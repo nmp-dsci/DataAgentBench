@@ -1,0 +1,1352 @@
+[
+{
+"id": "agnews/1",
+"run": 0,
+"answer": "The Rundown"
+},
+{
+"id": "agnews/1",
+"run": 1,
+"answer": "The Rundown"
+},
+{
+"id": "agnews/1",
+"run": 2,
+"answer": "The Rundown"
+},
+{
+"id": "agnews/1",
+"run": 3,
+"answer": "The Rundown"
+},
+{
+"id": "agnews/1",
+"run": 4,
+"answer": "The Rundown"
+},
+{
+"id": "agnews/2",
+"run": 0,
+"answer": "0.2500"
+},
+{
+"id": "agnews/2",
+"run": 1,
+"answer": "0.1441"
+},
+{
+"id": "agnews/2",
+"run": 2,
+"answer": "0.14414414414414414"
+},
+{
+"id": "agnews/2",
+"run": 3,
+"answer": "0.14414414414414415"
+},
+{
+"id": "agnews/2",
+"run": 4,
+"answer": "0.13513513513513514"
+},
+{
+"id": "agnews/3",
+"run": 0,
+"answer": "391.9091"
+},
+{
+"id": "agnews/3",
+"run": 1,
+"answer": "Cannot be determined because the API endpoint required to fetch article texts for business classification is currently offline."
+},
+{
+"id": "agnews/3",
+"run": 2,
+"answer": "11"
+},
+{
+"id": "agnews/3",
+"run": 3,
+"answer": "396.82"
+},
+{
+"id": "agnews/3",
+"run": 4,
+"answer": "Unable to compute the exact average number of business articles published per year in Europe from 2010 to 2020 because the articles_database API is offline. Total articles published: 14860."
+},
+{
+"id": "agnews/4",
+"run": 0,
+"answer": "The task could not be completed because the articles_database API is offline."
+},
+{
+"id": "agnews/4",
+"run": 1,
+"answer": "Unable to determine because the external articles_database API is offline."
+},
+{
+"id": "agnews/4",
+"run": 2,
+"answer": "Cannot be determined because the API hosting the article contents is offline."
+},
+{
+"id": "agnews/4",
+"run": 3,
+"answer": "I am currently unable to complete the analysis because the external articles_database API is offline."
+},
+{
+"id": "agnews/4",
+"run": 4,
+"answer": "North America"
+},
+{
+"id": "bookreview/1",
+"run": 0,
+"answer": "2020s"
+},
+{
+"id": "bookreview/1",
+"run": 1,
+"answer": "2020s"
+},
+{
+"id": "bookreview/1",
+"run": 2,
+"answer": "2020s"
+},
+{
+"id": "bookreview/1",
+"run": 3,
+"answer": "2020s"
+},
+{
+"id": "bookreview/1",
+"run": 4,
+"answer": "2020s"
+},
+{
+"id": "bookreview/2",
+"run": 0,
+"answer": "1. Reunion: The Children of Lauderdale Park\n2. The Prophet: With Original 1923 Illustrations by the Author\n3. The Melancholy Strumpet Master\n4. Child Of The King A Journey of Hope Book 1: Earthly Story With A Heavenly Message\n5. Fire Cracker\n6. Local Honey\n7. Hollywood Confessions: Hollywood Headlines Book #3 (Hollywood Headlines Mysteries)\n8. Knowing When To Die: Uncollected Stories\n9. Childe Harold of Dysna\n10. Forged in Blood (Freehold)\n11. Exits, Desires, & Slow Fires\n12. Kennebago Moments\n13. The Sludge\n14. Liza of Lambeth\n15. Something That Feels Like Truth (Switchgrass Books)"
+},
+{
+"id": "bookreview/2",
+"run": 1,
+"answer": "1. Reunion: The Children of Lauderdale Park\n2. The Prophet: With Original 1923 Illustrations by the Author\n3. The Melancholy Strumpet Master\n4. Child Of The King A Journey of Hope Book 1: Earthly Story With A Heavenly Message\n5. Fire Cracker\n6. Local Honey\n7. Hollywood Confessions: Hollywood Headlines Book #3 (Hollywood Headlines Mysteries)\n8. Knowing When To Die: Uncollected Stories\n9. Childe Harold of Dysna\n10. Forged in Blood (Freehold)\n11. Exits, Desires, & Slow Fires\n12. Kennebago Moments\n13. The Sludge\n14. Liza of Lambeth\n15. Something That Feels Like Truth (Switchgrass Books)"
+},
+{
+"id": "bookreview/2",
+"run": 2,
+"answer": "1. Reunion: The Children of Lauderdale Park\n2. The Prophet: With Original 1923 Illustrations by the Author\n3. The Melancholy Strumpet Master\n4. Child Of The King A Journey of Hope Book 1: Earthly Story With A Heavenly Message\n5. Fire Cracker\n6. Local Honey\n7. Hollywood Confessions: Hollywood Headlines Book #3 (Hollywood Headlines Mysteries)\n8. Knowing When To Die: Uncollected Stories\n9. Childe Harold of Dysna\n10. Forged in Blood (Freehold)\n11. Exits, Desires, & Slow Fires\n12. Kennebago Moments\n13. The Sludge\n14. Liza of Lambeth\n15. Something That Feels Like Truth (Switchgrass Books)"
+},
+{
+"id": "bookreview/2",
+"run": 3,
+"answer": "1. Reunion: The Children of Lauderdale Park\n2. The Prophet: With Original 1923 Illustrations by the Author\n3. The Melancholy Strumpet Master\n4. Child Of The King A Journey of Hope Book 1: Earthly Story With A Heavenly Message\n5. Fire Cracker\n6. Local Honey\n7. Hollywood Confessions: Hollywood Headlines Book #3 (Hollywood Headlines Mysteries)\n8. Knowing When To Die: Uncollected Stories\n9. Childe Harold of Dysna\n10. Forged in Blood (Freehold)\n11. Exits, Desires, & Slow Fires\n12. Kennebago Moments\n13. The Sludge\n14. Liza of Lambeth\n15. Something That Feels Like Truth (Switchgrass Books)"
+},
+{
+"id": "bookreview/2",
+"run": 4,
+"answer": "1. Reunion: The Children of Lauderdale Park\n2. The Prophet: With Original 1923 Illustrations by the Author\n3. The Melancholy Strumpet Master\n4. Child Of The King A Journey of Hope Book 1: Earthly Story With A Heavenly Message\n5. Fire Cracker\n6. Local Honey\n7. Hollywood Confessions: Hollywood Headlines Book #3 (Hollywood Headlines Mysteries)\n8. Knowing When To Die: Uncollected Stories\n9. Childe Harold of Dysna\n10. Forged in Blood (Freehold)\n11. Exits, Desires, & Slow Fires\n12. Kennebago Moments\n13. The Sludge\n14. Liza of Lambeth\n15. Something That Feels Like Truth (Switchgrass Books)"
+},
+{
+"id": "bookreview/3",
+"run": 0,
+"answer": "1. Favorite Thorton W. Burgess Stories: 6 Books: 5.00\n2. The Library Book: 5.00\n3. LunaLu the Llamacorn: 5.00\n4. Monstrous Stories #4: The Day the Mice Stood Still: 5.00\n5. The Old Man and the Pirate Princess: 5.00\n6. Egypt (Enchantment of the World): 5.00\n7. Behind the Wheel (Choose Your Own Adventure #35)(Paperback/Revised): 5.00\n8. Cheer Up, Ben Franklin! (Young Historians): 5.00\n9. Benny Goes To The Moon: The great new book from Top Children's entertainer Gerry Ogilvie (1): 5.00\n10. Around the World Mazes: 5.00\n11. Pokémon: Sun & Moon, Vol. 8 (8): 5.00\n12. Trouble in the CTC!: The Terra Prime Adventures Book 2: 4.90\n13. Clark the Shark: Tooth Trouble, No. 1: 4.75\n14. Cleo Porter and the Body Electric: 4.70"
+},
+{
+"id": "bookreview/3",
+"run": 1,
+"answer": "1. Monstrous Stories #4: The Day the Mice Stood Still: 5.00\n2. The Old Man and the Pirate Princess: 5.00\n3. Egypt (Enchantment of the World): 5.00\n4. Favorite Thorton W. Burgess Stories: 6 Books: 5.00\n5. Behind the Wheel (Choose Your Own Adventure #35)(Paperback/Revised): 5.00\n6. Cheer Up, Ben Franklin! (Young Historians): 5.00\n7. The Library Book: 5.00\n8. Benny Goes To The Moon: The great new book from Top Children's entertainer Gerry Ogilvie (1): 5.00\n9. LunaLu the Llamacorn: 5.00\n10. Around the World Mazes: 5.00\n11. Pokémon: Sun & Moon, Vol. 8 (8): 5.00\n12. Trouble in the CTC!: The Terra Prime Adventures Book 2: 4.90\n13. Clark the Shark: Tooth Trouble, No. 1: 4.75\n14. Cleo Porter and the Body Electric: 4.70"
+},
+{
+"id": "bookreview/3",
+"run": 2,
+"answer": "1. The Old Man and the Pirate Princess: 5.00\n2. Around the World Mazes: 5.00\n3. Cheer Up, Ben Franklin! (Young Historians): 5.00\n4. Favorite Thorton W. Burgess Stories: 6 Books: 5.00\n5. The Library Book: 5.00\n6. Behind the Wheel (Choose Your Own Adventure #35)(Paperback/Revised): 5.00\n7. Egypt (Enchantment of the World): 5.00\n8. Monstrous Stories #4: The Day the Mice Stood Still: 5.00\n9. LunaLu the Llamacorn: 5.00\n10. Pokémon: Sun & Moon, Vol. 8 (8): 5.00\n11. Benny Goes To The Moon: The great new book from Top Children's entertainer Gerry Ogilvie (1): 5.00\n12. Trouble in the CTC!: The Terra Prime Adventures Book 2: 4.90\n13. Clark the Shark: Tooth Trouble, No. 1: 4.75\n14. Cleo Porter and the Body Electric: 4.70"
+},
+{
+"id": "bookreview/3",
+"run": 3,
+"answer": "1. Favorite Thorton W. Burgess Stories: 6 Books: 5.00\n2. The Library Book: 5.00\n3. LunaLu the Llamacorn: 5.00\n4. Monstrous Stories #4: The Day the Mice Stood Still: 5.00\n5. The Old Man and the Pirate Princess: 5.00\n6. Egypt (Enchantment of the World): 5.00\n7. Behind the Wheel (Choose Your Own Adventure #35)(Paperback/Revised): 5.00\n8. Cheer Up, Ben Franklin! (Young Historians): 5.00\n9. Benny Goes To The Moon: The great new book from Top Children's entertainer Gerry Ogilvie (1): 5.00\n10. Around the World Mazes: 5.00\n11. Pokémon: Sun & Moon, Vol. 8 (8): 5.00\n12. Trouble in the CTC!: The Terra Prime Adventures Book 2: 4.90\n13. Clark the Shark: Tooth Trouble, No. 1: 4.75\n14. Cleo Porter and the Body Electric: 4.70"
+},
+{
+"id": "bookreview/3",
+"run": 4,
+"answer": "1. Monstrous Stories #4: The Day the Mice Stood Still: 5.00\n2. The Old Man and the Pirate Princess: 5.00\n3. Egypt (Enchantment of the World): 5.00\n4. Favorite Thorton W. Burgess Stories: 6 Books: 5.00\n5. Behind the Wheel (Choose Your Own Adventure #35)(Paperback/Revised): 5.00\n6. Cheer Up, Ben Franklin! (Young Historians): 5.00\n7. The Library Book: 5.00\n8. Benny Goes To The Moon: The great new book from Top Children's entertainer Gerry Ogilvie (1): 5.00\n9. LunaLu the Llamacorn: 5.00\n10. Around the World Mazes: 5.00\n11. Pokémon: Sun & Moon, Vol. 8 (8): 5.00\n12. Trouble in the CTC!: The Terra Prime Adventures Book 2: 4.90\n13. Clark the Shark: Tooth Trouble, No. 1: 4.75\n14. Cleo Porter and the Body Electric: 4.70"
+},
+{
+"id": "crmarenapro/1",
+"run": 0,
+"answer": "Authority"
+},
+{
+"id": "crmarenapro/1",
+"run": 1,
+"answer": "Authority"
+},
+{
+"id": "crmarenapro/1",
+"run": 2,
+"answer": "Authority"
+},
+{
+"id": "crmarenapro/1",
+"run": 3,
+"answer": "Authority"
+},
+{
+"id": "crmarenapro/1",
+"run": 4,
+"answer": "Authority"
+},
+{
+"id": "crmarenapro/2",
+"run": 0,
+"answer": "ka0Wt000000Ens5IAC"
+},
+{
+"id": "crmarenapro/2",
+"run": 1,
+"answer": "ka0Wt000000Ens5IAC"
+},
+{
+"id": "crmarenapro/2",
+"run": 2,
+"answer": "ka0Wt000000Ens5IAC"
+},
+{
+"id": "crmarenapro/2",
+"run": 3,
+"answer": "ka0Wt000000Ens5IAC"
+},
+{
+"id": "crmarenapro/2",
+"run": 4,
+"answer": "ka0Wt000000Ens5IAC"
+},
+{
+"id": "crmarenapro/3",
+"run": 0,
+"answer": "Quote"
+},
+{
+"id": "crmarenapro/3",
+"run": 1,
+"answer": "Quote"
+},
+{
+"id": "crmarenapro/3",
+"run": 2,
+"answer": "Quote"
+},
+{
+"id": "crmarenapro/3",
+"run": 3,
+"answer": "Quote"
+},
+{
+"id": "crmarenapro/3",
+"run": 4,
+"answer": "Negotiation"
+},
+{
+"id": "crmarenapro/4",
+"run": 0,
+"answer": "November"
+},
+{
+"id": "crmarenapro/4",
+"run": 1,
+"answer": "November"
+},
+{
+"id": "crmarenapro/4",
+"run": 2,
+"answer": "November"
+},
+{
+"id": "crmarenapro/4",
+"run": 3,
+"answer": "November"
+},
+{
+"id": "crmarenapro/4",
+"run": 4,
+"answer": "November"
+},
+{
+"id": "crmarenapro/5",
+"run": 0,
+"answer": "a03Wt00000JqnHwIAJ"
+},
+{
+"id": "crmarenapro/5",
+"run": 1,
+"answer": "a03Wt00000JqnHwIAJ"
+},
+{
+"id": "crmarenapro/5",
+"run": 2,
+"answer": "a03Wt00000JqnHwIAJ"
+},
+{
+"id": "crmarenapro/5",
+"run": 3,
+"answer": "a03Wt00000JqnHwIAJ"
+},
+{
+"id": "crmarenapro/5",
+"run": 4,
+"answer": "a03Wt00000JqnHwIAJ"
+},
+{
+"id": "crmarenapro/6",
+"run": 0,
+"answer": "ka0Wt000000EnwvIAC, ka0Wt000000Ens5IAC"
+},
+{
+"id": "crmarenapro/6",
+"run": 1,
+"answer": "ka0Wt000000EnwvIAC, ka0Wt000000Ens5IAC"
+},
+{
+"id": "crmarenapro/6",
+"run": 2,
+"answer": "ka0Wt000000EnwvIAC"
+},
+{
+"id": "crmarenapro/6",
+"run": 3,
+"answer": "ka0Wt000000EnwvIAC"
+},
+{
+"id": "crmarenapro/6",
+"run": 4,
+"answer": "ka0Wt000000EnwvIAC"
+},
+{
+"id": "crmarenapro/7",
+"run": 0,
+"answer": "ka0Wt000000EpSUIA0"
+},
+{
+"id": "crmarenapro/7",
+"run": 1,
+"answer": "ka0Wt000000EoD3IAK"
+},
+{
+"id": "crmarenapro/7",
+"run": 2,
+"answer": "ka0Wt000000EpSUIA0"
+},
+{
+"id": "crmarenapro/7",
+"run": 3,
+"answer": "None"
+},
+{
+"id": "crmarenapro/7",
+"run": 4,
+"answer": "ka0Wt000000EpSUIA0"
+},
+{
+"id": "crmarenapro/8",
+"run": 0,
+"answer": "005Wt000003NFKoIAO\n005Wt000003NHsrIAG\n005Wt000003NINVIA4\n005Wt000003NJ8HIAW\n005Wt000003NJhlIAG\n005Wt000003NBcAIAW\n005Wt000003NBykIAG\n005Wt000003NDJ1IAO\n005Wt000003NDqFIAW\n005Wt000003NDsUIAW\n005Wt000003NEGhIAO\n005Wt000003NEzqIAG\n005Wt000003NFr4IAG\n005Wt000003NGjuIAG\n005Wt000003NHpeIAG\n005Wt000003NI2XIAW\n005Wt000003NIaQIAW\n005Wt000003NIc2IAG\n005Wt000003NInLIAW\n005Wt000003NISLIA4\n005Wt000003NIvNIAW\n005Wt000003NIVZIA4\n005Wt000003NIwzIAG\n005Wt000003NJ0DIAW\n005Wt000003NJ6gIAG\n005Wt000003NJcvIAG\n005Wt000003NJD9IAO\n005Wt000003NJEjIAO\n005Wt000003NJoDIAW\n005Wt000003NJrRIAW\n005Wt000003NJTFIA4"
+},
+{
+"id": "crmarenapro/8",
+"run": 1,
+"answer": "005Wt000003NFKoIAO"
+},
+{
+"id": "crmarenapro/8",
+"run": 2,
+"answer": "005Wt000003NFKoIAO"
+},
+{
+"id": "crmarenapro/8",
+"run": 3,
+"answer": "005Wt000003NFKoIAO"
+},
+{
+"id": "crmarenapro/8",
+"run": 4,
+"answer": "005Wt000003NFKoIAO"
+},
+{
+"id": "crmarenapro/9",
+"run": 0,
+"answer": "MI"
+},
+{
+"id": "crmarenapro/9",
+"run": 1,
+"answer": "MI"
+},
+{
+"id": "crmarenapro/9",
+"run": 2,
+"answer": "MI"
+},
+{
+"id": "crmarenapro/9",
+"run": 3,
+"answer": "MI"
+},
+{
+"id": "crmarenapro/9",
+"run": 4,
+"answer": "MI"
+},
+{
+"id": "crmarenapro/10",
+"run": 0,
+"answer": "005Wt000003NDqDIAW"
+},
+{
+"id": "crmarenapro/10",
+"run": 1,
+"answer": "005Wt000003NIddIAG"
+},
+{
+"id": "crmarenapro/10",
+"run": 2,
+"answer": "005Wt000003NDqDIAW"
+},
+{
+"id": "crmarenapro/10",
+"run": 3,
+"answer": "005Wt000003NDqDIAW"
+},
+{
+"id": "crmarenapro/10",
+"run": 4,
+"answer": "005Wt000003NDqDIAW"
+},
+{
+"id": "crmarenapro/11",
+"run": 0,
+"answer": "01tWt000006hV8LIAU"
+},
+{
+"id": "crmarenapro/11",
+"run": 1,
+"answer": "01tWt000006hV8LIAU"
+},
+{
+"id": "crmarenapro/11",
+"run": 2,
+"answer": "01tWt000006hV8LIAU"
+},
+{
+"id": "crmarenapro/11",
+"run": 3,
+"answer": "01tWt000006hV8LIAU"
+},
+{
+"id": "crmarenapro/11",
+"run": 4,
+"answer": "01tWt000006hV8LIAU"
+},
+{
+"id": "crmarenapro/12",
+"run": 0,
+"answer": "005Wt000003NJjNIAW"
+},
+{
+"id": "crmarenapro/12",
+"run": 1,
+"answer": "005Wt000003NJjNIAW"
+},
+{
+"id": "crmarenapro/12",
+"run": 2,
+"answer": "005Wt000003NJjNIAW"
+},
+{
+"id": "crmarenapro/12",
+"run": 3,
+"answer": "005Wt000003NJjNIAW"
+},
+{
+"id": "crmarenapro/12",
+"run": 4,
+"answer": "005Wt000003NJjNIAW"
+},
+{
+"id": "crmarenapro/13",
+"run": 0,
+"answer": "005Wt000003NHw5IAG"
+},
+{
+"id": "crmarenapro/13",
+"run": 1,
+"answer": "005Wt000003NHw5IAG"
+},
+{
+"id": "crmarenapro/13",
+"run": 2,
+"answer": "005Wt000003NHw5IAG"
+},
+{
+"id": "crmarenapro/13",
+"run": 3,
+"answer": "005Wt000003NEa3IAG"
+},
+{
+"id": "crmarenapro/13",
+"run": 4,
+"answer": "005Wt000003NIXCIA4"
+},
+{
+"id": "deps_dev_v1/1",
+"run": 0,
+"answer": "1. @docly/web: 0.2.3 (89398 stars)\n2. @dylanvann/svelte: 3.25.4 (73499 stars)\n3. @dumc11/tailwindcss: 0.4.0 (73464 stars)\n4. @dman777/shadow-dom-quill-temp: 1.0.0 (42407 stars)\n5. @dothq/styled-components: 1.0.0 (39660 stars)"
+},
+{
+"id": "deps_dev_v1/1",
+"run": 1,
+"answer": "1. @docly/web: 0.2.3\n2. @dylanvann/svelte: 3.25.4\n3. @dumc11/tailwindcss: 0.4.0\n4. @dman777/shadow-dom-quill-temp: 1.0.0\n5. @dothq/styled-components: 1.0.0"
+},
+{
+"id": "deps_dev_v1/1",
+"run": 2,
+"answer": "1. @dylanvann/svelte: 3.25.4\n2. @dumc11/tailwindcss: 0.4.0\n3. @dman777/shadow-dom-quill-temp: 1.0.0\n4. @dothq/styled-components: 1.0.0\n5. @dynasty/styled-components: 3.2.1"
+},
+{
+"id": "deps_dev_v1/1",
+"run": 3,
+"answer": "1. @docly/web: 89398 stars, 0.2.3\n2. @dylanvann/svelte: 73499 stars, 3.25.4\n3. @dumc11/tailwindcss: 73464 stars, 0.4.0\n4. @edgarai/strapi-provider-upload-local: 57236 stars, Unknown\n5. @dman777/shadow-dom-quill-temp: 42407 stars, 1.0.0"
+},
+{
+"id": "deps_dev_v1/1",
+"run": 4,
+"answer": "1. @docly/web: 0.2.3, 89398\n2. @dylanvann/svelte: 3.25.4, 73499\n3. @dumc11/tailwindcss: 0.4.0, 73464\n4. @edgarai/strapi-provider-upload-local: No release version found, 57236\n5. @dman777/shadow-dom-quill-temp: 1.0.0, 42407"
+},
+{
+"id": "deps_dev_v1/2",
+"run": 0,
+"answer": "1. mui-org/material-ui: 30522\n2. semantic-org/semantic-ui: 4955\n3. react-native-elements/react-native-elements: 4623\n4. sveltejs/svelte: 4091\n5. tailwindcss/tailwindcss: 3848"
+},
+{
+"id": "deps_dev_v1/2",
+"run": 1,
+"answer": "1. mui-org/material-ui: 30522\n2. semantic-org/semantic-ui: 4955\n3. react-native-elements/react-native-elements: 4623\n4. sveltejs/svelte: 4091\n5. tailwindcss/tailwindcss: 3848"
+},
+{
+"id": "deps_dev_v1/2",
+"run": 2,
+"answer": "1. mui-org/material-ui: 30522\n2. moment/moment: 7201\n3. semantic-org/semantic-ui: 4955\n4. sveltejs/svelte: 4091\n5. tailwindcss/tailwindcss: 3848"
+},
+{
+"id": "deps_dev_v1/2",
+"run": 3,
+"answer": "1. mui-org/material-ui: 30522\n2. moment/moment: 7201\n3. semantic-org/semantic-ui: 4955\n4. react-native-elements/react-native-elements: 4623\n5. sveltejs/svelte: 4091"
+},
+{
+"id": "deps_dev_v1/2",
+"run": 4,
+"answer": "1. mui-org/material-ui: 30522\n2. moment/moment: 7201\n3. semantic-org/semantic-ui: 4955\n4. react-native-elements/react-native-elements: 4623\n5. sveltejs/svelte: 4091"
+},
+{
+"id": "github_repos/1",
+"run": 0,
+"answer": "0.13076923076923078"
+},
+{
+"id": "github_repos/1",
+"run": 1,
+"answer": "0.1818181818181818"
+},
+{
+"id": "github_repos/1",
+"run": 2,
+"answer": "0.14516129032258066"
+},
+{
+"id": "github_repos/1",
+"run": 3,
+"answer": "0.1616161616161616"
+},
+{
+"id": "github_repos/1",
+"run": 4,
+"answer": "0.1919191919191919"
+},
+{
+"id": "github_repos/2",
+"run": 0,
+"answer": "uacaps/PageMenu"
+},
+{
+"id": "github_repos/2",
+"run": 1,
+"answer": "uacaps/PageMenu"
+},
+{
+"id": "github_repos/2",
+"run": 2,
+"answer": "uacaps/PageMenu"
+},
+{
+"id": "github_repos/2",
+"run": 3,
+"answer": "uacaps/PageMenu"
+},
+{
+"id": "github_repos/2",
+"run": 4,
+"answer": "uacaps/PageMenu"
+},
+{
+"id": "github_repos/3",
+"run": 0,
+"answer": "1077"
+},
+{
+"id": "github_repos/3",
+"run": 1,
+"answer": "1077"
+},
+{
+"id": "github_repos/3",
+"run": 2,
+"answer": "1077"
+},
+{
+"id": "github_repos/3",
+"run": 3,
+"answer": "1077"
+},
+{
+"id": "github_repos/3",
+"run": 4,
+"answer": "1077"
+},
+{
+"id": "github_repos/4",
+"run": 0,
+"answer": "1. torvalds/linux\n2. apple/swift\n3. twbs/bootstrap\n4. Microsoft/vscode\n5. facebook/react"
+},
+{
+"id": "github_repos/4",
+"run": 1,
+"answer": "1. torvalds/linux: 16061\n2. apple/swift: 1051\n3. twbs/bootstrap: 340\n4. Microsoft/vscode: 190\n5. facebook/react: 178"
+},
+{
+"id": "github_repos/4",
+"run": 2,
+"answer": "1. apple/swift\n2. twbs/bootstrap\n3. Microsoft/vscode\n4. facebook/react\n5. tensorflow/tensorflow"
+},
+{
+"id": "github_repos/4",
+"run": 3,
+"answer": "1. apple/swift: 1051\n2. twbs/bootstrap: 340\n3. Microsoft/vscode: 190\n4. facebook/react: 178\n5. tensorflow/tensorflow: 156"
+},
+{
+"id": "github_repos/4",
+"run": 4,
+"answer": "1. torvalds/linux: 16061\n2. apple/swift: 1051\n3. twbs/bootstrap: 340\n4. Microsoft/vscode: 190\n5. facebook/react: 178"
+},
+{
+"id": "googlelocal/1",
+"run": 0,
+"answer": "1. Widows Peak Salon: 4.87\n2. City Textile: 4.50\n3. Nobel Textile Co: 4.29\n4. San Soo Dang: 4.28\n5. Nova Fabrics: 3.33"
+},
+{
+"id": "googlelocal/1",
+"run": 1,
+"answer": "1. Widows Peak Salon: 4.87\n2. City Textile: 4.50\n3. Nobel Textile Co: 4.29\n4. San Soo Dang: 4.28\n5. Nova Fabrics: 3.33"
+},
+{
+"id": "googlelocal/1",
+"run": 2,
+"answer": "1. Widows Peak Salon: 4.87\n2. City Textile: 4.50\n3. Nobel Textile Co: 4.29\n4. San Soo Dang: 4.28\n5. Nova Fabrics: 3.33"
+},
+{
+"id": "googlelocal/1",
+"run": 3,
+"answer": "1. Widows Peak Salon: 4.87\n2. City Textile: 4.50\n3. Nobel Textile Co: 4.29\n4. San Soo Dang: 4.28\n5. Nova Fabrics: 3.33"
+},
+{
+"id": "googlelocal/1",
+"run": 4,
+"answer": "1. Widows Peak Salon: 4.87\n2. City Textile: 4.50\n3. Nobel Textile Co: 4.29\n4. San Soo Dang: 4.28\n5. Nova Fabrics: 3.33"
+},
+{
+"id": "googlelocal/2",
+"run": 0,
+"answer": "Angel-A Massage: 4.33\nAurora Massage: 4.18\nElite Massage: 5.00"
+},
+{
+"id": "googlelocal/2",
+"run": 1,
+"answer": "1. Elite Massage: 5.00\n2. Angel-A Massage: 4.33\n3. Aurora Massage: 4.18"
+},
+{
+"id": "googlelocal/2",
+"run": 2,
+"answer": "Elite Massage: 5.00\nAngel-A Massage: 4.33\nAurora Massage: 4.18"
+},
+{
+"id": "googlelocal/2",
+"run": 3,
+"answer": "Elite Massage: 5.00\nAngel-A Massage: 4.33\nAurora Massage: 4.18"
+},
+{
+"id": "googlelocal/2",
+"run": 4,
+"answer": "Elite Massage: 5.00\nAngel-A Massage: 4.33\nAurora Massage: 4.18"
+},
+{
+"id": "googlelocal/3",
+"run": 0,
+"answer": "1. Taba Rug Gallery: 5.00, Thursday 10AM-7PM, Friday 10AM-7PM, Saturday 10AM-7PM, Sunday 11AM-6PM, Monday 10AM-7PM, Tuesday 10AM-7PM, Wednesday 10AM-7PM\n2. Beauty Divine Artistry: 5.00, Thursday 9AM-8PM, Friday 9AM-8PM, Saturday 10AM-7PM, Sunday 11AM-6PM, Monday 9AM-8PM, Tuesday 9AM-8PM, Wednesday 9AM-8PM\n3. Mariscos el poblano: 5.00, Thursday Open 24 hours, Friday 8AM-3:30PM, Saturday 8AM-3:30PM, Sunday 8AM-3:30PM, Monday 9AM-3:30AM, Tuesday 8AM-3:30PM, Wednesday 8AM-3:30PM\n4. White Barn Candle Co: 5.00, Thursday 10AM-9PM, Friday 10AM-9PM, Saturday 10AM-9PM, Sunday 11AM-7PM, Monday 10AM-9PM, Tuesday 10AM-9PM, Wednesday 10AM-9PM\n5. TACOS LA CABANA: 5.00, Thursday Closed, Friday 5-11PM, Saturday 5-11PM, Sunday 5-11PM, Monday 5-11PM, Tuesday Closed, Wednesday Closed"
+},
+{
+"id": "googlelocal/3",
+"run": 1,
+"answer": "1. Beauty Divine Artistry: 5.00\n2. Mariscos el poblano: 5.00\n3. Taba Rug Gallery: 5.00\n4. White Barn Candle Co: 5.00\n5. Paradise tattoo: 4.96"
+},
+{
+"id": "googlelocal/3",
+"run": 2,
+"answer": "1. Beauty Divine Artistry: 5.00, Hours: [[\"Thursday\", \"9AM–8PM\"], [\"Friday\", \"9AM–8PM\"], [\"Saturday\", \"10AM–7PM\"], [\"Sunday\", \"11AM–6PM\"], [\"Monday\", \"9AM–8PM\"], [\"Tuesday\", \"9AM–8PM\"], [\"Wednesday\", \"9AM–8PM\"]]\n2. Mariscos el poblano: 5.00, Hours: [[\"Thursday\", \"Open 24 hours\"], [\"Friday\", \"8AM–3:30PM\"], [\"Saturday\", \"8AM–3:30PM\"], [\"Sunday\", \"8AM–3:30PM\"], [\"Monday\", \"9AM–3:30AM\"], [\"Tuesday\", \"8AM–3:30PM\"], [\"Wednesday\", \"8AM–3:30PM\"]]\n3. TACOS LA CABANA: 5.00, Hours: [[\"Thursday\", \"Closed\"], [\"Friday\", \"5–11PM\"], [\"Saturday\", \"5–11PM\"], [\"Sunday\", \"5–11PM\"], [\"Monday\", \"5–11PM\"], [\"Tuesday\", \"Closed\"], [\"Wednesday\", \"Closed\"]]\n4. Taba Rug Gallery: 5.00, Hours: [[\"Thursday\", \"10AM–7PM\"], [\"Friday\", \"10AM–7PM\"], [\"Saturday\", \"10AM–7PM\"], [\"Sunday\", \"11AM–6PM\"], [\"Monday\", \"10AM–7PM\"], [\"Tuesday\", \"10AM–7PM\"], [\"Wednesday\", \"10AM–7PM\"]]\n5. White Barn Candle Co: 5.00, Hours: [[\"Thursday\", \"10AM–9PM\"], [\"Friday\", \"10AM–9PM\"], [\"Saturday\", \"10AM–9PM\"], [\"Sunday\", \"11AM–7PM\"], [\"Monday\", \"10AM–9PM\"], [\"Tuesday\", \"10AM–9PM\"], [\"Wednesday\", \"10AM–9PM\"]]"
+},
+{
+"id": "googlelocal/3",
+"run": 3,
+"answer": "1. Taba Rug Gallery: 5.00, [[\"Thursday\", \"10AM-7PM\"], [\"Friday\", \"10AM-7PM\"], [\"Saturday\", \"10AM-7PM\"], [\"Sunday\", \"11AM-6PM\"], [\"Monday\", \"10AM-7PM\"], [\"Tuesday\", \"10AM-7PM\"], [\"Wednesday\", \"10AM-7PM\"]]\n2. Beauty Divine Artistry: 5.00, [[\"Thursday\", \"9AM-8PM\"], [\"Friday\", \"9AM-8PM\"], [\"Saturday\", \"10AM-7PM\"], [\"Sunday\", \"11AM-6PM\"], [\"Monday\", \"9AM-8PM\"], [\"Tuesday\", \"9AM-8PM\"], [\"Wednesday\", \"9AM-8PM\"]]\n3. White Barn Candle Co: 5.00, [[\"Thursday\", \"10AM-9PM\"], [\"Friday\", \"10AM-9PM\"], [\"Saturday\", \"10AM-9PM\"], [\"Sunday\", \"11AM-7PM\"], [\"Monday\", \"10AM-9PM\"], [\"Tuesday\", \"10AM-9PM\"], [\"Wednesday\", \"10AM-9PM\"]]\n4. TACOS LA CABANA: 5.00, [[\"Thursday\", \"Closed\"], [\"Friday\", \"5-11PM\"], [\"Saturday\", \"5-11PM\"], [\"Sunday\", \"5-11PM\"], [\"Monday\", \"5-11PM\"], [\"Tuesday\", \"Closed\"], [\"Wednesday\", \"Closed\"]]\n5. Mariscos el poblano: 5.00, [[\"Thursday\", \"Open 24 hours\"], [\"Friday\", \"8AM-3:30PM\"], [\"Saturday\", \"8AM-3:30PM\"], [\"Sunday\", \"8AM-3:30PM\"], [\"Monday\", \"9AM-3:30AM\"], [\"Tuesday\", \"8AM-3:30PM\"], [\"Wednesday\", \"8AM-3:30PM\"]]"
+},
+{
+"id": "googlelocal/3",
+"run": 4,
+"answer": "1. Taba Rug Gallery: 5.00, [[\"Thursday\", \"10AM-7PM\"], [\"Friday\", \"10AM-7PM\"], [\"Saturday\", \"10AM-7PM\"], [\"Sunday\", \"11AM-6PM\"], [\"Monday\", \"10AM-7PM\"], [\"Tuesday\", \"10AM-7PM\"], [\"Wednesday\", \"10AM-7PM\"]]\n2. Beauty Divine Artistry: 5.00, [[\"Thursday\", \"9AM-8PM\"], [\"Friday\", \"9AM-8PM\"], [\"Saturday\", \"10AM-7PM\"], [\"Sunday\", \"11AM-6PM\"], [\"Monday\", \"9AM-8PM\"], [\"Tuesday\", \"9AM-8PM\"], [\"Wednesday\", \"9AM-8PM\"]]\n3. Mariscos el poblano: 5.00, [[\"Thursday\", \"Open 24 hours\"], [\"Friday\", \"8AM-3:30PM\"], [\"Saturday\", \"8AM-3:30PM\"], [\"Sunday\", \"8AM-3:30PM\"], [\"Monday\", \"9AM-3:30AM\"], [\"Tuesday\", \"8AM-3:30PM\"], [\"Wednesday\", \"8AM-3:30PM\"]]\n4. White Barn Candle Co: 5.00, [[\"Thursday\", \"10AM-9PM\"], [\"Friday\", \"10AM-9PM\"], [\"Saturday\", \"10AM-9PM\"], [\"Sunday\", \"11AM-7PM\"], [\"Monday\", \"10AM-9PM\"], [\"Tuesday\", \"10AM-9PM\"], [\"Wednesday\", \"10AM-9PM\"]]\n5. TACOS LA CABANA: 5.00, [[\"Thursday\", \"Closed\"], [\"Friday\", \"5-11PM\"], [\"Saturday\", \"5-11PM\"], [\"Sunday\", \"5-11PM\"], [\"Monday\", \"5-11PM\"], [\"Tuesday\", \"Closed\"], [\"Wednesday\", \"Closed\"]]\n6. Paradise tattoo: 4.96, [[\"Thursday\", \"12-10PM\"], [\"Friday\", \"12PM-12AM\"], [\"Saturday\", \"12PM-12AM\"], [\"Sunday\", \"12-10PM\"], [\"Monday\", \"12-10PM\"], [\"Tuesday\", \"12-10PM\"], [\"Wednesday\", \"12-10PM\"]]\n7. The Boochyard @ Local Roots: 4.89, [[\"Thursday\", \"3-8PM\"], [\"Friday\", \"3-9PM\"], [\"Saturday\", \"12-9PM\"], [\"Sunday\", \"12-8PM\"], [\"Monday\", \"Closed\"], [\"Tuesday\", \"3-8PM\"], [\"Wednesday\", \"3-8PM\"]]\n8. Widows Peak Salon: 4.87, [[\"Thursday\", \"11AM-8PM\"], [\"Friday\", \"11AM-7PM\"], [\"Saturday\", \"10AM-6PM\"], [\"Sunday\", \"10AM-2PM\"], [\"Monday\", \"Closed\"], [\"Tuesday\", \"10AM-7PM\"], [\"Wednesday\", \"10AM-7PM\"]]\n9. The Beauty Bar: 4.85, [[\"Thursday\", \"9AM-8PM\"], [\"Friday\", \"9AM-8PM\"], [\"Saturday\", \"9AM-8PM\"], [\"Sunday\", \"Closed\"], [\"Monday\", \"9AM-8PM\"], [\"Tuesday\", \"9AM-8PM\"], [\"Wednesday\", \"9AM-8PM\"]]\n10. Rossy's Beauty Salon: 4.82, [[\"Thursday\", \"10AM-7PM\"], [\"Friday\", \"10AM-7PM\"], [\"Saturday\", \"9AM-6PM\"], [\"Sunday\", \"9AM-3PM\"], [\"Monday\", \"Closed\"], [\"Tuesday\", \"10AM-7PM\"], [\"Wednesday\", \"10AM-7PM\"]]\n11. Vons Chicken: 4.67, [[\"Thursday\", \"11AM-9:30PM\"], [\"Friday\", \"11AM-9:30PM\"], [\"Saturday\", \"11AM-9:30PM\"], [\"Sunday\", \"11AM-9:30PM\"], [\"Monday\", \"Closed\"], [\"Tuesday\", \"11AM-9:30PM\"], [\"Wednesday\", \"11AM-9:30PM\"]]\n12. Regus - California, Irvine - Oracle Tower: 4.44, [[\"Thursday\", \"Open 24 hours\"], [\"Friday\", \"Open 24 hours\"], [\"Saturday\", \"Open 24 hours\"], [\"Sunday\", \"Open 24 hours\"], [\"Monday\", \"Open 24 hours\"], [\"Tuesday\", \"Open 24 hours\"], [\"Wednesday\", \"Open 24 hours\"]]\n13. LuXe Organic Nails Boutique: 4.35, [[\"Thursday\", \"10AM-7PM\"], [\"Friday\", \"10AM-7PM\"], [\"Saturday\", \"9AM-6PM\"], [\"Sunday\", \"10AM-6PM\"], [\"Monday\", \"10AM-7PM\"], [\"Tuesday\", \"Closed\"], [\"Wednesday\", \"10AM-7PM\"]]\n14. Angel-A Massage: 4.33, [[\"Thursday\", \"9:30AM-9:30PM\"], [\"Friday\", \"9:30AM-9:30PM\"], [\"Saturday\", \"9:30AM-9:30PM\"], [\"Sunday\", \"10AM-8PM\"], [\"Monday\", \"10AM-9:30PM\"], [\"Tuesday\", \"10AM-9:30PM\"], [\"Wednesday\", \"9:30AM-9:30PM\"]]\n15. Excel Hair & Nails: 4.22, [[\"Thursday\", \"9AM-7PM\"], [\"Friday\", \"9AM-7PM\"], [\"Saturday\", \"9AM-7PM\"], [\"Sunday\", \"10AM-5PM\"], [\"Monday\", \"9AM-7PM\"], [\"Tuesday\", \"9AM-7PM\"], [\"Wednesday\", \"9AM-7PM\"]]"
+},
+{
+"id": "googlelocal/4",
+"run": 0,
+"answer": "1. Encino Dermatology & Laser: Alex Khadavi MD: 19\n2. The Boochyard @ Local Roots: 17\n3. Aurora Massage: 14"
+},
+{
+"id": "googlelocal/4",
+"run": 1,
+"answer": "1. Encino Dermatology & Laser: Alex Khadavi MD: 19\n2. The Boochyard @ Local Roots: 17\n3. Aurora Massage: 14"
+},
+{
+"id": "googlelocal/4",
+"run": 2,
+"answer": "1. Encino Dermatology & Laser: Alex Khadavi MD: 19\n2. The Boochyard @ Local Roots: 17\n3. Aurora Massage: 14"
+},
+{
+"id": "googlelocal/4",
+"run": 3,
+"answer": "1. Encino Dermatology & Laser: Alex Khadavi MD: 19\n2. The Boochyard @ Local Roots: 17\n3. Aurora Massage: 14"
+},
+{
+"id": "googlelocal/4",
+"run": 4,
+"answer": "1. Encino Dermatology & Laser: Alex Khadavi MD: 19\n2. The Boochyard @ Local Roots: 17\n3. Aurora Massage: 14"
+},
+{
+"id": "music_brainz_20k/1",
+"run": 0,
+"answer": "$1059.46"
+},
+{
+"id": "music_brainz_20k/1",
+"run": 1,
+"answer": "$601.44"
+},
+{
+"id": "music_brainz_20k/1",
+"run": 2,
+"answer": "$1059.46"
+},
+{
+"id": "music_brainz_20k/1",
+"run": 3,
+"answer": "$601.44"
+},
+{
+"id": "music_brainz_20k/1",
+"run": 4,
+"answer": "$601.44"
+},
+{
+"id": "music_brainz_20k/2",
+"run": 0,
+"answer": "Amazon Music"
+},
+{
+"id": "music_brainz_20k/2",
+"run": 1,
+"answer": "Amazon Music"
+},
+{
+"id": "music_brainz_20k/2",
+"run": 2,
+"answer": "Amazon Music"
+},
+{
+"id": "music_brainz_20k/2",
+"run": 3,
+"answer": "Amazon Music"
+},
+{
+"id": "music_brainz_20k/2",
+"run": 4,
+"answer": "Amazon Music"
+},
+{
+"id": "music_brainz_20k/3",
+"run": 0,
+"answer": "Groovey"
+},
+{
+"id": "music_brainz_20k/3",
+"run": 1,
+"answer": "Zo gaat het leven aan je voor"
+},
+{
+"id": "music_brainz_20k/3",
+"run": 2,
+"answer": "Zo gaat het leven aan je voor"
+},
+{
+"id": "music_brainz_20k/3",
+"run": 3,
+"answer": "Zo gaat het leven aan je voor"
+},
+{
+"id": "music_brainz_20k/3",
+"run": 4,
+"answer": "Zo gaat het leven aan je voor"
+},
+{
+"id": "pancancer_atlas/1",
+"run": 0,
+"answer": "Oligoastrocytoma: 2.7136\nOligodendroglioma: 2.6825\nAstrocytoma: 2.5713"
+},
+{
+"id": "pancancer_atlas/1",
+"run": 1,
+"answer": "Oligoastrocytoma: 2.7136\nOligodendroglioma: 2.6825\nAstrocytoma: 2.5713"
+},
+{
+"id": "pancancer_atlas/1",
+"run": 2,
+"answer": "Oligoastrocytoma: 2.7136\nOligodendroglioma: 2.6825\nAstrocytoma: 2.5713"
+},
+{
+"id": "pancancer_atlas/1",
+"run": 3,
+"answer": "1. Oligoastrocytoma: 2.7136\n2. Oligodendroglioma: 2.6825\n3. Astrocytoma: 2.5713"
+},
+{
+"id": "pancancer_atlas/1",
+"run": 4,
+"answer": "Oligoastrocytoma: 2.7136\nOligodendroglioma: 2.6825\nAstrocytoma: 2.5713"
+},
+{
+"id": "pancancer_atlas/2",
+"run": 0,
+"answer": "1. Infiltrating Lobular Carcinoma: 61.2245%\n2. Mixed Histology (please specify): 18.1818%\n3. Other  specify: 8.5714%\n4. Infiltrating Ductal Carcinoma: 2.1638%\n5. Mucinous Carcinoma: 0%\n6. Metaplastic Carcinoma: 0%\n7. Medullary Carcinoma: 0%\n8. Infiltrating Carcinoma NOS: 0%\n9. [Unknown]: 0%"
+},
+{
+"id": "pancancer_atlas/2",
+"run": 1,
+"answer": "1. Infiltrating Lobular Carcinoma: 61.2245%\n2. Mixed Histology (please specify): 18.1818%\n3. Other  specify: 8.5714%"
+},
+{
+"id": "pancancer_atlas/2",
+"run": 2,
+"answer": "1. Infiltrating Lobular Carcinoma: 0.6122448979591837\n2. Mixed Histology (please specify): 0.18181818181818182\n3. Other  specify: 0.08571428571428572"
+},
+{
+"id": "pancancer_atlas/2",
+"run": 3,
+"answer": "1. Infiltrating Lobular Carcinoma: 0.50340136\n2. Mixed Histology (please specify): 0.13636364\n3. Other  specify: 0.08571429"
+},
+{
+"id": "pancancer_atlas/2",
+"run": 4,
+"answer": "1. Infiltrating Lobular Carcinoma: 0.415730\n2. Mixed Histology (please specify): 0.125\n3. Other  specify: 0.083333"
+},
+{
+"id": "pancancer_atlas/3",
+"run": 0,
+"answer": "364.17"
+},
+{
+"id": "pancancer_atlas/3",
+"run": 1,
+"answer": "305.12"
+},
+{
+"id": "pancancer_atlas/3",
+"run": 2,
+"answer": "364.17"
+},
+{
+"id": "pancancer_atlas/3",
+"run": 3,
+"answer": "364.17"
+},
+{
+"id": "pancancer_atlas/3",
+"run": 4,
+"answer": "364.1713"
+},
+{
+"id": "patents/1",
+"run": 0,
+"answer": "A23J, A23P, A24F, A41H, A44D, A61G, A62C, B02C, B03C, B04B, B05B, B07B, B08B, B09B, B09C, B21B, B21C, B21H, B22D, B22F, B25D, B27C, B27G, B27M, B33Y, B60D, B60L, B60P, B63C, B63G, B65G, B66F, C01D, C01F, C01G, C01P, C07B, C21B, C21C, C21D, C22B, D03J, D06H, E01C, E01D, E02D, E03B, E03D, E03F, E04B, E04G, E21F, F02K, F04F, F16M, F16N, F23N, F25J, F41C, F42C, G01D, G01H, G01K, G01L, G01P, G01S, G04F, G06N, G06Q, G06T, G06V, G08B, G09F, G10L, G16B, G16H, G16Y, G21F, G21G, H01M, H02B, H02G, H02J, H03H, H04S, Y02B, Y02E, Y02T, Y04S"
+},
+{
+"id": "patents/1",
+"run": 1,
+"answer": "A23J, A23P, A24F, A41H, A44D, A61G, A62C, B02C, B03C, B04B, B05B, B07B, B08B, B09B, B09C, B21B, B21C, B21H, B22D, B22F, B25D, B27C, B27G, B27M, B33Y, B60D, B60L, B60P, B63C, B63G, B65G, B66F, C01D, C01F, C01G, C01P, C07B, C21B, C21C, C21D, C22B, D03J, D06H, E01C, E01D, E02D, E03B, E03D, E03F, E04B, E04G, E21F, F02K, F04F, F16M, F16N, F23N, F25J, F41C, F42C, G01D, G01H, G01K, G01L, G01P, G01S, G04F, G06N, G06Q, G06T, G06V, G08B, G09F, G10L, G16B, G16H, G16Y, G21F, G21G, H01M, H02B, H02G, H02J, H03H, H04S, Y02B, Y02E, Y02T, Y04S"
+},
+{
+"id": "patents/1",
+"run": 2,
+"answer": "A23J, A23P, A24F, A41H, A44D, A61G, A62C, B02C, B03C, B04B, B05B, B07B, B08B, B09B, B09C, B21B, B21C, B21H, B22D, B22F, B25D, B27C, B27G, B27M, B33Y, B60D, B60L, B60P, B63C, B63G, B65G, B66F, C01D, C01F, C01G, C01P, C07B, C21B, C21C, C21D, C22B, D03J, D06H, E01C, E01D, E02D, E03B, E03D, E03F, E04B, E04G, E21F, F02K, F04F, F16M, F16N, F23N, F25J, F41C, F42C, G01D, G01H, G01K, G01L, G01P, G01S, G04F, G06N, G06Q, G06T, G06V, G08B, G09F, G10L, G16B, G16H, G16Y, G21F, G21G, H01M, H02B, H02G, H02J, H03H, H04S, Y02B, Y02E, Y02T, Y04S"
+},
+{
+"id": "patents/1",
+"run": 3,
+"answer": "Y02E, G06Q, G06T, Y02T, G06N, H01M, G06V, Y02B, H02J, G01S, B65G, G16H, B60L, B08B, G08B, G10L, B33Y, G09F, Y04S, C01P, B22F, B05B, E04B, G01D, C21D, H02G, E02D, G01L, C07B, E04G, F16M, A24F, B02C, C01G, B22D, A61G, G01K, C22B, H03H, E01C, A62C, H02B, B07B, B66F, G16B, B60P, G01P, E01D, B21B, A23P, B21C, E03F, E21F, B09B, G01H, H04S, E03B, C01F, B03C, C21C, F02K, G16Y, E03D, C21B, B09C, C01D, G21F, F16N, A23J, F25J, B04B, B63C, B27M, F23N, B63G, B60D, D06H, B27G, B25D, F04F, A41H, B27C, G04F, F41C, F42C, G21G, B21H, D03J, A44D"
+},
+{
+"id": "patents/1",
+"run": 4,
+"answer": "A23J, A23P, A24F, A41H, A44D, A61G, A62C, B02C, B03C, B04B, B05B, B07B, B08B, B09B, B09C, B21B, B21C, B21H, B22D, B22F, B25D, B27C, B27G, B27M, B33Y, B60D, B60L, B60P, B63C, B63G, B65G, B66F, C01D, C01F, C01G, C01P, C07B, C21B, C21C, C21D, C22B, D03J, D06H, E01C, E01D, E02D, E03B, E03D, E03F, E04B, E04G, E21F, F02K, F04F, F16M, F16N, F23N, F25J, F41C, F42C, G01D, G01H, G01K, G01L, G01P, G01S, G04F, G06N, G06Q, G06T, G06V, G08B, G09F, G10L, G16B, G16H, G16Y, G21F, G21G, H01M, H02B, H02G, H02J, H03H, H04S, Y02B, Y02E, Y02T, Y04S"
+},
+{
+"id": "patents/2",
+"run": 0,
+"answer": "1. A61 - MEDICAL OR VETERINARY SCIENCE; HYGIENE: 2016\n2. H04 - ELECTRIC COMMUNICATION TECHNIQUE: 2015\n3. B41 - PRINTING; LINING MACHINES; TYPEWRITERS; STAMPS: 2007\n4. F02 - COMBUSTION ENGINES; HOT-GAS OR COMBUSTION-PRODUCT ENGINE PLANTS: 2010\n5. F04 - POSITIVE - DISPLACEMENT MACHINES FOR LIQUIDS; PUMPS FOR LIQUIDS OR ELASTIC FLUIDS: 2014\n6. G01 - MEASURING; TESTING: 2008\n7. B23 - MACHINE TOOLS; METAL-WORKING NOT OTHERWISE PROVIDED FOR: 2015\n8. B63 - SHIPS OR OTHER WATERBORNE VESSELS; RELATED EQUIPMENT: 2014\n9. Y02 - TECHNOLOGIES OR APPLICATIONS FOR MITIGATION OR ADAPTATION AGAINST CLIMATE CHANGE: 2013\n10. E02 - HYDRAULIC ENGINEERING; FOUNDATIONS; SOIL SHIFTING: 2012"
+},
+{
+"id": "patents/2",
+"run": 1,
+"answer": "1. TRANSMISSION OF DIGITAL INFORMATION, e.g. TELEGRAPHIC COMMUNICATION, CPC Group Code: H04L, Best Year: 2015\n2. DIAGNOSIS; SURGERY; IDENTIFICATION, CPC Group Code: A61B, Best Year: 2016"
+},
+{
+"id": "patents/2",
+"run": 2,
+"answer": "CPC Code: C04B\nTitle: LIME, MAGNESIA; SLAG; CEMENTS; COMPOSITIONS THEREOF, e.g. MORTARS, CONCRETE OR LIKE BUILDING MATERIALS; ARTIFICIAL STONE; CERAMICS; REFRACTORIES; TREATMENT OF NATURAL STONE\nBest Year: 2015"
+},
+{
+"id": "patents/2",
+"run": 3,
+"answer": "1. MEDICAL OR VETERINARY SCIENCE; HYGIENE: A61, 2016\n2. ELECTRIC COMMUNICATION TECHNIQUE: H04, 2015\n3. PRINTING; LINING MACHINES; TYPEWRITERS; STAMPS: B41, 2007\n4. COMBUSTION ENGINES; HOT-GAS OR COMBUSTION-PRODUCT ENGINE PLANTS: F02, 2010\n5. POSITIVE - DISPLACEMENT MACHINES FOR LIQUIDS; PUMPS FOR LIQUIDS OR ELASTIC FLUIDS: F04, 2014\n6. MEASURING; TESTING: G01, 2008\n7. MACHINE TOOLS; METAL-WORKING NOT OTHERWISE PROVIDED FOR: B23, 2015\n8. SHIPS OR OTHER WATERBORNE VESSELS; RELATED EQUIPMENT: B63, 2014\n9. TECHNOLOGIES OR APPLICATIONS FOR MITIGATION OR ADAPTATION AGAINST CLIMATE CHANGE: Y02, 2013\n10. HOISTING; LIFTING; HAULING: B66, 2016"
+},
+{
+"id": "patents/2",
+"run": 4,
+"answer": "1. H04L - TRANSMISSION OF DIGITAL INFORMATION, e.g. TELEGRAPHIC COMMUNICATION, Best Year: 2015, EMA: 2.00\n2. A61B - DIAGNOSIS; SURGERY; IDENTIFICATION, Best Year: 2016, EMA: 2.00"
+},
+{
+"id": "patents/3",
+"run": 0,
+"answer": "1. BLOOM ENERGY CORP: PROCESSES OR MEANS, e.g. BATTERIES, FOR THE DIRECT CONVERSION OF CHEMICAL ENERGY INTO ELECTRICAL ENERGY\n2. CALIFORNIA INST OF TECHN: GEOPHYSICS; GRAVITATIONAL MEASUREMENTS; DETECTING MASSES OR OBJECTS; TAGS\n3. CRYSTAL IS INC: SINGLE-CRYSTAL GROWTH; UNIDIRECTIONAL SOLIDIFICATION OF EUTECTIC MATERIAL OR UNIDIRECTIONAL DEMIXING OF EUTECTOID MATERIAL; REFINING BY ZONE-MELTING OF MATERIAL; PRODUCTION OF A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; SINGLE CRYSTALS OR HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; AFTER-TREATMENT OF SINGLE CRYSTALS OR A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; APPARATUS THEREFOR\n4. SCHOWALTER LEO J: SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10"
+},
+{
+"id": "patents/3",
+"run": 1,
+"answer": "1. BLOOM ENERGY CORP: PROCESSES OR MEANS, e.g. BATTERIES, FOR THE DIRECT CONVERSION OF CHEMICAL ENERGY INTO ELECTRICAL ENERGY\n2. CRYSTAL IS INC: SINGLE-CRYSTAL GROWTH; UNIDIRECTIONAL SOLIDIFICATION OF EUTECTIC MATERIAL OR UNIDIRECTIONAL DEMIXING OF EUTECTOID MATERIAL; REFINING BY ZONE-MELTING OF MATERIAL; PRODUCTION OF A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; SINGLE CRYSTALS OR HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; AFTER-TREATMENT OF SINGLE CRYSTALS OR A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; APPARATUS THEREFOR\n3. SCHOWALTER LEO J: SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10"
+},
+{
+"id": "patents/3",
+"run": 2,
+"answer": "1. CRYSTAL IS INC: SINGLE-CRYSTAL GROWTH; UNIDIRECTIONAL SOLIDIFICATION OF EUTECTIC MATERIAL OR UNIDIRECTIONAL DEMIXING OF EUTECTOID MATERIAL; REFINING BY ZONE-MELTING OF MATERIAL; PRODUCTION OF A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; SINGLE CRYSTALS OR HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; AFTER-TREATMENT OF SINGLE CRYSTALS OR A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; APPARATUS THEREFOR\n2. SCHOWALTER LEO J: SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10\n3. CALIFORNIA INST OF TECHN: GEOPHYSICS; GRAVITATIONAL MEASUREMENTS; DETECTING MASSES OR OBJECTS; TAGS\n4. BLOOM ENERGY CORP: PROCESSES OR MEANS, e.g. BATTERIES, FOR THE DIRECT CONVERSION OF CHEMICAL ENERGY INTO ELECTRICAL ENERGY"
+},
+{
+"id": "patents/3",
+"run": 3,
+"answer": "1. CALIFORNIA INST OF TECHN: GEOPHYSICS; GRAVITATIONAL MEASUREMENTS; DETECTING MASSES OR OBJECTS; TAGS\n2. BLOOM ENERGY CORP: PROCESSES OR MEANS, e.g. BATTERIES, FOR THE DIRECT CONVERSION OF CHEMICAL ENERGY INTO ELECTRICAL ENERGY\n3. CRYSTAL IS INC: SINGLE-CRYSTAL GROWTH; UNIDIRECTIONAL SOLIDIFICATION OF EUTECTIC MATERIAL OR UNIDIRECTIONAL DEMIXING OF EUTECTOID MATERIAL; REFINING BY ZONE-MELTING OF MATERIAL; PRODUCTION OF A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; SINGLE CRYSTALS OR HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; AFTER-TREATMENT OF SINGLE CRYSTALS OR A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; APPARATUS THEREFOR\n4. SCHOWALTER LEO J: SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10"
+},
+{
+"id": "patents/3",
+"run": 4,
+"answer": "CRYSTAL IS INC: SINGLE-CRYSTAL GROWTH; UNIDIRECTIONAL SOLIDIFICATION OF EUTECTIC MATERIAL OR UNIDIRECTIONAL DEMIXING OF EUTECTOID MATERIAL; REFINING BY ZONE-MELTING OF MATERIAL; PRODUCTION OF A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; SINGLE CRYSTALS OR HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; AFTER-TREATMENT OF SINGLE CRYSTALS OR A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; APPARATUS THEREFOR\nSCHOWALTER LEO J: SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10\nCALIFORNIA INST OF TECHN: GEOPHYSICS; GRAVITATIONAL MEASUREMENTS; DETECTING MASSES OR OBJECTS; TAGS"
+},
+{
+"id": "stockindex/1",
+"run": 0,
+"answer": "399001.SZ"
+},
+{
+"id": "stockindex/1",
+"run": 1,
+"answer": "399001.SZ"
+},
+{
+"id": "stockindex/1",
+"run": 2,
+"answer": "399001.SZ"
+},
+{
+"id": "stockindex/1",
+"run": 3,
+"answer": "399001.SZ"
+},
+{
+"id": "stockindex/1",
+"run": 4,
+"answer": "399001.SZ"
+},
+{
+"id": "stockindex/2",
+"run": 0,
+"answer": "IXIC"
+},
+{
+"id": "stockindex/2",
+"run": 1,
+"answer": "IXIC"
+},
+{
+"id": "stockindex/2",
+"run": 2,
+"answer": "IXIC"
+},
+{
+"id": "stockindex/2",
+"run": 3,
+"answer": "IXIC"
+},
+{
+"id": "stockindex/2",
+"run": 4,
+"answer": "IXIC"
+},
+{
+"id": "stockindex/3",
+"run": 0,
+"answer": "1. IXIC: USA\n2. 399001.SZ: China\n3. GDAXI: Germany\n4. TWII: Taiwan\n5. N225: Japan\n6. NYA: USA\n7. GSPTSE: Canada\n8. 000001.SS: China\n9. N100: Pan-European\n10. HSI: Hong Kong\n11. SSMI: Switzerland"
+},
+{
+"id": "stockindex/3",
+"run": 1,
+"answer": "1. IXIC: United States\n2. 399001.SZ: China\n3. GDAXI: Germany\n4. TWII: Taiwan\n5. N225: Japan"
+},
+{
+"id": "stockindex/3",
+"run": 2,
+"answer": "1. IXIC: USA\n2. GDAXI: Germany\n3. NSEI: India\n4. 399001.SZ: China\n5. TWII: Taiwan"
+},
+{
+"id": "stockindex/3",
+"run": 3,
+"answer": "1. IXIC: United States\n2. NSEI: India\n3. 399001.SZ: China\n4. GDAXI: Germany\n5. TWII: Taiwan"
+},
+{
+"id": "stockindex/3",
+"run": 4,
+"answer": "1. IXIC: United States\n2. NSEI: India\n3. GDAXI: Germany\n4. 399001.SZ: China\n5. TWII: Taiwan"
+},
+{
+"id": "stockmarket/1",
+"run": 0,
+"answer": "$18.44"
+},
+{
+"id": "stockmarket/1",
+"run": 1,
+"answer": "$18.44"
+},
+{
+"id": "stockmarket/1",
+"run": 2,
+"answer": "$18.44"
+},
+{
+"id": "stockmarket/1",
+"run": 3,
+"answer": "$18.44"
+},
+{
+"id": "stockmarket/1",
+"run": 4,
+"answer": "$18.44"
+},
+{
+"id": "stockmarket/2",
+"run": 0,
+"answer": "Total: 31\n\n1. BOIL: ProShares Ultra Bloomberg Natural Gas\n2. BZQ: ProShares UltraShort MSCI Brazil Capped\n3. COM: Direxion Auspice Broad Commodity Strategy ETF\n4. DUST: Direxion Daily Gold Miners Index Bear 2X Shares\n5. EDZ: Direxion Emerging Markets Bear 3X Shares\n6. ERX: Direxion Energy Bull 2X Shares\n7. FAZ: Direxion Financial Bear 3X Shares\n8. FXP: ProShares Ultrashort FTSE China 50\n9. GFIN: Goldman Sachs Motif Finance Reimagined ETF\n10. GUSH: Direxion Daily S&P Oil & Gas Exp. & Prod. Bull 2X Shares\n11. HYUP: Xtrackers High Beta High Yield Bond ETF\n12. JDST: Direxion Daily Junior Gold Miners Index Bear 2X Shares\n13. JNUG: Direxion Daily Junior Gold Miners Index Bull 2X Shares\n14. JPN: Xtrackers Japan JPX-Nikkei 400 Equity ETF\n15. LABD: Direxion Daily S&P Biotech Bear 3X Shares\n16. LABU: Direxion Daily S&P Biotech Bull 3X Shares\n17. LBJ: Direxion Daily Latin America 3x Bull Shares\n18. MDY: SPDR MidCap Trust Series I\n19. PTIN: Pacer Trendpilot International ETF\n20. RTL: Pacer Benchmark Retail Real Estate SCTR ETF\n21. SDOW: UltraPro Short Dow30\n22. SOXS: Direxion Daily Semiconductor Bear 3x Shares\n23. SSG: ProShares UltraShort Semiconductors\n24. TECS: Direxion Technology Bear 3X Shares\n25. TZA: Direxion Small Cap Bear 3X Shares\n26. UVXY: ProShares Trust Ultra VIX Short Term Futures ETF\n27. VIXY: ProShares Trust VIX Short-Term Futures ETF\n28. VPC: Virtus Private Credit Strategy ETF\n29. XES: SPDR Series Trust SPDR S&P Oil & Gas Equipment & Services ETF\n30. XOP: SPDR S&P Oil & Gas Exploration & Production\n31. YANG: Direxion Daily FTSE China Bear 3x Shares"
+},
+{
+"id": "stockmarket/2",
+"run": 1,
+"answer": "Total: 31\n\n1. BOIL: ProShares Ultra Bloomberg Natural Gas offers investors leveraged exposure to the natural gas market, aiming to amplify the performance of this vital energy commodity.\n2. BZQ: ProShares UltraShort MSCI Brazil Capped offers investors a way to profit from declines in Brazilian equities by providing leveraged exposure to the country's stock market index.\n3. COM: Direxion Auspice Broad Commodity Strategy ETF offers investors a unique opportunity to diversify their portfolios by focusing on a broad range of commodity investments, aiming to capitalize on market trends and provide strategic exposure to various commodities.\n4. DUST: Direxion Daily Gold Miners Index Bear 2X Shares offers investors a unique opportunity to capitalize on the decline of gold mining stocks by providing leveraged inverse exposure to the market.\n5. EDZ: Direxion Emerging Markets Bear 3X Shares provides investors with a way to profit from declines in emerging market stocks by offering a leveraged inverse exchange-traded fund designed to deliver triple the daily opposite performance of its benchmark index.\n6. ERX: Direxion Energy Bull 2X Shares offers investors a leveraged exposure to the energy sector, aiming to amplify returns by providing twice the daily performance of its underlying index.\n7. FAZ: Direxion Financial Bear 3X Shares offers an investment product designed to provide triple inverse exposure to the financial sector, allowing investors to profit from declines in financial stocks.\n8. FXP: ProShares Ultrashort FTSE China 50 offers investors a unique opportunity to profit from declines in the FTSE China 50 Index by providing leveraged inverse exposure to Chinese equities.\n9. GFIN: Goldman Sachs Motif Finance Reimagined ETF offers investors a dynamic approach to finance by providing a curated selection of stocks and securities that reflect innovative financial trends and strategies.\n10. GUSH: Direxion Daily S&P Oil & Gas Exp. & Prod. Bull 2X Shares is an investment fund that aims to deliver twice the daily performance of the S&P Oil & Gas Exploration & Production Index, offering investors a leveraged exposure to the oil and gas sector.\n11. HYUP: Xtrackers High Beta High Yield Bond ETF offers investors exposure to a portfolio of high-risk, high-reward bonds, aiming to deliver substantial returns through strategic investments in volatile fixed-income securities.\n12. JDST: Direxion Daily Junior Gold Miners Index Bear 2X Shares offers investors a way to capitalize on the decline of junior gold mining stocks through leveraged exchange-traded funds, providing a strategic tool for those anticipating bearish trends in the mining sector.\n13. JNUG: Direxion Daily Junior Gold Miners Index Bull 2X Shares offers a leveraged investment opportunity, allowing traders to amplify their exposure to the junior gold mining sector through a specialized exchange-traded fund.\n14. JPN: Xtrackers Japan JPX-Nikkei 400 Equity ETF offers investors a diverse portfolio of Japanese equities, tracking the performance of the JPX-Nikkei 400 Index to provide exposure to top-tier companies in Japan.\n15. LABD: Direxion Daily S&P Biotech Bear 3X Shares offers investors a way to profit from declines in the biotechnology sector by providing leveraged inverse exposure to the S&P Biotechnology Select Industry Index.\n16. LABU: Direxion Daily S&P Biotech Bull 3X Shares offers investors a high-risk, high-reward opportunity by providing leveraged exposure to the biotechnology sector, amplifying the daily performance of the S&P Biotechnology Select Industry Index by three times.\n17. LBJ: Direxion Daily Latin America 3x Bull Shares is an investment fund designed to provide triple the daily return of the Latin American stock market, offering bold investors a chance to amplify their exposure to this dynamic region.\n18. MDY: SPDR MidCap Trust Series I offers investors a way to gain exposure to a diverse range of medium-sized companies through its exchange-traded fund, which seeks to mirror the performance of the S&P MidCap 400 Index.\n19. PTIN: Pacer Trendpilot International ETF is an investment fund that strategically allocates assets based on market trends to optimize returns and minimize risks for its investors.\n20. RTL: Pacer Benchmark Retail Real Estate SCTR ETF is an investment fund that focuses on tracking the performance of companies within the retail real estate sector, offering investors exposure to this specific market niche.\n21. SDOW: UltraPro Short Dow30 is an investment fund that provides leveraged exposure to the inverse performance of the Dow Jones Industrial Average, catering to investors aiming to profit from declines in the market.\n22. SOXS: Direxion Daily Semiconductor Bear 3x Shares is an exchange-traded fund designed to provide investors with leveraged exposure to the inverse performance of the semiconductor sector, allowing them to profit from declines in this industry.\n23. SSG: ProShares UltraShort Semiconductors offers an investment product designed to provide twice the inverse daily performance of the semiconductor sector, allowing investors to profit from declines in the market.\n24. TECS: Direxion Technology Bear 3X Shares is a leveraged exchange-traded fund designed to profit from declines in the technology sector by delivering three times the inverse performance of the technology index each day.\n25. TZA: Direxion Small Cap Bear 3X Shares offers investors a way to profit from declining markets by providing leveraged exposure to the inverse performance of small-cap companies.\n26. UVXY: ProShares Trust Ultra VIX Short Term Futures ETF offers investors a way to capitalize on short-term market volatility through leveraged exposure to futures contracts tied to the VIX, a key measure of market risk.\n27. VIXY: ProShares Trust VIX Short-Term Futures ETF offers investors a way to gain exposure to the volatility of the stock market through short-term futures contracts, helping them manage risk or speculate on market fluctuations.\n28. VPC: Virtus Private Credit Strategy ETF offers investors a unique opportunity to gain exposure to a diverse portfolio of private credit investments, aiming to enhance returns through strategic lending.\n29. XES: SPDR Series Trust SPDR S&P Oil & Gas Equipment & Services ETF is an exchange-traded fund that focuses on investing in companies within the oil and gas equipment and services sector, offering investors a way to gain exposure to this vital industry.\n30. XOP: SPDR S&P Oil & Gas Exploration & Production is an investment fund that focuses on companies involved in the extraction and production of oil and natural gas, offering investors exposure to the energy sector.\n31. YANG: Direxion Daily FTSE China Bear 3x Shares is an exchange-traded fund designed to provide triple the inverse performance of the FTSE China 50 Index, allowing investors to profit from declines in the Chinese stock market."
+},
+{
+"id": "stockmarket/2",
+"run": 2,
+"answer": "Total ETFs: 31\n\n1. BOIL: ProShares Ultra Bloomberg Natural Gas offers investors leveraged exposure to the natural gas market, aiming to amplify the performance of this vital energy commodity.\n2. BZQ: ProShares UltraShort MSCI Brazil Capped offers investors a way to profit from declines in Brazilian equities by providing leveraged exposure to the country's stock market index.\n3. COM: Direxion Auspice Broad Commodity Strategy ETF offers investors a unique opportunity to diversify their portfolios by focusing on a broad range of commodity investments, aiming to capitalize on market trends and provide strategic exposure to various commodities.\n4. DUST: Direxion Daily Gold Miners Index Bear 2X Shares offers investors a unique opportunity to capitalize on the decline of gold mining stocks by providing leveraged inverse exposure to the market.\n5. EDZ: Direxion Emerging Markets Bear 3X Shares provides investors with a way to profit from declines in emerging market stocks by offering a leveraged inverse exchange-traded fund designed to deliver triple the daily opposite performance of its benchmark index.\n6. ERX: Direxion Energy Bull 2X Shares offers investors a leveraged exposure to the energy sector, aiming to amplify returns by providing twice the daily performance of its underlying index.\n7. FAZ: Direxion Financial Bear 3X Shares offers an investment product designed to provide triple inverse exposure to the financial sector, allowing investors to profit from declines in financial stocks.\n8. FXP: ProShares Ultrashort FTSE China 50 offers investors a unique opportunity to profit from declines in the FTSE China 50 Index by providing leveraged inverse exposure to Chinese equities.\n9. GFIN: Goldman Sachs Motif Finance Reimagined ETF offers investors a dynamic approach to finance by providing a curated selection of stocks and securities that reflect innovative financial trends and strategies.\n10. GUSH: Direxion Daily S&P Oil & Gas Exp. & Prod. Bull 2X Shares is an investment fund that aims to deliver twice the daily performance of the S&P Oil & Gas Exploration & Production Index, offering investors a leveraged exposure to the oil and gas sector.\n11. HYUP: Xtrackers High Beta High Yield Bond ETF offers investors exposure to a portfolio of high-risk, high-reward bonds, aiming to deliver substantial returns through strategic investments in volatile fixed-income securities.\n12. JDST: Direxion Daily Junior Gold Miners Index Bear 2X Shares offers investors a way to capitalize on the decline of junior gold mining stocks through leveraged exchange-traded funds, providing a strategic tool for those anticipating bearish trends in the mining sector.\n13. JNUG: Direxion Daily Junior Gold Miners Index Bull 2X Shares offers a leveraged investment opportunity, allowing traders to amplify their exposure to the junior gold mining sector through a specialized exchange-traded fund.\n14. JPN: Xtrackers Japan JPX-Nikkei 400 Equity ETF offers investors a diverse portfolio of Japanese equities, tracking the performance of the JPX-Nikkei 400 Index to provide exposure to top-tier companies in Japan.\n15. LABD: Direxion Daily S&P Biotech Bear 3X Shares offers investors a way to profit from declines in the biotechnology sector by providing leveraged inverse exposure to the S&P Biotechnology Select Industry Index.\n16. LABU: Direxion Daily S&P Biotech Bull 3X Shares offers investors a high-risk, high-reward opportunity by providing leveraged exposure to the biotechnology sector, amplifying the daily performance of the S&P Biotechnology Select Industry Index by three times.\n17. LBJ: Direxion Daily Latin America 3x Bull Shares is an investment fund designed to provide triple the daily return of the Latin American stock market, offering bold investors a chance to amplify their exposure to this dynamic region.\n18. MDY: SPDR MidCap Trust Series I offers investors a way to gain exposure to a diverse range of medium-sized companies through its exchange-traded fund, which seeks to mirror the performance of the S&P MidCap 400 Index.\n19. PTIN: Pacer Trendpilot International ETF is an investment fund that strategically allocates assets based on market trends to optimize returns and minimize risks for its investors.\n20. RTL: Pacer Benchmark Retail Real Estate SCTR ETF is an investment fund that focuses on tracking the performance of companies within the retail real estate sector, offering investors exposure to this specific market niche.\n21. SDOW: UltraPro Short Dow30 is an investment fund that provides leveraged exposure to the inverse performance of the Dow Jones Industrial Average, catering to investors aiming to profit from declines in the market.\n22. SOXS: Direxion Daily Semiconductor Bear 3x Shares is an exchange-traded fund designed to provide investors with leveraged exposure to the inverse performance of the semiconductor sector, allowing them to profit from declines in this industry.\n23. SSG: ProShares UltraShort Semiconductors offers an investment product designed to provide twice the inverse daily performance of the semiconductor sector, allowing investors to profit from declines in the market.\n24. TECS: Direxion Technology Bear 3X Shares is a leveraged exchange-traded fund designed to profit from declines in the technology sector by delivering three times the inverse performance of the technology index each day.\n25. TZA: Direxion Small Cap Bear 3X Shares offers investors a way to profit from declining markets by providing leveraged exposure to the inverse performance of small-cap companies.\n26. UVXY: ProShares Trust Ultra VIX Short Term Futures ETF offers investors a way to capitalize on short-term market volatility through leveraged exposure to futures contracts tied to the VIX, a key measure of market risk.\n27. VIXY: ProShares Trust VIX Short-Term Futures ETF offers investors a way to gain exposure to the volatility of the stock market through short-term futures contracts, helping them manage risk or speculate on market fluctuations.\n28. VPC: Virtus Private Credit Strategy ETF offers investors a unique opportunity to gain exposure to a diverse portfolio of private credit investments, aiming to enhance returns through strategic lending.\n29. XES: SPDR Series Trust SPDR S&P Oil & Gas Equipment & Services ETF is an exchange-traded fund that focuses on investing in companies within the oil and gas equipment and services sector, offering investors a way to gain exposure to this vital industry.\n30. XOP: SPDR S&P Oil & Gas Exploration & Production is an investment fund that focuses on companies involved in the extraction and production of oil and natural gas, offering investors exposure to the energy sector.\n31. YANG: Direxion Daily FTSE China Bear 3x Shares is an exchange-traded fund designed to provide triple the inverse performance of the FTSE China 50 Index, allowing investors to profit from declines in the Chinese stock market."
+},
+{
+"id": "stockmarket/2",
+"run": 3,
+"answer": "Total: 31\n\n1. BOIL: ProShares Ultra Bloomberg Natural Gas offers investors leveraged exposure to the natural gas market, aiming to amplify the performance of this vital energy commodity.\n2. BZQ: ProShares UltraShort MSCI Brazil Capped offers investors a way to profit from declines in Brazilian equities by providing leveraged exposure to the country's stock market index.\n3. COM: Direxion Auspice Broad Commodity Strategy ETF offers investors a unique opportunity to diversify their portfolios by focusing on a broad range of commodity investments, aiming to capitalize on market trends and provide strategic exposure to various commodities.\n4. DUST: Direxion Daily Gold Miners Index Bear 2X Shares offers investors a unique opportunity to capitalize on the decline of gold mining stocks by providing leveraged inverse exposure to the market.\n5. EDZ: Direxion Emerging Markets Bear 3X Shares provides investors with a way to profit from declines in emerging market stocks by offering a leveraged inverse exchange-traded fund designed to deliver triple the daily opposite performance of its benchmark index.\n6. ERX: Direxion Energy Bull 2X Shares offers investors a leveraged exposure to the energy sector, aiming to amplify returns by providing twice the daily performance of its underlying index.\n7. FAZ: Direxion Financial Bear 3X Shares offers an investment product designed to provide triple inverse exposure to the financial sector, allowing investors to profit from declines in financial stocks.\n8. FXP: ProShares Ultrashort FTSE China 50 offers investors a unique opportunity to profit from declines in the FTSE China 50 Index by providing leveraged inverse exposure to Chinese equities.\n9. GFIN: Goldman Sachs Motif Finance Reimagined ETF offers investors a dynamic approach to finance by providing a curated selection of stocks and securities that reflect innovative financial trends and strategies.\n10. GUSH: Direxion Daily S&P Oil & Gas Exp. & Prod. Bull 2X Shares is an investment fund that aims to deliver twice the daily performance of the S&P Oil & Gas Exploration & Production Index, offering investors a leveraged exposure to the oil and gas sector.\n11. HYUP: Xtrackers High Beta High Yield Bond ETF offers investors exposure to a portfolio of high-risk, high-reward bonds, aiming to deliver substantial returns through strategic investments in volatile fixed-income securities.\n12. JDST: Direxion Daily Junior Gold Miners Index Bear 2X Shares offers investors a way to capitalize on the decline of junior gold mining stocks through leveraged exchange-traded funds, providing a strategic tool for those anticipating bearish trends in the mining sector.\n13. JNUG: Direxion Daily Junior Gold Miners Index Bull 2X Shares offers a leveraged investment opportunity, allowing traders to amplify their exposure to the junior gold mining sector through a specialized exchange-traded fund.\n14. JPN: Xtrackers Japan JPX-Nikkei 400 Equity ETF offers investors a diverse portfolio of Japanese equities, tracking the performance of the JPX-Nikkei 400 Index to provide exposure to top-tier companies in Japan.\n15. LABD: Direxion Daily S&P Biotech Bear 3X Shares offers investors a way to profit from declines in the biotechnology sector by providing leveraged inverse exposure to the S&P Biotechnology Select Industry Index.\n16. LABU: Direxion Daily S&P Biotech Bull 3X Shares offers investors a high-risk, high-reward opportunity by providing leveraged exposure to the biotechnology sector, amplifying the daily performance of the S&P Biotechnology Select Industry Index by three times.\n17. LBJ: Direxion Daily Latin America 3x Bull Shares is an investment fund designed to provide triple the daily return of the Latin American stock market, offering bold investors a chance to amplify their exposure to this dynamic region.\n18. MDY: SPDR MidCap Trust Series I offers investors a way to gain exposure to a diverse range of medium-sized companies through its exchange-traded fund, which seeks to mirror the performance of the S&P MidCap 400 Index.\n19. PTIN: Pacer Trendpilot International ETF is an investment fund that strategically allocates assets based on market trends to optimize returns and minimize risks for its investors.\n20. RTL: Pacer Benchmark Retail Real Estate SCTR ETF is an investment fund that focuses on tracking the performance of companies within the retail real estate sector, offering investors exposure to this specific market niche.\n21. SDOW: UltraPro Short Dow30 is an investment fund that provides leveraged exposure to the inverse performance of the Dow Jones Industrial Average, catering to investors aiming to profit from declines in the market.\n22. SOXS: Direxion Daily Semiconductor Bear 3x Shares is an exchange-traded fund designed to provide investors with leveraged exposure to the inverse performance of the semiconductor sector, allowing them to profit from declines in this industry.\n23. SSG: ProShares UltraShort Semiconductors offers an investment product designed to provide twice the inverse daily performance of the semiconductor sector, allowing investors to profit from declines in the market.\n24. TECS: Direxion Technology Bear 3X Shares is a leveraged exchange-traded fund designed to profit from declines in the technology sector by delivering three times the inverse performance of the technology index each day.\n25. TZA: Direxion Small Cap Bear 3X Shares offers investors a way to profit from declining markets by providing leveraged exposure to the inverse performance of small-cap companies.\n26. UVXY: ProShares Trust Ultra VIX Short Term Futures ETF offers investors a way to capitalize on short-term market volatility through leveraged exposure to futures contracts tied to the VIX, a key measure of market risk.\n27. VIXY: ProShares Trust VIX Short-Term Futures ETF offers investors a way to gain exposure to the volatility of the stock market through short-term futures contracts, helping them manage risk or speculate on market fluctuations.\n28. VPC: Virtus Private Credit Strategy ETF offers investors a unique opportunity to gain exposure to a diverse portfolio of private credit investments, aiming to enhance returns through strategic lending.\n29. XES: SPDR Series Trust SPDR S&P Oil & Gas Equipment & Services ETF is an exchange-traded fund that focuses on investing in companies within the oil and gas equipment and services sector, offering investors a way to gain exposure to this vital industry.\n30. XOP: SPDR S&P Oil & Gas Exploration & Production is an investment fund that focuses on companies involved in the extraction and production of oil and natural gas, offering investors exposure to the energy sector.\n31. YANG: Direxion Daily FTSE China Bear 3x Shares is an exchange-traded fund designed to provide triple the inverse performance of the FTSE China 50 Index, allowing investors to profit from declines in the Chinese stock market."
+},
+{
+"id": "stockmarket/2",
+"run": 4,
+"answer": "Total ETFs: 31\n\n1. BOIL: $382.20\n2. BZQ: $462.78\n3. COM: $40487.99\n4. DUST: $1923.28\n5. EDZ: $302.01\n6. ERX: $645.16\n7. FAZ: $288.54\n8. FXP: $206.00\n9. GFIN: $686.76\n10. GUSH: $78699.22\n11. HYUP: $4329.75\n12. JDST: $12988.41\n13. JNUG: $451.07\n14. JPN: $201.52\n15. LABD: $624.08\n16. LABU: $230.28\n17. LBJ: $998.11\n18. MDY: $263.77\n19. PTIN: $843.53\n20. RTL: $13306.76\n21. SDOW: $415.17\n22. SOXS: $3886.62\n23. SSG: $263.87\n24. TECS: $253.30\n25. TZA: $272.63\n26. UVXY: $81500.00\n27. VIXY: $491.00\n28. VPC: $2250.14\n29. XES: $278.55\n30. XOP: $208.74\n31. YANG: $347.35"
+},
+{
+"id": "stockmarket/3",
+"run": 0,
+"answer": "1. Frontier Communications Corporation: 254397.63\n2. Correvio Pharma Corp.: 145247.83\n3. CBAK Energy Technology, Inc.: 86223.32\n4. Sypris Solutions, Inc.: 36836.36\n5. Apex Global Brands Inc.: 23781.42\n6. DASAN Zhone Solutions, Inc.: 15578.66\n7. BIO-key International, Inc.: 10988.14\n8. Pacific Ethanol, Inc.: 10706.72\n9. China Ceramics Co., Ltd.: 4366.80\n10. Synthesis Energy Systems, Inc.: 2390.51\n11. Sunesis Pharmaceuticals, Inc.: 781.82\n12. CounterPath Corporation: 375.49\n13. Ocean Power Technologies, Inc.: 254.15\n14. Ideanomics, Inc.: 10.28\n15. Future FinTech Group Inc.: 9.85"
+},
+{
+"id": "stockmarket/3",
+"run": 1,
+"answer": "1. Frontier Communications Corporation: 254397.63\n2. Correvio Pharma Corp.: 145247.83\n3. CBAK Energy Technology, Inc.: 86223.32\n4. Sypris Solutions, Inc.: 36836.36\n5. Apex Global Brands Inc.: 23781.42\n6. DASAN Zhone Solutions, Inc.: 15578.66\n7. BIO-key International, Inc.: 10988.14\n8. Pacific Ethanol, Inc.: 10706.72\n9. China Ceramics Co., Ltd.: 4366.80\n10. Synthesis Energy Systems, Inc.: 2390.51\n11. Sunesis Pharmaceuticals, Inc.: 781.82\n12. CounterPath Corporation: 375.49\n13. Ocean Power Technologies, Inc.: 254.15\n14. Ideanomics, Inc.: 10.28\n15. Future FinTech Group Inc.: 9.85"
+},
+{
+"id": "stockmarket/3",
+"run": 2,
+"answer": "1. Apex Global Brands Inc.: 23781.42\n2. BIO-key International, Inc.: 10988.14\n3. CBAK Energy Technology, Inc.: 86223.32\n4. China Ceramics Co., Ltd.: 4366.80\n5. Correvio Pharma Corp.: 145247.83\n6. CounterPath Corporation: 375.49\n7. DASAN Zhone Solutions, Inc.: 15578.66\n8. Future FinTech Group Inc.: 9.85\n9. Frontier Communications Corporation: 254397.63\n10. Ideanomics, Inc.: 10.28\n11. Ocean Power Technologies, Inc.: 254.15\n12. Pacific Ethanol, Inc.: 10706.72\n13. Synthesis Energy Systems, Inc.: 2390.51\n14. Sunesis Pharmaceuticals, Inc.: 781.82\n15. Sypris Solutions, Inc.: 36836.36"
+},
+{
+"id": "stockmarket/3",
+"run": 3,
+"answer": "1. Frontier Communications Corporation: 254397.63\n2. Correvio Pharma Corp.: 145247.83\n3. CBAK Energy Technology, Inc.: 86223.32\n4. Sypris Solutions, Inc.: 36836.36\n5. Apex Global Brands Inc.: 23781.42\n6. DASAN Zhone Solutions, Inc.: 15578.66\n7. BIO-key International, Inc.: 10988.14\n8. Pacific Ethanol, Inc.: 10706.72\n9. China Ceramics Co., Ltd.: 4366.80\n10. Synthesis Energy Systems, Inc.: 2390.51\n11. Sunesis Pharmaceuticals, Inc.: 781.82\n12. CounterPath Corporation: 375.49\n13. Ocean Power Technologies, Inc.: 254.15\n14. Ideanomics, Inc.: 10.28\n15. Future FinTech Group Inc.: 9.85"
+},
+{
+"id": "stockmarket/3",
+"run": 4,
+"answer": "1. Frontier Communications Corporation: 254397.63\n2. Correvio Pharma Corp.: 145247.83\n3. CBAK Energy Technology, Inc.: 86223.32\n4. Sypris Solutions, Inc.: 36836.36\n5. Apex Global Brands Inc.: 23781.42\n6. DASAN Zhone Solutions, Inc.: 15578.66\n7. BIO-key International, Inc.: 10988.14\n8. Pacific Ethanol, Inc.: 10706.72\n9. China Ceramics Co., Ltd.: 4366.8\n10. Synthesis Energy Systems, Inc.: 2390.51\n11. Sunesis Pharmaceuticals, Inc.: 781.82\n12. CounterPath Corporation: 375.49\n13. Ocean Power Technologies, Inc.: 254.15\n14. Ideanomics, Inc.: 10.28\n15. Future FinTech Group Inc.: 9.85"
+},
+{
+"id": "stockmarket/4",
+"run": 0,
+"answer": "1. HDFC Bank Limited\n2. Albany International Corporation\n3. Getty Realty Corporation\n4. Mettler-Toledo International, Inc.\n5. Pfizer, Inc."
+},
+{
+"id": "stockmarket/4",
+"run": 1,
+"answer": "1. HDFC Bank Limited: 146\n2. Albany International Corporation: 143\n3. Getty Realty Corporation: 143\n4. Mettler-Toledo International, Inc.: 143\n5. Pfizer, Inc.: 141\n6. Ameriprise Financial, Inc.: 141"
+},
+{
+"id": "stockmarket/4",
+"run": 2,
+"answer": "1. HDFC Bank Limited\n2. Albany International Corporation\n3. Getty Realty Corporation\n4. Mettler-Toledo International, Inc.\n5. Ameriprise Financial, Inc.\n6. Pfizer, Inc."
+},
+{
+"id": "stockmarket/4",
+"run": 3,
+"answer": "1. HDFC Bank Limited\n2. Albany International Corporation\n3. Getty Realty Corporation\n4. Mettler-Toledo International, Inc.\n5. Pfizer, Inc."
+},
+{
+"id": "stockmarket/4",
+"run": 4,
+"answer": "1. Clough Global Opportunities Fund\n2. Wells Fargo Utilities and High Income Fund\n3. HDFC Bank Limited\n4. Albany International Corporation\n5. Getty Realty Corporation"
+},
+{
+"id": "stockmarket/5",
+"run": 0,
+"answer": "1. Synthesis Energy Systems, Inc.: 51\n2. TD Holdings, Inc.: 42\n3. TMSR Holding Company Limited: 40\n4. Verb Technology Company, Inc.: 38\n5. Sunesis Pharmaceuticals, Inc.: 32"
+},
+{
+"id": "stockmarket/5",
+"run": 1,
+"answer": "1. Synthesis Energy Systems, Inc.: 51\n2. TD Holdings, Inc.: 42\n3. TMSR Holding Company Limited: 40\n4. Verb Technology Company, Inc.: 38\n5. Sunesis Pharmaceuticals, Inc.: 32"
+},
+{
+"id": "stockmarket/5",
+"run": 2,
+"answer": "1. Synthesis Energy Systems, Inc.: 51\n2. TD Holdings, Inc.: 42\n3. TMSR Holding Company Limited: 40\n4. Verb Technology Company, Inc.: 38\n5. Sunesis Pharmaceuticals, Inc.: 32"
+},
+{
+"id": "stockmarket/5",
+"run": 3,
+"answer": "1. Synthesis Energy Systems, Inc.\n2. TD Holdings, Inc.\n3. TMSR Holding Company Limited\n4. Verb Technology Company, Inc.\n5. Sunesis Pharmaceuticals, Inc."
+},
+{
+"id": "stockmarket/5",
+"run": 4,
+"answer": "1. Synthesis Energy Systems, Inc.: 51\n2. TD Holdings, Inc.: 42\n3. TMSR Holding Company Limited: 40\n4. Verb Technology Company, Inc.: 38\n5. Sunesis Pharmaceuticals, Inc.: 32"
+},
+{
+"id": "yelp/1",
+"run": 0,
+"answer": "3.55"
+},
+{
+"id": "yelp/1",
+"run": 1,
+"answer": "3.55"
+},
+{
+"id": "yelp/1",
+"run": 2,
+"answer": "3.55"
+},
+{
+"id": "yelp/1",
+"run": 3,
+"answer": "3.55"
+},
+{
+"id": "yelp/1",
+"run": 4,
+"answer": "3.55"
+},
+{
+"id": "yelp/2",
+"run": 0,
+"answer": "PA: 3.70"
+},
+{
+"id": "yelp/2",
+"run": 1,
+"answer": "PA: 3.70"
+},
+{
+"id": "yelp/2",
+"run": 2,
+"answer": "PA: 3.70"
+},
+{
+"id": "yelp/2",
+"run": 3,
+"answer": "PA: 3.70"
+},
+{
+"id": "yelp/2",
+"run": 4,
+"answer": "PA: 3.70"
+},
+{
+"id": "yelp/3",
+"run": 0,
+"answer": "35"
+},
+{
+"id": "yelp/3",
+"run": 1,
+"answer": "35"
+},
+{
+"id": "yelp/3",
+"run": 2,
+"answer": "35"
+},
+{
+"id": "yelp/3",
+"run": 3,
+"answer": "35"
+},
+{
+"id": "yelp/3",
+"run": 4,
+"answer": "35"
+},
+{
+"id": "yelp/4",
+"run": 0,
+"answer": "Restaurants: 3.63"
+},
+{
+"id": "yelp/4",
+"run": 1,
+"answer": "Restaurants: 3.57"
+},
+{
+"id": "yelp/4",
+"run": 2,
+"answer": "Restaurants: 3.64"
+},
+{
+"id": "yelp/4",
+"run": 3,
+"answer": "Restaurants: 3.63"
+},
+{
+"id": "yelp/4",
+"run": 4,
+"answer": "Restaurants: 3.63"
+},
+{
+"id": "yelp/5",
+"run": 0,
+"answer": "PA: 3.48"
+},
+{
+"id": "yelp/5",
+"run": 1,
+"answer": "Pennsylvania: 3.48"
+},
+{
+"id": "yelp/5",
+"run": 2,
+"answer": "PA: 3.48"
+},
+{
+"id": "yelp/5",
+"run": 3,
+"answer": "Pennsylvania: 3.48"
+},
+{
+"id": "yelp/5",
+"run": 4,
+"answer": "PA: 3.48"
+},
+{
+"id": "yelp/6",
+"run": 0,
+"answer": "Orangetheory Fitness Carrollwood: Fitness & Instruction, Gyms, Boot Camps, Trainers, Active Life, and Interval Training Gyms"
+},
+{
+"id": "yelp/6",
+"run": 1,
+"answer": "Business: Coffee House Too Cafe\nCategories: Restaurants, Breakfast & Brunch, American (New), Cafes"
+},
+{
+"id": "yelp/6",
+"run": 2,
+"answer": "Coffee House Too Cafe: Restaurants, Breakfast & Brunch, American (New), Cafes"
+},
+{
+"id": "yelp/6",
+"run": 3,
+"answer": "Coffee House Too Cafe: Restaurants, Breakfast & Brunch, American (New), Cafes"
+},
+{
+"id": "yelp/6",
+"run": 4,
+"answer": "Coffee House Too Cafe: Restaurants, Breakfast & Brunch, American (New), Cafes"
+},
+{
+"id": "yelp/7",
+"run": 0,
+"answer": "1. Restaurants: 58\n2. Food: 38\n3. American (New): 24\n4. Shopping: 20\n5. Breakfast & Brunch: 19"
+},
+{
+"id": "yelp/7",
+"run": 1,
+"answer": "1. Restaurants: 58\n2. Food: 38\n3. American (New): 24\n4. Shopping: 20\n5. Breakfast & Brunch: 19"
+},
+{
+"id": "yelp/7",
+"run": 2,
+"answer": "1. Restaurants: 58\n2. Food: 38\n3. American (New): 24\n4. Shopping: 20\n5. Breakfast & Brunch: 19"
+},
+{
+"id": "yelp/7",
+"run": 3,
+"answer": "1. Restaurants: 58\n2. Food: 38\n3. American (New): 24\n4. Shopping: 20\n5. Breakfast & Brunch: 19"
+},
+{
+"id": "yelp/7",
+"run": 4,
+"answer": "1. Restaurants: 25\n2. Food: 17\n3. Shopping: 12\n4. Fast Food: 10\n5. American (New): 8"
+}
+]

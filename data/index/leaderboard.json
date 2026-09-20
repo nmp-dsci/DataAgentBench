@@ -1,0 +1,826 @@
+{
+ "updatedAt": "2026-09-15",
+ "sources": [
+  "DEPS_DEV_V1 query 1 re-scored 2026-08-18 by re-running its validate.py under a revised validator (accepting any of the 95 packages tied at fifth place on 57779 stars rather than the single tied package recorded in ground_truth.csv, see issue #86), from the same submission JSONs, with no other query changed",
+  "All Pass@1 scores recomputed 2026-06-12 by re-running each query's validate.py under the current validators (including the regenerated PATENTS ground truths), from the submission JSONs in this repository or in the corresponding submission PR branches",
+  "PromptQL and baseline stratified tables: re-scored 2026-06-12 from the stored submission JSONs"
+ ],
+ "overallLeaderboard": [
+  {
+   "rank": 1,
+   "agent": "Permute EQ (Claude Opus 5)",
+   "trials": 5,
+   "passAt1": 0.9467,
+   "promptGroup": "benchmark-informed",
+   "team": "Permute",
+   "teamUrl": "https://permute.ai",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/95",
+   "date": "2026-09-11",
+   "note": "Learned evidence layer plus an independent execution agent. Per query a frozen 'Arbiter1' evidence JSON (column and relation routing, data previews, an execution plan) is supplied as a queryable table, and a fresh Claude Opus 5 agent (max reasoning, 100 steps) answers over the sanctioned stores through DuckDB and a calculator. Uses db_description_withhint.txt hints, delivered in full for all 12 datasets. No web, shell or document-search tool. Trace audit found no external fetches and no reads of ground truth, validators, prior runs or other submissions; DuckDB glob/read_text are unfiltered and were used in some stockmarket trials, but returned only sanctioned parquet stores and one benchmark hints file already present in the prompt. Two fixed prompts were used across a 27/27 split; the second carries three question-scoped rules, two presentational and one, scoped to GITHUB_REPOS q1, governing population selection. Scored on the answer section only: responses also contain contract tables and audits that can name the gold value while the stated answer differs, which inflates full-text scoring from 0.8713 to 0.9133. One bookreview trial was re-scored upward after the answer-section rule was found to truncate before a later 'Matching Books' table whose titles were present in the answer. Full execution traces provided for all 270 trials. Updated in PR #95: GITHUB_REPOS q2 rerun after the query wording was clarified, and full 5-trial reruns of crmarenapro q3/q7/q9 and DEPS_DEV_V1 q1. Those reruns use query-specific prompts (5 prompt variants across the 54 queries); crmarenapro q3/q7/q9 carry a CONDITIONAL EXECUTION RULES block not present in the other 51 queries."
+  },
+  {
+   "rank": 2,
+   "agent": "Scout (OceanBase Lab) (GLM-5.2)",
+   "trials": 5,
+   "passAt1": 0.9062,
+   "promptGroup": "benchmark-informed",
+   "team": "OceanBase Lab",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/96",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/96",
+   "date": "2026-09-08",
+   "note": "Tool-using main agent (GLM-5.2, thinking disabled) with on-demand planner subagents, a deterministic workflow compiler and data kernel over each task's sanctioned stores, LLM-backed extract_fields and classify_aggregate tools, and a network-isolated Python sandbox. Uses db_description_withhint.txt hints. Tuned prompt: a per-query, runtime-generated pre-analysis block (schema facts, measured join overlaps, question-to-column bindings, answer-shape contract) is placed in the system prompt; the opening user message is the benchmark question plus description and hints only. Tuned tools: the harness ships workflow operators built for specific DAB question shapes, e.g. temporal_ema_group_extremum and a compute_ema_and_find_best_year helper (PATENTS EMA queries), periodic_investment_return (stockindex q3), contingency_test (PANCANCER_ATLAS q3), duplicate_content_rank (GITHUB_REPOS q2), schedule_filter (googlelocal q3), state_transition_aggregate and interval_duration_aggregate (crmarenapro q8 and q10), versioned_entity_rank (DEPS_DEV_V1 q1). Trace audit over all 270 trials found no external fetches, no reads of ground truth, validators, prior runs or other submissions, no ground-truth values in any prompt, and every passing answer derived in the trial's own tool outputs. Full execution traces provided for all 270 trials."
+  },
+  {
+   "rank": 3,
+   "agent": "Camber (Claude Opus 5, high effort)",
+   "trials": 5,
+   "passAt1": 0.879,
+   "promptGroup": "benchmark-informed",
+   "team": "Camber",
+   "teamUrl": "https://www.cambercloud.com/",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/92",
+   "date": "2026-08-27",
+   "note": "Twelve per-dataset Camber Cloud notebook agents, one per DAB dataset, each invoked once per trial as an independent conversation (camber chat --agent @camber-dev.<dataset>), Claude Opus 5 via Amazon Bedrock at high reasoning effort. The agent drives a Jupyter kernel through generate_code/append_code_cell over that dataset's sanctioned stores. No web, shell or document-search tool. Tuned prompt: a per-dataset system prompt embedding db_description.txt verbatim, an author-written schema profile (types, nullability, row counts, observed value sets) obtained by introspecting the sanctioned files, connection instructions, answer-shape guidance and a 'Known Pitfalls' section. The prompts were supplied on request and audited: no verbatim ground truth, and the pitfalls hand the decisive interpretation back to the agent rather than stating it. Hints marked yes per the submission's own declaration, but the audit found no use of db_description_withhint.txt: 0 of 47 hint lines appear in any prompt or in any of the 270 traces, no trace references the hint or description files, and on stockmarket the agent decodes only the status letters present in the data (N, D, H), inconsistently across runs, without the E/G/J/K, listing-exchange or market-category tables the hint file spells out; on stockindex the prompt supplies no volatility formula or up/down-day definition. Query raised with the submitter. Trace audit over all 270 trials found no external fetches, no reads of ground truth, validators, prior runs or other submissions, and no cross-dataset access. Six trials shipped with an empty tool_call_parts and were supplied afterwards from the submitter's observability store; their Bedrock timestamps reconcile with the started_at values published in the original bundle, and all 270 answers are byte-identical to the original submission. Scored on the full answer text. Answer-section scoring would give 0.8534 (0.8492 after a hand correction to GITHUB_REPOS q4), since responses append a method/caveat section that sometimes names the gold value while the stated answer differs."
+  },
+  {
+   "rank": 4,
+   "agent": "Sentinel (Actioneer) (Fable 5) + Claude Opus 4.7",
+   "trials": 5,
+   "passAt1": 0.8617,
+   "promptGroup": "benchmark-informed",
+   "team": "Sentinel (Actioneer)",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/73",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/73",
+   "date": "2026-07-20",
+   "note": "Single-agent ReAct executor operating a sandboxed Python REPL over each task's sanctioned stores, with a deterministic verify_step assertion layer (row-count/uniqueness/non-null/dtype/range checks on intermediate results). Fable 5 backbone (primary); Claude Opus 4.7 on the 3 PANCANCER_ATLAS queries where Fable 5 declines the clinical-genomics domain. Uses db_description_withhint.txt hints. The agnews traces show external label-fetch attempts (load_dataset, raw.githubusercontent, HuggingFace cache), all sandbox-blocked with 0 bytes obtained; no off-limits data drove any answer. No gold values, per-dataset rules, or validator references. Full execution traces provided for all 270 trials."
+  },
+  {
+   "rank": 5,
+   "agent": "Permute Core (Claude Opus 5)",
+   "trials": 5,
+   "passAt1": 0.8413,
+   "promptGroup": "benchmark-informed",
+   "team": "Permute",
+   "teamUrl": "https://permute.ai",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/85",
+   "date": "2026-08-05",
+   "note": "Single-agent analytical executor over a read-only DuckDB interface to each task's sanctioned stores, with a deterministic evidence layer (schema, join, data-quality and temporal-format profiling) filtered per query at runtime and a select_result_candidate provenance gate. Claude Opus 5 backbone (max reasoning). Uses db_description_withhint.txt hints. The harness exposes no file, shell or network tool: no web or external-dataset fetches, no off-limits reads, and no file-reading DuckDB functions in any of the 2946 SQL calls across the 270 traces; the Python tool was non-functional for the whole run, so all analysis went through SQL. Every opening prompt is the benchmark question plus db_description.txt and its hints and nothing else, identical across the 5 runs of each query; the PATENTS prompts carry only 5 of the 7 hints present at the cited commit. No gold values, per-dataset rules, or validator references. The traces publish the user prompt, every tool call with its output, and the final answer, but not the system prompt or the query-specific evidence payload; every object the agent cites from that layer appears in the published trace, and the data-quality facts it encodes restate hints the benchmark already gives. Full execution traces provided for all 270 trials."
+  },
+  {
+   "rank": 6,
+   "agent": "Alkera (Fable 5) + Claude Opus 4.8",
+   "trials": 5,
+   "passAt1": 0.8411,
+   "promptGroup": "benchmark-informed",
+   "team": "Alkera",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/70",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/70",
+   "date": "2026-07-14",
+   "note": "Runs the same benchmark-agnostic \"data engineering best practices\" system addendum as the team's Opus 4.8 submission (#69), byte-identical across all 270 trials; Fable 5 backbone (max reasoning) with fallback to Claude Opus 4.8 (xhigh) on Fable safety refusals (15 of 270 trials). No gold values, per-dataset rules, or validator references. Full execution traces provided for all 270 trials."
+  },
+  {
+   "rank": 7,
+   "agent": "Sarvam Code v0.36 (GLM-5.2)",
+   "trials": 5,
+   "passAt1": 0.8208,
+   "promptGroup": "benchmark-informed",
+   "team": "Sarvam Code",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/75",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/75",
+   "date": "2026-07-28",
+   "note": "Single data-engineering agent (sarvam-code CLI v0.36.0, GLM-5.2, max reasoning) running shell + SQL over each task's sanctioned stores, with a deterministic answer gate and one blind second solver (original question only, no inherited context) as a cross-check. Uses db_description_withhint.txt hints. Same team and backbone as #74 (0.7812) with an upgraded agent harness. Every opening prompt is the verbatim benchmark question with no injected plan or spec; no network fetches in any of the 270 traces and no ground-truth or off-limits reads (the container holds only db_config.yaml, the two db_description files and query_dataset/). The bundled agent skill is benchmark-agnostic methodology with no per-dataset rules; one numeric formatting example in it coincides with the yelp/query1 gold value, and all five yelp/query1 trials derive that number independently from the sanctioned stores. Full execution traces provided for all 270 trials."
+  },
+  {
+   "rank": 8,
+   "agent": "DataTrail v1 (Muse Spark 1.3, medium effort)",
+   "trials": 5,
+   "passAt1": 0.8201,
+   "promptGroup": "benchmark-informed",
+   "team": "DataTrail",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/104",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/104",
+   "date": "2026-09-13",
+   "note": "Single-agent loop over one `execute` bash tool in a per-trial macOS sandbox with network disabled, read-only source mounts and a file-read allowlist; Muse Spark 1.3 at medium reasoning via OpenRouter. Subagents and the challenger stage disabled. Uses db_description_withhint.txt hints. Tuned prompt: one authored system preamble, byte-identical across all 270 trials, carrying DAB task conventions (retain eligible zero-event entities, report ties rather than inventing a winner, extract entity names from prose description fields rather than treating the description as the name, identifier-only answers contain only the identifier) plus a result-rendering contract. No tuned tools: the four bundled skills are generic methodology (structured-data-investigation, semantic-answer-verification, statistical-analysis, document-text-extraction), identical across trials, with no per-dataset or per-query rules. Every prompt's task section is query.json, db_description.txt and db_description_withhint.txt verbatim and nothing else. Trace audit over all 270 trials and 4,676 tool calls found no external fetches, no reads of ground truth, validators, prior runs or other submissions, no ground-truth values in any prompt, and every passing answer derived in the trial's own tool outputs. Four trials touched paths outside the workspace: two listed their own sanctioned query_dataset directory, one had an outer dataset-directory listing return nothing before listing only sanctioned files, and one probed localhost Postgres ports and was denied; no answer key was exposed. Independently re-validated: 215/270, stratified 0.8201, zero disagreements with the submitter's per-trial scores. Full execution traces provided for all 270 trials; release tarball matches its published SHA256."
+  },
+  {
+   "rank": 9,
+   "agent": "SCRIBE (Actioneer) + Claude Opus 4.7",
+   "trials": 5,
+   "passAt1": 0.8185,
+   "promptGroup": "benchmark-informed",
+   "team": "SCRIBE (Actioneer)",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/67",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/67",
+   "date": "2026-06-26",
+   "note": "Two-stage spec/executor pipeline whose planner is prompted with DAB-specific domain rules (validator output conventions, code-vs-name columns, date-column selection, per-domain parsing) and derives the interpretation and plan up front from sanctioned data."
+  },
+  {
+   "rank": 10,
+   "agent": "Stela (DeepSeek-V4.1-Flash, max effort)",
+   "trials": 5,
+   "passAt1": 0.8114,
+   "promptGroup": "benchmark-informed",
+   "team": "Stela",
+   "teamUrl": "https://stelaapp.com/",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/103",
+   "date": "2026-09-13",
+   "note": "Local-first data analysis app run through its Agent harness over a benchmark connection adapter, with SQL and MongoDB query tools, a per-trial Python workspace, and model-backed semantic operators. Uses db_description_withhint.txt hints. The opening prompt is byte-exact benchmark content for all 54 queries (db_description.txt, db_description_withhint.txt and query.json), with an invariant tool-mechanics contract and no query-specific content; the system prompt is invariant across all 270 trials (supplied in the PR, built by a parameterless buildSystemPrompt(), no benchmark-specific content), and tool schemas were not captured. No query-specific tools or skills: two fixed system skills, analysis-verification and semantic-analysis, are loaded by the agent at its own discretion in 99 of 270 trials and are byte-identical on every load. Semantic operators are used on agnews (all 20 trials, semantic.classify to categorize articles) and yelp q4/q7. An analysis-contract API records the agent's own population, metric, denominator and coverage claims against its own query aliases. Trace audit found no external fetches, no reads of ground truth, validators, prior runs or other submissions, and no unsourced answers: every high-entropy gold value in each of the 127 applicable passing trials appears in a recorded tool output. Full conversation traces for all 270 trials, 6,393 tool calls with matching returns; raw semantic-subcall conversations were not captured, and the deployed build carried one file beyond the pinned base commit."
+  },
+  {
+   "rank": 11,
+   "agent": "Alkera + Claude Opus 4.8",
+   "trials": 5,
+   "passAt1": 0.8044,
+   "promptGroup": "benchmark-informed",
+   "team": "Alkera",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/69",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/69",
+   "date": "2026-07-15",
+   "note": "Runs a single benchmark-agnostic \"data engineering best practices\" system addendum, identical across all 270 trials; its only decisive analytical conventions restate the benchmark's own db_description_withhint.txt hints, with no gold values, per-dataset rules, or validator references. Full execution traces provided for all 270 trials."
+  },
+  {
+   "rank": 12,
+   "agent": "LabRat (Claude Opus 5 + Cartographer)",
+   "trials": 5,
+   "passAt1": 0.8018,
+   "promptGroup": "benchmark-informed",
+   "team": "LabRat",
+   "teamUrl": "https://github.com/esagduyu/labrat",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/84",
+   "date": "2026-08-03",
+   "note": "Claude Opus 5 (high reasoning) driving the LabRat MCP tool suite (schema catalog, profiling, SQL with error-category repair hints, join verification, local-embedding classification, result ledger) over each task's sanctioned stores, with a deterministic GT-firewalled Cartographer pre-pass and four benchmark-informed prompt rule packs. Uses db_description_withhint.txt hints. The packs are per-dataset at their finest and never per-query, and carry no gold content: none of the 154 ground-truth numbers or 228 ground-truth strings appear in any prompt, and each prompt's question region matches db_description.txt, db_description_withhint.txt and query.json exactly. Two per-dataset lines state interpretation choices absent from the hints (github_repos file population, deps_dev composite identifiers), but every trial of the two queries they bear on failed. Across 4,123 tool calls in 268 traces there are no network fetches, no off-limits or ground-truth reads, and every attached store is sanctioned; agnews categories come from the agent's own local-embedding classifier rather than external labels. Missing 2 of 270 trials (agnews query 4, infra timeouts) counted as non-passes; excluding them gives 0.8102."
+  },
+  {
+   "rank": 13,
+   "agent": "Spacedock (Recce) + OpenAI GPT-5.5",
+   "trials": 5,
+   "passAt1": 0.785,
+   "promptGroup": "general-purpose",
+   "team": "Spacedock (Recce)",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/63",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/63",
+   "date": "2026-06-23"
+  },
+  {
+   "rank": 14,
+   "agent": "Sarvam Code v0.35 (GLM-5.2)",
+   "trials": 5,
+   "passAt1": 0.7812,
+   "promptGroup": "benchmark-informed",
+   "team": "Sarvam Code",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/74",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/74",
+   "date": "2026-07-27",
+   "note": "Single data-engineering agent (sarvam-code CLI v0.35.0, GLM-5.2, max reasoning) running shell + SQL over each task's sanctioned stores, with a deterministic self-consistency answer gate and one blind second solver (original question only, no inherited context) as a cross-check. Uses db_description_withhint.txt hints. Every opening prompt is the verbatim benchmark question with no injected gold values, per-dataset rules, or validator references; no network fetches (the single network attempt fails on DNS) and no off-limits or ground-truth reads. Full execution traces provided for all 270 trials."
+  },
+  {
+   "rank": 15,
+   "agent": "LabRat (GPT-5.6 Luna Max + Cartographer)",
+   "trials": 5,
+   "passAt1": 0.7751,
+   "promptGroup": "general-purpose",
+   "team": "LabRat",
+   "teamUrl": "https://github.com/esagduyu/labrat",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/72",
+   "date": "2026-07-16"
+  },
+  {
+   "rank": 16,
+   "agent": "Altimate Code + GPT-5.5 + Claude Sonnet 4.6",
+   "trials": 5,
+   "passAt1": 0.7588,
+   "promptGroup": "general-purpose",
+   "team": "Altimate Code",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/53",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/53",
+   "date": "2026-06-01"
+  },
+  {
+   "rank": 17,
+   "agent": "Phoenix-CLI (Claude Opus 5)",
+   "trials": 5,
+   "passAt1": 0.7556,
+   "promptGroup": "general-purpose",
+   "team": "Phoenix-CLI",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/94",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/94",
+   "date": "2026-09-04",
+   "note": "Claude Code CLI driven one query per process (claude --print), Claude Opus 5, hints used, generic data-analyst system prompt. All data access goes through a helper that reads each dataset's own db_config.yaml; WebSearch and WebFetch disallowed (0 web calls across 270 traces); nested model CLIs shadowed by refusing shims. Scored on the text after the agent's own FINAL ANSWER: marker."
+  },
+  {
+   "rank": 18,
+   "agent": "AgenDA + Claude Opus 4.8",
+   "trials": 5,
+   "passAt1": 0.7244,
+   "promptGroup": "general-purpose",
+   "team": "AgenDA",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/68",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/68",
+   "date": "2026-07-10"
+  },
+  {
+   "rank": 19,
+   "agent": "Qwen3.8-Flash-Next ReAct",
+   "trials": 5,
+   "passAt1": 0.7087,
+   "promptGroup": "general-purpose",
+   "team": "qiboyu301-crypto",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/99",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/99",
+   "date": "2026-09-12",
+   "note": "Unmodified built-in DAB DataAgent scaffold (query_db, list_db, execute_python, return_answer) on a self-hosted Qwen3.8-Flash-Next served with vLLM on 8 L40S GPUs; thinking enabled, up to 300 iterations. System and user prompts are byte-identical to common_scaffold/prompts/prompt_builder.py across all 270 trials, the Qwen dispatch branch reusing the existing locals()[storage_key] tool-result instruction: no tuned prompt and no query-specific tools. Uses db_description_withhint.txt hints. Five trials (agnews q4 runs 1-4, music_brainz_20k q3 run 2) exhausted the 262144-token context and are retained as empty non-passes. Submitter disclosed that the DuckDB executor's host filesystem access is not structurally restricted; in stockmarket q2 runs 0, 2 and 4 the agent used glob() to enumerate repository filenames, including ground_truth.csv names, but no gold or validator contents were read and all three answers are derived from the sanctioned stores. Independently re-validated: 201/270, stratified 0.7087, zero disagreements with the submitter's per-trial scores."
+  },
+  {
+   "rank": 20,
+   "agent": "fabric-rlm (GPT-5.6 Luna Max)",
+   "trials": 5,
+   "passAt1": 0.6956,
+   "promptGroup": "general-purpose",
+   "team": "fabric-rlm",
+   "teamUrl": "https://github.com/pawarbi/fabric-rlm-core",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/76",
+   "date": "2026-07-31",
+   "note": "Notebook-importable Recursive Language Model library (PyPI fabric-rlm), not an agent CLI: per trial the dataset's sanctioned stores are consolidated into one DuckDB file and solved twice in fresh contexts, with a code-based agreement check and a reconciler on disagreement. Uses db_description_withhint.txt hints. 8 of 270 agnews records counted as non-passes: q3 trial 1 and q4 trials 1, 2 and 5 loaded the external HuggingFace ag_news gold labels, and q3 trials 2-5 submitted the gold value with no derivation anywhere in the supplied traces. No off-limits filesystem access anywhere in the run, no gold values in prompts, no per-dataset rules or validator references. Traces cover the winning ensemble stage only, one per trial."
+  },
+  {
+   "rank": 21,
+   "agent": "Altimate Code + Claude Sonnet 4.6",
+   "trials": 5,
+   "passAt1": 0.6822,
+   "promptGroup": "general-purpose",
+   "team": "Altimate Code",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/44",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/44",
+   "date": "2026-05-10"
+  },
+  {
+   "rank": 22,
+   "agent": "Spacedock (Recce) + Claude Opus 4.8",
+   "trials": 5,
+   "passAt1": 0.6804,
+   "promptGroup": "general-purpose",
+   "team": "Spacedock (Recce)",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/55",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/55",
+   "date": "2026-06-08"
+  },
+  {
+   "rank": 23,
+   "agent": "MinusX + Claude Sonnet 4.6 + GPT-5.5-mini + Claude Haiku 4.5",
+   "trials": 5,
+   "passAt1": 0.6601,
+   "promptGroup": "general-purpose",
+   "team": "MinusX",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/50",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/50",
+   "date": "2026-05-21"
+  },
+  {
+   "rank": 24,
+   "agent": "DataBridge + GLM-5.2",
+   "trials": 6,
+   "passAt1": 0.6137,
+   "promptGroup": "benchmark-informed",
+   "team": "DataBridge",
+   "teamUrl": "https://github.com/gagarwal304/databridge",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/61",
+   "date": "2026-06-22",
+   "note": "6-run average; only 1 run includes open-source execution traces; runs on a large system prompt that hard-codes dataset-specific handling rules (e.g. bracket-notation null codes, weighted decade-averaging, diacritic/parenthetical normalization)"
+  },
+  {
+   "rank": 25,
+   "agent": "Pi Coding Agent + Claude Opus 4.6",
+   "trials": 5,
+   "passAt1": 0.6103,
+   "promptGroup": "general-purpose",
+   "team": "Pi Coding Agent",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/31",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/31",
+   "date": "2026-04-21"
+  },
+  {
+   "rank": 26,
+   "agent": "LabRat (Claude Sonnet 4.6 + Cartographer)",
+   "trials": 5,
+   "passAt1": 0.6088,
+   "promptGroup": "general-purpose",
+   "team": "LabRat",
+   "teamUrl": "https://github.com/esagduyu/labrat",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/65",
+   "date": "2026-06-24"
+  },
+  {
+   "rank": 27,
+   "agent": "PromptQL + Gemini 3.1 Pro",
+   "trials": 5,
+   "passAt1": 0.6,
+   "promptGroup": "general-purpose",
+   "team": "Hasura PromptQL",
+   "teamUrl": "https://promptql.io/",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/24",
+   "date": "2026-03-18"
+  },
+  {
+   "rank": 28,
+   "agent": "PromptQL + Claude Opus 4.6",
+   "trials": 5,
+   "passAt1": 0.5933,
+   "promptGroup": "general-purpose",
+   "team": "Hasura PromptQL",
+   "teamUrl": "https://promptql.io/",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/23",
+   "date": "2026-03-02"
+  },
+  {
+   "rank": 29,
+   "agent": "Spacedock (Recce) + Claude Opus 4.6",
+   "trials": 5,
+   "passAt1": 0.5828,
+   "promptGroup": "general-purpose",
+   "team": "Spacedock (Recce)",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/47",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/47",
+   "date": "2026-05-08"
+  },
+  {
+   "rank": 30,
+   "agent": "Claude Opus 4.6 ReAct",
+   "trials": 5,
+   "passAt1": 0.5551,
+   "promptGroup": "general-purpose",
+   "team": "EPIC Data Lab",
+   "teamUrl": "https://epic.berkeley.edu/",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/22",
+   "date": "2026-03-18"
+  },
+  {
+   "rank": 31,
+   "agent": "LabRat (Claude Sonnet 4.6)",
+   "trials": 5,
+   "passAt1": 0.5138,
+   "promptGroup": "general-purpose",
+   "team": "LabRat",
+   "teamUrl": "https://github.com/esagduyu/labrat",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/54",
+   "date": "2026-06-01"
+  },
+  {
+   "rank": 32,
+   "agent": "Oracle Forge (Team PaLM) + Gemini 3.1 Pro Preview",
+   "trials": 5,
+   "passAt1": 0.4721,
+   "promptGroup": "general-purpose",
+   "team": "Team PaLM",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/37",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/37",
+   "date": "2026-04-19"
+  },
+  {
+   "rank": 33,
+   "agent": "Gemini-3-Pro ReAct",
+   "trials": 50,
+   "passAt1": 0.4663,
+   "promptGroup": "general-purpose",
+   "team": "EPIC Data Lab",
+   "teamUrl": "https://epic.berkeley.edu/",
+   "date": "2026-03-02"
+  },
+  {
+   "rank": 34,
+   "agent": "nQuery (gpt-oss-safeguard-120b)",
+   "trials": 5,
+   "passAt1": 0.4547,
+   "promptGroup": "general-purpose",
+   "team": "NGENUX SOLUTIONS PVT LTD",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/56",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/56",
+   "date": "2026-07-02",
+   "note": "Uses the sanctioned db_description_withhint.txt files (hints used), despite the PR's 'Hint: No' label."
+  },
+  {
+   "rank": 35,
+   "agent": "Oracle Forge (Tenacious Intelligence) + Claude Sonnet 4.6",
+   "trials": 5,
+   "passAt1": 0.4464,
+   "promptGroup": "general-purpose",
+   "team": "Tenacious Intelligence Corp",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/32",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/32",
+   "date": "2026-04-21"
+  },
+  {
+   "rank": 36,
+   "agent": "GPT-5-mini ReAct",
+   "trials": 50,
+   "passAt1": 0.3663,
+   "promptGroup": "general-purpose",
+   "team": "EPIC Data Lab",
+   "teamUrl": "https://epic.berkeley.edu/",
+   "date": "2026-03-02"
+  },
+  {
+   "rank": 37,
+   "agent": "GPT-5.2 ReAct",
+   "trials": 50,
+   "passAt1": 0.2991,
+   "promptGroup": "general-purpose",
+   "team": "EPIC Data Lab",
+   "teamUrl": "https://epic.berkeley.edu/",
+   "date": "2026-03-02"
+  },
+  {
+   "rank": 38,
+   "agent": "Kimi-K2 ReAct",
+   "trials": 50,
+   "passAt1": 0.2925,
+   "promptGroup": "general-purpose",
+   "team": "EPIC Data Lab",
+   "teamUrl": "https://epic.berkeley.edu/",
+   "date": "2026-03-02"
+  },
+  {
+   "rank": 39,
+   "agent": "Oracle Forge (Team Cohere) + Gemini 2.0 Flash",
+   "trials": 5,
+   "passAt1": 0.1671,
+   "promptGroup": "general-purpose",
+   "team": "Team Cohere",
+   "teamUrl": "https://github.com/ucbepic/DataAgentBench/pull/38",
+   "prUrl": "https://github.com/ucbepic/DataAgentBench/pull/38",
+   "date": "2026-04-21"
+  },
+  {
+   "rank": 40,
+   "agent": "Gemini-2.5-Flash ReAct",
+   "trials": 50,
+   "passAt1": 0.1049,
+   "promptGroup": "general-purpose",
+   "team": "EPIC Data Lab",
+   "teamUrl": "https://epic.berkeley.edu/",
+   "date": "2026-03-02"
+  }
+ ],
+ "promptqlStratified": {
+  "columns": [
+   {
+    "key": "opus46",
+    "label": "Opus 4.6"
+   },
+   {
+    "key": "gemini31pro",
+    "label": "Gemini 3.1 Pro"
+   },
+   {
+    "key": "gpt52",
+    "label": "GPT 5.2"
+   }
+  ],
+  "rows": [
+   {
+    "dataset": "agnews",
+    "opus46": 65.0,
+    "gemini31pro": 40.0,
+    "gpt52": 25.0
+   },
+   {
+    "dataset": "bookreview",
+    "opus46": 100.0,
+    "gemini31pro": 100.0,
+    "gpt52": 80.0
+   },
+   {
+    "dataset": "crmarenapro",
+    "opus46": 80.0,
+    "gemini31pro": 56.9,
+    "gpt52": 72.3
+   },
+   {
+    "dataset": "deps_dev",
+    "opus46": 0.0,
+    "gemini31pro": 20.0,
+    "gpt52": 0.0
+   },
+   {
+    "dataset": "github_repos",
+    "opus46": 25.0,
+    "gemini31pro": 35.0,
+    "gpt52": 40.0
+   },
+   {
+    "dataset": "googlelocal",
+    "opus46": 70.0,
+    "gemini31pro": 70.0,
+    "gpt52": 50.0
+   },
+   {
+    "dataset": "music_brainz",
+    "opus46": 13.3,
+    "gemini31pro": 73.3,
+    "gpt52": 33.3
+   },
+   {
+    "dataset": "pancancer",
+    "opus46": 60.0,
+    "gemini31pro": 40.0,
+    "gpt52": 33.3
+   },
+   {
+    "dataset": "patents",
+    "opus46": 26.7,
+    "gemini31pro": 26.7,
+    "gpt52": 0.0
+   },
+   {
+    "dataset": "stockindex",
+    "opus46": 100.0,
+    "gemini31pro": 86.7,
+    "gpt52": 86.7
+   },
+   {
+    "dataset": "stockmarket",
+    "opus46": 92.0,
+    "gemini31pro": 80.0,
+    "gpt52": 76.0
+   },
+   {
+    "dataset": "yelp",
+    "opus46": 80.0,
+    "gemini31pro": 91.4,
+    "gpt52": 80.0
+   }
+  ],
+  "overall": {
+   "dataset": "Overall",
+   "opus46": 59.3,
+   "gemini31pro": 60.0,
+   "gpt52": 48.1
+  }
+ },
+ "baselineStratified": {
+  "columns": [
+   {
+    "key": "gpt52",
+    "label": "GPT-5.2"
+   },
+   {
+    "key": "gpt5mini",
+    "label": "GPT-5-mini"
+   },
+   {
+    "key": "gemini3pro",
+    "label": "Gemini-3-Pro"
+   },
+   {
+    "key": "gemini25flash",
+    "label": "Gemini-2.5-Flash"
+   },
+   {
+    "key": "kimik2",
+    "label": "Kimi-K2"
+   }
+  ],
+  "rows": [
+   {
+    "dataset": "agnews",
+    "gpt52": 0.0,
+    "gpt5mini": 0.05,
+    "gemini3pro": 0.2,
+    "gemini25flash": 0.0,
+    "kimik2": 0.13
+   },
+   {
+    "dataset": "bookreview",
+    "gpt52": 0.5267,
+    "gpt5mini": 0.5333,
+    "gemini3pro": 0.8933,
+    "gemini25flash": 0.02,
+    "kimik2": 0.6733
+   },
+   {
+    "dataset": "crmarenapro",
+    "gpt52": 0.5338,
+    "gpt5mini": 0.6431,
+    "gemini3pro": 0.6308,
+    "gemini25flash": 0.2169,
+    "kimik2": 0.5415
+   },
+   {
+    "dataset": "deps_dev_v1",
+    "gpt52": 0.0,
+    "gpt5mini": 0.06,
+    "gemini3pro": 0.02,
+    "gemini25flash": 0.0,
+    "kimik2": 0.0
+   },
+   {
+    "dataset": "github_repos",
+    "gpt52": 0.22,
+    "gpt5mini": 0.235,
+    "gemini3pro": 0.36,
+    "gemini25flash": 0.04,
+    "kimik2": 0.205
+   },
+   {
+    "dataset": "googlelocal",
+    "gpt52": 0.28,
+    "gpt5mini": 0.315,
+    "gemini3pro": 0.57,
+    "gemini25flash": 0.195,
+    "kimik2": 0.405
+   },
+   {
+    "dataset": "music_brainz_20k",
+    "gpt52": 0.14,
+    "gpt5mini": 0.28,
+    "gemini3pro": 0.5067,
+    "gemini25flash": 0.3333,
+    "kimik2": 0.32
+   },
+   {
+    "dataset": "pancancer_atlas",
+    "gpt52": 0.44,
+    "gpt5mini": 0.5267,
+    "gemini3pro": 0.56,
+    "gemini25flash": 0.0467,
+    "kimik2": 0.0
+   },
+   {
+    "dataset": "patents",
+    "gpt52": 0.0,
+    "gpt5mini": 0.0,
+    "gemini3pro": 0.02,
+    "gemini25flash": 0.0,
+    "kimik2": 0.0
+   },
+   {
+    "dataset": "stockindex",
+    "gpt52": 0.8667,
+    "gpt5mini": 0.9467,
+    "gemini3pro": 0.8467,
+    "gemini25flash": 0.1533,
+    "kimik2": 0.78
+   },
+   {
+    "dataset": "stockmarket",
+    "gpt52": 0.348,
+    "gpt5mini": 0.452,
+    "gemini3pro": 0.608,
+    "gemini25flash": 0.192,
+    "kimik2": 0.264
+   },
+   {
+    "dataset": "yelp",
+    "gpt52": 0.2343,
+    "gpt5mini": 0.3343,
+    "gemini3pro": 0.24,
+    "gemini25flash": 0.0514,
+    "kimik2": 0.1914
+   }
+  ],
+  "overall": {
+   "dataset": "Average",
+   "gpt52": 0.2991,
+   "gpt5mini": 0.3647,
+   "gemini3pro": 0.4546,
+   "gemini25flash": 0.1041,
+   "kimik2": 0.2925
+  }
+ },
+ "answer_files": [
+  {
+   "name": "react_gpt-5.2",
+   "upstream_path": "submissions/react_gpt-5.2.json",
+   "label": "GPT-5.2 ReAct",
+   "agent": "GPT-5.2 ReAct",
+   "rank": 37,
+   "pass_at_1_site": 0.2991,
+   "stratified": "baselineStratified:gpt52",
+   "rows": 2700,
+   "rows_unmatched": 0,
+   "queries": 54,
+   "runs_per_query": [
+    50
+   ]
+  },
+  {
+   "name": "react_gpt-5-mini",
+   "upstream_path": "submissions/react_gpt-5-mini.json",
+   "label": "GPT-5-mini ReAct",
+   "agent": "GPT-5-mini ReAct",
+   "rank": 36,
+   "pass_at_1_site": 0.3663,
+   "stratified": "baselineStratified:gpt5mini",
+   "rows": 2700,
+   "rows_unmatched": 0,
+   "queries": 54,
+   "runs_per_query": [
+    50
+   ]
+  },
+  {
+   "name": "react_gemini-3-pro",
+   "upstream_path": "submissions/react_gemini-3-pro.json",
+   "label": "Gemini-3-Pro ReAct",
+   "agent": "Gemini-3-Pro ReAct",
+   "rank": 33,
+   "pass_at_1_site": 0.4663,
+   "stratified": "baselineStratified:gemini3pro",
+   "rows": 2700,
+   "rows_unmatched": 0,
+   "queries": 54,
+   "runs_per_query": [
+    50
+   ]
+  },
+  {
+   "name": "react_gemini-2.5-flash",
+   "upstream_path": "submissions/react_gemini-2.5-flash.json",
+   "label": "Gemini-2.5-Flash ReAct",
+   "agent": "Gemini-2.5-Flash ReAct",
+   "rank": 40,
+   "pass_at_1_site": 0.1049,
+   "stratified": "baselineStratified:gemini25flash",
+   "rows": 2700,
+   "rows_unmatched": 0,
+   "queries": 54,
+   "runs_per_query": [
+    50
+   ]
+  },
+  {
+   "name": "react_kimi-k2-thinking",
+   "upstream_path": "submissions/react_kimi-k2-thinking.json",
+   "label": "Kimi-K2 ReAct",
+   "agent": "Kimi-K2 ReAct",
+   "rank": 38,
+   "pass_at_1_site": 0.2925,
+   "stratified": "baselineStratified:kimik2",
+   "rows": 2600,
+   "rows_unmatched": 0,
+   "queries": 52,
+   "runs_per_query": [
+    50
+   ]
+  },
+  {
+   "name": "promptql_opus46_wiki4_pp2_n5",
+   "upstream_path": "submissions/promptql_opus46_wiki4_pp2_n5.json",
+   "label": "PromptQL + Claude Opus 4.6",
+   "agent": "PromptQL + Claude Opus 4.6",
+   "rank": 28,
+   "pass_at_1_site": 0.5933,
+   "stratified": "promptqlStratified:opus46",
+   "rows": 270,
+   "rows_unmatched": 0,
+   "queries": 54,
+   "runs_per_query": [
+    5
+   ]
+  },
+  {
+   "name": "promptql_gemini31pro_wiki4_pp2_n5",
+   "upstream_path": "submissions/promptql_gemini31pro_wiki4_pp2_n5.json",
+   "label": "PromptQL + Gemini 3.1 Pro",
+   "agent": "PromptQL + Gemini 3.1 Pro",
+   "rank": 27,
+   "pass_at_1_site": 0.6,
+   "stratified": "promptqlStratified:gemini31pro",
+   "rows": 270,
+   "rows_unmatched": 0,
+   "queries": 54,
+   "runs_per_query": [
+    5
+   ]
+  },
+  {
+   "name": "promptql_gpt52_wiki4_pp2_n5",
+   "upstream_path": "submissions/promptql_gpt52_wiki4_pp2_n5.json",
+   "label": "PromptQL + GPT-5.2",
+   "agent": null,
+   "rank": null,
+   "pass_at_1_site": null,
+   "stratified": "promptqlStratified:gpt52",
+   "rows": 270,
+   "rows_unmatched": 0,
+   "queries": 54,
+   "runs_per_query": [
+    5
+   ]
+  },
+  {
+   "name": "claude-opus-4-6",
+   "upstream_path": "leaderboard_submissions/claude-opus-4-6_results.json",
+   "label": "Claude Opus 4.6 ReAct",
+   "agent": "Claude Opus 4.6 ReAct",
+   "rank": 30,
+   "pass_at_1_site": 0.5551,
+   "stratified": null,
+   "rows": 270,
+   "rows_unmatched": 0,
+   "queries": 54,
+   "runs_per_query": [
+    5
+   ]
+  }
+ ]
+}

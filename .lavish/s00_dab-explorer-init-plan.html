@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>s00 · DataAgentBench — stand up the project, ingest the benchmark, ship the explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Design source (2): the project family's own system — DESIGN.md ("Field Guide"),
+   a port of nmp-dsci.github.io/assets/css/tokens.css, as used by DABStep-loop and
+   tau2-loop. Tokens verbatim. */
+:root{
+  --bg:#F7F6F2; --panel:#FFFFFF; --band:#EFEEE8;
+  --ink:#1A1D1B; --ink-2:#3B403D; --muted:#4A514D; --faint:#5C635E;
+  --line:#DCDAD2; --line-2:#C7C5BC; --line-3:#8A8880;
+  --accent:#0A6552; --accent-ink:#FFFFFF; --accent-soft:#DFEFE8;
+  --amber:#8A5006; --amber-soft:#F6E6CF;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --t-2:0.8rem; --t-1:0.875rem; --t0:1rem; --t1:1.125rem; --t2:1.406rem; --t3:1.758rem; --t4:2.197rem;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --r:10px; --r-sm:6px;
+  --shadow:0 1px 2px rgb(20 25 22 / .05), 0 12px 28px -18px rgb(20 25 22 / .22);
+  --dur:300ms; --ease:cubic-bezier(.2,.7,.2,1); --focus:var(--accent);
+  --w:1140px; --measure:68ch; --track-label:.08em;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121614; --panel:#191E1B; --band:#161A18;
+    --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+    --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+    --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+    --amber:#D99A4E; --amber-soft:#3A2A14;
+    --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121614; --panel:#191E1B; --band:#161A18;
+  --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+  --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+  --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+  --amber:#D99A4E; --amber-soft:#3A2A14;
+  --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+}
+@media (prefers-reduced-motion: reduce){ :root{ --dur:0.01ms; } }
+*,*::before,*::after{box-sizing:border-box}
+:where(.grid,.flex,.kpi,.slide,.cards,.mock-body,.mock-cols)>*{min-width:0}
+:where(p,h1,h2,h3,h4,li,dd,figcaption,td,th,.chip,.label){overflow-wrap:anywhere}
+:where(img,svg,video,iframe){max-width:100%;height:auto}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink-2);font-family:var(--sans);font-size:var(--t0);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{color:var(--ink);margin:0;line-height:1.15;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+h1{font-size:var(--t4);font-family:var(--serif);font-weight:400} h1 em{font-style:italic;font-weight:400;color:var(--accent)}
+h2{font-size:var(--t3)} h3{font-size:var(--t1)} h4{font-size:var(--t0)}
+p{margin:0 0 var(--s4);text-wrap:pretty}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:.2em} a:hover{text-decoration-thickness:2px}
+strong,b{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:max(var(--t-2),.86em);background:var(--band);padding:.08em .32em;border-radius:var(--r-sm);color:var(--ink-2)}
+.wrap{max-width:var(--w);margin-inline:auto;padding-inline:var(--s5)}
+.label{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0}
+.lead{font-family:var(--serif);font-size:var(--t1);line-height:1.5;color:var(--ink-2);max-width:72ch}
+.small{font-size:var(--t-1);color:var(--muted)}
+.top{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:var(--w);margin-inline:auto;padding:var(--s3) var(--s5);display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.top b{font-family:var(--mono);font-size:var(--t-1);color:var(--ink);white-space:nowrap}
+.top nav{display:flex;gap:var(--s4);margin-left:auto;flex-wrap:wrap;font-size:var(--t-1);font-weight:500}
+.top nav a{color:var(--ink-2);text-decoration:none;padding:var(--s1) 0} .top nav a:hover{color:var(--accent)}
+header.hero{padding:var(--s7) 0 var(--s5)}
+.chips{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s4) 0 0}
+.chip{font-family:var(--mono);font-size:var(--t-2);padding:.3em .6em;border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--ink-2);background:var(--panel)}
+.chip.ok{border-color:var(--accent);color:var(--accent)} .chip.warn{border-color:var(--amber);color:var(--amber)}
+section.blk{padding-top:var(--s8)} section.blk:last-of-type{padding-bottom:var(--s9)}
+section.band-sec{background:var(--band);margin-top:var(--s8);padding:var(--s7) 0}
+section.band-sec + section.blk{padding-top:var(--s7)}
+.hd{margin-bottom:var(--s5);max-width:80ch} .hd .label{margin-bottom:var(--s2)} .hd h2{margin-bottom:var(--s3)}
+.panel{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5)}
+.grid{display:grid;gap:var(--s4)} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.g3,.g2{grid-template-columns:minmax(0,1fr)}}
+.card h3{margin-bottom:var(--s2)} .card p{margin-bottom:var(--s2);font-size:var(--t-1)} .card p:last-child{margin:0}
+.card.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r);box-shadow:var(--shadow);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:var(--t-1)}
+caption{text-align:left;padding:var(--s4) var(--s5) var(--s2);color:var(--muted);font-size:var(--t-1);caption-side:top}
+th,td{text-align:left;padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}
+thead th{font-family:var(--mono);font-size:var(--t-2);font-weight:500;color:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase;border-bottom:1px solid var(--line-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.sub{font-weight:600;color:var(--ink);white-space:nowrap}
+td.num{font-family:var(--mono);font-size:var(--t-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+td .path{display:block;font-family:var(--mono);font-size:var(--t-2);color:var(--faint);font-weight:400;margin-top:2px}
+tr.pro td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+tr.dim td{color:var(--muted)}
+.v-ok{color:var(--accent);font-weight:600} .v-no{color:var(--muted)} .v-warn{color:var(--amber);font-weight:600}
+.kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4)}
+@media(max-width:900px){.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi .k{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s4)}
+.kpi .k b{display:block;font-family:var(--mono);font-size:var(--t3);color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.1}
+.kpi .k span{display:block;font-size:var(--t-2);color:var(--muted);margin-top:var(--s2);line-height:1.4}
+blockquote{margin:0;padding:var(--s3) var(--s4);border-left:2px solid var(--accent);background:var(--band);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:var(--t-1)}
+blockquote.warn{border-left-color:var(--amber)}
+.fig{margin:var(--s5) 0 0}
+.fig-title{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0 0 var(--s3);text-wrap:balance}
+.dia-frame{background:var(--panel);border-radius:var(--r);padding:var(--s4);box-shadow:var(--shadow)}
+.fig figcaption{font-family:var(--sans);font-size:var(--t-1);color:var(--muted);line-height:1.5;margin-top:var(--s3)}
+.fig figcaption b{color:var(--ink);font-weight:600}
+.dia{display:block;width:100%;height:auto;color:var(--ink-2);overflow:visible}
+.dia .nd{fill:var(--bg);stroke:currentColor;stroke-width:1;vector-effect:non-scaling-stroke}
+.dia .nd.hi{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.4}
+.dia .nd.ext{fill:none;stroke:var(--line-3);stroke-dasharray:4 3}
+.dia .rg{fill:none;stroke:var(--line-2);stroke-dasharray:5 4}
+.dia .tx{font-family:var(--mono);font-size:11.5px;fill:currentColor}
+.dia .tx.k{fill:var(--ink);font-weight:500;font-family:var(--sans);font-size:12.5px}
+.dia .tx.s{font-size:10.5px;fill:var(--faint)}
+.dia .cap{font-family:var(--mono);font-size:10.5px;fill:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase}
+.dia .ed{stroke:currentColor;stroke-width:1.25;vector-effect:non-scaling-stroke;fill:none;marker-end:url(#arr)}
+.dia .ed.hi{stroke:var(--accent);stroke-width:1.6}
+.dia .ed.dash{stroke:var(--line-3);stroke-dasharray:4 3}
+.dia .bar{fill:var(--line-2)} .dia .bar.hi{fill:var(--accent)} .dia .bar.pro{fill:var(--amber)}
+.dia .ax{stroke:var(--line-2);stroke-width:1}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:var(--s3)}
+.steps li{position:relative;padding-left:2.75rem;font-size:var(--t-1)}
+.steps li::before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:0;top:2px;font-family:var(--mono);color:var(--accent);font-weight:500}
+form.q{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5);display:grid;gap:var(--s3);margin-top:var(--s4)}
+form.q h3{margin:0} form.q .why{font-size:var(--t-1);color:var(--muted);margin:0}
+form.q label{display:grid;grid-template-columns:1.2rem minmax(0,1fr);gap:var(--s2);align-items:start;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;min-height:24px}
+form.q label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+form.q input[type=radio],form.q input[type=checkbox]{margin:3px 0 0;accent-color:var(--accent);width:16px;height:16px}
+form.q textarea{width:100%;font:inherit;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);color:var(--ink-2);min-height:3.2rem;resize:vertical}
+form.q .row{display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap}
+.btn{font:500 var(--t-1) var(--sans);background:var(--accent);color:var(--accent-ink);border:0;border-radius:var(--r-sm);padding:.55em 1em;cursor:pointer;min-height:24px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.08)} .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.queued{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);min-height:1.2em}
+.rec{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);margin-left:.4em}
+.done{font-family:var(--mono);font-size:var(--t-2);color:var(--accent-ink);background:var(--accent);padding:.2em .5em;border-radius:var(--r-sm);letter-spacing:var(--track-label);text-transform:uppercase}
+.tag{font-family:var(--mono);font-size:var(--t-2);padding:.15em .45em;border-radius:var(--r-sm);border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.tag.ok{border-color:var(--accent);color:var(--accent)} .tag.warn{border-color:var(--amber);color:var(--amber)}
+ul.tight{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.tight li{margin-bottom:var(--s1)}
+ul.qa{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.qa li{margin-bottom:var(--s2)}
+.tree,pre.md{font-family:var(--mono);font-size:var(--t-2);line-height:1.65;white-space:pre;overflow-x:auto;margin:0;background:var(--band);border-radius:var(--r);padding:var(--s4)}
+.insight{font-size:var(--t-1);color:var(--muted);margin:var(--s3) 0 0;max-width:var(--measure)}
+footer{border-top:1px solid var(--line);padding:var(--s5) 0;font-size:var(--t-2);color:var(--faint);font-family:var(--mono)}
+/* UI mocks of the explorer, rendered in the app's own tokens */
+.mock{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;font-size:var(--t-1)}
+.mock-top{display:flex;gap:var(--s4);align-items:center;padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.mock-top b{font-family:var(--mono);font-size:var(--t-2);color:var(--ink)}
+.mock-top nav{display:flex;gap:var(--s3);flex-wrap:wrap;font-size:var(--t-2);color:var(--muted)}
+.mock-top nav span.on{color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:.25em}
+.mock-body{padding:var(--s4)}
+.mock h4{font-size:var(--t1);margin-bottom:var(--s2)}
+.mock .filters{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s3) 0}
+.mock .filters span{font-family:var(--mono);font-size:var(--t-2);padding:.25em .55em;border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--ink-2)}
+.mock .filters span.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.mock table{min-width:0;font-size:var(--t-2)}
+.mock th,.mock td{padding:var(--s2) var(--s3)}
+.mock-cols{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:var(--s4)}
+@media (max-width:900px){.mock-cols{grid-template-columns:minmax(0,1fr)}}
+.mock .kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--s1) var(--s3);font-size:var(--t-2)}
+.mock .kv dt{font-family:var(--mono);color:var(--faint);text-transform:uppercase;letter-spacing:var(--track-label);margin:0}
+.mock .kv dd{margin:0;color:var(--ink-2)}
+.mock pre{font-family:var(--mono);font-size:var(--t-2);line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;margin:var(--s2) 0 0;background:var(--band);border-radius:var(--r-sm);padding:var(--s3)}
+.mock .mini{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s2)}
+@media (max-width:700px){.mock .mini{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.mock .mini div{background:var(--band);border-radius:var(--r-sm);padding:var(--s3)}
+.mock .mini b{display:block;font-family:var(--mono);font-size:var(--t2);color:var(--ink);line-height:1.1}
+.mock .mini span{display:block;font-size:var(--t-2);color:var(--muted);margin-top:var(--s1);line-height:1.35}
+.ms{display:grid;grid-template-columns:5.5rem minmax(0,1fr);gap:var(--s3);align-items:start;padding:var(--s3) 0;border-bottom:1px solid var(--line)}
+.ms:last-child{border-bottom:0}
+.ms b.id{font-family:var(--mono);color:var(--accent);font-weight:500;font-size:var(--t-1)}
+.ms .body{font-size:var(--t-1)} .ms .body b{display:block;margin-bottom:2px}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in"><b>s00 · DataAgentBench · plan</b>
+<nav><a href="#goal">Goal</a><a href="#bench">Benchmark</a><a href="#gold">Gold</a><a href="#ingest">Ingest</a><a href="#arch">Architecture</a><a href="#ui">Explorer</a><a href="#evidence">Evidence</a><a href="#repo">Repo</a><a href="#ms">Milestones</a><a href="#risks">Risks</a><a href="#decide">Decide</a></nav></div></div>
+
+<header class="hero"><div class="wrap">
+  <p class="label">plan · new project · 2026-09-20 · design source: DESIGN.md (Field Guide), shared with DABStep-loop and tau2-loop</p>
+  <h1>A public project that ingests the DAB benchmark and opens an explorer over every question, its gold, and <em>who</em> has beaten it</h1>
+  <p class="lead">DataAgentBench (DAB, UC Berkeley + Hasura PromptQL) is a data-agent benchmark: natural-language questions over several databases at once, each with a ground-truth answer and its own <code>validate.py</code>. This build stands the project up as a sibling of DABStep-loop: a Python package that ingests the benchmark's text layer, a FastAPI index, and a React explorer for the datasets, questions, gold answers, validators and published trials. Agents, evals, the loop and optimisation come in later builds on the same skeleton.</p>
+  <div class="chips">
+    <span class="chip ok">verified from source: 17 datasets · 104 queries · 104 gold · 104 validators · 54 on the leaderboard</span>
+    <span class="chip ok">proposed: public repo nmp-dsci/DataAgentBench, gh is logged in as nmp-dsci, name is free</span>
+    <span class="chip ok">proposed: React + Vite + FastAPI on tokens.css, uv, Python 3.12, same skeleton as DABStep-loop</span>
+    <span class="chip ok">this build: scaffold · ingest · index · explorer · rescore of the published trials</span>
+    <span class="chip ok">proven this session: 14,210 answers judged by the 54 validators · 3 queries never passed</span>
+    <span class="chip ok">decided: the 54 leaderboard queries only; the 50 unreleased are deferred to a later build</span>
+    <span class="chip ok">decided: ingest A (text layer only) · commit the index and answer files with attribution · approved M0–M4, 2026-09-20</span>
+  </div>
+</div></header>
+
+<section class="blk" id="goal"><div class="wrap">
+  <div class="hd"><p class="label">01 · goal &amp; state</p>
+  <h2>1 · Goal — open the app, see the 54 scored questions, their gold, and who has beaten them</h2>
+  <p>Done for <b>this build</b> means <code>make setup &amp;&amp; make upstream &amp;&amp; make ingest &amp;&amp; make dev</code> opens a local explorer over the 54 leaderboard queries where you can pick any of the 12 datasets, read every question with its gold answer and validator side by side, see the schema description and the hint file, and see how the published agents did on it. No model is called. The four discovery facts below reshape the build and are each verified against the cloned repo at <code>0290945</code> (pushed 2026-09-15).</p></div>
+  <div class="kpi">
+    <div class="k"><b>54 of 104</b><span>queries in scope: the 12 leaderboard datasets · the other 50, in 5 unreleased datasets, are deferred (decided in review)</span></div>
+    <div class="k"><b>54 / 54</b><span>have <code>ground_truth.csv</code> and <code>validate.py</code> (so do the deferred 50) · gold is universal, published evidence is not</span></div>
+    <div class="k"><b>54 / 104</b><span>have published trials: 14,480 answers across 9 committed files (8 in <code>submissions/</code>, 1 in <code>leaderboard_submissions/</code>)</span></div>
+    <div class="k"><b>&lt; 322 KB</b><span>the text layer this build ingests, against 8.35 GB of database files for the 54 (13.36 GB for all 104) it does not</span></div>
+  </div>
+  <p class="insight">Everything the explorer needs fits in a shallow clone with LFS skipped; the databases wait for the agent build.</p>
+  <blockquote class="warn" style="margin-top:var(--s4)"><b>Two facts to hold in mind while reviewing.</b> The README, site and submission rubric all describe 12 datasets; five more sit in the repo with 50 queries and gold, but no leaderboard entry and no published trial, so they are gold-with-no-evidence until someone runs them; <b>decided in review: this build is the 54, the 50 are a later scope</b>. And the upstream repo has <b>no LICENSE file</b> (GitHub reports none), which shapes what we commit in §8 and is a decision in §11.</blockquote>
+</div></section>
+
+<section class="band-sec" id="bench"><div class="wrap">
+  <div class="hd"><p class="label">02 · the benchmark, verified from source</p>
+  <h2>2 · Benchmark — 17 datasets, not 12, and four landed this May</h2>
+  <p>A DAB query is a question over two to six databases in up to four engines, answered by an agent that must join across them. The README's 12 datasets carry the 40-entry leaderboard (Pass@1 from 0.1049 to 0.9467). <code>civic_unstructured</code> was added on 2025-09-23 and <code>cve</code>, <code>imdb</code>, <code>krama</code>, <code>usaspending</code> between 2026-05-02 and 05-05; none of the five is in the README table, <code>docs/data/queries.json</code>, the rubric's sanctioned-stores list, or any submission file.</p></div>
+  <div class="tw"><table>
+    <caption>The 17 datasets · counted from <code>query_*/</code>, <code>db_config.yaml</code>, <code>dataset_manifest.tsv</code> and the GitHub commits API this session</caption>
+    <thead><tr><th>Dataset</th><th>Queries</th><th>DBs · engines</th><th>DB files</th><th>Leaderboard</th><th>Validators</th><th>Gold shape</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">crmarenapro<span class="path">query_crmarenapro</span></td><td class="num">13</td><td>6 · duckdb, postgres, sqlite</td><td class="num">32.8 MB</td><td class="v-ok">released</td><td>12 regex · 1 substring</td><td>13 single-line</td></tr>
+      <tr><td class="sub">yelp<span class="path">query_yelp</span></td><td class="num">7</td><td>2 · duckdb, mongo</td><td class="num">3.4 MB</td><td class="v-ok">released</td><td>6 regex · 1 substring</td><td>6 single · 1 list</td></tr>
+      <tr><td class="sub">stockmarket<span class="path">query_stockmarket</span></td><td class="num">5</td><td>2 · duckdb, sqlite</td><td class="num">966 MB</td><td class="v-ok">released</td><td>4 levenshtein · 1 regex</td><td>1 single · lists of 32, 15, 5, 5</td></tr>
+      <tr><td class="sub">agnews<span class="path">query_agnews</span></td><td class="num">4</td><td>2 · mongo, sqlite</td><td class="num">4.0 MB</td><td class="v-ok">released</td><td>2 regex · 2 substring</td><td>4 single-line</td></tr>
+      <tr><td class="sub">GITHUB_REPOS<span class="path">query_GITHUB_REPOS</span></td><td class="num">4</td><td>2 · duckdb, sqlite</td><td class="num">928 MB</td><td class="v-ok">released</td><td>2 regex · 2 levenshtein</td><td>lists of 2, 2, 2, 6</td></tr>
+      <tr><td class="sub">googlelocal<span class="path">query_googlelocal</span></td><td class="num">4</td><td>2 · postgres, sqlite</td><td class="num">0.6 MB</td><td class="v-ok">released</td><td>3 regex · 1 substring (ordered list)</td><td>lists of 5, 4, 5, 3</td></tr>
+      <tr><td class="sub">bookreview<span class="path">query_bookreview</span></td><td class="num">3</td><td>2 · postgres, sqlite</td><td class="num">1.7 MB</td><td class="v-ok">released</td><td>2 regex · 1 substring</td><td>1 single · lists of 15, 14</td></tr>
+      <tr><td class="sub">music_brainz_20k<span class="path">query_music_brainz_20k</span></td><td class="num">3</td><td>2 · duckdb, sqlite</td><td class="num">2.0 MB</td><td class="v-ok">released</td><td>2 regex · 1 substring</td><td>2 single · 1 list</td></tr>
+      <tr><td class="sub">PANCANCER_ATLAS<span class="path">query_PANCANCER_ATLAS</span></td><td class="num">3</td><td>2 · duckdb, postgres</td><td class="num">301 MB</td><td class="v-ok">released</td><td>2 regex · 1 levenshtein</td><td>lists of 6, 4, 2</td></tr>
+      <tr><td class="sub">PATENTS<span class="path">query_PATENTS</span></td><td class="num">3</td><td>2 · postgres, sqlite</td><td class="num">5.56 GB</td><td class="v-ok">released</td><td>2 levenshtein · 1 substring</td><td>lists of 73, 24, 4</td></tr>
+      <tr><td class="sub">stockindex<span class="path">query_stockindex</span></td><td class="num">3</td><td>2 · duckdb, sqlite</td><td class="num">4.5 MB</td><td class="v-ok">released</td><td>3 substring</td><td>2 single · 1 list</td></tr>
+      <tr><td class="sub">DEPS_DEV_V1<span class="path">query_DEPS_DEV_V1</span></td><td class="num">2</td><td>2 · duckdb, sqlite</td><td class="num">550 MB</td><td class="v-ok">released · q1 re-scored 2026-08-18</td><td>1 regex · 1 substring</td><td>lists of 6, 6</td></tr>
+      <tr class="dim"><td class="sub">civic_unstructured<span class="path">query_civic_unstructured · 2025-09-23</span></td><td class="num">10</td><td>2 · mongo, sqlite</td><td class="num">0.3 MB</td><td class="v-warn">unreleased</td><td>10 regex</td><td>9 single · 1 list</td></tr>
+      <tr class="dim"><td class="sub">cve<span class="path">query_cve · 2026-05-02</span></td><td class="num">10</td><td>4 · duckdb, mongo, postgres, sqlite</td><td class="num">21.5 MB (+94 MB <code>cpe.duckdb</code> outside the manifest)</td><td class="v-warn">unreleased</td><td>10 read <code>ground_truth.csv</code></td><td>10 single-line</td></tr>
+      <tr class="dim"><td class="sub">imdb<span class="path">query_imdb · 2026-05-04</span></td><td class="num">10</td><td>2 · postgres, sqlite</td><td class="num">4.26 GB</td><td class="v-warn">unreleased</td><td>10 regex</td><td>10 two-line</td></tr>
+      <tr class="dim"><td class="sub">krama<span class="path">query_krama · 2026-05-05</span></td><td class="num">10</td><td>3 · mongo, sqlite</td><td class="num">718 MB</td><td class="v-warn">unreleased</td><td>10 regex</td><td>10 single-line</td></tr>
+      <tr class="dim"><td class="sub">usaspending<span class="path">query_usaspending · 2026-05-02</span></td><td class="num">10</td><td>4 · duckdb, mongo, postgres, sqlite</td><td class="num">5.1 MB</td><td class="v-warn">unreleased</td><td>10 read <code>ground_truth.csv</code></td><td>10 single-line</td></tr>
+    </tbody></table></div>
+  <p class="insight">Decided: the index carries the 12 released datasets and their 54 queries; the five dimmed rows are recorded as a count in <code>source.json</code> and nothing more. The released 54 are 8.35 GB of databases; the unreleased 50 are 5.01 GB. Three engines (sqlite 15, duckdb 10, postgres 8, mongo 6 datasets) means the agent build needs Postgres and Mongo servers; this build needs neither.</p>
+  <div class="grid g2" style="margin-top:var(--s5)">
+    <div class="panel card"><h3>A query is three files, and the question can carry its own rubric</h3>
+<pre class="md">query_crmarenapro/query1/
+├─ query.json         "Can this lead be qualified based on the
+│                      latest discussions? … Return only one or
+│                      several of the four BANT factors …
+│                      - Lead Id to be considered is: 00QWt0000089AekMAE"
+├─ ground_truth.csv   Authority
+└─ validate.py        def validate(llm_output: str) -> (bool, str)</pre>
+      <p class="small" style="margin-top:var(--s3)">Source: the three files above, read this session. Questions are plain double-quoted JSON strings; some embed instructions and identifiers, which the explorer must render verbatim.</p></div>
+    <div class="panel card"><h3>Three spellings of one dataset, so the index needs a key</h3>
+      <p>The folder is <code>query_DEPS_DEV_V1</code>; the PromptQL submissions say <code>deps_dev</code>; the ReAct baselines say <code>DEPS_DEV_V1</code>; the site says <code>deps_dev_v1</code>. Same for <code>music_brainz</code> / <code>music_brainz_20k</code> and <code>pancancer</code> / <code>pancancer_atlas</code>. The ingest lower-cases folder names to a canonical <code>dataset_key</code> and applies the site's own <code>DATASET_ALIASES</code> map (<code>docs/app.js</code>), so every submission row joins to exactly one query.</p></div>
+  </div>
+</div></section>
+
+<section class="blk" id="gold"><div class="wrap">
+  <div class="hd"><p class="label">03 · what "has golden evals" means here</p>
+  <h2>3 · Gold — every query has gold; the validator is the eval, the CSV is often a copy</h2>
+  <p>All 104 queries ship a <code>ground_truth.csv</code> and a <code>validate.py</code>, so "which have gold" is not the question; with the 50 deferred, the 54 in scope all have gold too. The useful distinctions are <b>how</b> a query is judged and <b>whether anyone has published a run against it</b>. Only 20 of 104 validators read the CSV at all; 84 carry the answer inline in Python, and in three cases the two disagree in kind (PATENTS q1 lists 73 CPC codes in the CSV and the same 73 hard-coded in the validator; DEPS_DEV_V1 q1's revised validator accepts any of 95 tied packages while the CSV records one).</p></div>
+  <div class="tw"><table>
+    <caption>Validator styles across the 104 (the 54 in scope in the second column) · classified by reading every <code>validate.py</code> this session (3,553 lines in total)</caption>
+    <thead><tr><th>Style</th><th>Queries · in scope</th><th>How it judges</th><th>Where the gold lives</th><th>What it costs to run</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">regex / number extraction</td><td class="num">63 · 33</td><td>strips commas, finds every integer or decimal, passes if any equals the gold (often with a tolerance)</td><td>inline in the <code>.py</code></td><td>microseconds</td></tr>
+      <tr><td class="sub">reads <code>ground_truth.csv</code></td><td class="num">20 · 0 (all cve and usaspending)</td><td>the cve and usaspending validators load the CSV at call time, then do the same number match</td><td>the CSV, for real</td><td>microseconds</td></tr>
+      <tr><td class="sub">substring / list membership</td><td class="num">12 · 12</td><td>case-insensitive containment; some require every list item, one (googlelocal q1) requires order</td><td>inline</td><td>microseconds</td></tr>
+      <tr class="pro"><td class="sub">levenshtein</td><td class="num">9 · 9</td><td>fuzzy match of each gold name against the answer via <code>common_scaffold.validate.levenshtein</code>, a pure-Python O(n·m) DP</td><td>inline</td><td>seconds to minutes: answers reach 13,798 characters and PATENTS q1 has 73 names</td></tr>
+    </tbody></table></div>
+  <p class="insight">The levenshtein row is why a naive "validate everything" script did not finish in two minutes this session: re-scoring must run in a worker pool with a per-call timeout and cache to disk (§7).</p>
+  <div class="grid g3" style="margin-top:var(--s5)">
+    <div class="panel card pro"><p class="label" style="margin-bottom:var(--s2)">grade A · 54 queries</p><h3>Gold, validator, and published evidence</h3><p>On the leaderboard since 2026-03. Between 270 and 2,700 committed trials each across the 9 answer files, so the explorer can show a pass rate per query per agent, not just a label.</p></div>
+    <div class="panel card"><p class="label" style="margin-bottom:var(--s2)">grade B · 50 queries · <span class="done">deferred</span></p><h3>Gold and validator, no evidence</h3><p>The five unreleased datasets. The gold exists and the validator runs, but no agent has published a trial, so nothing says whether the gold is right or how hard the question is. Decided in review: out of scope for this build; the ingest keeps the <code>released</code> flag so a later build turns them on with one setting.</p></div>
+    <div class="panel card"><p class="label" style="margin-bottom:var(--s2)">grade A, footnoted · 4 queries</p><h3>Gold that has been revised upstream</h3><p>DEPS_DEV_V1 q1 (validator revised 2026-08-18, issue #86) and the three PATENTS queries (ground truths regenerated before the 2026-06-12 re-score). The explorer carries the footnote text from <code>docs/data/leaderboards.json</code> <code>sources[]</code> on those rows.</p></div>
+  </div>
+</div></section>
+
+<section class="band-sec" id="ingest"><div class="wrap">
+  <div class="hd"><p class="label">04 · decision A · what to pull in</p>
+  <h2>4 · Ingest — the text layer is 322 KB; the databases are 13.4 GB and can wait</h2>
+  <p>Everything the explorer shows is text: 54 × (<code>query.json</code>, <code>ground_truth.csv</code>, <code>validate.py</code>), 12 × (<code>db_description.txt</code>, <code>db_description_withhint.txt</code>, <code>db_config.yaml</code>), the manifest, the rubric, 9 answer files (4.6 MB) and the site's two JSON files (52 KB). A shallow clone with <code>GIT_LFS_SKIP_SMUDGE=1</code> brings all of it down in seconds and leaves every <code>.db</code> as a 130-byte LFS pointer, which is itself useful: the manifest gives us size and sha256 per file without downloading one.</p></div>
+  <div class="grid g3">
+    <div class="panel card pro"><p class="label" style="margin-bottom:var(--s2)"><span class="done">recommended</span></p><h3>A · Text layer only</h3><p><b>What:</b> <code>make upstream</code> shallow-clones with LFS skipped into <code>data/upstream/</code> (gitignored); <code>make ingest</code> writes <code>data/index/*.json</code>.</p><p><b>Cost:</b> ~300 MB clone (git history of the answer files), zero database bytes, no Postgres or Mongo.</p><p><b>Gives up:</b> live schema previews and row counts; the explorer shows the authors' <code>db_description.txt</code> instead, which is what agents see anyway.</p></div>
+    <div class="panel card"><h3>B · Text layer + the small databases</h3><p><b>What:</b> A, plus <code>make data SMALL=1</code> pulls the 25 manifest files under 50 MB (about 124 MB) from the Hugging Face mirror, verified by sha256, so sqlite and duckdb schemas can be introspected in-app.</p><p><b>Cost:</b> 124 MB local, a <code>duckdb</code> and <code>sqlite3</code> dependency, one more page. Postgres dumps (<code>.sql</code>) and Mongo dumps (<code>.bson</code>) still need servers, so coverage is partial (7 of the 12 datasets fully).</p></div>
+    <div class="panel card"><h3>C · Everything now</h3><p><b>What:</b> the full 13.36 GB via <code>download.sh</code>, plus Postgres 17 and MongoDB 8 running locally, per the README.</p><p><b>Cost:</b> hours of download (8.35 GB for the 54), 5.4 GB for PATENTS alone, two servers to keep alive, all for a build that never runs an agent. This is the agent build's job (M5), gated per dataset: <code>make data DATASET=bookreview</code>.</p></div>
+  </div>
+  <div class="panel card pro" style="margin-top:var(--s4)"><p class="label" style="margin-bottom:var(--s2)"><span class="done">decided</span> · decision A</p>
+    <h3>Option A: the text layer only; databases wait for the agent build</h3>
+    <p>Approved in review on 2026-09-20. <code>make upstream</code> is a shallow clone with LFS skipped; no database byte is downloaded in this build.</p></div>
+</div></section>
+
+<section class="blk" id="arch"><div class="wrap">
+  <div class="hd"><p class="label">05 · architecture</p>
+  <h2>5 · Architecture — one package, one ingest, one JSON index, one API, one SPA</h2>
+  <p>The shape is DABStep-loop's, minus the agent and loop planes, so that those planes slot in later without moving anything. The index is files first: <code>make ingest</code> is deterministic and its output is committed, so CI, the frontend and a future demo image never need the upstream clone.</p></div>
+  <figure class="fig">
+    <p class="fig-title">Fig. 1 · data flow from the upstream repo to the explorer · solid is this build, dashed is later</p>
+    <div class="dia-frame">
+      <svg class="dia" viewBox="0 0 1000 330" role="img" aria-label="Data flow: the upstream GitHub repo is shallow-cloned into data/upstream, the ingest step writes data/index JSON files and copies the answer files, the FastAPI serving layer reads the index, and the React explorer renders six pages. Dashed nodes for the agent, runs and MLflow are later builds.">
+        <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+        <g id="n-upstream"><title>ucbepic/DataAgentBench on GitHub</title>
+          <rect class="nd ext" x="20" y="40" width="190" height="70" rx="8"/>
+          <text class="tx k" x="115" y="68" text-anchor="middle">ucbepic/DataAgentBench</text>
+          <text class="tx s" x="115" y="88" text-anchor="middle">17 datasets · 104 queries · LFS</text>
+        </g>
+        <path class="ed" d="M210 75 H255"/>
+        <text class="cap" x="232" y="62" text-anchor="middle">make upstream</text>
+        <g id="n-clone"><title>data/upstream — shallow clone, LFS skipped, gitignored</title>
+          <rect class="nd" x="255" y="40" width="190" height="70" rx="8"/>
+          <text class="tx k" x="350" y="68" text-anchor="middle">data/upstream/</text>
+          <text class="tx s" x="350" y="88" text-anchor="middle">depth 1 · LFS pointers · gitignored</text>
+        </g>
+        <path class="ed hi" d="M445 75 H490"/>
+        <text class="cap" x="467" y="62" text-anchor="middle">make ingest</text>
+        <g id="n-index"><title>data/index — the committed JSON index</title>
+          <rect class="nd hi" x="490" y="20" width="220" height="110" rx="8"/>
+          <text class="tx k" x="600" y="44" text-anchor="middle">data/index/</text>
+          <text class="tx" x="502" y="64">datasets.json · queries.json</text>
+          <text class="tx" x="502" y="80">validators.json · manifest.json</text>
+          <text class="tx" x="502" y="96">leaderboard.json · trials.json</text>
+          <text class="tx s" x="502" y="116">+ data/answers/*.json (9 files, 4.6 MB)</text>
+        </g>
+        <path class="ed hi" d="M710 75 H755"/>
+        <g id="n-api"><title>FastAPI serving layer</title>
+          <rect class="nd" x="755" y="40" width="225" height="70" rx="8"/>
+          <text class="tx k" x="867" y="63" text-anchor="middle">src/dab_bench/serving/app.py</text>
+          <text class="tx s" x="867" y="82" text-anchor="middle">/api/datasets · /api/queries/{key}/{n}</text>
+          <text class="tx s" x="867" y="97" text-anchor="middle">/api/validators · /api/leaderboard · SPA</text>
+        </g>
+        <path class="ed hi" d="M867 110 V160"/>
+        <g id="n-ui"><title>React explorer</title>
+          <rect class="nd hi" x="700" y="160" width="280" height="70" rx="8"/>
+          <text class="tx k" x="840" y="185" text-anchor="middle">frontend/ · React + Vite on tokens.css</text>
+          <text class="tx s" x="840" y="205" text-anchor="middle">Overview · Datasets · Queries · Query · Validators · Leaderboard</text>
+        </g>
+        <g id="n-rescore"><title>make rescore — validators over the committed answer files</title>
+          <rect class="nd" x="490" y="160" width="220" height="70" rx="8"/>
+          <text class="tx k" x="600" y="185" text-anchor="middle">make rescore</text>
+          <text class="tx s" x="600" y="203" text-anchor="middle">104 validators × 14,480 answers</text>
+          <text class="tx s" x="600" y="218" text-anchor="middle">worker pool · 30 s timeout · cached</text>
+        </g>
+        <path class="ed" d="M600 130 V160"/>
+        <path class="ed" d="M710 195 H700"/>
+        <rect class="rg" x="20" y="260" width="960" height="55" rx="8"/>
+        <text class="cap" x="32" y="278">later builds, same skeleton</text>
+        <g id="n-later"><title>Later planes: agent, runs, tracking, loop</title>
+          <rect class="nd ext" x="40" y="285" width="150" height="24" rx="6"/><text class="tx s" x="115" y="301" text-anchor="middle">agent/ (Agent SDK)</text>
+          <rect class="nd ext" x="210" y="285" width="150" height="24" rx="6"/><text class="tx s" x="285" y="301" text-anchor="middle">runs/&lt;id&gt;/ + validators</text>
+          <rect class="nd ext" x="380" y="285" width="150" height="24" rx="6"/><text class="tx s" x="455" y="301" text-anchor="middle">MLflow :5600</text>
+          <rect class="nd ext" x="550" y="285" width="150" height="24" rx="6"/><text class="tx s" x="625" y="301" text-anchor="middle">loop/ (optimiser, gate)</text>
+          <rect class="nd ext" x="720" y="285" width="240" height="24" rx="6"/><text class="tx s" x="840" y="301" text-anchor="middle">data/context/&lt;dataset&gt;/ (13.4 GB, per dataset)</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption><b>The index is the contract.</b> The frontend and API read only <code>data/index/</code> and <code>data/answers/</code>; the clone is a build input. When the agent build lands, <code>runs/</code> joins to <code>queries.json</code> on <code>(dataset_key, query_id)</code> and nothing in the explorer changes.</figcaption>
+  </figure>
+  <div class="grid g2" style="margin-top:var(--s5)">
+    <div class="panel card"><h3>The index records, and the one key that joins everything</h3>
+<pre class="md">queries.json[i] = {
+  "id": "crmarenapro/1",           ← dataset_key + "/" + query number
+  "dataset_key": "crmarenapro",     ← folder name lower-cased
+  "query_id": 1,
+  "question": "...",                ← query.json verbatim
+  "gold_text": "Authority",         ← ground_truth.csv verbatim
+  "gold_lines": 1,
+  "validator": { "style": "substring", "lines": 27,
+                 "reads_gold_file": false, "source": "..." },
+  "released": true,                 ← always true in this build; the ingest
+                                    filter that a later build relaxes
+  "footnote": null,                 ← leaderboard.json sources[] when revised
+  "trials": { "files": 9, "n": 405, "passed": 301 }   ← from rescore
+}</pre></div>
+    <div class="panel card"><h3>What each plane owns</h3>
+      <ul class="qa">
+        <li><b><code>data/</code></b> — <code>upstream.py</code> (clone, verify the commit), <code>ingest.py</code> (walk folders, classify validators, apply aliases, write the index), <code>manifest.py</code>.</li>
+        <li><b><code>eval/</code></b> — <code>validators.py</code> loads a query's <code>validate.py</code> in a subprocess with <code>common_scaffold</code> on the path and a timeout; <code>rescore.py</code> runs the pool and writes <code>trials.json</code>. This plane is reused unchanged when our own agent produces answers.</li>
+        <li><b><code>serving/</code></b> — FastAPI reading the index at startup; serves <code>frontend/dist</code> as the SPA fallback, exactly like DABStep-loop.</li>
+        <li><b><code>cli.py</code></b> — Typer: <code>dab upstream</code>, <code>dab ingest</code>, <code>dab rescore</code>, <code>dab serve</code>, <code>dab stats</code> (prints the §1 numbers, which the README quotes).</li>
+      </ul></div>
+  </div>
+</div></section>
+
+<section class="band-sec" id="ui"><div class="wrap">
+  <div class="hd"><p class="label">06 · the explorer, mocked in its own tokens</p>
+  <h2>6 · Explorer — six pages mocked below, and the question page is the one that matters</h2>
+  <p>The viewer's one job, from DESIGN.md: find the question and its gold in two clicks. Overview gives the numbers with their denominators; Queries is the filterable table; Query is the page you will spend your time on. Every page is led by an assertion headline and reads the index; nothing is hand-maintained.</p></div>
+  <figure class="fig" style="margin-top:0">
+    <p class="fig-title">Fig. 2 · Overview page · every number carries what it is out of</p>
+    <div class="mock">
+      <div class="mock-top"><b>DAB explorer</b><nav><span class="on">Overview</span><span>Datasets</span><span>Queries</span><span>Validators</span><span>Leaderboard</span></nav></div>
+      <div class="mock-body">
+        <h4>54 questions over 12 datasets, all with gold; 14,480 published trials judge them</h4>
+        <div class="mini">
+          <div><b>54</b><span>queries · 50 more in 5 unreleased datasets, deferred</span></div>
+          <div><b>12</b><span>datasets · 4 engines · 8.35 GB of databases</span></div>
+          <div><b>54 / 54</b><span>with gold and a validator</span></div>
+          <div><b>14,480</b><span>published trials across 9 files, 54 queries</span></div>
+        </div>
+        <p class="small" style="margin:var(--s3) 0 0">Then, in order: a bar per dataset of query count split released/unreleased; the validator-style breakdown (33 / 12 / 9); the leaderboard's 40 rows with Pass@1, trials, hints and tuned-prompt flags from <code>docs/data/leaderboards.json</code>.</p>
+      </div>
+    </div>
+  </figure>
+  <figure class="fig">
+    <p class="fig-title">Fig. 3 · Queries page · filter by dataset, release, validator style, gold shape, pass rate</p>
+    <div class="mock">
+      <div class="mock-top"><b>DAB explorer</b><nav><span>Overview</span><span>Datasets</span><span class="on">Queries</span><span>Validators</span><span>Leaderboard</span></nav></div>
+      <div class="mock-body">
+        <h4>Hardest first: 15 of 54 queries pass in under 10% of 265 published trials; 3 never pass</h4>
+        <div class="filters"><span class="on">all 12 datasets</span><span class="on">any validator</span><span>levenshtein</span><span>list gold</span><span>sort: pass rate ↑</span></div>
+        <div class="tw" style="box-shadow:none"><table>
+          <thead><tr><th>Query</th><th>Question</th><th>Gold</th><th>Validator</th><th>Pass rate</th><th>Best agent</th></tr></thead>
+          <tbody>
+            <tr><td class="sub">patents/1</td><td>CPC subclasses … (73 codes, every one required)</td><td class="num">73 lines</td><td>levenshtein</td><td class="num">0 / 265</td><td class="num">0% (8 files)</td></tr>
+            <tr><td class="sub">pancancer_atlas/1</td><td>…</td><td class="num">6 lines</td><td>regex</td><td class="num">0 / 265</td><td class="num">0% (8 files)</td></tr>
+            <tr><td class="sub">agnews/3</td><td>…</td><td class="num">1 line</td><td>regex</td><td class="num">0 / 265</td><td class="num">0% (8 files)</td></tr>
+            <tr><td class="sub">patents/2</td><td>…</td><td class="num">24 lines</td><td>levenshtein</td><td class="num">1 / 265</td><td class="num">20% · promptql</td></tr>
+            <tr><td class="sub">deps_dev_v1/1</td><td>… fifth most-starred … <span class="tag warn">revised 2026-08-18</span></td><td class="num">6 lines</td><td>regex</td><td class="num">17 / 265</td><td class="num">28%</td></tr>
+          </tbody></table></div>
+        <p class="small" style="margin:var(--s2) 0 0">Pass-rate cells come from <code>trials.json</code>, written by <code>make rescore</code> (§7); the numbers above are from this session's run over the 8 <code>submissions/</code> files (265 = 5 × 50 ReAct + 3 × 5 PromptQL trials). A query with no trials would read "not scored", never a zero. Rows link to the Query page.</p>
+      </div>
+    </div>
+  </figure>
+  <figure class="fig">
+    <p class="fig-title">Fig. 4 · Query page · question, gold and validator side by side, with the trials beneath</p>
+    <div class="mock">
+      <div class="mock-top"><b>DAB explorer</b><nav><span>Overview</span><span>Datasets</span><span class="on">Queries › crmarenapro › 1</span></nav></div>
+      <div class="mock-body">
+        <h4>crmarenapro/1 — a BANT judgement from call transcripts; the gold is one word</h4>
+        <div class="mock-cols">
+          <div>
+            <dl class="kv"><dt>question</dt><dd>Can this lead be qualified based on the latest discussions? If the answer is no, which factors — 'Budget', 'Authority', 'Need', or 'Timeline' — are responsible? … Lead Id to be considered is: 00QWt0000089AekMAE</dd>
+            <dt>gold</dt><dd><code>Authority</code> · 1 line</dd>
+            <dt>leaderboard</dt><dd>since 2026-03-02 · 265 published trials</dd>
+            <dt>databases</dt><dd>core_crm (sqlite) · sales_pipeline (duckdb) · support (postgres) · products_orders (sqlite) · activities (duckdb) · territory (sqlite)</dd>
+            <dt>hint</dt><dd>364 bytes · toggle to diff against the 4,583-byte description</dd></dl>
+          </div>
+          <div>
+            <p class="label">validate.py · substring · 27 lines</p>
+<pre>expected = "Authority"
+if expected.lower() in llm_output.strip().lower():
+    return True, "Found expected BANT factor"
+# any other BANT word present → False with the list</pre>
+          </div>
+        </div>
+        <p class="label" style="margin:var(--s4) 0 var(--s2)">published trials · per answer file · from make rescore</p>
+        <div class="tw" style="box-shadow:none"><table>
+          <thead><tr><th>Answer file</th><th>Trials</th><th>Passed</th><th>An answer that passed</th><th>An answer that failed</th></tr></thead>
+          <tbody>
+            <tr><td class="sub">all 8 files</td><td class="num">265</td><td class="num">265 · 100%</td><td class="small">shown verbatim, expandable</td><td class="small">none · the easiest released query</td></tr>
+            <tr><td class="sub">react_gemini-3-pro</td><td class="num">50</td><td class="num">50</td><td class="small">…</td><td class="small">on a harder query: the answer and the validator's reason string</td></tr>
+          </tbody></table></div>
+      </div>
+    </div>
+    <figcaption><b>Failed answers with the validator's reason string are the most useful thing on the page</b> for the agent build: they show what the field gets wrong before we have run anything.</figcaption>
+  </figure>
+  <figure class="fig">
+    <p class="fig-title">Fig. 5 · Datasets page · one card per dataset, released first, sorted by query count</p>
+    <div class="mock">
+      <div class="mock-top"><b>DAB explorer</b><nav><span>Overview</span><span class="on">Datasets</span><span>Queries</span><span>Validators</span><span>Leaderboard</span></nav></div>
+      <div class="mock-body">
+        <h4>12 datasets carry 54 queries and 8.35 GB of databases; crmarenapro alone is 13 of the 54</h4>
+        <div class="filters"><span class="on">all 12</span><span>sort: queries ↓</span><span>sort: pass rate ↑</span></div>
+        <div class="mini" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+          <div><b>crmarenapro</b><span>13 queries · 6 DBs · duckdb, postgres, sqlite · 32.8 MB<br>pass 1,804 / 3,445 published trials · 52.4%</span></div>
+          <div><b>yelp</b><span>7 queries · 2 DBs · duckdb, mongo · 3.4 MB<br>pass 456 / 1,855 · 24.6%</span></div>
+          <div><b>stockmarket</b><span>5 queries · 2 DBs · duckdb, sqlite · 966 MB<br>pass 528 / 1,325 · 39.9%</span></div>
+          <div><b>patents</b><span>3 queries · 2 DBs · postgres, sqlite · 5.56 GB<br>pass 11 / 795 · 1.4% · <span class="tag warn">gold regenerated</span></span></div>
+          <div><b>deps_dev_v1</b><span>2 queries · 2 DBs · duckdb, sqlite · 550 MB<br>pass 27 / 530 · 5.1% · <span class="tag warn">q1 revised</span></span></div>
+          <div><b>agnews</b><span>4 queries · 2 DBs · mongo, sqlite · 4.0 MB<br>pass 102 / 1,060 · 9.6%</span></div>
+        </div>
+        <p class="small" style="margin:var(--s3) 0 0">A footer line reads "5 more datasets with 50 queries exist upstream and are deferred", with the count only. A card opens the dataset page: <code>db_description.txt</code> rendered, the hint file as a toggle-diff, the <code>db_config.yaml</code> clients with engine and file size from the manifest, then its queries as the Fig. 3 table filtered to that dataset.</p>
+      </div>
+    </div>
+  </figure>
+  <figure class="fig">
+    <p class="fig-title">Fig. 6 · Validators page · the 104 grouped by style, with the source one click away</p>
+    <div class="mock">
+      <div class="mock-top"><b>DAB explorer</b><nav><span>Overview</span><span>Datasets</span><span>Queries</span><span class="on">Validators</span><span>Leaderboard</span></nav></div>
+      <div class="mock-body">
+        <h4>All 54 validators carry the answer inline in Python; the CSV beside them is a copy</h4>
+        <div class="tw" style="box-shadow:none"><table>
+          <thead><tr><th>Style</th><th>Queries</th><th>Reads CSV</th><th>Longest</th><th>Mean pass rate (released)</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td class="sub">regex / number</td><td class="num">33</td><td class="num">0</td><td class="num">217 lines · deps_dev_v1/1</td><td class="num">from trials.json</td><td class="small"><code>bookreview/1</code> · the decade "2020" anywhere in the answer</td></tr>
+            <tr><td class="sub">substring / list</td><td class="num">12</td><td class="num">0</td><td class="num">152 lines · googlelocal/3</td><td class="num">from trials.json</td><td class="small"><code>googlelocal/1</code> · five names, in order</td></tr>
+            <tr class="pro"><td class="sub">levenshtein</td><td class="num">9</td><td class="num">0</td><td class="num">110 lines · stockmarket/2</td><td class="num">from trials.json</td><td class="small"><code>patents/1</code> · 73 CPC codes, fuzzy, all required</td></tr>
+          </tbody></table></div>
+        <p class="small" style="margin:var(--s2) 0 0">Each row expands to its queries; each query shows the <code>validate.py</code> source with the gold highlighted, and the reason strings the validator produced on published failures.</p>
+      </div>
+    </div>
+  </figure>
+  <figure class="fig">
+    <p class="fig-title">Fig. 7 · Leaderboard page · the site's 40 rows, plus the two stratified tables and our rescore beside them</p>
+    <div class="mock">
+      <div class="mock-top"><b>DAB explorer</b><nav><span>Overview</span><span>Datasets</span><span>Queries</span><span>Validators</span><span class="on">Leaderboard</span></nav></div>
+      <div class="mock-body">
+        <h4>40 entries from 0.1049 to 0.9467 Pass@1; 12 of the top 12 used a DAB-tuned prompt</h4>
+        <div class="filters"><span class="on">all 40</span><span>hide tuned prompts</span><span>hints used</span><span>has committed answers (9)</span></div>
+        <div class="tw" style="box-shadow:none"><table>
+          <thead><tr><th>#</th><th>Agent</th><th>Pass@1</th><th>Trials</th><th>Tuned</th><th>Hints</th><th>Date</th><th>Answers in repo</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td class="sub">Permute EQ (Claude Opus 5)</td><td class="num">0.9467</td><td class="num">5</td><td>yes</td><td>yes</td><td class="num">2026-09-11</td><td class="small">PR #95 only</td></tr>
+            <tr><td class="num">2</td><td class="sub">Scout (OceanBase Lab) (GLM-5.2)</td><td class="num">0.9062</td><td class="num">5</td><td>yes</td><td>yes</td><td class="num">2026-09-08</td><td class="small">PR #96 only</td></tr>
+            <tr><td class="num">…</td><td class="sub">…</td><td class="num"></td><td class="num"></td><td></td><td></td><td class="num"></td><td class="small"></td></tr>
+            <tr class="pro"><td class="num">30</td><td class="sub">Claude-Opus-4.6</td><td class="num">0.5551</td><td class="num">5</td><td>no</td><td>yes</td><td class="num">2026-03-18</td><td class="small">yes · <code>leaderboard_submissions/</code> · rescore per query</td></tr>
+            <tr class="pro"><td class="num">33</td><td class="sub">Gemini-3-Pro (ReAct baseline)</td><td class="num">0.4663</td><td class="num">50</td><td>no</td><td>yes</td><td class="num">2026-03-02</td><td class="small">yes · <code>submissions/</code> · rescore per query</td></tr>
+          </tbody></table></div>
+        <p class="small" style="margin:var(--s2) 0 0">Rows whose answers are committed upstream (the 9 files) link to their per-query pass rates; the other 31 only have the PR link. Below the table: the two stratified per-dataset tables from <code>docs/data</code>, with our macro-average rescore in an adjacent column and the difference shown, never hidden.</p>
+      </div>
+    </div>
+    <figcaption><b>All six pages are the same three components — a KPI row, a filterable table, a detail panel — grouped differently.</b> The frontend builds those three once on <code>tokens.css</code> and composes the pages from the index.</figcaption>
+  </figure>
+</div></section>
+
+<section class="blk" id="evidence"><div class="wrap">
+  <div class="hd"><p class="label">07 · published evidence, re-scored locally</p>
+  <h2>7 · Evidence — 14,480 published answers, judged by the benchmark's own validators</h2>
+  <p>The upstream repo commits nine answer files: five ReAct baselines at 50 trials per query (2,700 rows each; kimi-k2 has 2,600, missing two PANCANCER queries), three PromptQL runs at 5 trials (270 rows each), and the Claude Opus 4.6 leaderboard submission (270 rows). Running each query's <code>validate.py</code> over them reproduces the site's per-dataset tables and gives the per-query pass rates the explorer sorts by. The site's numbers below are the target the rescore must reproduce before it is trusted.</p></div>
+  <div class="tw"><table>
+    <caption>Per-dataset Pass@1 of the five ReAct baselines · <code>docs/data/leaderboards.json</code> <code>baselineStratified</code>, re-scored upstream 2026-06-12 · 50 trials per query</caption>
+    <thead><tr><th>Dataset</th><th>Queries</th><th>Gemini-3-Pro</th><th>GPT-5-mini</th><th>GPT-5.2</th><th>Kimi-K2</th><th>Gemini-2.5-Flash</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">stockindex</td><td class="num">3</td><td class="num">0.8467</td><td class="num">0.9467</td><td class="num">0.8667</td><td class="num">0.7800</td><td class="num">0.1533</td></tr>
+      <tr><td class="sub">bookreview</td><td class="num">3</td><td class="num">0.8933</td><td class="num">0.5333</td><td class="num">0.5267</td><td class="num">0.6733</td><td class="num">0.0200</td></tr>
+      <tr><td class="sub">crmarenapro</td><td class="num">13</td><td class="num">0.6308</td><td class="num">0.6431</td><td class="num">0.5338</td><td class="num">0.5415</td><td class="num">0.2169</td></tr>
+      <tr><td class="sub">stockmarket</td><td class="num">5</td><td class="num">0.6080</td><td class="num">0.4520</td><td class="num">0.3480</td><td class="num">0.2640</td><td class="num">0.1920</td></tr>
+      <tr><td class="sub">googlelocal</td><td class="num">4</td><td class="num">0.5700</td><td class="num">0.3150</td><td class="num">0.2800</td><td class="num">0.4050</td><td class="num">0.1950</td></tr>
+      <tr><td class="sub">pancancer_atlas</td><td class="num">3</td><td class="num">0.5600</td><td class="num">0.5267</td><td class="num">0.4400</td><td class="num">0.0000</td><td class="num">0.0467</td></tr>
+      <tr><td class="sub">music_brainz_20k</td><td class="num">3</td><td class="num">0.5067</td><td class="num">0.2800</td><td class="num">0.1400</td><td class="num">0.3200</td><td class="num">0.3333</td></tr>
+      <tr><td class="sub">github_repos</td><td class="num">4</td><td class="num">0.3600</td><td class="num">0.2350</td><td class="num">0.2200</td><td class="num">0.2050</td><td class="num">0.0400</td></tr>
+      <tr><td class="sub">yelp</td><td class="num">7</td><td class="num">0.2400</td><td class="num">0.3343</td><td class="num">0.2343</td><td class="num">0.1914</td><td class="num">0.0514</td></tr>
+      <tr><td class="sub">agnews</td><td class="num">4</td><td class="num">0.2000</td><td class="num">0.0500</td><td class="num">0.0000</td><td class="num">0.1300</td><td class="num">0.0000</td></tr>
+      <tr class="pro"><td class="sub">deps_dev_v1</td><td class="num">2</td><td class="num">0.0200</td><td class="num">0.0600</td><td class="num">0.0000</td><td class="num">0.0000</td><td class="num">0.0000</td></tr>
+      <tr class="pro"><td class="sub">patents</td><td class="num">3</td><td class="num">0.0200</td><td class="num">0.0000</td><td class="num">0.0000</td><td class="num">0.0000</td><td class="num">0.0000</td></tr>
+      <tr><td class="sub">Average</td><td class="num">54</td><td class="num">0.4546</td><td class="num">0.3647</td><td class="num">0.2991</td><td class="num">0.2925</td><td class="num">0.1041</td></tr>
+    </tbody></table></div>
+  <p class="insight">Two datasets, five queries, are near zero for every plain baseline; the best tuned agent reaches 0.9467 overall. That spread is what the later agent build will work on, and the explorer should make it visible per query.</p>
+  <div class="panel" style="margin-top:var(--s5)">
+    <h3>The rescore already ran once this session, and it says the approach works with one correction</h3>
+    <div class="grid g2" style="margin-top:var(--s3);align-items:start">
+      <div>
+        <p class="label" style="margin-bottom:var(--s2)">14,210 answers in the 8 <code>submissions/</code> files, judged by their query's <code>validate.py</code></p>
+        <div class="tw" style="box-shadow:none;background:var(--band)"><table style="min-width:0">
+          <thead><tr><th>Answer file</th><th>Passed / trials</th><th>Micro rate</th></tr></thead>
+          <tbody>
+            <tr><td class="sub">promptql_opus46</td><td class="num">180 / 270</td><td class="num">66.7%</td></tr>
+            <tr><td class="sub">promptql_gemini31pro</td><td class="num">169 / 270</td><td class="num">62.6%</td></tr>
+            <tr><td class="sub">promptql_gpt52</td><td class="num">152 / 270</td><td class="num">56.3%</td></tr>
+            <tr><td class="sub">react_gemini-3-pro</td><td class="num">1,312 / 2,700</td><td class="num">48.6%</td></tr>
+            <tr><td class="sub">react_gpt-5-mini</td><td class="num">1,119 / 2,700</td><td class="num">41.4%</td></tr>
+            <tr><td class="sub">react_kimi-k2-thinking</td><td class="num">899 / 2,600</td><td class="num">34.6%</td></tr>
+            <tr><td class="sub">react_gpt-5.2</td><td class="num">912 / 2,700</td><td class="num">33.8%</td></tr>
+            <tr><td class="sub">react_gemini-2.5-flash</td><td class="num">338 / 2,700</td><td class="num">12.5%</td></tr>
+          </tbody></table></div>
+      </div>
+      <div>
+        <ul class="qa">
+          <li><b>Three released queries have never passed</b> in 265 trials each: <code>agnews/3</code>, <code>pancancer_atlas/1</code>, <code>patents/1</code>. Fifteen pass under 10%. Two pass at 95% or more (<code>crmarenapro/1</code> 265/265, <code>stockmarket/1</code> 262/265).</li>
+          <li><b>The correction:</b> the micro rates above are not the site's Pass@1. The site takes the mean over datasets of each dataset's mean per-query rate (a macro average), which is why react_gemini-3-pro reads 48.6% here and 0.4546 there. <code>rescore.py</code> reports both and the M4 test compares the macro figure.</li>
+          <li><b>Cost:</b> the naive single-process run took over ten minutes, almost all of it in the nine levenshtein validators; the pool-and-timeout design in the steps below is not optional.</li>
+          <li><b>Not yet included:</b> the Opus 4.6 file in <code>leaderboard_submissions/</code> (270 rows), which brings the total to 14,480 for M4.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-top:var(--s5)">
+    <div class="panel card"><h3>How the rescore runs, given the levenshtein cost</h3>
+      <ol class="steps">
+        <li>Group the 14,480 rows by <code>(dataset_key, query_id)</code> via the alias map; unmatched rows are counted and reported, never dropped silently.</li>
+        <li>For each query, spawn one worker with <code>data/upstream</code> on <code>sys.path</code>, import its <code>validate.py</code> once, and judge its rows; <code>signal.alarm(30)</code> per call, a timeout counts as a fail and is flagged <code>timed_out</code>.</li>
+        <li>Write <code>data/index/trials.json</code>: per query per file, <code>n</code>, <code>passed</code>, <code>timed_out</code>, and up to three pass/fail example row ids; write the full per-row verdicts to <code>data/index/verdicts.jsonl</code> (gitignored if over 5 MB).</li>
+        <li>A test asserts the recomputed per-dataset means match the site's <code>baselineStratified</code> and <code>promptqlStratified</code> tables to two decimals, so the vendored validators are proven before any number ships.</li>
+      </ol></div>
+    <div class="panel card"><h3>What the explorer will and will not claim</h3>
+      <ul class="qa">
+        <li><b>Will:</b> per-query pass rate per answer file with its denominator; the best single file per query; the footnote for revised gold.</li>
+        <li><b>Will not:</b> an overall Pass@1 for an agent from partial files, a "difficulty" label with no trials behind it, or anything at all about the 50 deferred queries beyond their count.</li>
+        <li><b>Caveat carried on the page:</b> the site re-scored on 2026-06-12 under then-current validators; ours runs under the validators at commit <code>0290945</code>, so a small difference on DEPS_DEV_V1 q1 is expected and the test tolerates it on that one query.</li>
+      </ul></div>
+  </div>
+</div></section>
+
+<section class="band-sec" id="repo"><div class="wrap">
+  <div class="hd"><p class="label">08 · the repository</p>
+  <h2>8 · Repo — public under nmp-dsci from the first commit, the clone never in it</h2>
+  <p>The folder is <code>nmp-ai-portfolio/DataAgentBench</code>, so the repo is <code>nmp-dsci/DataAgentBench</code>, created public with <code>gh repo create</code> before the first push, MIT-licensed like DABStep-loop. Upstream has no licence file, so what we commit from it is the derived index (facts about the benchmark, the question text, the gold and the validator source, all needed for the explorer to work without the clone) with a clear attribution block and a link to the source commit; the answer files are copied for the same reason. §11 asks you to confirm that.</p></div>
+  <div class="grid g2">
+    <div class="panel card">
+<pre class="tree">DataAgentBench/
+├─ AGENTS.md · CLAUDE.md · DESIGN.md · README.md · LICENSE (MIT)
+├─ Makefile · pyproject.toml · uv.lock · .env.example
+├─ data/
+│  ├─ upstream/            gitignored: the shallow clone
+│  ├─ index/               committed: datasets, queries, validators,
+│  │                       manifest, leaderboard, trials (JSON)
+│  ├─ answers/             committed copy of the 9 answer files (4.6 MB)
+│  └─ context/             gitignored: databases, per dataset (later)
+├─ src/dab_bench/
+│  ├─ cli.py · config.py
+│  ├─ data/     upstream.py · ingest.py · manifest.py · aliases.py
+│  ├─ eval/     validators.py · rescore.py
+│  └─ serving/  app.py
+├─ frontend/    Vite + React 18 + TS · src/tokens.css verbatim
+│               scripts/design_lint.mjs (copied from DABStep-loop)
+├─ tests/       ingest on a fixture tree · alias map · validator runner
+│               with a timeout · rescore reproduces the site's tables
+├─ .lavish/     this plan (never gitignored)
+└─ .github/workflows/ci.yml   ruff · mypy · pytest · tsc · design lint</pre></div>
+    <div class="panel card"><h3>Conventions carried over, and one not</h3>
+      <ul class="qa">
+        <li><b>Python 3.12, uv, ruff, mypy strict, pytest</b> — the workspace's rules; <code>make lint</code> and <code>make test</code> are green before the first push.</li>
+        <li><b>Frontend on <code>tokens.css</code></b> with the design lint that fails on any hex outside the token block; three type voices; assertion headlines; no Tailwind.</li>
+        <li><b>Files first</b> — the index is committed, so <code>git clone &amp;&amp; make setup &amp;&amp; make dev</code> works with no network call to upstream.</li>
+        <li><b>Not carried yet:</b> the App Runner deploy, MLflow, the billing guard and the demo image. They belong to the agent build and are listed in §9 so the skeleton leaves room.</li>
+        <li><b>Attribution</b> — <code>README.md</code> and <code>data/index/ATTRIBUTION.md</code> name the paper (arXiv 2603.20576), the repo, and the source commit hash the index was built from; <code>make ingest</code> refuses to run against a dirty or unknown upstream commit.</li>
+      </ul></div>
+  </div>
+</div></section>
+
+<section class="blk" id="ms"><div class="wrap">
+  <div class="hd"><p class="label">09 · milestones</p>
+  <h2>9 · Milestones — M0 to M4 in this build, the agent from M5 on the same skeleton</h2>
+  <p>Each milestone ends with a command that works and a test that proves it. Nothing in M0 to M4 calls a model or needs a database server.</p></div>
+  <div class="panel">
+    <div class="ms"><b class="id">M0</b><div class="body"><b>Scaffold and public repo</b>Package, Makefile, CI, DESIGN.md and tokens.css copied, <code>gh repo create nmp-dsci/DataAgentBench --public</code>, first push. Proof: CI green on an empty index.</div></div>
+    <div class="ms"><b class="id">M1</b><div class="body"><b>Upstream and ingest</b><code>make upstream</code> (shallow, LFS skipped, commit pinned) and <code>make ingest</code> writing the six index files plus the answer copies. Proof: <code>dab stats</code> prints 12 / 54 / 54 / 14,480 (and "5 datasets, 50 queries deferred") and a fixture-tree test covers aliases, validator classification and the released filter.</div></div>
+    <div class="ms"><b class="id">M2</b><div class="body"><b>API</b>FastAPI over the index with the five routes in Fig. 1, SPA fallback, <code>/healthz</code>. Proof: httpx tests per route, including a 404 for an unknown query and a 404 for the deferred <code>cve/1</code>.</div></div>
+    <div class="ms"><b class="id">M3</b><div class="body"><b>Explorer</b>The six pages of §6 on tokens.css; design lint and typecheck in CI. Proof: <code>make dev</code> opens Overview; Query page reached in two clicks; layout holds at 390 / 900 / 1280 px in both themes.</div></div>
+    <div class="ms"><b class="id">M4</b><div class="body"><b>Rescore</b><code>make rescore</code> with the pool and timeout, <code>trials.json</code> committed, pass-rate columns live. Proof: the per-dataset means reproduce the site's two stratified tables to two decimals (DEPS_DEV_V1 q1 tolerated).</div></div>
+    <div class="ms"><b class="id">M5+</b><div class="body"><b>Later builds, each its own plan</b>per-dataset <code>make data</code> and the DB servers; <b>one</b> Claude Agent SDK agent with the benchmark's four tools (list DBs, query DB, execute Python, return answer), given each dataset's <code>db_config.yaml</code> and description per run, exactly as the reference <code>run_agent.py</code> does — never an agent per dataset, which is what the leaderboard flags as a tuned prompt; <code>runs/</code> scored by the same <code>eval/</code> plane; MLflow; the error loop and gate; the App Runner demo. The explorer gains Runs and Trace pages and nothing else moves.</div></div>
+  </div>
+</div></section>
+
+<section class="band-sec" id="risks"><div class="wrap">
+  <div class="hd"><p class="label">10 · risks</p>
+  <h2>10 · Risks — each has a mechanism in the plan, not a hope</h2></div>
+  <div class="tw"><table>
+    <caption>Risks found during discovery, and where the plan handles them</caption>
+    <thead><tr><th>Risk</th><th>Evidence</th><th>Mechanism</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">Redistributing unlicensed content</td><td>Upstream has no LICENSE file; the index carries question text, gold and validator source</td><td>Attribution block and pinned source commit; decision C in §11 lets you choose gitignore-and-fetch instead; either way the databases are never committed</td></tr>
+      <tr><td class="sub">Validators that hang</td><td>Nine levenshtein validators against answers up to 13,798 characters; the naive run did not finish in 120 s</td><td>Subprocess per query, 30 s alarm per call, <code>timed_out</code> counted and shown, results cached to <code>trials.json</code></td></tr>
+      <tr><td class="sub">Validators that touch the filesystem</td><td>20 validators read <code>ground_truth.csv</code> relative to <code>__file__</code>; all 104 are arbitrary Python</td><td>Run from the upstream tree with cwd set; read-only by inspection this session (no db, network or subprocess imports); the runner is the same isolation the agent build will need</td></tr>
+      <tr><td class="sub">Silent join failures</td><td>Three spellings per dataset across the answer files; kimi-k2 is missing 100 rows</td><td>Alias map from the site's own <code>app.js</code>; unmatched rows reported by <code>dab ingest</code>; a test pins 14,480 matched rows</td></tr>
+      <tr><td class="sub">Upstream moves</td><td>167 stars, pushed 2026-09-15, leaderboard PRs weekly; the 5 deferred datasets may be released, which would change the 54</td><td><code>make upstream</code> pins a commit in <code>data/index/source.json</code>; re-ingest is a deliberate bump with a diff of the index in the PR</td></tr>
+      <tr><td class="sub">A number that looks like evidence and is not</td><td>DESIGN.md rule 9; our micro rates differ from the site's macro Pass@1</td><td>Every rate cell shows its denominator and which average it is; the deferred 50 appear only as a count</td></tr>
+      <tr><td class="sub">Scope creep into the agent</td><td>The natural next step after seeing failed answers is to try an agent</td><td>This build has no model dependency in <code>pyproject.toml</code>; the agent gets its own s01 plan</td></tr>
+    </tbody></table></div>
+</div></section>
+
+<section class="blk" id="decide"><div class="wrap">
+  <div class="hd"><p class="label">11 · decisions &amp; approve</p>
+  <h2>11 · Decided — A, B and C settled, M0 to M4 approved</h2>
+  <p>Every decision is settled in review on 2026-09-20: A in §4, B and C below, and the scope. The record stays here so the build can be checked against it.</p></div>
+
+  <div class="panel card pro"><p class="label" style="margin-bottom:var(--s2)"><span class="done">decided</span> · decision B</p>
+    <h3>The 50 unreleased queries are out of scope; the leaderboard's 54 are the project</h3>
+    <p>Your call in review: "if the scoreboard is on the 54 then keep it to the 54 and expand the scope to the other 50 later." The ingest records the five extra datasets as a count in <code>source.json</code>, the <code>released</code> filter keeps them out of the index, and turning them on later is one setting plus a re-ingest.</p></div>
+
+  <div class="panel card pro"><p class="label" style="margin-bottom:var(--s2)"><span class="done">decided</span> · decision C</p>
+    <h3>Commit the derived index and the answer files, with attribution and the pinned source commit</h3>
+    <p>Approved in review on 2026-09-20. The app works from a bare clone; <code>data/index/ATTRIBUTION.md</code> names the paper, the repo and the commit the index was built from.</p></div>
+
+  <div class="panel card pro"><p class="label" style="margin-bottom:var(--s2)"><span class="done">approved</span> · 2026-09-20</p>
+    <h3>M0 to M4: scaffold and public repo, upstream and ingest, API, the six-page explorer, and the rescore</h3>
+    <p>"approve M0-M4 with option A, commit the index." The build starts from this artifact; <code>AGENTS.md</code> points here.</p></div>
+
+  <p class="small" style="margin-top:var(--s5)">Verified this session from a shallow clone of <code>ucbepic/DataAgentBench</code> at <code>0290945</code>: every <code>query_*/</code> folder, all 104 <code>query.json</code>, <code>ground_truth.csv</code> and <code>validate.py</code>, all 17 <code>db_config.yaml</code> and description files, <code>dataset_manifest.tsv</code>, <code>.gitattributes</code>, the 9 answer files, <code>docs/app.js</code> and <code>docs/data/*.json</code>, <code>SUBMISSION_RUBRIC.md</code>, <code>common_scaffold/</code>; the GitHub commits API for the five unreleased datasets' first-commit dates; the repo's licence field. Sibling conventions read from DABStep-loop's <code>CLAUDE.md</code>, <code>AGENTS.md</code>, <code>DESIGN.md</code>, <code>Makefile</code>, <code>pyproject.toml</code>, <code>frontend/</code>, <code>ci.yml</code> and <code>.lavish/s00</code>. Local toolchain: uv 0.10.4, node 25.8.1, gh logged in as nmp-dsci.</p>
+</div></section>
+
+<footer><div class="wrap">s00 · DataAgentBench · design source: DESIGN.md, ported from nmp-dsci.github.io (Field Guide) via DABStep-loop · one em, in the h1</div></footer>
+</body>
+</html>

@@ -1,0 +1,290 @@
+[
+ {
+  "path": "query_DEPS_DEV_V1/query_dataset/package_query.db",
+  "sha256": "6676259f784aa89aec838a3e4a74bc68793085e49520c819b2356205a6eaf68a",
+  "bytes": 538877952,
+  "dataset_key": "deps_dev_v1",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_DEPS_DEV_V1/query_dataset/project_query.db",
+  "sha256": "e6b171594cbb8dbb5298b54206b235a396b0eee9dd8c2c68deefab8d76c72e6a",
+  "bytes": 11022336,
+  "dataset_key": "deps_dev_v1",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_GITHUB_REPOS/query_dataset/repo_artifacts.db",
+  "sha256": "d514c66eb07403f79b8da2ff6a79a6c82f2d862cadaf71d536ea58644cd07bbc",
+  "bytes": 361246720,
+  "dataset_key": "github_repos",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_GITHUB_REPOS/query_dataset/repo_metadata.db",
+  "sha256": "e9b71beb5d7e2b344f996baf19fb34231c24ab354019d65bd14a1cbfc62c67a1",
+  "bytes": 567222272,
+  "dataset_key": "github_repos",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_PANCANCER_ATLAS/query_dataset/pancancer_clinical.sql",
+  "sha256": "ce57356f7a0f72e1c43a1fc2083d46293991645cbce2f6f237c731bf4035fdd6",
+  "bytes": 7555304,
+  "dataset_key": "pancancer_atlas",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_PANCANCER_ATLAS/query_dataset/pancancer_molecular.db",
+  "sha256": "7e1131c386014ea8bdd528d2fd040a85f6891dd9e46e8dc18947f7a712cf8610",
+  "bytes": 293875712,
+  "dataset_key": "pancancer_atlas",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_PATENTS/query_dataset/patent_CPCDefinition.sql",
+  "sha256": "f888382228bf87538744194ca2ea1be126c316423d6d10e35e7d4ec226da0144",
+  "bytes": 135238448,
+  "dataset_key": "patents",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_PATENTS/query_dataset/patent_publication.db",
+  "sha256": "1e22b92b9849b3f7a07dcf89075f37787c84feacb0cdbc7b4bd96ae4fa88071c",
+  "bytes": 5421027328,
+  "dataset_key": "patents",
+  "in_scope": true,
+  "is_lfs_pointer": false
+ },
+ {
+  "path": "query_agnews/query_dataset/metadata.db",
+  "sha256": "30cfb96d29b4e49c5f6ae6e5cb2c754d98e118a183ddd57ae44ee3564aeb1955",
+  "bytes": 4046848,
+  "dataset_key": "agnews",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_bookreview/query_dataset/books_info.sql",
+  "sha256": "80acb3ece574f26b634107c9c553dc5ab0c95ca11f6b226c9602dff9465393d9",
+  "bytes": 649048,
+  "dataset_key": "bookreview",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_bookreview/query_dataset/review_query.db",
+  "sha256": "01f07a5894f058613374694a8f46d19341bf1fa316367494d019191e772b3e2c",
+  "bytes": 1093632,
+  "dataset_key": "bookreview",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_civic_unstructured/query_dataset/civic_docs_dump/civic_db/civic_docs.bson",
+  "sha256": "57fd5ff32b81478b696b6af7583dfd64744c01b3ed6bf112b3f8ee00c2e45bce",
+  "bytes": 237654,
+  "dataset_key": "civic_unstructured",
+  "in_scope": false,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_civic_unstructured/query_dataset/funding.db",
+  "sha256": "7e2e209f30c79917882db69ef379e0d4f58be23e7117e6caf14c31ebdbbfefc3",
+  "bytes": 106496,
+  "dataset_key": "civic_unstructured",
+  "in_scope": false,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_crmarenapro/query_dataset/activities.duckdb",
+  "sha256": "f3299b9214885f00c71c9af77d89b62ad73f3e545e3cf5baa4861d1265151c60",
+  "bytes": 21245952,
+  "dataset_key": "crmarenapro",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_crmarenapro/query_dataset/core_crm.db",
+  "sha256": "aa595797e41db401136a0a68bf14bac44707f9f86ed235f61d9f051728e50506",
+  "bytes": 188416,
+  "dataset_key": "crmarenapro",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_crmarenapro/query_dataset/products_orders.db",
+  "sha256": "92ad52f2a624ee5e0cdf7cd4cc64ac60b1e3f7af2c672be27f651f80af4a6bdb",
+  "bytes": 143360,
+  "dataset_key": "crmarenapro",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_crmarenapro/query_dataset/sales_pipeline.duckdb",
+  "sha256": "5b44cc3754820bff20c3f25e50cf09c6be401f86e69df6b9d3ee7a4cf64ac5af",
+  "bytes": 2371584,
+  "dataset_key": "crmarenapro",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_crmarenapro/query_dataset/support.sql",
+  "sha256": "5248cd64cddf4936027859c5d6f74b2d32fbeb4e1939d784b2ff26d45d83950c",
+  "bytes": 8860941,
+  "dataset_key": "crmarenapro",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_crmarenapro/query_dataset/territory.db",
+  "sha256": "1a9650d4ba3c0a3690b936d294feb31a3227bf6f2ebe886f74cf12e14936366a",
+  "bytes": 24576,
+  "dataset_key": "crmarenapro",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_cve/query_dataset/kev.sql",
+  "sha256": "76f15a345a8dd1006a5b21c198e52952846efa7dc5581727d5052137218a8bfe",
+  "bytes": 1030796,
+  "dataset_key": "cve",
+  "in_scope": false,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_cve/query_dataset/vulns.db",
+  "sha256": "e76efe1a177354afcc0929610eabbcf088f29af7bc1638d1def78085f4ca601b",
+  "bytes": 20504576,
+  "dataset_key": "cve",
+  "in_scope": false,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_googlelocal/query_dataset/business_description.sql",
+  "sha256": "cac36db1c60ab1fcbc661cc7df46c9980db1c2fcdaedb65b57f7a2618339ddd4",
+  "bytes": 38204,
+  "dataset_key": "googlelocal",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_googlelocal/query_dataset/review_query.db",
+  "sha256": "1e9ef561d4edf62ff49bf874253935caf8d404a79c60d21b9b0fc40ee041692c",
+  "bytes": 585728,
+  "dataset_key": "googlelocal",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_imdb/query_dataset/movies.sql",
+  "sha256": "9ef5452628ec8d07fbdc283fdb420168bd97b718dda25648087f2fe178bb1daa",
+  "bytes": 1622189538,
+  "dataset_key": "imdb",
+  "in_scope": false,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_imdb/query_dataset/people.sqlite",
+  "sha256": "ba583402740f2f5ef42b5be7ac1dd4c47a0cac990ddf7332575e203b976c1b10",
+  "bytes": 2639507456,
+  "dataset_key": "imdb",
+  "in_scope": false,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_krama/query_dataset/domain_assets.db",
+  "sha256": "d657f2253337b19694e7785b7d7ccf4398df95fe78012fc3b9e803715d15a3d1",
+  "bytes": 160571392,
+  "dataset_key": "krama",
+  "in_scope": false,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_krama/query_dataset/domain_docs/domain_docs_db/files.bson",
+  "sha256": "3bab163bfef5761e4e1407943eed4f9b2b1af0f6c14dd08931980f5df3dbd376",
+  "bytes": 528766506,
+  "dataset_key": "krama",
+  "in_scope": false,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_krama/query_dataset/us_geo.db",
+  "sha256": "bf442d08de0ffc396d8b750597dba7d0df6659fac44af98ec53b73ae7a31514c",
+  "bytes": 28504064,
+  "dataset_key": "krama",
+  "in_scope": false,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_music_brainz_20k/query_dataset/tracks.db",
+  "sha256": "0c349f70e5bafcba1deb605b49e224abfa95c5a83a44688faa511f9e123a02cc",
+  "bytes": 2035712,
+  "dataset_key": "music_brainz_20k",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_stockindex/query_dataset/indexInfo_query.db",
+  "sha256": "976511f3eb213269c81b286dd4517e4948b3d3bb776e221559943f0439916b55",
+  "bytes": 8192,
+  "dataset_key": "stockindex",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_stockindex/query_dataset/indextrade_query.db",
+  "sha256": "12e9cf350be2a6396f6be9f0c2bb057013859956bc8269952dc7a85008973bb1",
+  "bytes": 4468736,
+  "dataset_key": "stockindex",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_stockmarket/query_dataset/stockinfo_query.db",
+  "sha256": "b8cf6b5627c92e17c10e27779afa8aa77c659e44bd4ccc14b10f1116053bc6a2",
+  "bytes": 737280,
+  "dataset_key": "stockmarket",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_stockmarket/query_dataset/stocktrade_query.db",
+  "sha256": "e9cbf3c4d05d2eeb919c5b207374aefd19aa02e40dca49f2688618beb180350d",
+  "bytes": 964964352,
+  "dataset_key": "stockmarket",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_usaspending/query_dataset/contracts.sql",
+  "sha256": "7fdde155670e23568458570bdb17171b36f4789b49c95dde5461b03ca951a861",
+  "bytes": 4840083,
+  "dataset_key": "usaspending",
+  "in_scope": false,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_usaspending/query_dataset/recipients.db",
+  "sha256": "008916d8764ba11e759be1499a78c0c090da2fa8b72ff409ed69623c2f1733b5",
+  "bytes": 225280,
+  "dataset_key": "usaspending",
+  "in_scope": false,
+  "is_lfs_pointer": true
+ },
+ {
+  "path": "query_yelp/query_dataset/yelp_user.db",
+  "sha256": "155ecf989e62e0d087ed9d4586893e6825ab56504bc5e62ad46d454067f9b730",
+  "bytes": 3420160,
+  "dataset_key": "yelp",
+  "in_scope": true,
+  "is_lfs_pointer": true
+ }
+]

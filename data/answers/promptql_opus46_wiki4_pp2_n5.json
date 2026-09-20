@@ -1,0 +1,1352 @@
+[
+{
+"id": "agnews/1",
+"run": 0,
+"answer": "The Rundown"
+},
+{
+"id": "agnews/1",
+"run": 1,
+"answer": "The Rundown"
+},
+{
+"id": "agnews/1",
+"run": 2,
+"answer": "The Rundown"
+},
+{
+"id": "agnews/1",
+"run": 3,
+"answer": "The Rundown"
+},
+{
+"id": "agnews/1",
+"run": 4,
+"answer": "The Rundown"
+},
+{
+"id": "agnews/2",
+"run": 0,
+"answer": "0.1441"
+},
+{
+"id": "agnews/2",
+"run": 1,
+"answer": "0.1441"
+},
+{
+"id": "agnews/2",
+"run": 2,
+"answer": "15/111 = 0.1351"
+},
+{
+"id": "agnews/2",
+"run": 3,
+"answer": "15/111 = 0.1351351351351351"
+},
+{
+"id": "agnews/2",
+"run": 4,
+"answer": "0.1441"
+},
+{
+"id": "agnews/3",
+"run": 0,
+"answer": ""
+},
+{
+"id": "agnews/3",
+"run": 1,
+"answer": "356.73"
+},
+{
+"id": "agnews/3",
+"run": 2,
+"answer": "354.73"
+},
+{
+"id": "agnews/3",
+"run": 3,
+"answer": "351.55"
+},
+{
+"id": "agnews/3",
+"run": 4,
+"answer": "346.18"
+},
+{
+"id": "agnews/4",
+"run": 0,
+"answer": "Africa"
+},
+{
+"id": "agnews/4",
+"run": 1,
+"answer": "Africa: 331"
+},
+{
+"id": "agnews/4",
+"run": 2,
+"answer": "Africa"
+},
+{
+"id": "agnews/4",
+"run": 3,
+"answer": "Africa"
+},
+{
+"id": "agnews/4",
+"run": 4,
+"answer": "Africa: 328"
+},
+{
+"id": "bookreview/1",
+"run": 0,
+"answer": "2020s"
+},
+{
+"id": "bookreview/1",
+"run": 1,
+"answer": "2020s"
+},
+{
+"id": "bookreview/1",
+"run": 2,
+"answer": "2020s"
+},
+{
+"id": "bookreview/1",
+"run": 3,
+"answer": "2020s"
+},
+{
+"id": "bookreview/1",
+"run": 4,
+"answer": "2020s"
+},
+{
+"id": "bookreview/2",
+"run": 0,
+"answer": "The 15 English-language books in the 'Literature & Fiction' category with a perfect average rating of 5.0 are:\n\n1. The Prophet: With Original 1923 Illustrations by the Author\n2. Kennebago Moments\n3. Exits, Desires, & Slow Fires\n4. The Melancholy Strumpet Master\n5. The Sludge\n6. Forged in Blood (Freehold)\n7. Liza of Lambeth\n8. Something That Feels Like Truth (Switchgrass Books)\n9. Hollywood Confessions: Hollywood Headlines Book #3 (Hollywood Headlines Mysteries)\n10. Reunion: The Children of Lauderdale Park\n11. Childe Harold of Dysna\n12. Local Honey\n13. Fire Cracker\n14. Child Of The King A Journey of Hope Book 1: Earthly Story With A Heavenly Message\n15. Knowing When To Die: Uncollected Stories"
+},
+{
+"id": "bookreview/2",
+"run": 1,
+"answer": "1. Childe Harold of Dysna: 5.0\n2. Child Of The King A Journey of Hope Book 1: Earthly Story With A Heavenly Message: 5.0\n3. Exits, Desires, & Slow Fires: 5.0\n4. Fire Cracker: 5.0\n5. Forged in Blood (Freehold): 5.0\n6. Hollywood Confessions: Hollywood Headlines Book #3 (Hollywood Headlines Mysteries): 5.0\n7. Kennebago Moments: 5.0\n8. Knowing When To Die: Uncollected Stories: 5.0\n9. Liza of Lambeth: 5.0\n10. Local Honey: 5.0\n11. Reunion: The Children of Lauderdale Park: 5.0\n12. Something That Feels Like Truth (Switchgrass Books): 5.0\n13. The Melancholy Strumpet Master: 5.0\n14. The Prophet: With Original 1923 Illustrations by the Author: 5.0\n15. The Sludge: 5.0"
+},
+{
+"id": "bookreview/2",
+"run": 2,
+"answer": "Childe Harold of Dysna\nChild Of The King A Journey of Hope Book 1: Earthly Story With A Heavenly Message\nExits, Desires, & Slow Fires\nFire Cracker\nForged in Blood (Freehold)\nHollywood Confessions: Hollywood Headlines Book #3 (Hollywood Headlines Mysteries)\nKennebago Moments\nKnowing When To Die: Uncollected Stories\nLiza of Lambeth\nLocal Honey\nReunion: The Children of Lauderdale Park\nSomething That Feels Like Truth (Switchgrass Books)\nThe Melancholy Strumpet Master\nThe Prophet: With Original 1923 Illustrations by the Author\nThe Sludge"
+},
+{
+"id": "bookreview/2",
+"run": 3,
+"answer": "1. Child Of The King A Journey of Hope Book 1: Earthly Story With A Heavenly Message: 5.0\n2. Childe Harold of Dysna: 5.0\n3. Exits, Desires, & Slow Fires: 5.0\n4. Fire Cracker: 5.0\n5. Forged in Blood (Freehold): 5.0\n6. Hollywood Confessions: Hollywood Headlines Book #3 (Hollywood Headlines Mysteries): 5.0\n7. Kennebago Moments: 5.0\n8. Knowing When To Die: Uncollected Stories: 5.0\n9. Liza of Lambeth: 5.0\n10. Local Honey: 5.0\n11. Reunion: The Children of Lauderdale Park: 5.0\n12. Something That Feels Like Truth (Switchgrass Books): 5.0\n13. The Melancholy Strumpet Master: 5.0\n14. The Prophet: With Original 1923 Illustrations by the Author: 5.0\n15. The Sludge: 5.0"
+},
+{
+"id": "bookreview/2",
+"run": 4,
+"answer": "1. Reunion: The Children of Lauderdale Park\n2. The Prophet: With Original 1923 Illustrations by the Author\n3. The Melancholy Strumpet Master\n4. Child Of The King A Journey of Hope Book 1: Earthly Story With A Heavenly Message\n5. Fire Cracker\n6. Local Honey\n7. Hollywood Confessions: Hollywood Headlines Book #3 (Hollywood Headlines Mysteries)\n8. Knowing When To Die: Uncollected Stories\n9. Childe Harold of Dysna\n10. Forged in Blood (Freehold)\n11. Exits, Desires, & Slow Fires\n12. Kennebago Moments\n13. The Sludge\n14. Liza of Lambeth\n15. Something That Feels Like Truth (Switchgrass Books)"
+},
+{
+"id": "bookreview/3",
+"run": 0,
+"answer": "Around the World Mazes: 5.00 (1 review)\nBehind the Wheel (Choose Your Own Adventure #35)(Paperback/Revised): 5.00 (1 review)\nBenny Goes To The Moon: The great new book from Top Children's entertainer Gerry Ogilvie (1): 5.00 (1 review)\nCheer Up, Ben Franklin! (Young Historians): 5.00 (1 review)\nEgypt (Enchantment of the World): 5.00 (1 review)\nFavorite Thorton W. Burgess Stories: 6 Books: 5.00 (3 reviews)\nLunaLu the Llamacorn: 5.00 (3 reviews)\nMonstrous Stories #4: The Day the Mice Stood Still: 5.00 (1 review)\nPokémon: Sun & Moon, Vol. 8 (8): 5.00 (1 review)\nThe Library Book: 5.00 (3 reviews)\nThe Old Man and the Pirate Princess: 5.00 (1 review)\nTrouble in the CTC!: The Terra Prime Adventures Book 2: 4.90 (10 reviews)\nClark the Shark: Tooth Trouble, No. 1: 4.75 (4 reviews)\nCleo Porter and the Body Electric: 4.70 (23 reviews)"
+},
+{
+"id": "bookreview/3",
+"run": 1,
+"answer": "1. Around the World Mazes: 5.00 avg, 1 review\n2. Behind the Wheel (Choose Your Own Adventure #35)(Paperback/Revised): 5.00 avg, 1 review\n3. Benny Goes To The Moon: The great new book from Top Children's entertainer Gerry Ogilvie (1): 5.00 avg, 1 review\n4. Cheer Up, Ben Franklin! (Young Historians): 5.00 avg, 1 review\n5. Egypt (Enchantment of the World): 5.00 avg, 1 review\n6. Favorite Thorton W. Burgess Stories: 6 Books: 5.00 avg, 3 reviews\n7. LunaLu the Llamacorn: 5.00 avg, 3 reviews\n8. Monstrous Stories #4: The Day the Mice Stood Still: 5.00 avg, 1 review\n9. Pokémon: Sun & Moon, Vol. 8 (8): 5.00 avg, 1 review\n10. The Library Book: 5.00 avg, 3 reviews\n11. The Old Man and the Pirate Princess: 5.00 avg, 1 review\n12. Trouble in the CTC!: The Terra Prime Adventures Book 2: 4.90 avg, 10 reviews\n13. Clark the Shark: Tooth Trouble, No. 1: 4.75 avg, 4 reviews\n14. Cleo Porter and the Body Electric: 4.70 avg, 23 reviews"
+},
+{
+"id": "bookreview/3",
+"run": 2,
+"answer": "1. Around the World Mazes: 5.00\n2. Behind the Wheel (Choose Your Own Adventure #35)(Paperback/Revised): 5.00\n3. Benny Goes To The Moon: The great new book from Top Children's entertainer Gerry Ogilvie (1): 5.00\n4. Cheer Up, Ben Franklin! (Young Historians): 5.00\n5. Egypt (Enchantment of the World): 5.00\n6. Favorite Thorton W. Burgess Stories: 6 Books: 5.00\n7. LunaLu the Llamacorn: 5.00\n8. Monstrous Stories #4: The Day the Mice Stood Still: 5.00\n9. Pokémon: Sun & Moon, Vol. 8 (8): 5.00\n10. The Library Book: 5.00\n11. The Old Man and the Pirate Princess: 5.00\n12. Trouble in the CTC!: The Terra Prime Adventures Book 2: 4.90\n13. Clark the Shark: Tooth Trouble, No. 1: 4.75\n14. Cleo Porter and the Body Electric: 4.70"
+},
+{
+"id": "bookreview/3",
+"run": 3,
+"answer": "1. Around the World Mazes: 5.00, 1 review\n2. Behind the Wheel (Choose Your Own Adventure #35)(Paperback/Revised): 5.00, 1 review\n3. Benny Goes To The Moon: The great new book from Top Children's entertainer Gerry Ogilvie (1): 5.00, 1 review\n4. Cheer Up, Ben Franklin! (Young Historians): 5.00, 1 review\n5. Egypt (Enchantment of the World): 5.00, 1 review\n6. Favorite Thorton W. Burgess Stories: 6 Books: 5.00, 3 reviews\n7. LunaLu the Llamacorn: 5.00, 3 reviews\n8. Monstrous Stories #4: The Day the Mice Stood Still: 5.00, 1 review\n9. Pokémon: Sun & Moon, Vol. 8 (8): 5.00, 1 review\n10. The Library Book: 5.00, 3 reviews\n11. The Old Man and the Pirate Princess: 5.00, 1 review\n12. Trouble in the CTC!: The Terra Prime Adventures Book 2: 4.90, 10 reviews\n13. Clark the Shark: Tooth Trouble, No. 1: 4.75, 4 reviews\n14. Cleo Porter and the Body Electric: 4.70, 23 reviews"
+},
+{
+"id": "bookreview/3",
+"run": 4,
+"answer": "1. Around the World Mazes: 5.00 avg, 1 review\n2. Behind the Wheel (Choose Your Own Adventure #35)(Paperback/Revised): 5.00 avg, 1 review\n3. Benny Goes To The Moon: The great new book from Top Children's entertainer Gerry Ogilvie (1): 5.00 avg, 1 review\n4. Cheer Up, Ben Franklin! (Young Historians): 5.00 avg, 1 review\n5. Egypt (Enchantment of the World): 5.00 avg, 1 review\n6. Favorite Thorton W. Burgess Stories: 6 Books: 5.00 avg, 3 reviews\n7. LunaLu the Llamacorn: 5.00 avg, 3 reviews\n8. Monstrous Stories #4: The Day the Mice Stood Still: 5.00 avg, 1 review\n9. Pokémon: Sun & Moon, Vol. 8 (8): 5.00 avg, 1 review\n10. The Library Book: 5.00 avg, 3 reviews\n11. The Old Man and the Pirate Princess: 5.00 avg, 1 review\n12. Trouble in the CTC!: The Terra Prime Adventures Book 2: 4.90 avg, 10 reviews\n13. Clark the Shark: Tooth Trouble, No. 1: 4.75 avg, 4 reviews\n14. Cleo Porter and the Body Electric: 4.70 avg, 23 reviews"
+},
+{
+"id": "crmarenapro/1",
+"run": 0,
+"answer": "Budget, Authority"
+},
+{
+"id": "crmarenapro/1",
+"run": 1,
+"answer": "Budget, Authority"
+},
+{
+"id": "crmarenapro/1",
+"run": 2,
+"answer": "Budget, Authority"
+},
+{
+"id": "crmarenapro/1",
+"run": 3,
+"answer": "Budget, Authority"
+},
+{
+"id": "crmarenapro/1",
+"run": 4,
+"answer": "Budget, Authority"
+},
+{
+"id": "crmarenapro/2",
+"run": 0,
+"answer": "ka0Wt000000Ens5IAC, ka0Wt000000Eq0MIAS"
+},
+{
+"id": "crmarenapro/2",
+"run": 1,
+"answer": "ka0Wt000000Ens5IAC"
+},
+{
+"id": "crmarenapro/2",
+"run": 2,
+"answer": "ka0Wt000000Ens5IAC"
+},
+{
+"id": "crmarenapro/2",
+"run": 3,
+"answer": "ka0Wt000000Ens5IAC"
+},
+{
+"id": "crmarenapro/2",
+"run": 4,
+"answer": "ka0Wt000000Ens5IAC"
+},
+{
+"id": "crmarenapro/3",
+"run": 0,
+"answer": "Quote"
+},
+{
+"id": "crmarenapro/3",
+"run": 1,
+"answer": "Negotiation"
+},
+{
+"id": "crmarenapro/3",
+"run": 2,
+"answer": "Quote"
+},
+{
+"id": "crmarenapro/3",
+"run": 3,
+"answer": "Negotiation"
+},
+{
+"id": "crmarenapro/3",
+"run": 4,
+"answer": "Quote"
+},
+{
+"id": "crmarenapro/4",
+"run": 0,
+"answer": "November"
+},
+{
+"id": "crmarenapro/4",
+"run": 1,
+"answer": "November"
+},
+{
+"id": "crmarenapro/4",
+"run": 2,
+"answer": "November"
+},
+{
+"id": "crmarenapro/4",
+"run": 3,
+"answer": "November"
+},
+{
+"id": "crmarenapro/4",
+"run": 4,
+"answer": "November"
+},
+{
+"id": "crmarenapro/5",
+"run": 0,
+"answer": "a03Wt00000JqnHwIAJ"
+},
+{
+"id": "crmarenapro/5",
+"run": 1,
+"answer": "a03Wt00000JqnHwIAJ"
+},
+{
+"id": "crmarenapro/5",
+"run": 2,
+"answer": "a03Wt00000JqnHwIAJ"
+},
+{
+"id": "crmarenapro/5",
+"run": 3,
+"answer": "a03Wt00000JqnHwIAJ"
+},
+{
+"id": "crmarenapro/5",
+"run": 4,
+"answer": "a03Wt00000JqnHwIAJ"
+},
+{
+"id": "crmarenapro/6",
+"run": 0,
+"answer": "ka0Wt000000EnwvIAC"
+},
+{
+"id": "crmarenapro/6",
+"run": 1,
+"answer": "ka0Wt000000EnwvIAC, ka0Wt000000Ens5IAC"
+},
+{
+"id": "crmarenapro/6",
+"run": 2,
+"answer": "ka0Wt000000EnwvIAC, ka0Wt000000Ens5IAC"
+},
+{
+"id": "crmarenapro/6",
+"run": 3,
+"answer": "ka0Wt000000EnwvIAC"
+},
+{
+"id": "crmarenapro/6",
+"run": 4,
+"answer": "ka0Wt000000EnwvIAC, ka0Wt000000Ens5IAC"
+},
+{
+"id": "crmarenapro/7",
+"run": 0,
+"answer": "ka0Wt000000EpSUIA0"
+},
+{
+"id": "crmarenapro/7",
+"run": 1,
+"answer": "ka0Wt000000EoD3IAK"
+},
+{
+"id": "crmarenapro/7",
+"run": 2,
+"answer": "ka0Wt000000EoD3IAK"
+},
+{
+"id": "crmarenapro/7",
+"run": 3,
+"answer": "ka0Wt000000EoD3IAK"
+},
+{
+"id": "crmarenapro/7",
+"run": 4,
+"answer": "ka0Wt000000EoD3IAK"
+},
+{
+"id": "crmarenapro/8",
+"run": 0,
+"answer": "005Wt000003NIliIAG"
+},
+{
+"id": "crmarenapro/8",
+"run": 1,
+"answer": "005Wt000003NIliIAG"
+},
+{
+"id": "crmarenapro/8",
+"run": 2,
+"answer": "005Wt000003NIliIAG"
+},
+{
+"id": "crmarenapro/8",
+"run": 3,
+"answer": "005Wt000003NIliIAG"
+},
+{
+"id": "crmarenapro/8",
+"run": 4,
+"answer": "005Wt000003NIliIAG"
+},
+{
+"id": "crmarenapro/9",
+"run": 0,
+"answer": "MI"
+},
+{
+"id": "crmarenapro/9",
+"run": 1,
+"answer": "MI"
+},
+{
+"id": "crmarenapro/9",
+"run": 2,
+"answer": "MI"
+},
+{
+"id": "crmarenapro/9",
+"run": 3,
+"answer": "MI"
+},
+{
+"id": "crmarenapro/9",
+"run": 4,
+"answer": "MI"
+},
+{
+"id": "crmarenapro/10",
+"run": 0,
+"answer": "005Wt000003NDqDIAW"
+},
+{
+"id": "crmarenapro/10",
+"run": 1,
+"answer": "005Wt000003NDqDIAW"
+},
+{
+"id": "crmarenapro/10",
+"run": 2,
+"answer": "005Wt000003NDqDIAW"
+},
+{
+"id": "crmarenapro/10",
+"run": 3,
+"answer": "005Wt000003NDqDIAW"
+},
+{
+"id": "crmarenapro/10",
+"run": 4,
+"answer": "005Wt000003NDqDIAW"
+},
+{
+"id": "crmarenapro/11",
+"run": 0,
+"answer": "01tWt000006hV8LIAU"
+},
+{
+"id": "crmarenapro/11",
+"run": 1,
+"answer": "01tWt000006hV8LIAU"
+},
+{
+"id": "crmarenapro/11",
+"run": 2,
+"answer": "01tWt000006hV8LIAU"
+},
+{
+"id": "crmarenapro/11",
+"run": 3,
+"answer": "01tWt000006hV8LIAU"
+},
+{
+"id": "crmarenapro/11",
+"run": 4,
+"answer": "01tWt000006hV8LIAU"
+},
+{
+"id": "crmarenapro/12",
+"run": 0,
+"answer": "005Wt000003NDEBIA4"
+},
+{
+"id": "crmarenapro/12",
+"run": 1,
+"answer": "005Wt000003NDEBIA4"
+},
+{
+"id": "crmarenapro/12",
+"run": 2,
+"answer": "005Wt000003NDEBIA4"
+},
+{
+"id": "crmarenapro/12",
+"run": 3,
+"answer": "005Wt000003NDEBIA4"
+},
+{
+"id": "crmarenapro/12",
+"run": 4,
+"answer": "005Wt000003NDEBIA4"
+},
+{
+"id": "crmarenapro/13",
+"run": 0,
+"answer": "005Wt000003NHw5IAG"
+},
+{
+"id": "crmarenapro/13",
+"run": 1,
+"answer": "005Wt000003NBp4IAG"
+},
+{
+"id": "crmarenapro/13",
+"run": 2,
+"answer": "005Wt000003NBp4IAG"
+},
+{
+"id": "crmarenapro/13",
+"run": 3,
+"answer": "005Wt000003NBp4IAG"
+},
+{
+"id": "crmarenapro/13",
+"run": 4,
+"answer": "005Wt000003NBp4IAG"
+},
+{
+"id": "deps_dev_v1/1",
+"run": 0,
+"answer": "1. @dylanvann/svelte: 3.25.4, 73499 stars\n2. @dumc11/tailwindcss: 0.4.0, 73464 stars\n3. @dman777/shadow-dom-quill-temp: 1.0.0, 42407 stars\n4. @dothq/styled-components: 1.0.0, 39660 stars\n5. @dynasty/styled-components: 3.2.1, 39660 stars"
+},
+{
+"id": "deps_dev_v1/1",
+"run": 1,
+"answer": "Based on the query, the response references a table artifact that was not rendered. However, the response does mention some details. Unfortunately, without the actual artifact data showing the top 5 packages and their versions, I cannot provide the exact answer.\n\nFrom the notes in the response, we know that microsoft/typescript (94931 stars), lodash/lodash (57779 stars), and strapi/strapi (57236 stars) were excluded for various reasons, but the actual top 5 results table is missing.\n\nSince the artifact data is unavailable, I cannot produce a reliable concise answer. The response lacks the critical table data needed to answer this question accurately."
+},
+{
+"id": "deps_dev_v1/1",
+"run": 2,
+"answer": "1. @docly/web: 0.2.3 (89398 stars)\n2. @dylanvann/svelte: 3.25.4 (73499 stars)\n3. @dumc11/tailwindcss: 0.4.0 (73464 stars)\n4. @dman777/shadow-dom-quill-temp: 1.0.0 (42407 stars)\n5. @dothq/styled-components: 1.0.0 (39660 stars)"
+},
+{
+"id": "deps_dev_v1/1",
+"run": 3,
+"answer": "1. @docly/web: 0.2.3 (89398 stars)\n2. @dylanvann/svelte: 3.25.4 (73499 stars)\n3. @dumc11/tailwindcss: 0.4.0 (73464 stars)\n4. @dreampie/semantic-ui: 2.2.11 (51069 stars)\n5. @dongls/pdfjs-dist: 3.2.72 (44231 stars)"
+},
+{
+"id": "deps_dev_v1/1",
+"run": 4,
+"answer": "1. @docly/web: 0.2.3 (89398 stars)\n2. @dylanvann/svelte: 3.25.4 (73499 stars)\n3. @dumc11/tailwindcss: 0.4.0 (73464 stars)\n4. @dman777/shadow-dom-quill-temp: 1.0.0 (42407 stars)\n5. @dothq/styled-components: 1.0.0 (39660 stars)"
+},
+{
+"id": "deps_dev_v1/2",
+"run": 0,
+"answer": "1. mui-org/material-ui: 30522\n2. semantic-org/semantic-ui: 4955\n3. react-native-elements/react-native-elements: 4623\n4. sveltejs/svelte: 4091\n5. tailwindcss/tailwindcss: 3848"
+},
+{
+"id": "deps_dev_v1/2",
+"run": 1,
+"answer": "1. mui-org/material-ui: 30522\n2. semantic-org/semantic-ui: 4955\n3. react-native-elements/react-native-elements: 4623\n4. sveltejs/svelte: 4091\n5. tailwindcss/tailwindcss: 3848"
+},
+{
+"id": "deps_dev_v1/2",
+"run": 2,
+"answer": "1. mui-org/material-ui: 30522\n2. semantic-org/semantic-ui: 4955\n3. react-native-elements/react-native-elements: 4623\n4. sveltejs/svelte: 4091\n5. tailwindcss/tailwindcss: 3848"
+},
+{
+"id": "deps_dev_v1/2",
+"run": 3,
+"answer": "1. mui-org/material-ui: 30522\n2. semantic-org/semantic-ui: 4955\n3. react-native-elements/react-native-elements: 4623\n4. sveltejs/svelte: 4091\n5. tailwindcss/tailwindcss: 3848"
+},
+{
+"id": "deps_dev_v1/2",
+"run": 4,
+"answer": "1. mui-org/material-ui: 30522\n2. semantic-org/semantic-ui: 4955\n3. react-native-elements/react-native-elements: 4623\n4. sveltejs/svelte: 4091\n5. tailwindcss/tailwindcss: 3848"
+},
+{
+"id": "github_repos/1",
+"run": 0,
+"answer": "0.1232"
+},
+{
+"id": "github_repos/1",
+"run": 1,
+"answer": "0.1881"
+},
+{
+"id": "github_repos/1",
+"run": 2,
+"answer": "0.1485"
+},
+{
+"id": "github_repos/1",
+"run": 3,
+"answer": "0.1579"
+},
+{
+"id": "github_repos/1",
+"run": 4,
+"answer": "0.1232"
+},
+{
+"id": "github_repos/2",
+"run": 0,
+"answer": "uacaps/PageMenu"
+},
+{
+"id": "github_repos/2",
+"run": 1,
+"answer": "uacaps/PageMenu"
+},
+{
+"id": "github_repos/2",
+"run": 2,
+"answer": "uacaps/PageMenu"
+},
+{
+"id": "github_repos/2",
+"run": 3,
+"answer": "uacaps/PageMenu"
+},
+{
+"id": "github_repos/2",
+"run": 4,
+"answer": "uacaps/PageMenu"
+},
+{
+"id": "github_repos/3",
+"run": 0,
+"answer": "1077"
+},
+{
+"id": "github_repos/3",
+"run": 1,
+"answer": "1077"
+},
+{
+"id": "github_repos/3",
+"run": 2,
+"answer": "1077"
+},
+{
+"id": "github_repos/3",
+"run": 3,
+"answer": "1077"
+},
+{
+"id": "github_repos/3",
+"run": 4,
+"answer": "1077"
+},
+{
+"id": "github_repos/4",
+"run": 0,
+"answer": "Based on the response, the top 5 GitHub repositories whose main language is not Python, ordered by highest number of commits:\n\n1. torvalds/linux\n2. apple/swift\n3. Microsoft/vscode\n4. d3/d3\n5. facebook/react"
+},
+{
+"id": "github_repos/4",
+"run": 1,
+"answer": "1. torvalds/linux\n2. apple/swift\n3. twbs/bootstrap\n4. Microsoft/vscode\n5. facebook/react"
+},
+{
+"id": "github_repos/4",
+"run": 2,
+"answer": "1. torvalds/linux\n2. apple/swift\n3. twbs/bootstrap\n4. Microsoft/vscode\n5. facebook/react"
+},
+{
+"id": "github_repos/4",
+"run": 3,
+"answer": "1. torvalds/linux\n2. apple/swift\n3. twbs/bootstrap\n4. Microsoft/vscode\n5. facebook/react"
+},
+{
+"id": "github_repos/4",
+"run": 4,
+"answer": "1. torvalds/linux: 16061 commits\n2. apple/swift: 1051 commits\n3. twbs/bootstrap: 340 commits\n4. Microsoft/vscode: 190 commits\n5. facebook/react: 178 commits"
+},
+{
+"id": "googlelocal/1",
+"run": 0,
+"answer": "1. Widows Peak Salon: 4.87\n2. City Textile: 4.50\n3. Nobel Textile Co: 4.29\n4. San Soo Dang: 4.28\n5. Nova Fabrics: 3.33"
+},
+{
+"id": "googlelocal/1",
+"run": 1,
+"answer": "1. Widows Peak Salon: 4.87 (30 reviews)\n2. City Textile: 4.50 (6 reviews)\n3. Nobel Textile Co: 4.29 (7 reviews)\n4. San Soo Dang: 4.28 (18 reviews)\n5. Nova Fabrics: 3.33 (6 reviews)"
+},
+{
+"id": "googlelocal/1",
+"run": 2,
+"answer": "1. Widows Peak Salon: 4.87 (30 reviews)\n2. City Textile: 4.50 (6 reviews)\n3. Nobel Textile Co: 4.29 (7 reviews)\n4. San Soo Dang: 4.28 (18 reviews)\n5. Nova Fabrics: 3.33 (6 reviews)"
+},
+{
+"id": "googlelocal/1",
+"run": 3,
+"answer": "1. Widows Peak Salon: 4.87\n2. City Textile: 4.50\n3. Nobel Textile Co: 4.29\n4. San Soo Dang: 4.28\n5. Nova Fabrics: 3.33"
+},
+{
+"id": "googlelocal/1",
+"run": 4,
+"answer": "1. Widows Peak Salon: 4.87\n2. City Textile: 4.50\n3. Nobel Textile Co: 4.29\n4. San Soo Dang: 4.28\n5. Nova Fabrics: 3.33"
+},
+{
+"id": "googlelocal/2",
+"run": 0,
+"answer": "Elite Massage: 5.00\nAngel-A Massage: 4.33\nAurora Massage: 4.18"
+},
+{
+"id": "googlelocal/2",
+"run": 1,
+"answer": "Elite Massage: 5.00\nAngel-A Massage: 4.33\nAurora Massage: 4.18"
+},
+{
+"id": "googlelocal/2",
+"run": 2,
+"answer": "Elite Massage: 5.00\nAngel-A Massage: 4.33\nAurora Massage: 4.18"
+},
+{
+"id": "googlelocal/2",
+"run": 3,
+"answer": "Elite Massage: 5.00\nAngel-A Massage: 4.33\nAurora Massage: 4.18"
+},
+{
+"id": "googlelocal/2",
+"run": 4,
+"answer": "Elite Massage: 5.00\nAngel-A Massage: 4.33\nAurora Massage: 4.18"
+},
+{
+"id": "googlelocal/3",
+"run": 0,
+"answer": "1. Taba Rug Gallery | Thursday: 10AM-7PM; Friday: 10AM-7PM; Saturday: 10AM-7PM; Sunday: 11AM-6PM; Monday: 10AM-7PM; Tuesday: 10AM-7PM; Wednesday: 10AM-7PM | Average Rating: 5.00\n2. Beauty Divine Artistry | Thursday: 9AM-8PM; Friday: 9AM-8PM; Saturday: 10AM-7PM; Sunday: 11AM-6PM; Monday: 9AM-8PM; Tuesday: 9AM-8PM; Wednesday: 9AM-8PM | Average Rating: 5.00\n3. White Barn Candle Co | Thursday: 10AM-9PM; Friday: 10AM-9PM; Saturday: 10AM-9PM; Sunday: 11AM-7PM; Monday: 10AM-9PM; Tuesday: 10AM-9PM; Wednesday: 10AM-9PM | Average Rating: 5.00\n4. TACOS LA CABANA | Thursday: Closed; Friday: 5-11PM; Saturday: 5-11PM; Sunday: 5-11PM; Monday: 5-11PM; Tuesday: Closed; Wednesday: Closed | Average Rating: 5.00\n5. Mariscos el poblano | Thursday: Open 24 hours; Friday: 8AM-3:30PM; Saturday: 8AM-3:30PM; Sunday: 8AM-3:30PM; Monday: 9AM-3:30AM; Tuesday: 8AM-3:30PM; Wednesday: 8AM-3:30PM | Average Rating: 5.00"
+},
+{
+"id": "googlelocal/3",
+"run": 1,
+"answer": "1. Taba Rug Gallery: Average Rating 5.00, Hours: Thursday: 10AM-7PM; Friday: 10AM-7PM; Saturday: 10AM-7PM; Sunday: 11AM-6PM; Monday: 10AM-7PM; Tuesday: 10AM-7PM; Wednesday: 10AM-7PM\n2. Beauty Divine Artistry: Average Rating 5.00, Hours: Thursday: 9AM-8PM; Friday: 9AM-8PM; Saturday: 10AM-7PM; Sunday: 11AM-6PM; Monday: 9AM-8PM; Tuesday: 9AM-8PM; Wednesday: 9AM-8PM\n3. White Barn Candle Co: Average Rating 5.00, Hours: Thursday: 10AM-9PM; Friday: 10AM-9PM; Saturday: 10AM-9PM; Sunday: 11AM-7PM; Monday: 10AM-9PM; Tuesday: 10AM-9PM; Wednesday: 10AM-9PM\n4. TACOS LA CABANA: Average Rating 5.00, Hours: Thursday: Closed; Friday: 5-11PM; Saturday: 5-11PM; Sunday: 5-11PM; Monday: 5-11PM; Tuesday: Closed; Wednesday: Closed\n5. Mariscos el poblano: Average Rating 5.00, Hours: Thursday: Open 24 hours; Friday: 8AM-3:30PM; Saturday: 8AM-3:30PM; Sunday: 8AM-3:30PM; Monday: 9AM-3:30AM; Tuesday: 8AM-3:30PM; Wednesday: 8AM-3:30PM"
+},
+{
+"id": "googlelocal/3",
+"run": 2,
+"answer": "1. Taba Rug Gallery: 5.00 avg rating, 18 reviews. Hours: Monday: 10AM–7PM; Tuesday: 10AM–7PM; Wednesday: 10AM–7PM; Thursday: 10AM–7PM; Friday: 10AM–7PM; Saturday: 10AM–7PM; Sunday: 11AM–6PM\n2. Beauty Divine Artistry: 5.00 avg rating, 8 reviews. Hours: Monday: 9AM–8PM; Tuesday: 9AM–8PM; Wednesday: 9AM–8PM; Thursday: 9AM–8PM; Friday: 9AM–8PM; Saturday: 10AM–7PM; Sunday: 11AM–6PM\n3. Mariscos el poblano: 5.00 avg rating, 3 reviews. Hours: Monday: 9AM–3:30AM; Tuesday: 8AM–3:30PM; Wednesday: 8AM–3:30PM; Thursday: Open 24 hours; Friday: 8AM–3:30PM; Saturday: 8AM–3:30PM; Sunday: 8AM–3:30PM\n4. White Barn Candle Co: 5.00 avg rating, 2 reviews. Hours: Monday: 10AM–9PM; Tuesday: 10AM–9PM; Wednesday: 10AM–9PM; Thursday: 10AM–9PM; Friday: 10AM–9PM; Saturday: 10AM–9PM; Sunday: 11AM–7PM\n5. TACOS LA CABANA: 5.00 avg rating, 2 reviews. Hours: Monday: 5–11PM; Tuesday: Closed; Wednesday: Closed; Thursday: Closed; Friday: 5–11PM; Saturday: 5–11PM; Sunday: 5–11PM"
+},
+{
+"id": "googlelocal/3",
+"run": 3,
+"answer": "1. Taba Rug Gallery: Average Rating 5.00, Hours: Thursday: 10AM–7PM; Friday: 10AM–7PM; Saturday: 10AM–7PM; Sunday: 11AM–6PM; Monday: 10AM–7PM; Tuesday: 10AM–7PM; Wednesday: 10AM–7PM\n2. Beauty Divine Artistry: Average Rating 5.00, Hours: Thursday: 9AM–8PM; Friday: 9AM–8PM; Saturday: 10AM–7PM; Sunday: 11AM–6PM; Monday: 9AM–8PM; Tuesday: 9AM–8PM; Wednesday: 9AM–8PM\n3. White Barn Candle Co: Average Rating 5.00, Hours: Thursday: 10AM–9PM; Friday: 10AM–9PM; Saturday: 10AM–9PM; Sunday: 11AM–7PM; Monday: 10AM–9PM; Tuesday: 10AM–9PM; Wednesday: 10AM–9PM\n4. TACOS LA CABANA: Average Rating 5.00, Hours: Thursday: Closed; Friday: 5–11PM; Saturday: 5–11PM; Sunday: 5–11PM; Monday: 5–11PM; Tuesday: Closed; Wednesday: Closed\n5. Mariscos el poblano: Average Rating 5.00, Hours: Thursday: Open 24 hours; Friday: 8AM–3:30PM; Saturday: 8AM–3:30PM; Sunday: 8AM–3:30PM; Monday: 9AM–3:30AM; Tuesday: 8AM–3:30PM; Wednesday: 8AM–3:30PM"
+},
+{
+"id": "googlelocal/3",
+"run": 4,
+"answer": "1. Taba Rug Gallery | Monday: 10AM-7PM; Tuesday: 10AM-7PM; Wednesday: 10AM-7PM; Thursday: 10AM-7PM; Friday: 10AM-7PM | 5.00\n2. Beauty Divine Artistry | Monday: 9AM-8PM; Tuesday: 9AM-8PM; Wednesday: 9AM-8PM; Thursday: 9AM-8PM; Friday: 9AM-8PM | 5.00\n3. White Barn Candle Co | Monday: 10AM-9PM; Tuesday: 10AM-9PM; Wednesday: 10AM-9PM; Thursday: 10AM-9PM; Friday: 10AM-9PM | 5.00\n4. TACOS LA CABANA | Monday: 5-11PM; Tuesday: Closed; Wednesday: Closed; Thursday: Closed; Friday: 5-11PM | 5.00\n5. Mariscos el poblano | Monday: 9AM-3:30AM; Tuesday: 8AM-3:30PM; Wednesday: 8AM-3:30PM; Thursday: Open 24 hours; Friday: 8AM-3:30PM | 5.00"
+},
+{
+"id": "googlelocal/4",
+"run": 0,
+"answer": "1. Encino Dermatology & Laser: Alex Khadavi MD: 19\n2. The Boochyard @ Local Roots: 17\n3. Aurora Massage: 14"
+},
+{
+"id": "googlelocal/4",
+"run": 1,
+"answer": "1. Encino Dermatology & Laser: Alex Khadavi MD: 19\n2. The Boochyard @ Local Roots: 17\n3. Aurora Massage: 14"
+},
+{
+"id": "googlelocal/4",
+"run": 2,
+"answer": "1. Encino Dermatology & Laser: Alex Khadavi MD: 19\n2. The Boochyard @ Local Roots: 17\n3. Aurora Massage: 14"
+},
+{
+"id": "googlelocal/4",
+"run": 3,
+"answer": "1. Encino Dermatology & Laser: Alex Khadavi MD: 19\n2. The Boochyard @ Local Roots: 17\n3. Aurora Massage: 14"
+},
+{
+"id": "googlelocal/4",
+"run": 4,
+"answer": "1. Encino Dermatology & Laser: Alex Khadavi MD: 19\n2. The Boochyard @ Local Roots: 17\n3. Aurora Massage: 14"
+},
+{
+"id": "music_brainz_20k/1",
+"run": 0,
+"answer": "$601.44"
+},
+{
+"id": "music_brainz_20k/1",
+"run": 1,
+"answer": "$601.44"
+},
+{
+"id": "music_brainz_20k/1",
+"run": 2,
+"answer": "$601.44"
+},
+{
+"id": "music_brainz_20k/1",
+"run": 3,
+"answer": "$377.62"
+},
+{
+"id": "music_brainz_20k/1",
+"run": 4,
+"answer": "$601.44"
+},
+{
+"id": "music_brainz_20k/2",
+"run": 0,
+"answer": "iTunes: $505.61"
+},
+{
+"id": "music_brainz_20k/2",
+"run": 1,
+"answer": "Amazon Music: $304.13"
+},
+{
+"id": "music_brainz_20k/2",
+"run": 2,
+"answer": "iTunes: $505.61"
+},
+{
+"id": "music_brainz_20k/2",
+"run": 3,
+"answer": "iTunes: $505.61"
+},
+{
+"id": "music_brainz_20k/2",
+"run": 4,
+"answer": "Amazon Music: $304.13"
+},
+{
+"id": "music_brainz_20k/3",
+"run": 0,
+"answer": "Groovey by Rich Matteson: $5417.34"
+},
+{
+"id": "music_brainz_20k/3",
+"run": 1,
+"answer": "Groovey: $4128.59"
+},
+{
+"id": "music_brainz_20k/3",
+"run": 2,
+"answer": "Groovey by Rich Matteson: $5417.34"
+},
+{
+"id": "music_brainz_20k/3",
+"run": 3,
+"answer": "Kapitel 01"
+},
+{
+"id": "music_brainz_20k/3",
+"run": 4,
+"answer": "Groovey: $5417.34"
+},
+{
+"id": "pancancer_atlas/1",
+"run": 0,
+"answer": "Astrocytoma: 2.5290 (6 samples)\nOligoastrocytoma: 2.7136 (5 samples)\nOligodendroglioma: 2.6825 (8 samples)"
+},
+{
+"id": "pancancer_atlas/1",
+"run": 1,
+"answer": "Astrocytoma: 2.5290 (6 patients)\nOligoastrocytoma: 2.7136 (5 patients)\nOligodendroglioma: 2.6825 (8 patients)"
+},
+{
+"id": "pancancer_atlas/1",
+"run": 2,
+"answer": "Oligoastrocytoma: 2.7136 (n=5)\nOligodendroglioma: 2.6825 (n=8)\nAstrocytoma: 2.5290 (n=6)"
+},
+{
+"id": "pancancer_atlas/1",
+"run": 3,
+"answer": "Astrocytoma: 2.5713 (n=10)\nOligoastrocytoma: 2.7136 (n=5)\nOligodendroglioma: 2.6825 (n=8)"
+},
+{
+"id": "pancancer_atlas/1",
+"run": 4,
+"answer": "Astrocytoma: 2.5290 (6 patients)\nOligoastrocytoma: 2.7136 (5 patients)\nOligodendroglioma: 2.6825 (8 patients)"
+},
+{
+"id": "pancancer_atlas/2",
+"run": 0,
+"answer": "1. Infiltrating Lobular Carcinoma: 41.57% (74 out of 178 patients)\n2. Mixed Histology (please specify): 12.50% (3 out of 24 patients)\n3. Other  specify: 8.33% (3 out of 36 patients)"
+},
+{
+"id": "pancancer_atlas/2",
+"run": 1,
+"answer": "1. Infiltrating Lobular Carcinoma: 61.22% (90 out of 147 patients)\n2. Mixed Histology (please specify): 18.18% (4 out of 22 patients)\n3. Other  specify: 8.57% (3 out of 35 patients)"
+},
+{
+"id": "pancancer_atlas/2",
+"run": 2,
+"answer": "1. Infiltrating Lobular Carcinoma: 50.56%\n2. Mixed Histology (please specify): 16.67%\n3. Other  specify: 8.33%"
+},
+{
+"id": "pancancer_atlas/2",
+"run": 3,
+"answer": "1. Infiltrating Lobular Carcinoma: 48.03%\n2. Other  specify: 7.41%\n3. Mixed Histology (please specify): 6.67%"
+},
+{
+"id": "pancancer_atlas/2",
+"run": 4,
+"answer": "1. Infiltrating Lobular Carcinoma: 48.03%\n2. Other, specify: 7.41%\n3. Mixed Histology (please specify): 6.67%"
+},
+{
+"id": "pancancer_atlas/3",
+"run": 0,
+"answer": "305.1239"
+},
+{
+"id": "pancancer_atlas/3",
+"run": 1,
+"answer": "305.1239"
+},
+{
+"id": "pancancer_atlas/3",
+"run": 2,
+"answer": "325.3373"
+},
+{
+"id": "pancancer_atlas/3",
+"run": 3,
+"answer": "305.1239"
+},
+{
+"id": "pancancer_atlas/3",
+"run": 4,
+"answer": "305.1239"
+},
+{
+"id": "patents/1",
+"run": 0,
+"answer": "Y02E, G06Q, G06T, Y02T, G06N, H01M, G06V, Y02B, H02J, G01S, B65G, G16H, B60L, B08B, G08B, G10L, B33Y, G09F, Y04S, C01P, B22F, B05B, E04B, G01D, C21D, H02G, E02D, G01L, C07B, E04G, F16M, A24F, B02C, C01G, B22D, A61G, G01K, C22B, H03H, E01C, A62C, H02B, B07B, B66F, G16B, B60P, G01P, E01D, B21B, A23P\n\nNote: The response indicates 89 total CPC group codes whose best EMA year is 2022. The artifact table provided shows 50 of them. The complete list of 89 codes based on the available data includes the 50 listed above, with the remaining codes not fully shown in the artifact. The 50 codes shown above are:\n\nY02E, G06Q, G06T, Y02T, G06N, H01M, G06V, Y02B, H02J, G01S, B65G, G16H, B60L, B08B, G08B, G10L, B33Y, G09F, Y04S, C01P, B22F, B05B, E04B, G01D, C21D, H02G, E02D, G01L, C07B, E04G, F16M, A24F, B02C, C01G, B22D, A61G, G01K, C22B, H03H, E01C, A62C, H02B, B07B, B66F, G16B, B60P, G01P, E01D, B21B, A23P"
+},
+{
+"id": "patents/1",
+"run": 1,
+"answer": "Y02E, G06Q, G06T, Y02T, G06N, H01M, G06V, Y02B, H02J, G01S, B65G, G16H, B60L, B08B, G08B, G10L, B33Y, G09F, Y04S, C01P, B22F, B05B, E04B, G01D, C21D, H02G, E02D, G01L, C07B, E04G, F16M, A24F, B02C, C01G, B22D, A61G, G01K, C22B, H03H, E01C, A62C, H02B, B07B, B66F, G16B, B60P, G01P, E01D, B21B, A23P\n\n(and the remaining 42 codes from the full 92 results, which were truncated in the artifact display)\n\nThe 50 CPC level 5 group codes shown above (with 42 additional codes beyond the displayed artifact) whose best EMA year is 2022, ranked by peak EMA value:\n\n1. Y02E: 868.07\n2. G06Q: 414.95\n3. G06T: 313.94\n4. Y02T: 311.57\n5. G06N: 280.29\n6. H01M: 239.78\n7. G06V: 228.66\n8. Y02B: 208.57\n9. H02J: 160.97\n10. G01S: 139.85\n11. B65G: 101.97\n12. G16H: 101.37\n13. B60L: 90.19\n14. B08B: 81.12\n15. G08B: 77.35\n16. G10L: 73.63\n17. B33Y: 59.37\n18. G09F: 56.95\n19. Y04S: 56.62\n20. C01P: 54.75\n21. B22F: 50.65\n22. B05B: 50.53\n23. E04B: 50.04\n24. G01D: 47.29\n25. C21D: 45.55\n26. H02G: 45.10\n27. E02D: 43.42\n28. G01L: 38.42\n29. C07B: 36.77\n30. E04G: 36.20\n31. F16M: 34.07\n32. A24F: 34.02\n33. B02C: 33.32\n34. C01G: 30.43\n35. B22D: 30.06\n36. A61G: 29.15\n37. G01K: 27.90\n38. C22B: 24.10\n39. H03H: 23.27\n40. E01C: 22.60\n41. A62C: 20.92\n42. H02B: 20.73\n43. B07B: 20.62\n44. B66F: 20.52\n45. G16B: 20.11\n46. B60P: 18.62\n47. G01P: 18.34\n48. E01D: 17.62\n49. B21B: 17.25\n50. A23P: 16.69"
+},
+{
+"id": "patents/1",
+"run": 2,
+"answer": "1. Y02E: 868.07\n2. G06Q: 414.95\n3. G06T: 313.94\n4. Y02T: 311.57\n5. G06N: 280.29\n6. H01M: 239.78\n7. G06V: 228.66\n8. Y02B: 208.57\n9. H02J: 160.97\n10. G01S: 139.85\n11. B65G: 101.97\n12. G16H: 101.37\n13. B60L: 90.19\n14. B08B: 81.12\n15. G08B: 77.35\n16. G10L: 73.63\n17. B33Y: 59.37\n18. G09F: 56.95\n19. Y04S: 56.62\n20. C01P: 54.75\n21. B22F: 50.65\n22. B05B: 50.53\n23. E04B: 50.04\n24. G01D: 47.29\n25. C21D: 45.55\n26. H02G: 45.1\n27. E02D: 43.42\n28. G01L: 38.42\n29. C07B: 36.77\n30. E04G: 36.2\n31. F16M: 34.07\n32. A24F: 34.02\n33. B02C: 33.32\n34. C01G: 30.43\n35. B22D: 30.06\n36. A61G: 29.15\n37. G01K: 27.9\n38. C22B: 24.1\n39. H03H: 23.27\n40. E01C: 22.6\n41. A62C: 20.92\n42. H02B: 20.73\n43. B07B: 20.62\n44. B66F: 20.52\n45. G16B: 20.11\n46. B60P: 18.62\n47. G01P: 18.34\n48. E01D: 17.62\n49. B21B: 17.25\n50. A23P: 16.69\n\n92 CPC level-5 group codes have their highest EMA year in 2022."
+},
+{
+"id": "patents/1",
+"run": 3,
+"answer": "1. Y02E: 868.07\n2. G06Q: 414.95\n3. G06T: 313.94\n4. Y02T: 311.57\n5. G06N: 280.29\n6. H01M: 239.78\n7. G06V: 228.66\n8. Y02B: 208.57\n9. H02J: 160.97\n10. G01S: 139.85\n11. B65G: 101.97\n12. G16H: 101.37\n13. B60L: 90.19\n14. B08B: 81.12\n15. G08B: 77.35\n16. G10L: 73.63\n17. B33Y: 59.37\n18. G09F: 56.95\n19. Y04S: 56.62\n20. C01P: 54.75\n21. B22F: 50.65\n22. B05B: 50.53\n23. E04B: 50.04\n24. G01D: 47.29\n25. C21D: 45.55\n26. H02G: 45.1\n27. E02D: 43.42\n28. G01L: 38.42\n29. C07B: 36.77\n30. E04G: 36.2\n31. F16M: 34.07\n32. A24F: 34.02\n33. B02C: 33.32\n34. C01G: 30.43\n35. B22D: 30.06\n36. A61G: 29.15\n37. G01K: 27.9\n38. C22B: 24.1\n39. H03H: 23.27\n40. E01C: 22.6\n41. A62C: 20.92\n42. H02B: 20.73\n43. B07B: 20.62\n44. B66F: 20.52\n45. G16B: 20.11\n46. B60P: 18.62\n47. G01P: 18.34\n48. E01D: 17.62\n49. B21B: 17.25\n50. A23P: 16.69\n\nThese are the CPC level-5 group codes whose peak exponential moving average (smoothing factor 0.2) of patent filings occurred in 2022, ranked by peak EMA value. There are 89 total codes meeting this criterion; the top 50 are listed above from the available artifact data."
+},
+{
+"id": "patents/1",
+"run": 4,
+"answer": "Here are all 92 CPC level 5 group codes whose best EMA year is 2022:\n\n1. Y02E: 868.07\n2. G06Q: 414.95\n3. G06T: 313.94\n4. Y02T: 311.57\n5. G06N: 280.29\n6. H01M: 239.78\n7. G06V: 228.66\n8. Y02B: 208.57\n9. H02J: 160.97\n10. G01S: 139.85\n11. B65G: 101.97\n12. G16H: 101.37\n13. B60L: 90.19\n14. B08B: 81.12\n15. G08B: 77.35\n16. G10L: 73.63\n17. B33Y: 59.37\n18. G09F: 56.95\n19. Y04S: 56.62\n20. C01P: 54.75\n21. B22F: 50.65\n22. B05B: 50.53\n23. E04B: 50.04\n24. G01D: 47.29\n25. C21D: 45.55\n26. H02G: 45.10\n27. E02D: 43.42\n28. G01L: 38.42\n29. C07B: 36.77\n30. E04G: 36.20\n31. F16M: 34.07\n32. A24F: 34.02\n33. B02C: 33.32\n34. C01G: 30.43\n35. B22D: 30.06\n36. A61G: 29.15\n37. G01K: 27.90\n38. C22B: 24.10\n39. H03H: 23.27\n40. E01C: 22.60\n41. A62C: 20.92\n42. H02B: 20.73\n43. B07B: 20.62\n44. B66F: 20.52\n45. G16B: 20.11\n46. B60P: 18.62\n47. G01P: 18.34\n48. E01D: 17.62\n49. B21B: 17.25\n50. A23P: 16.69\n51. G21B: 16.69\n52. B64D: 16.44\n53. C40B: 15.88\n54. B64C: 15.72\n55. G07F: 15.55\n56. F03D: 15.29\n57. C04B: 14.97\n58. B21D: 14.80\n59. B61D: 14.72\n60. G01V: 14.59\n61. G08C: 14.41\n62. C10J: 14.26\n63. E04D: 13.89\n64. C08J: 13.84\n65. E21D: 13.72\n66. B03B: 13.40\n67. E04C: 12.91\n68. A01H: 12.73\n69. F24S: 12.56\n70. G21C: 12.40\n71. B60S: 12.24\n72. E02F: 11.94\n73. B62J: 11.87\n74. B61B: 11.61\n75. B03D: 11.28\n76. G01T: 10.89\n77. G06E: 10.78\n78. B21C: 10.60\n79. B61L: 10.44\n80. F17D: 10.32\n81. E01F: 10.18\n82. E21F: 10.05\n83. B62H: 9.94\n84. C25D: 9.82\n85. F03B: 9.68\n86. B62K: 9.55\n87. E02B: 9.40\n88. G07C: 9.28\n89. H05H: 9.12\n90. B03C: 8.97\n91. F17C: 8.84\n92. A63H: 8.70"
+},
+{
+"id": "patents/2",
+"run": 0,
+"answer": "CPC Group Code | Full Title | Highest EMA | Best Year\nA61 | MEDICAL OR VETERINARY SCIENCE; HYGIENE | 3 | 2016\nH04 | ELECTRIC COMMUNICATION TECHNIQUE | 2 | 2015\nB41 | PRINTING; LINING MACHINES; TYPEWRITERS; STAMPS | 1 | 2007\nF02 | COMBUSTION ENGINES; HOT-GAS OR COMBUSTION-PRODUCT ENGINE PLANTS | 1 | 2010\nF04 | POSITIVE - DISPLACEMENT MACHINES FOR LIQUIDS; PUMPS FOR LIQUIDS OR ELASTIC FLUIDS | 1 | 2014\nG01 | MEASURING; TESTING | 1 | 2008\nB23 | MACHINE TOOLS; METAL-WORKING NOT OTHERWISE PROVIDED FOR | 1 | 2015\nB63 | SHIPS OR OTHER WATERBORNE VESSELS; RELATED EQUIPMENT | 1 | 2014\nY02 | TECHNOLOGIES OR APPLICATIONS FOR MITIGATION OR ADAPTATION AGAINST CLIMATE CHANGE | 1 | 2013\nB66 | HOISTING; LIFTING; HAULING | 1 | 2016\nE02 | HYDRAULIC ENGINEERING; FOUNDATIONS; SOIL SHIFTING | 1 | 2012\nB60 | VEHICLES IN GENERAL | 1 | 2009\nF24 | HEATING; RANGES; VENTILATING | 1 | 2018\nF23 | COMBUSTION APPARATUS; COMBUSTION PROCESSES | 1 | 2018\nF16 | ENGINEERING ELEMENTS AND UNITS; GENERAL MEASURES FOR PRODUCING AND MAINTAINING EFFECTIVE FUNCTIONING OF MACHINES OR INSTALLATIONS; THERMAL INSULATION IN GENERAL | 1 | 2009\nA21 | BAKING; EDIBLE DOUGHS | 1 | 2015\nA47 | FURNITURE; DOMESTIC ARTICLES OR APPLIANCES; COFFEE MILLS; SPICE MILLS; SUCTION CLEANERS IN GENERAL | 1 | 2015\nA43 | FOOTWEAR | 1 | 2016\nH01 | ELECTRIC ELEMENTS | 1 | 2008\nF01 | MACHINES OR ENGINES IN GENERAL; ENGINE PLANTS IN GENERAL; STEAM ENGINES | 1 | 2018\nF05 | INDEXING SCHEMES RELATING TO ENGINES OR PUMPS IN VARIOUS SUBCLASSES OF CLASSES F01-F04 | 1 | 2018\nB64 | AIRCRAFT; AVIATION; COSMONAUTICS | 1 | 2018\nB62 | LAND VEHICLES FOR TRAVELLING OTHERWISE THAN ON RAILS | 1 | 2010\nC04 | CEMENTS; CONCRETE; ARTIFICIAL STONE; CERAMICS; REFRACTORIES | 1 | 2015\nC09 | DYES; PAINTS; POLISHES; NATURAL RESINS; ADHESIVES; COMPOSITIONS NOT OTHERWISE PROVIDED FOR; APPLICATIONS OF MATERIALS NOT OTHERWISE PROVIDED FOR | 1 | 2015\nB29 | WORKING OF PLASTICS; WORKING OF SUBSTANCES IN A PLASTIC STATE IN GENERAL | 1 | 2007\nG02 | OPTICS | 1 | 2016\nY10 | TECHNICAL SUBJECTS COVERED BY FORMER USPC | 1 | 2012\nE05 | LOCKS; KEYS; WINDOW OR DOOR FITTINGS; SAFES | 1 | 2012\nG07 | CHECKING-DEVICES | 1 | 2012\nH02 | GENERATION; CONVERSION OR DISTRIBUTION OF ELECTRIC POWER | 1 | 2009\nH03 | ELECTRONIC CIRCUITRY | 1 | 2015\nF41 | WEAPONS | 1 | 2012\nF42 | AMMUNITION; BLASTING | 1 | 2012\nG08 | SIGNALLING | 1 | 2017"
+},
+{
+"id": "patents/2",
+"run": 1,
+"answer": "1. C04: CEMENTS; CONCRETE; ARTIFICIAL STONE; CERAMICS; REFRACTORIES | Best Year: 2015 | EMA: 23\n2. H04: ELECTRIC COMMUNICATION TECHNIQUE | Best Year: 2015 | EMA: 17\n3. A61: MEDICAL OR VETERINARY SCIENCE; HYGIENE | Best Year: 2016 | EMA: 9\n4. B29: WORKING OF PLASTICS; WORKING OF SUBSTANCES IN A PLASTIC STATE IN GENERAL | Best Year: 2007 | EMA: 9\n5. G02: OPTICS | Best Year: 2016 | EMA: 9\n6. H01: ELECTRIC ELEMENTS | Best Year: 2008 | EMA: 6\n7. F23: COMBUSTION APPARATUS; COMBUSTION PROCESSES | Best Year: 2018 | EMA: 5\n8. F16: ENGINEERING ELEMENTS AND UNITS; GENERAL MEASURES FOR PRODUCING AND MAINTAINING EFFECTIVE FUNCTIONING OF MACHINES OR INSTALLATIONS; THERMAL INSULATION IN GENERAL | Best Year: 2009 | EMA: 5\n9. F02: COMBUSTION ENGINES; HOT-GAS OR COMBUSTION-PRODUCT ENGINE PLANTS | Best Year: 2017 | EMA: 4.39\n10. B41: PRINTING; LINING MACHINES; TYPEWRITERS; STAMPS | Best Year: 2007 | EMA: 3\n11. E02: HYDRAULIC ENGINEERING; FOUNDATIONS; SOIL SHIFTING | Best Year: 2012 | EMA: 3\n12. B60: VEHICLES IN GENERAL | Best Year: 2009 | EMA: 3\n13. A43: FOOTWEAR | Best Year: 2016 | EMA: 3\n14. H02: GENERATION; CONVERSION OR DISTRIBUTION OF ELECTRIC POWER | Best Year: 2009 | EMA: 3\n15. H03: ELECTRONIC CIRCUITRY | Best Year: 2015 | EMA: 3\n16. Y02: TECHNOLOGIES OR APPLICATIONS FOR MITIGATION OR ADAPTATION AGAINST CLIMATE CHANGE | Best Year: 2013 | EMA: 2\n17. F05: INDEXING SCHEMES RELATING TO ENGINES OR PUMPS IN VARIOUS SUBCLASSES OF CLASSES F01-F04 | Best Year: 2018 | EMA: 2\n18. B62: LAND VEHICLES FOR TRAVELLING OTHERWISE THAN ON RAILS | Best Year: 2010 | EMA: 2\n19. G08: SIGNALLING | Best Year: 2017 | EMA: 2\n20. G01: MEASURING; TESTING | Best Year: 2018 | EMA: 1.29\n21. F04: POSITIVE - DISPLACEMENT MACHINES FOR LIQUIDS; PUMPS FOR LIQUIDS OR ELASTIC FLUIDS | Best Year: 2014 | EMA: 1\n22. B23: MACHINE TOOLS; METAL-WORKING NOT OTHERWISE PROVIDED FOR | Best Year: 2015 | EMA: 1\n23. B63: SHIPS OR OTHER WATERBORNE VESSELS; RELATED EQUIPMENT | Best Year: 2014 | EMA: 1\n24. B66: HOISTING; LIFTING; HAULING | Best Year: 2016 | EMA: 1\n25. F24: HEATING; RANGES; VENTILATING | Best Year: 2018 | EMA: 1\n26. A47: FURNITURE; DOMESTIC ARTICLES OR APPLIANCES; COFFEE MILLS; SPICE MILLS; SUCTION CLEANERS IN GENERAL | Best Year: 2015 | EMA: 1\n27. A21: BAKING; EDIBLE DOUGHS | Best Year: 2015 | EMA: 1\n28. F01: MACHINES OR ENGINES IN GENERAL; ENGINE PLANTS IN GENERAL; STEAM ENGINES | Best Year: 2018 | EMA: 1\n29. B64: AIRCRAFT; AVIATION; COSMONAUTICS | Best Year: 2018 | EMA: 1\n30. C09: DYES; PAINTS; POLISHES; NATURAL RESINS; ADHESIVES; COMPOSITIONS NOT OTHERWISE PROVIDED FOR; APPLICATIONS OF MATERIALS NOT OTHERWISE PROVIDED FOR | Best Year: 2015 | EMA: 1\n31. Y10: TECHNICAL SUBJECTS COVERED BY FORMER USPC | Best Year: 2012 | EMA: 1\n32. G07: CHECKING-DEVICES | Best Year: 2012 | EMA: 1\n33. E05: LOCKS; KEYS; WINDOW OR DOOR FITTINGS; SAFES | Best Year: 2012 | EMA: 1\n34. F42: AMMUNITION; BLASTING | Best Year: 2012 | EMA: 1\n35. F41: WEAPONS | Best Year: 2012 | EMA: 1"
+},
+{
+"id": "patents/2",
+"run": 2,
+"answer": "CPC Group Code | Full Title | Highest EMA | Best Year\nA61 | MEDICAL OR VETERINARY SCIENCE; HYGIENE | 3.00 | 2016\nH04 | ELECTRIC COMMUNICATION TECHNIQUE | 2.00 | 2015\nB41 | PRINTING; LINING MACHINES; TYPEWRITERS; STAMPS | 1.00 | 2007\nF02 | COMBUSTION ENGINES; HOT-GAS OR COMBUSTION-PRODUCT ENGINE PLANTS | 1.00 | 2010\nF04 | POSITIVE - DISPLACEMENT MACHINES FOR LIQUIDS; PUMPS FOR LIQUIDS OR ELASTIC FLUIDS | 1.00 | 2014\nG01 | MEASURING; TESTING | 1.00 | 2008\nB23 | MACHINE TOOLS; METAL-WORKING NOT OTHERWISE PROVIDED FOR | 1.00 | 2015\nB63 | SHIPS OR OTHER WATERBORNE VESSELS; RELATED EQUIPMENT | 1.00 | 2014\nY02 | TECHNOLOGIES OR APPLICATIONS FOR MITIGATION OR ADAPTATION AGAINST CLIMATE CHANGE | 1.00 | 2013\nB66 | HOISTING; LIFTING; HAULING | 1.00 | 2016\nE02 | HYDRAULIC ENGINEERING; FOUNDATIONS; SOIL SHIFTING | 1.00 | 2012\nB60 | VEHICLES IN GENERAL | 1.00 | 2009\nF24 | HEATING; RANGES; VENTILATING | 1.00 | 2018\nF23 | COMBUSTION APPARATUS; COMBUSTION PROCESSES | 1.00 | 2018\nF16 | ENGINEERING ELEMENTS AND UNITS; GENERAL MEASURES FOR PRODUCING AND MAINTAINING EFFECTIVE FUNCTIONING OF MACHINES OR INSTALLATIONS; THERMAL INSULATION IN GENERAL | 1.00 | 2009\nA47 | FURNITURE; DOMESTIC ARTICLES OR APPLIANCES; COFFEE MILLS; SPICE MILLS; SUCTION CLEANERS IN GENERAL | 1.00 | 2015\nA21 | BAKING; EDIBLE DOUGHS | 1.00 | 2015\nA43 | FOOTWEAR | 1.00 | 2016\nH01 | ELECTRIC ELEMENTS | 1.00 | 2008\nF05 | INDEXING SCHEMES RELATING TO ENGINES OR PUMPS IN VARIOUS SUBCLASSES OF CLASSES F01-F04 | 1.00 | 2018\nF01 | N/A | 1.00 | 2018\nB64 | N/A | 1.00 | 2018\nB62 | N/A | 1.00 | 2010\nC04 | N/A | 1.00 | 2015\nC09 | N/A | 1.00 | 2015\nB29 | N/A | 1.00 | 2007\nG02 | N/A | 1.00 | 2016\nY10 | N/A | 1.00 | 2012\nG07 | N/A | 1.00 | 2012\nE05 | N/A | 1.00 | 2012\nH02 | N/A | 1.00 | 2009\nH03 | N/A | 1.00 | 2015\nF42 | N/A | 1.00 | 2012\nF41 | N/A | 1.00 | 2012\nG08 | N/A | 1.00 | 2017"
+},
+{
+"id": "patents/2",
+"run": 3,
+"answer": "CPC Group Code | Full Title | Best Year | Highest EMA\nG01 | MEASURING; TESTING | 2018 | 0.48\nY02 | TECHNOLOGIES OR APPLICATIONS FOR MITIGATION OR ADAPTATION AGAINST CLIMATE CHANGE | 2018 | 0.42\nF02 | COMBUSTION ENGINES; HOT-GAS OR COMBUSTION-PRODUCT ENGINE PLANTS | 2018 | 0.41\nB60 | VEHICLES IN GENERAL | 2018 | 0.34\nH01 | ELECTRIC ELEMENTS | 2013 | 0.33\nA61 | MEDICAL OR VETERINARY SCIENCE; HYGIENE | 2016 | 0.3\nF16 | ENGINEERING ELEMENTS AND UNITS; GENERAL MEASURES FOR PRODUCING AND MAINTAINING EFFECTIVE FUNCTIONING OF MACHINES OR INSTALLATIONS; THERMAL INSULATION IN GENERAL | 2018 | 0.25\nH04 | ELECTRIC COMMUNICATION TECHNIQUE | 2015 | 0.2\nG02 | OPTICS | 2018 | 0.18\nF04 | POSITIVE - DISPLACEMENT MACHINES FOR LIQUIDS; PUMPS FOR LIQUIDS OR ELASTIC FLUIDS | 2018 | 0.17\nE02 | HYDRAULIC ENGINEERING; FOUNDATIONS; SOIL SHIFTING | 2016 | 0.17\nB29 | WORKING OF PLASTICS; WORKING OF SUBSTANCES IN A PLASTIC STATE IN GENERAL | 2012 | 0.16\nB41 | PRINTING; LINING MACHINES; TYPEWRITERS; STAMPS | 2007 | 0.1\nB23 | MACHINE TOOLS; METAL-WORKING NOT OTHERWISE PROVIDED FOR | 2015 | 0.1\nB63 | SHIPS OR OTHER WATERBORNE VESSELS; RELATED EQUIPMENT | 2014 | 0.1\nB66 | HOISTING; LIFTING; HAULING | 2016 | 0.1\nF23 | COMBUSTION APPARATUS; COMBUSTION PROCESSES | 2018 | 0.1\nF24 | HEATING; RANGES; VENTILATING | 2018 | 0.1\nA21 | BAKING; EDIBLE DOUGHS | 2015 | 0.1\nA47 | FURNITURE; DOMESTIC ARTICLES OR APPLIANCES; COFFEE MILLS; SPICE MILLS; SUCTION CLEANERS IN GENERAL | 2015 | 0.1\nA43 | FOOTWEAR | 2016 | 0.1\nF01 | MACHINES OR ENGINES IN GENERAL; ENGINE PLANTS IN GENERAL; STEAM ENGINES | 2018 | 0.1\nF05 | INDEXING SCHEMES RELATING TO ENGINES OR PUMPS IN VARIOUS SUBCLASSES OF CLASSES F01-F04 | 2018 | 0.1\nB64 | AIRCRAFT; AVIATION; COSMONAUTICS | 2018 | 0.1\nB62 | LAND VEHICLES FOR TRAVELLING OTHERWISE THAN ON RAILS | 2010 | 0.1\nC04 | CEMENTS; CONCRETE; ARTIFICIAL STONE; CERAMICS; REFRACTORIES | 2015 | 0.1\nC09 | DYES; PAINTS; POLISHES; NATURAL RESINS; ADHESIVES; COMPOSITIONS NOT OTHERWISE PROVIDED FOR; APPLICATIONS OF MATERIALS NOT OTHERWISE PROVIDED FOR | 2015 | 0.1\nY10 | TECHNICAL SUBJECTS COVERED BY FORMER USPC | 2012 | 0.1\nE05 | LOCKS; KEYS; WINDOW OR DOOR FITTINGS; SAFES | 2012 | 0.1\nG07 | CHECKING-DEVICES | 2012 | 0.1\nH02 | GENERATION; CONVERSION OR DISTRIBUTION OF ELECTRIC POWER | 2009 | 0.1\nH03 | ELECTRONIC CIRCUITRY | 2015 | 0.1\nF41 | WEAPONS | 2012 | 0.1\nF42 | AMMUNITION; BLASTING | 2012 | 0.1\nG08 | SIGNALLING | 2017 | 0.1"
+},
+{
+"id": "patents/2",
+"run": 4,
+"answer": "CPC Group Code | Full Title | Highest EMA | Best Year\nG01 | MEASURING; TESTING | 0.48 | 2018\nY02 | TECHNOLOGIES OR APPLICATIONS FOR MITIGATION OR ADAPTATION AGAINST CLIMATE CHANGE | 0.42 | 2018\nF02 | COMBUSTION ENGINES; HOT-GAS OR COMBUSTION-PRODUCT ENGINE PLANTS | 0.41 | 2018\nB60 | VEHICLES IN GENERAL | 0.34 | 2018\nH01 | ELECTRIC ELEMENTS | 0.33 | 2013\nA61 | MEDICAL OR VETERINARY SCIENCE; HYGIENE | 0.3 | 2016\nF16 | ENGINEERING ELEMENTS AND UNITS; GENERAL MEASURES FOR PRODUCING AND MAINTAINING EFFECTIVE FUNCTIONING OF MACHINES OR INSTALLATIONS; THERMAL INSULATION IN GENERAL | 0.25 | 2018\nH04 | ELECTRIC COMMUNICATION TECHNIQUE | 0.2 | 2015\nG02 | OPTICS | 0.18 | 2018\nF04 | POSITIVE - DISPLACEMENT MACHINES FOR LIQUIDS; PUMPS FOR LIQUIDS OR ELASTIC FLUIDS | 0.17 | 2018\nE02 | HYDRAULIC ENGINEERING; FOUNDATIONS; SOIL SHIFTING | 0.17 | 2016\nB29 | WORKING OF PLASTICS; WORKING OF SUBSTANCES IN A PLASTIC STATE IN GENERAL | 0.16 | 2012\nB41 | PRINTING; LINING MACHINES; TYPEWRITERS; STAMPS | 0.1 | 2007\nB23 | MACHINE TOOLS; METAL-WORKING NOT OTHERWISE PROVIDED FOR | 0.1 | 2015\nB63 | SHIPS OR OTHER WATERBORNE VESSELS; RELATED EQUIPMENT | 0.1 | 2014\nB66 | HOISTING; LIFTING; HAULING | 0.1 | 2016\nF24 | HEATING; RANGES; VENTILATING | 0.1 | 2018\nF23 | COMBUSTION APPARATUS; COMBUSTION PROCESSES | 0.1 | 2018\nA47 | FURNITURE; DOMESTIC ARTICLES OR APPLIANCES; COFFEE MILLS; SPICE MILLS; SUCTION CLEANERS IN GENERAL | 0.1 | 2015\nA21 | BAKING; EDIBLE DOUGHS | 0.1 | 2015\nA43 | FOOTWEAR | 0.1 | 2016\nF01 | MACHINES OR ENGINES IN GENERAL; ENGINE PLANTS IN GENERAL; STEAM ENGINES | 0.1 | 2018\nF05 | INDEXING SCHEMES RELATING TO ENGINES OR PUMPS IN VARIOUS SUBCLASSES OF CLASSES F01-F04 | 0.1 | 2018\nB64 | AIRCRAFT; AVIATION; COSMONAUTICS | 0.1 | 2018\nB62 | LAND VEHICLES FOR TRAVELLING OTHERWISE THAN ON RAILS | 0.1 | 2010\nC04 | CEMENTS; CONCRETE; ARTIFICIAL STONE; CERAMICS; REFRACTORIES | 0.1 | 2015\nC09 | DYES; PAINTS; POLISHES; NATURAL RESINS; ADHESIVES; COMPOSITIONS NOT OTHERWISE PROVIDED FOR; APPLICATIONS OF MATERIALS NOT OTHERWISE PROVIDED FOR | 0.1 | 2015\nG07 | CHECKING-DEVICES | 0.1 | 2012\nE05 | LOCKS; KEYS; WINDOW OR DOOR FITTINGS; SAFES | 0.1 | 2012\nY10 | TECHNICAL SUBJECTS COVERED BY FORMER USPC | 0.1 | 2012\nH02 | GENERATION; CONVERSION OR DISTRIBUTION OF ELECTRIC POWER | 0.1 | 2009\nH03 | ELECTRONIC CIRCUITRY | 0.1 | 2015\nF41 | WEAPONS | 0.1 | 2012\nF42 | AMMUNITION; BLASTING | 0.1 | 2012\nG08 | SIGNALLING | 0.1 | 2017"
+},
+{
+"id": "patents/3",
+"run": 0,
+"answer": "1. BLOOM ENERGY CORP — H01M: PROCESSES OR MEANS, e.g. BATTERIES, FOR THE DIRECT CONVERSION OF CHEMICAL ENERGY INTO ELECTRICAL ENERGY\n2. BLOOM ENERGY CORP — Y02E: REDUCTION OF GREENHOUSE GAS [GHG] EMISSIONS, RELATED TO ENERGY GENERATION, TRANSMISSION OR DISTRIBUTION\n3. BLOOM ENERGY CORP — Y02P: CLIMATE CHANGE MITIGATION TECHNOLOGIES IN THE PRODUCTION OR PROCESSING OF GOODS\n4. CALIFORNIA INST OF TECHN — G01M: TESTING STATIC OR DYNAMIC BALANCE OF MACHINES OR STRUCTURES; TESTING OF STRUCTURES OR APPARATUS, NOT OTHERWISE PROVIDED FOR\n5. CALIFORNIA INST OF TECHN — G01V: GEOPHYSICS; GRAVITATIONAL MEASUREMENTS; DETECTING MASSES OR OBJECTS; TAGS\n6. CRYSTAL IS INC — C30B: SINGLE-CRYSTAL GROWTH; UNIDIRECTIONAL SOLIDIFICATION OF EUTECTIC MATERIAL OR UNIDIRECTIONAL DEMIXING OF EUTECTOID MATERIAL; REFINING BY ZONE-MELTING OF MATERIAL; PRODUCTION OF A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; SINGLE CRYSTALS OR HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; AFTER-TREATMENT OF SINGLE CRYSTALS OR A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; APPARATUS THEREFOR\n7. CRYSTAL IS INC — H01L: SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10\n8. CRYSTAL IS INC — Y10T: TECHNICAL SUBJECTS COVERED BY FORMER US CLASSIFICATION\n9. SCHOWALTER LEO J — H01L: SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10"
+},
+{
+"id": "patents/3",
+"run": 1,
+"answer": "1. BLOOM ENERGY CORP — H01M: PROCESSES OR MEANS, e.g. BATTERIES, FOR THE DIRECT CONVERSION OF CHEMICAL ENERGY INTO ELECTRICAL ENERGY; Y02E: REDUCTION OF GREENHOUSE GAS [GHG] EMISSIONS, RELATED TO ENERGY GENERATION, TRANSMISSION OR DISTRIBUTION; Y02P: CLIMATE CHANGE MITIGATION TECHNOLOGIES IN THE PRODUCTION OR PROCESSING OF GOODS\n\n2. CALIFORNIA INST OF TECHN — G01M: TESTING STATIC OR DYNAMIC BALANCE OF MACHINES OR STRUCTURES; TESTING OF STRUCTURES OR APPARATUS, NOT OTHERWISE PROVIDED FOR; G01V: GEOPHYSICS; GRAVITATIONAL MEASUREMENTS; DETECTING MASSES OR OBJECTS; TAGS\n\n3. CRYSTAL IS INC — C30B: SINGLE-CRYSTAL GROWTH; H01L: SEMICONDUCTOR DEVICES; ELECTRIC SOLID STATE DEVICES NOT OTHERWISE PROVIDED FOR; Y10T: TECHNICAL SUBJECTS COVERED BY FORMER US CLASSIFICATION\n\n4. SCHOWALTER LEO J — H01L: SEMICONDUCTOR DEVICES; ELECTRIC SOLID STATE DEVICES NOT OTHERWISE PROVIDED FOR"
+},
+{
+"id": "patents/3",
+"run": 2,
+"answer": "1. CALIFORNIA INST OF TECHN: G01V - GEOPHYSICS; GRAVITATIONAL MEASUREMENTS; DETECTING MASSES OR OBJECTS; TAGS\n2. CRYSTAL IS INC: C30B - SINGLE-CRYSTAL GROWTH; UNIDIRECTIONAL SOLIDIFICATION OF EUTECTIC MATERIAL OR UNIDIRECTIONAL DEMIXING OF EUTECTOID MATERIAL; REFINING BY ZONE-MELTING OF MATERIAL; PRODUCTION OF A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; SINGLE CRYSTALS OR HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; AFTER-TREATMENT OF SINGLE CRYSTALS OR A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; APPARATUS THEREFOR\n3. SCHOWALTER LEO J: H01L - SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10"
+},
+{
+"id": "patents/3",
+"run": 3,
+"answer": "BLOOM ENERGY CORP | H01M | PROCESSES OR MEANS, e.g. BATTERIES, FOR THE DIRECT CONVERSION OF CHEMICAL ENERGY INTO ELECTRICAL ENERGY\nBLOOM ENERGY CORP | Y02E | REDUCTION OF GREENHOUSE GAS [GHG] EMISSIONS, RELATED TO ENERGY GENERATION, TRANSMISSION OR DISTRIBUTION\nBLOOM ENERGY CORP | Y02P | CLIMATE CHANGE MITIGATION TECHNOLOGIES IN THE PRODUCTION OR PROCESSING OF GOODS\nCALIFORNIA INST OF TECHN | G01M | TESTING STATIC OR DYNAMIC BALANCE OF MACHINES OR STRUCTURES; TESTING OF STRUCTURES OR APPARATUS, NOT OTHERWISE PROVIDED FOR\nCALIFORNIA INST OF TECHN | G01V | GEOPHYSICS; GRAVITATIONAL MEASUREMENTS; DETECTING MASSES OR OBJECTS; TAGS\nCRYSTAL IS INC | C30B | SINGLE-CRYSTAL GROWTH; UNIDIRECTIONAL SOLIDIFICATION OF EUTECTIC MATERIAL OR UNIDIRECTIONAL DEMIXING OF EUTECTOID MATERIAL; REFINING BY ZONE-MELTING OF MATERIAL; PRODUCTION OF A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; SINGLE CRYSTALS OR HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; AFTER-TREATMENT OF SINGLE CRYSTALS OR A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; APPARATUS THEREFOR\nCRYSTAL IS INC | H01L | SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10\nCRYSTAL IS INC | Y10T | TECHNICAL SUBJECTS COVERED BY FORMER US CLASSIFICATION\nSCHOWALTER LEO J | H01L | SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10"
+},
+{
+"id": "patents/3",
+"run": 4,
+"answer": "1. BLOOM ENERGY CORP\n   - H01M: PROCESSES OR MEANS, e.g. BATTERIES, FOR THE DIRECT CONVERSION OF CHEMICAL ENERGY INTO ELECTRICAL ENERGY\n   - Y02E: REDUCTION OF GREENHOUSE GAS [GHG] EMISSIONS, RELATED TO ENERGY GENERATION, TRANSMISSION OR DISTRIBUTION\n   - Y02P: CLIMATE CHANGE MITIGATION TECHNOLOGIES IN THE PRODUCTION OR PROCESSING OF GOODS\n\n2. CALIFORNIA INST OF TECHN\n   - G01M: TESTING STATIC OR DYNAMIC BALANCE OF MACHINES OR STRUCTURES; TESTING OF STRUCTURES OR APPARATUS, NOT OTHERWISE PROVIDED FOR\n   - G01V: GEOPHYSICS; GRAVITATIONAL MEASUREMENTS; DETECTING MASSES OR OBJECTS; TAGS\n\n3. CRYSTAL IS INC\n   - C30B: SINGLE-CRYSTAL GROWTH; UNIDIRECTIONAL SOLIDIFICATION OF EUTECTIC MATERIAL OR UNIDIRECTIONAL DEMIXING OF EUTECTOID MATERIAL; REFINING BY ZONE-MELTING OF MATERIAL; PRODUCTION OF A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; SINGLE CRYSTALS OR HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; AFTER-TREATMENT OF SINGLE CRYSTALS OR A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; APPARATUS THEREFOR\n   - H01L: SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10\n   - Y10T: TECHNICAL SUBJECTS COVERED BY FORMER US CLASSIFICATION\n\n4. SCHOWALTER LEO J\n   - H01L: SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10"
+},
+{
+"id": "stockindex/1",
+"run": 0,
+"answer": "399001.SZ, with an average intraday volatility of 0.0190."
+},
+{
+"id": "stockindex/1",
+"run": 1,
+"answer": "399001.SZ: 1.90%"
+},
+{
+"id": "stockindex/1",
+"run": 2,
+"answer": "399001.SZ: 0.019"
+},
+{
+"id": "stockindex/1",
+"run": 3,
+"answer": "399001.SZ: 0.019"
+},
+{
+"id": "stockindex/1",
+"run": 4,
+"answer": "399001.SZ: 0.0190"
+},
+{
+"id": "stockindex/2",
+"run": 0,
+"answer": "IXIC (NASDAQ Composite): 131 up days versus 120 down days."
+},
+{
+"id": "stockindex/2",
+"run": 1,
+"answer": "IXIC: 131 up days, 120 down days"
+},
+{
+"id": "stockindex/2",
+"run": 2,
+"answer": "IXIC (NASDAQ Composite) with 131 up days vs 120 down days."
+},
+{
+"id": "stockindex/2",
+"run": 3,
+"answer": "IXIC (NASDAQ Composite) had more up days (131) than down days (120) in 2018."
+},
+{
+"id": "stockindex/2",
+"run": 4,
+"answer": "IXIC (131 up days vs 120 down days)"
+},
+{
+"id": "stockindex/3",
+"run": 0,
+"answer": "1. IXIC (NASDAQ Composite): USA, 382.38% return\n2. GDAXI (DAX): Germany, 134.93% return\n3. NSEI (Nifty 50): India, 134.87% return\n4. 399001.SZ (SZSE Component Index): China, 134.04% return\n5. TWII (TAIEX): Taiwan, 129.65% return"
+},
+{
+"id": "stockindex/3",
+"run": 1,
+"answer": "1. NASDAQ Composite (IXIC): United States, 382.38%\n2. DAX (GDAXI): Germany, 134.93%\n3. Nifty 50 (NSEI): India, 134.87%\n4. SZSE Component (399001.SZ): China, 134.04%\n5. TAIEX (TWII): Taiwan, 129.65%"
+},
+{
+"id": "stockindex/3",
+"run": 2,
+"answer": "1. IXIC (NASDAQ Composite): United States, 387.83% return\n2. 399001.SZ (SZSE Component): China, 137.54% return\n3. TWII (TAIEX): Taiwan, 131.89% return\n4. GDAXI (DAX): Germany, 131.89% return\n5. NSEI (Nifty 50): India, 121.49% return"
+},
+{
+"id": "stockindex/3",
+"run": 3,
+"answer": "1. IXIC (NASDAQ Composite): United States, 387.83%\n2. 399001.SZ (SZSE Component Index): China, 137.54%\n3. TWII (TAIEX): Taiwan, 131.89%\n4. GDAXI (DAX): Germany, 131.89%\n5. NSEI (Nifty 50): India, 121.49%"
+},
+{
+"id": "stockindex/3",
+"run": 4,
+"answer": "1. IXIC (NASDAQ Composite): United States, 387.83% return\n2. 399001.SZ (SZSE Component Index): China, 137.54% return\n3. TWII (TAIEX): Taiwan, 131.89% return\n4. GDAXI (DAX): Germany, 131.89% return\n5. NSEI (Nifty 50): India, 121.49% return"
+},
+{
+"id": "stockmarket/1",
+"run": 0,
+"answer": "$18.44"
+},
+{
+"id": "stockmarket/1",
+"run": 1,
+"answer": "$18.44"
+},
+{
+"id": "stockmarket/1",
+"run": 2,
+"answer": "$18.44"
+},
+{
+"id": "stockmarket/1",
+"run": 3,
+"answer": "$18.44"
+},
+{
+"id": "stockmarket/1",
+"run": 4,
+"answer": "$18.44"
+},
+{
+"id": "stockmarket/2",
+"run": 0,
+"answer": "Total number of such ETFs: 31\n\n1. UVXY: $81500.00\n2. GUSH: $78699.22\n3. COM: $40487.99\n4. RTL: $13306.76\n5. JDST: $12988.41\n6. HYUP: $4329.75\n7. SOXS: $3886.62\n8. VPC: $2250.14\n9. DUST: $1923.28\n10. LBJ: $998.11\n11. PTIN: $843.53\n12. GFIN: $686.76\n13. ERX: $645.16\n14. LABD: $624.08\n15. VIXY: $491.00\n16. BZQ: $462.78\n17. JNUG: $451.07\n18. SDOW: $415.17\n19. BOIL: $382.20\n20. YANG: $347.35\n21. EDZ: $302.01\n22. FAZ: $288.54\n23. XES: $278.55\n24. TZA: $272.63\n25. SSG: $263.87\n26. MDY: $263.77\n27. TECS: $253.30\n28. LABU: $230.28\n29. XOP: $208.74\n30. FXP: $206.00\n31. JPN: $201.52"
+},
+{
+"id": "stockmarket/2",
+"run": 1,
+"answer": "Total number of ETFs: 31\n\n1. UVXY: $81500.00\n2. GUSH: $78699.22\n3. COM: $40487.99\n4. RTL: $13306.76\n5. JDST: $12988.41\n6. HYUP: $4329.75\n7. SOXS: $3886.62\n8. VPC: $2250.14\n9. DUST: $1923.28\n10. LBJ: $998.11\n11. PTIN: $843.53\n12. GFIN: $686.76\n13. ERX: $645.16\n14. LABD: $624.08\n15. VIXY: $491.00\n16. BZQ: $462.78\n17. JNUG: $451.07\n18. SDOW: $415.17\n19. BOIL: $382.20\n20. YANG: $347.35\n21. EDZ: $302.01\n22. FAZ: $288.54\n23. XES: $278.55\n24. TZA: $272.63\n25. SSG: $263.87\n26. MDY: $263.77\n27. TECS: $253.30\n28. LABU: $230.28\n29. XOP: $208.74\n30. FXP: $206.00\n31. JPN: $201.52"
+},
+{
+"id": "stockmarket/2",
+"run": 2,
+"answer": "Total number of ETFs: 31\n\n1. UVXY: $81500.00\n2. GUSH: $78699.22\n3. COM: $40487.99\n4. RTL: $13306.76\n5. JDST: $12988.41\n6. HYUP: $4329.75\n7. SOXS: $3886.62\n8. VPC: $2250.14\n9. DUST: $1923.28\n10. LBJ: $998.11\n11. PTIN: $843.53\n12. GFIN: $686.76\n13. ERX: $645.16\n14. LABD: $624.08\n15. VIXY: $491.00\n16. BZQ: $462.78\n17. JNUG: $451.07\n18. SDOW: $415.17\n19. BOIL: $382.20\n20. YANG: $347.35\n21. EDZ: $302.01\n22. FAZ: $288.54\n23. XES: $278.55\n24. TZA: $272.63\n25. SSG: $263.87\n26. MDY: $263.77\n27. TECS: $253.30\n28. LABU: $230.28\n29. XOP: $208.74\n30. FXP: $206.00\n31. JPN: $201.52"
+},
+{
+"id": "stockmarket/2",
+"run": 3,
+"answer": "31 ETFs listed on NYSE Arca reached an adjusted closing price above $200 during 2015:\n\n1. UVXY: ProShares Trust Ultra VIX Short Term Futures ETF - $81500.00\n2. GUSH: Direxion Daily S&P Oil & Gas Exp. & Prod. Bull 2X Shares - $78699.22\n3. COM: Direxion Auspice Broad Commodity Strategy ETF - $40487.99\n4. RTL: Pacer Benchmark Retail Real Estate SCTR ETF - $13306.76\n5. JDST: Direxion Daily Junior Gold Miners Index Bear 2X Shares - $12988.41\n6. HYUP: Xtrackers High Beta High Yield Bond ETF - $4329.75\n7. SOXS: Direxion Daily Semiconductor Bear 3x Shares - $3886.62\n8. VPC: Virtus Private Credit Strategy ETF - $2250.14\n9. DUST: Direxion Daily Gold Miners Index Bear 2X Shares - $1923.28\n10. LBJ: Direxion Daily Latin America 3x Bull Shares - $998.11\n11. PTIN: Pacer Trendpilot International ETF - $843.53\n12. GFIN: Goldman Sachs Motif Finance Reimagined ETF - $686.76\n13. ERX: Direxion Energy Bull 2X Shares - $645.16\n14. LABD: Direxion Daily S&P Biotech Bear 3X Shares - $624.08\n15. VIXY: ProShares Trust VIX Short-Term Futures ETF - $491.00\n16. BZQ: ProShares UltraShort MSCI Brazil Capped - $462.78\n17. JNUG: Direxion Daily Junior Gold Miners Index Bull 2X Shares - $451.07\n18. SDOW: UltraPro Short Dow30 - $415.17\n19. BOIL: ProShares Ultra Bloomberg Natural Gas - $382.20\n20. YANG: Direxion Daily FTSE China Bear 3x Shares - $347.35\n21. EDZ: Direxion Emerging Markets Bear 3X Shares - $302.01\n22. FAZ: Direxion Financial Bear 3X Shares - $288.54\n23. XES: SPDR Series Trust SPDR S&P Oil & Gas Equipment & Services ETF - $278.55\n24. TZA: Direxion Small Cap Bear 3X Shares - $272.63\n25. SSG: ProShares UltraShort Semiconductors - $263.87\n26. MDY: SPDR MidCap Trust Series I - $263.77\n27. TECS: Direxion Technology Bear 3X Shares - $253.30\n28. LABU: Direxion Daily S&P Biotech Bull 3X Shares - $230.28\n29. XOP: SPDR S&P Oil & Gas Exploration & Production - $208.74\n30. FXP: ProShares Ultrashort FTSE China 50 - $206.00\n31. JPN: Xtrackers Japan JPX-Nikkei 400 Equity ETF - $201.52\n\nTotal: 31 ETFs"
+},
+{
+"id": "stockmarket/2",
+"run": 4,
+"answer": "Total number of such ETFs: 31\n\n1. UVXY: $81500.00\n2. GUSH: $78699.22\n3. COM: $40487.99\n4. RTL: $13306.76\n5. JDST: $12988.41\n6. HYUP: $4329.75\n7. SOXS: $3886.62\n8. VPC: $2250.14\n9. DUST: $1923.28\n10. LBJ: $998.11\n11. PTIN: $843.53\n12. GFIN: $686.76\n13. ERX: $645.16\n14. LABD: $624.08\n15. VIXY: $491.00\n16. BZQ: $462.78\n17. JNUG: $451.07\n18. SDOW: $415.17\n19. BOIL: $382.20\n20. YANG: $347.35\n21. EDZ: $302.01\n22. FAZ: $288.54\n23. XES: $278.55\n24. TZA: $272.63\n25. SSG: $263.87\n26. MDY: $263.77\n27. TECS: $253.30\n28. LABU: $230.28\n29. XOP: $208.74\n30. FXP: $206.00\n31. JPN: $201.52"
+},
+{
+"id": "stockmarket/3",
+"run": 0,
+"answer": "1. Apex Global Brands Inc. (APEX) - Deficient - Avg Daily Trading Volume: 23781.42\n2. BIO-key International, Inc. (BKYI) - Deficient - Avg Daily Trading Volume: 10988.14\n3. CBAK Energy Technology, Inc. (CBAT) - Deficient - Avg Daily Trading Volume: 86223.32\n4. China Ceramics Co., Ltd. (CCCL) - Deficient - Avg Daily Trading Volume: 4366.8\n5. Correvio Pharma Corp. (CORV) - Deficient - Avg Daily Trading Volume: 145247.83\n6. CounterPath Corporation (CPAH) - Deficient - Avg Daily Trading Volume: 375.49\n7. DASAN Zhone Solutions, Inc. (DZSI) - Deficient - Avg Daily Trading Volume: 15578.66\n8. Future FinTech Group Inc. (FTFT) - Deficient - Avg Daily Trading Volume: 9.85\n9. Frontier Communications Corporation (FTR) - Deficient - Avg Daily Trading Volume: 254397.63\n10. Ideanomics, Inc. (IDEX) - Deficient - Avg Daily Trading Volume: 10.28\n11. Ocean Power Technologies, Inc. (OPTT) - Deficient - Avg Daily Trading Volume: 254.15\n12. Pacific Ethanol, Inc. (PEIX) - Deficient - Avg Daily Trading Volume: 10706.72\n13. Synthesis Energy Systems, Inc. (SES) - Deficient and Delinquent - Avg Daily Trading Volume: 2390.51\n14. Sunesis Pharmaceuticals, Inc. (SNSS) - Deficient - Avg Daily Trading Volume: 781.82\n15. Sypris Solutions, Inc. (SYPR) - Deficient - Avg Daily Trading Volume: 36836.36"
+},
+{
+"id": "stockmarket/3",
+"run": 1,
+"answer": "Based on the response, here are all 15 NASDAQ-listed companies that were financially troubled (deficient, delinquent, or both) with their average daily trading volume in 2008:\n\n1. Frontier Communications: 254397.63\n2. Synthesis Energy Systems, Inc.: (Deficient and Delinquent)\n3. Future FinTech Group: 9.85\n\nUnfortunately, the full artifact table with all 15 companies was not provided in the data. The response references 15 companies but the complete list with exact names and volumes is not available in the artifacts.\n\nFrom the information available, the following companies were identified as NASDAQ-listed, financially troubled, and had trading volume in 2008:\n\n1. Frontier Communications: ~254397.63\n2. Synthesis Energy Systems, Inc. (Deficient and Delinquent)\n3. Future FinTech Group: ~9.85\n\nNote: The complete list of all 15 companies and their exact average daily trading volumes could not be fully reproduced as the artifact data was not transmitted. The response indicates 14 companies were classified as Deficient and 1 (Synthesis Energy Systems, Inc.) was classified as Deficient and Delinquent."
+},
+{
+"id": "stockmarket/3",
+"run": 2,
+"answer": "Apex Global Brands Inc. (APEX): 23781.42\nBIO-key International, Inc. (BKYI): 10988.14\nCBAK Energy Technology, Inc. (CBAT): 86223.32\nChina Ceramics Co., Ltd. (CCCL): 4366.80\nCorrevio Pharma Corp., based in Canada (CORV): 145247.83\nCounterPath Corporation (CPAH): 375.49\nDASAN Zhone Solutions, Inc. (DZSI): 15578.66\nFuture FinTech Group Inc. (FTFT): 9.85\nFrontier Communications Corporation (FTR): 254397.63\nIdeanomics, Inc. (IDEX): 10.28\nOcean Power Technologies, Inc (OPTT): 254.15\nPacific Ethanol, Inc. (PEIX): 10706.72\nSynthesis Energy Systems, Inc. (SES): 2390.51\nSunesis Pharmaceuticals, Inc (SNSS): 781.82\nSypris Solutions, Inc. (SYPR): 36836.36"
+},
+{
+"id": "stockmarket/3",
+"run": 3,
+"answer": "Apex Global Brands Inc. (APEX): 23781.42\nBIO-key International, Inc. (BKYI): 10988.14\nCBAK Energy Technology, Inc. (CBAT): 86223.32\nChina Ceramics Co., Ltd. (CCCL): 4366.80\nCorrevio Pharma Corp., based in Canada (CORV): 145247.83\nCounterPath Corporation (CPAH): 375.49\nDASAN Zhone Solutions, Inc. (DZSI): 15578.66\nFrontier Communications Corporation (FTR): 254397.63\nFuture FinTech Group Inc. (FTFT): 9.85\nIdeanomics, Inc. (IDEX): 10.28\nOcean Power Technologies, Inc. (OPTT): 254.15\nPacific Ethanol, Inc. (PEIX): 10706.72\nSunesis Pharmaceuticals, Inc. (SNSS): 781.82\nSynthesis Energy Systems, Inc. (SES): 2390.51\nSypris Solutions, Inc. (SYPR): 36836.36"
+},
+{
+"id": "stockmarket/3",
+"run": 4,
+"answer": "Apex Global Brands Inc. (APEX): 23781.42\nBIO-key International, Inc. (BKYI): 10988.14\nCBAK Energy Technology, Inc. (CBAT): 86223.32\nChina Ceramics Co., Ltd. (CCCL): 4366.8\nCorrevio Pharma Corp. (CORV): 145247.83\nCounterPath Corporation (CPAH): 375.49\nDASAN Zhone Solutions, Inc. (DZSI): 15578.66\nFuture FinTech Group Inc. (FTFT): 9.85\nFrontier Communications Corporation (FTR): 254397.63\nIdeanomics, Inc. (IDEX): 10.28\nOcean Power Technologies, Inc. (OPTT): 254.15\nPacific Ethanol, Inc. (PEIX): 10706.72\nSynthesis Energy Systems, Inc. (SES): 2390.51\nSunesis Pharmaceuticals, Inc. (SNSS): 781.82\nSypris Solutions, Inc. (SYPR): 36836.36"
+},
+{
+"id": "stockmarket/4",
+"run": 0,
+"answer": "1. MFA Financial, Inc.\n2. Argo Group International Holdings, Ltd.\n3. HDFC Bank Limited\n4. Albany International Corporation\n5. DTE Energy Company"
+},
+{
+"id": "stockmarket/4",
+"run": 1,
+"answer": "1. MFA Financial, Inc.\n2. Argo Group International Holdings, Ltd.\n3. HDFC Bank Limited\n4. Albany International Corporation\n5. DTE Energy Company"
+},
+{
+"id": "stockmarket/4",
+"run": 2,
+"answer": "1. MFA Financial, Inc.\n2. Argo Group International Holdings, Ltd.\n3. HDFC Bank Limited\n4. Albany International Corporation\n5. DTE Energy Company"
+},
+{
+"id": "stockmarket/4",
+"run": 3,
+"answer": "1. MFA Financial, Inc.\n2. Argo Group International Holdings, Ltd.\n3. HDFC Bank Limited\n4. Albany International Corporation\n5. DTE Energy Company"
+},
+{
+"id": "stockmarket/4",
+"run": 4,
+"answer": "1. MFA Financial, Inc.\n2. Argo Group International Holdings, Ltd.\n3. HDFC Bank Limited\n4. Albany International Corporation\n5. DTE Energy Company"
+},
+{
+"id": "stockmarket/5",
+"run": 0,
+"answer": "1. Synthesis Energy Systems, Inc.: 51 days\n2. TD Holdings, Inc.: 42 days\n3. TMSR Holding Company Limited: 40 days\n4. Verb Technology Company, Inc.: 38 days\n5. Sunesis Pharmaceuticals, Inc.: 32 days"
+},
+{
+"id": "stockmarket/5",
+"run": 1,
+"answer": "1. Synthesis Energy Systems, Inc. - 51 days\n2. TD Holdings, Inc. - 42 days\n3. TMSR Holding Company Limited - 40 days\n4. Verb Technology Company, Inc. - 38 days\n5. Sunesis Pharmaceuticals, Inc. - 32 days"
+},
+{
+"id": "stockmarket/5",
+"run": 2,
+"answer": "1. Synthesis Energy Systems, Inc. - 51 days\n2. TD Holdings, Inc. - 42 days\n3. TMSR Holding Company Limited - 40 days\n4. Verb Technology Company, Inc. - 38 days\n5. Sunesis Pharmaceuticals, Inc. - 32 days"
+},
+{
+"id": "stockmarket/5",
+"run": 3,
+"answer": "1. Synthesis Energy Systems, Inc.: 51 days\n2. TD Holdings, Inc.: 42 days\n3. TMSR Holding Company Limited: 40 days\n4. Verb Technology Company, Inc.: 38 days\n5. Sunesis Pharmaceuticals, Inc.: 32 days"
+},
+{
+"id": "stockmarket/5",
+"run": 4,
+"answer": "1. Synthesis Energy Systems, Inc. - 51 days\n2. TD Holdings, Inc. - 42 days\n3. TMSR Holding Company Limited - 40 days\n4. Verb Technology Company, Inc. - 38 days\n5. Sunesis Pharmaceuticals, Inc. - 32 days"
+},
+{
+"id": "yelp/1",
+"run": 0,
+"answer": "3.55"
+},
+{
+"id": "yelp/1",
+"run": 1,
+"answer": "3.55"
+},
+{
+"id": "yelp/1",
+"run": 2,
+"answer": "3.55"
+},
+{
+"id": "yelp/1",
+"run": 3,
+"answer": "3.55"
+},
+{
+"id": "yelp/1",
+"run": 4,
+"answer": "3.55"
+},
+{
+"id": "yelp/2",
+"run": 0,
+"answer": "PA: 3.70"
+},
+{
+"id": "yelp/2",
+"run": 1,
+"answer": "PA: 3.70"
+},
+{
+"id": "yelp/2",
+"run": 2,
+"answer": "PA: 3.70"
+},
+{
+"id": "yelp/2",
+"run": 3,
+"answer": "PA: 3.70"
+},
+{
+"id": "yelp/2",
+"run": 4,
+"answer": "PA: 3.70"
+},
+{
+"id": "yelp/3",
+"run": 0,
+"answer": "35"
+},
+{
+"id": "yelp/3",
+"run": 1,
+"answer": "35"
+},
+{
+"id": "yelp/3",
+"run": 2,
+"answer": "35"
+},
+{
+"id": "yelp/3",
+"run": 3,
+"answer": "35"
+},
+{
+"id": "yelp/3",
+"run": 4,
+"answer": "35"
+},
+{
+"id": "yelp/4",
+"run": 0,
+"answer": "Restaurants: 27 businesses, average rating 3.63"
+},
+{
+"id": "yelp/4",
+"run": 1,
+"answer": "Restaurants: 27 businesses, average rating 3.63"
+},
+{
+"id": "yelp/4",
+"run": 2,
+"answer": "Restaurants: 27 businesses accepting credit cards, average rating 3.63."
+},
+{
+"id": "yelp/4",
+"run": 3,
+"answer": "Restaurants: 27 businesses accepting credit cards, average rating 3.63."
+},
+{
+"id": "yelp/4",
+"run": 4,
+"answer": "Restaurants: 27 businesses, average rating 3.63"
+},
+{
+"id": "yelp/5",
+"run": 0,
+"answer": "PA: 3.48"
+},
+{
+"id": "yelp/5",
+"run": 1,
+"answer": "PA: 3.48"
+},
+{
+"id": "yelp/5",
+"run": 2,
+"answer": "PA: 8 businesses, average rating 3.48"
+},
+{
+"id": "yelp/5",
+"run": 3,
+"answer": "PA: 8 businesses, average rating 3.48"
+},
+{
+"id": "yelp/5",
+"run": 4,
+"answer": "PA: 8 businesses, average rating 3.48"
+},
+{
+"id": "yelp/6",
+"run": 0,
+"answer": "Coffee House Too Cafe: average rating 4.38 with 16 reviews. Categories: Restaurants, Breakfast & Brunch, American (New), Cafes."
+},
+{
+"id": "yelp/6",
+"run": 1,
+"answer": "Steps to Learning Montessori Preschool, with an average rating of 4.38 across 16 reviews. Categories: Education, Elementary Schools, Child Care & Day Care, Local Services, Preschools, Montessori Schools."
+},
+{
+"id": "yelp/6",
+"run": 2,
+"answer": "Coffee House Too Cafe: 4.38 average rating, 16 reviews. Categories: Restaurants, Breakfast & Brunch, American (New), Cafes."
+},
+{
+"id": "yelp/6",
+"run": 3,
+"answer": "Coffee House Too Cafe received the highest average rating of 4.38 between January 1, 2016 and June 30, 2016, with 16 reviews. It belongs to the categories: Restaurants, Breakfast & Brunch, American (New), Cafes."
+},
+{
+"id": "yelp/6",
+"run": 4,
+"answer": "Orangetheory Fitness Carrollwood received the highest average rating of 4.40 with 5 reviews. It belongs to the category: Fitness & Instruction, Gyms, Boot Camps, Trainers, Active Life, Interval Training Gyms."
+},
+{
+"id": "yelp/7",
+"run": 0,
+"answer": "1. Restaurants: 25\n2. Food: 17\n3. Shopping: 12\n4. Fast Food: 10\n5. American (New): 8"
+},
+{
+"id": "yelp/7",
+"run": 1,
+"answer": "1. Restaurants: 25\n2. Food: 17\n3. Shopping: 12\n4. Fast Food: 10\n5. American (New): 8"
+},
+{
+"id": "yelp/7",
+"run": 2,
+"answer": "1. Restaurants: 25\n2. Food: 17\n3. Shopping: 12\n4. Fast Food: 10\n5. American (New): 8"
+},
+{
+"id": "yelp/7",
+"run": 3,
+"answer": "1. Restaurants: 25\n2. Food: 17\n3. Shopping: 12\n4. Fast Food: 10\n5. American (New): 8"
+},
+{
+"id": "yelp/7",
+"run": 4,
+"answer": "1. Restaurants: 25\n2. Food: 17\n3. Shopping: 12\n4. Fast Food: 10\n5. American (New): 8"
+}
+]
