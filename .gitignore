@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+*.egg-info/
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# The upstream benchmark clone (`make upstream`): shallow, LFS skipped. The
+# committed index under data/index/ and the answer copies under data/answers/
+# are what the app, CI and tests read.
+data/upstream/
+
+# Database files, if a later build downloads them (never committed; 8.35 GB
+# for the 54 queries alone).
+data/context/
+
+# Per-row rescore verdicts are large; the per-query summary in
+# data/index/trials.json is the committed record.
+data/index/verdicts.jsonl
+
+# Node / frontend
+node_modules/
+frontend/dist/
+
+# OS / editor
+.DS_Store
