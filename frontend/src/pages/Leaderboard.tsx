@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { type Leaderboard as LB, type Stratified, type TrialsIndex, fmtInt, fmtPct, useGet } from '../lib/api';
+import { type DatasetSummary, type Leaderboard as LB, type Stratified, type TrialsIndex, fmtInt, fmtPct, useGet } from '../lib/api';
 import { Loading } from '../lib/ui';
 
 export function Leaderboard() {
   const { data: lb, error } = useGet<LB>('/api/leaderboard');
   const { data: t } = useGet<TrialsIndex>('/api/trials');
+  const { data: ds } = useGet<DatasetSummary[]>('/api/datasets');
   const [hideTuned, setHideTuned] = useState(false);
   if (!lb) return <Loading error={error} />;
   const rows = lb.overallLeaderboard.filter((r) => !hideTuned || r.promptGroup !== 'benchmark-informed');
@@ -12,6 +13,9 @@ export function Leaderboard() {
   const withAnswers = new Map(lb.answer_files.filter((f) => f.rank != null).map((f) => [f.rank as number, f]));
   const best = lb.overallLeaderboard[0];
   const worst = lb.overallLeaderboard[lb.overallLeaderboard.length - 1];
+  const dsByQueries = ds ? [...ds].sort((a, b) => b.n_queries - a.n_queries) : [];
+  const mostQueriesDs = dsByQueries[0];
+  const fewestQueriesDs = dsByQueries[dsByQueries.length - 1];
   return (
     <>
       <p className="label">leaderboard · {lb.overallLeaderboard.length} entries · site updated {lb.updatedAt}</p>
@@ -79,8 +83,10 @@ export function Leaderboard() {
 
       <h2>The {lb.answer_files.length} answer files, rescored here</h2>
       <p>
-        Each file's rows were judged by the validators at the ingested commit. "Macro" is the site's Pass@1 definition; "micro" is over rows. They differ because crmarenapro has 13
-        queries and deps_dev_v1 has 2.
+        Each file's rows were judged by the validators at the ingested commit. "Macro" is the site's Pass@1 definition; "micro" is over rows. They differ because dataset query counts
+        vary{mostQueriesDs && fewestQueriesDs && mostQueriesDs.key !== fewestQueriesDs.key
+          ? ` — ${mostQueriesDs.key} has ${mostQueriesDs.n_queries} queries and ${fewestQueriesDs.key} has ${fewestQueriesDs.n_queries}`
+          : ''}.
       </p>
       <div className="tw">
         <table>

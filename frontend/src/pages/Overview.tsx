@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { type DatasetSummary, type Leaderboard, type Stats, type TrialsIndex, STYLE_LABEL, fmtBytes, fmtInt, fmtPct, shortSha, useGet } from '../lib/api';
+import { type AnswerFile, type DatasetSummary, type Leaderboard, type Stats, type TrialsIndex, STYLE_LABEL, fmtBytes, fmtInt, fmtPct, shortSha, useGet } from '../lib/api';
 import { Kpi, Loading, QLink, Rate } from '../lib/ui';
 
 export function Overview() {
@@ -14,6 +14,20 @@ export function Overview() {
   const best = lbRows[0];
   const worst = lbRows[lbRows.length - 1];
   const tuned = lbRows.filter((r) => r.promptGroup === 'benchmark-informed').length;
+
+  const bestReact = t
+    ? (lb?.answer_files ?? [])
+        .filter((f) => f.name.startsWith('react_'))
+        .map((f) => ({ file: f, macro: t.per_file[f.name]?.macro ?? null }))
+        .filter((x): x is { file: AnswerFile; macro: number } => x.macro != null)
+        .sort((a, b) => b.macro - a.macro)[0]
+    : undefined;
+  const bestReactRuns = bestReact?.file.runs_per_query ?? [];
+  const bestReactTrials = bestReactRuns.length
+    ? Math.min(...bestReactRuns) === Math.max(...bestReactRuns)
+      ? `${Math.min(...bestReactRuns)} trials per query`
+      : `${Math.min(...bestReactRuns)}–${Math.max(...bestReactRuns)} trials per query`
+    : null;
 
   return (
     <>
@@ -128,7 +142,10 @@ export function Overview() {
           </p>
           <div className="kpis">
             <Kpi n={best.passAt1.toFixed(4)} b={`#1 ${best.agent} · ${best.trials} trials · ${best.date}`} tone="ok" />
-            <Kpi n={fmtPct(t?.per_file['react_gemini-3-pro']?.macro ?? null, 2)} b="best plain ReAct baseline (Gemini-3-Pro, 50 trials per query), macro average as the site computes it" />
+            <Kpi
+              n={bestReact ? fmtPct(bestReact.macro, 2) : 'not scored'}
+              b={bestReact ? `best plain ReAct baseline (${bestReact.file.agent ?? bestReact.file.label}${bestReactTrials ? `, ${bestReactTrials}` : ''}), macro average as the site computes it` : 'best plain ReAct baseline, not scored'}
+            />
             <Kpi n={worst.passAt1.toFixed(4)} b={`#${worst.rank} ${worst.agent} · ${worst.trials} trials`} />
           </div>
         </section>
