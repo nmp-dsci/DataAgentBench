@@ -1,0 +1,87 @@
+{
+ "styles": [
+  {
+   "style": "regex",
+   "n": 33,
+   "ids": [
+    "deps_dev_v1/1",
+    "github_repos/1",
+    "github_repos/3",
+    "pancancer_atlas/1",
+    "pancancer_atlas/3",
+    "agnews/2",
+    "agnews/3",
+    "bookreview/2",
+    "bookreview/3",
+    "crmarenapro/2",
+    "crmarenapro/3",
+    "crmarenapro/4",
+    "crmarenapro/5",
+    "crmarenapro/6",
+    "crmarenapro/7",
+    "crmarenapro/8",
+    "crmarenapro/9",
+    "crmarenapro/10",
+    "crmarenapro/11",
+    "crmarenapro/12",
+    "crmarenapro/13",
+    "googlelocal/2",
+    "googlelocal/3",
+    "googlelocal/4",
+    "music_brainz_20k/1",
+    "music_brainz_20k/3",
+    "stockmarket/1",
+    "yelp/1",
+    "yelp/2",
+    "yelp/3",
+    "yelp/4",
+    "yelp/5",
+    "yelp/7"
+   ],
+   "longest": 217
+  },
+  {
+   "style": "reads-gold-file",
+   "n": 0,
+   "ids": [],
+   "longest": 0
+  },
+  {
+   "style": "substring",
+   "n": 12,
+   "ids": [
+    "deps_dev_v1/2",
+    "patents/1",
+    "agnews/1",
+    "agnews/4",
+    "bookreview/1",
+    "crmarenapro/1",
+    "googlelocal/1",
+    "music_brainz_20k/2",
+    "stockindex/1",
+    "stockindex/2",
+    "stockindex/3",
+    "yelp/6"
+   ],
+   "longest": 54
+  },
+  {
+   "style": "levenshtein",
+   "n": 9,
+   "ids": [
+    "github_repos/2",
+    "github_repos/4",
+    "pancancer_atlas/2",
+    "patents/2",
+    "patents/3",
+    "stockmarket/2",
+    "stockmarket/3",
+    "stockmarket/4",
+    "stockmarket/5"
+   ],
+   "longest": 110
+  }
+ ],
+ "reads_gold_file": [],
+ "total_lines": 2347
+}

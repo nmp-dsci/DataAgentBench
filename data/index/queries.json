@@ -1,0 +1,974 @@
+[
+ {
+  "id": "deps_dev_v1/1",
+  "dataset_key": "deps_dev_v1",
+  "query_id": 1,
+  "question": "Considering only the latest release versions for each distinct NPM package, which packages are the top 5 most popular based on the Github star number, as well as their versions?",
+  "gold_text": "﻿Name,Version\n@dmrvos/infrajs>0.0.6>typescript,2.6.2\n@dmrvos/infrajs>0.0.5>typescript,2.6.2\n@dylanvann/svelte,3.25.4\n@dumc11/tailwindcss,0.4.0\n@dwarvesf/react-scripts>0.7.0>lodash.indexof,4.0.5",
+  "gold_lines": 6,
+  "validator": {
+   "style": "regex",
+   "lines": 217,
+   "reads_gold_file": false,
+   "source": "\"\"\"Validator for DEPS_DEV_V1 query 1.\n\n    \"Considering only the latest release versions for each distinct NPM package, which\n     packages are the top 5 most popular based on the Github star number, as well as\n     their versions?\"\n\nApplying the question literally -- System='NPM', VersionInfo.IsRelease, the highest\nOrdinal per distinct Name, joined through project_packageversion to the star count in\nproject_info.Project_Information -- leaves four packages strictly above the cutoff and\n95 packages tied at fifth place on 57779 stars. Every tied package maps to the same\nGitHub project (lodash/lodash), so all of them carry identical stars, forks, issues and\nproject metadata; each has a single release with Ordinal=1 and a NULL UpstreamPublishedAt.\nNothing in the question or the data singles out one of them, so no single fifth row is\nuniquely correct. See https://github.com/ucbepic/DataAgentBench/issues/86.\n\nAccordingly this validator requires:\n\n* all four above-cutoff packages, each with its correct version; and\n* at least one fifth-place package, where *every* package the answer reports beyond the\n  four must belong to the tied set.\n\nAn answer naming any package outside those two sets as part of its top 5 is rejected, so\nreturning the one tied package the old ground truth happened to record, returning a\ndifferent one, or returning all 95 are all accepted, while a genuinely wrong package\n(for example one whose rank depends on aggregating stars across versions) is not.\n\"\"\"\n\nimport re\n\n# --- Ground truth -----------------------------------------------------------------\n# Packages strictly above the fifth-place cutoff. All four are required.\nABOVE_CUTOFF = [\n    (\"@dmrvos/infrajs>0.0.6>typescript\", \"2.6.2\"),\n    (\"@dmrvos/infrajs>0.0.5>typescript\", \"2.6.2\"),\n    (\"@dylanvann/svelte\", \"3.25.4\"),\n    (\"@dumc11/tailwindcss\", \"0.4.0\"),]\n\n# Packages tied at fifth place on 57779 stars (lodash/lodash). Any non-empty subset is\n# accepted as the fifth row.\nTIED_AT_CUTOFF = [\n    (\"@dollarshaveclub/cli>1.0.0>lodash\", \"4.17.4\"),\n    (\"@dollarshaveclub/cli>1.1.0>lodash\", \"4.17.4\"),\n    (\"@dollarshaveclub/cli>1.10.0>lodash\", \"4.17.5\"),\n    (\"@dollarshaveclub/cli>1.10.1>lodash\", \"4.17.5\"),\n    (\"@dollarshaveclub/cli>1.11.0>lodash\", \"4.17.5\"),\n    (\"@dollarshaveclub/cli>1.11.1>lodash\", \"4.17.5\"),\n    (\"@dollarshaveclub/cli>1.11.2>lodash\", \"4.17.4\"),\n    (\"@dollarshaveclub/cli>1.11.3>lodash\", \"4.17.4\"),\n    (\"@dollarshaveclub/cli>1.11.4>lodash\", \"4.17.11\"),\n    (\"@dollarshaveclub/cli>1.11.5-rc.1>lodash\", \"4.17.11\"),\n    (\"@dollarshaveclub/cli>1.11.5>lodash\", \"4.17.11\"),\n    (\"@dollarshaveclub/cli>1.12.0>lodash\", \"4.17.11\"),\n    (\"@dollarshaveclub/cli>1.13.0>lodash\", \"4.17.11\"),\n    (\"@dollarshaveclub/cli>1.13.1>lodash\", \"4.17.11\"),\n    (\"@dollarshaveclub/cli>1.2.0>lodash\", \"4.17.4\"),\n    (\"@dollarshaveclub/cli>1.3.0>lodash\", \"4.17.4\"),\n    (\"@dollarshaveclub/cli>1.5.0>lodash\", \"4.17.4\"),\n    (\"@dollarshaveclub/cli>1.5.1>lodash\", \"4.17.4\"),\n    (\"@dollarshaveclub/cli>1.5.2>lodash\", \"4.17.4\"),\n    (\"@dollarshaveclub/cli>1.5.3>lodash\", \"4.17.4\"),\n    (\"@dollarshaveclub/cli>1.5.4>lodash\", \"4.17.4\"),\n    (\"@dollarshaveclub/cli>1.5.5>lodash\", \"4.17.4\"),\n    (\"@dollarshaveclub/cli>1.5.6>lodash\", \"4.17.4\"),\n    (\"@dollarshaveclub/cli>1.5.7>lodash\", \"4.17.4\"),\n    (\"@dollarshaveclub/cli>1.6.0>lodash\", \"4.17.4\"),\n    (\"@dollarshaveclub/cli>1.7.1>lodash\", \"4.17.5\"),\n    (\"@dollarshaveclub/cli>1.8.0>lodash\", \"4.17.5\"),\n    (\"@dollarshaveclub/cli>1.9.0>lodash\", \"4.17.5\"),\n    (\"@dollarshaveclub/cli>1.9.1>lodash\", \"4.17.5\"),\n    (\"@dollarshaveclub/cli>2.0.0>lodash\", \"4.17.11\"),\n    (\"@dollarshaveclub/cli>2.0.1>lodash\", \"4.17.11\"),\n    (\"@dollarshaveclub/cli>2.1.0>lodash\", \"4.17.11\"),\n    (\"@dollarshaveclub/cli>2.1.1>lodash\", \"4.17.11\"),\n    (\"@dollarshaveclub/cli>2.2.0>lodash\", \"4.17.11\"),\n    (\"@dollarshaveclub/cli>2.2.1>lodash\", \"4.17.11\"),\n    (\"@dollarshaveclub/cli>2.2.2>lodash\", \"4.17.11\"),\n    (\"@dpoineau/react-scripts>1.0.0>eslint-plugin-flowtype>lodash\", \"4.16.3\"),\n    (\"@dpoineau/react-scripts>1.0.0>html-webpack-plugin>lodash\", \"4.16.3\"),\n    (\"@dpoineau/react-scripts>1.0.0>http-proxy-middleware>lodash\", \"4.16.3\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash\", \"4.9.0\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash._arraycopy\", \"3.0.0\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash._arrayeach\", \"3.0.0\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash._baseassign\", \"3.2.0\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash._baseclone\", \"3.3.0\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash._basecopy\", \"3.0.1\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash._basefor\", \"3.0.3\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash._bindcallback\", \"3.0.1\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash._createcompounder\", \"3.0.0\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash._getnative\", \"3.9.1\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash._root\", \"3.0.1\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash.assign\", \"4.2.0\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash.camelcase\", \"3.0.1\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash.clonedeep\", \"4.5.0\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash.cond\", \"4.5.2\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash.deburr\", \"3.2.0\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash.endswith\", \"4.2.1\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash.find\", \"4.6.0\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash.findindex\", \"4.6.0\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash.indexof\", \"4.0.5\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash.isarguments\", \"3.1.0\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash.isarray\", \"3.0.4\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash.keys\", \"3.1.2\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash.pickby\", \"4.6.0\"),\n    (\"@dpoineau/react-scripts>1.0.0>lodash.words\", \"3.2.0\"),\n    (\"@dpoineau/react-scripts>1.0.0>node-notifier>lodash.clonedeep\", \"3.0.2\"),\n    (\"@dummmy/pack-cli>1.0.8>lodash\", \"4.17.19\"),\n    (\"@dummmy/pack-cli>1.0.9>lodash\", \"4.17.19\"),\n    (\"@dummmy/webpack-cli>1.0.2>lodash\", \"4.17.19\"),\n    (\"@dummmy/webpack-cli>1.0.3>lodash\", \"4.17.19\"),\n    (\"@dummmy/webpack-cli>1.0.4>lodash\", \"4.17.19\"),\n    (\"@dummmy/webpack-cli>1.0.5>lodash\", \"4.17.19\"),\n    (\"@dummmy/webpack-cli>1.0.6>lodash\", \"4.17.19\"),\n    (\"@dummmy/webpack-cli>1.0.7>lodash\", \"4.17.19\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash\", \"4.17.2\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash._arraycopy\", \"3.0.0\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash._arrayeach\", \"3.0.0\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash._baseassign\", \"3.2.0\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash._baseclone\", \"3.3.0\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash._basecopy\", \"3.0.1\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash._basefor\", \"3.0.3\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash._bindcallback\", \"3.0.1\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash._createcompounder\", \"3.0.0\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash._getnative\", \"3.9.1\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash._root\", \"3.0.1\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash.assign\", \"4.2.0\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash.camelcase\", \"3.0.1\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash.clonedeep\", \"3.0.2\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash.cond\", \"4.5.2\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash.deburr\", \"3.2.0\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash.indexof\", \"4.0.5\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash.isarguments\", \"3.1.0\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash.isarray\", \"3.0.4\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash.keys\", \"3.1.2\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash.pickby\", \"4.6.0\"),\n    (\"@dwarvesf/react-scripts>0.7.0>lodash.words\", \"3.2.0\"),]\n\nCUTOFF_STARS = 57779\n\n# Kept for callers that expect the historical name.\ngt_pairs = ABOVE_CUTOFF + TIED_AT_CUTOFF\n\n# Characters that may continue a package name. A candidate match is only a real match\n# when the next character is not one of these, otherwise \">lodash\" would match inside\n# \">lodash._arraycopy\" and a shorter tied name would be found in a longer one.\n_NAME_CHAR = re.compile(r\"[\\w.\\-/>@]\")\n\n# How far after a name the version may appear. Wide enough for \", \" / \" | \" / '\", \"'\n# separators, narrow enough not to reach the next row of a table.\n_VERSION_WINDOW = 25\n\n# A package name as reported in an answer, used to spot packages outside both sets.\n_CANDIDATE = re.compile(r\"@[\\w.\\-]+/[\\w.\\-]+(?:>[\\w.\\-]+)*\")\n\n\ndef _version_follows(text, end, version):\n    \"\"\"True when `version` appears as a standalone token just after position `end`.\"\"\"\n    window = text[end:end + _VERSION_WINDOW]\n    return re.search(r\"(?<![\\w.])\" + re.escape(version) + r\"(?![\\w.])\", window) is not None\n\n\ndef _find_reported(text, name, version):\n    \"\"\"True when `name` appears at a name boundary and is followed by `version`.\"\"\"\n    start = 0\n    while True:\n        idx = text.find(name, start)\n        if idx == -1:\n            return False\n        end = idx + len(name)\n        at_boundary = end >= len(text) or not _NAME_CHAR.match(text[end])\n        if at_boundary and _version_follows(text, end, version):\n            return True\n        start = idx + 1\n\n\ndef validate(llm_output: str):\n    \"\"\"Validate an answer to DEPS_DEV_V1 query 1.\n\n    Returns (True, reason) if the answer reports all four above-cutoff packages with\n    their versions plus at least one package from the fifth-place tie and no package\n    from outside those sets; (False, reason) otherwise.\n    \"\"\"\n    text = (llm_output or \"\").lower()\n\n    for name, version in ABOVE_CUTOFF:\n        if not _find_reported(text, name.lower(), version.lower()):\n            return False, f\"Missing or mis-versioned above-cutoff package: {name} {version}\"\n\n    matched_tied = [\n        name for name, version in TIED_AT_CUTOFF\n        if _find_reported(text, name.lower(), version.lower())\n    ]\n    if not matched_tied:\n        return False, (\n            f\"No fifth-place package reported. Any of the {len(TIED_AT_CUTOFF)} packages \"\n            f\"tied at {CUTOFF_STARS} stars is acceptable, with its correct version.\"\n        )\n\n    # Reject packages from outside both sets, but only where the answer reports one as a\n    # result row (name followed by a version), not where it merely mentions one in prose.\n    allowed = {name.lower() for name, _ in gt_pairs}\n    for match in _CANDIDATE.finditer(text):\n        name = match.group(0)\n        if name in allowed:\n            continue\n        if any(a.startswith(name) for a in allowed):\n            continue  # a prefix of a real name, e.g. a truncated table cell\n        window = text[match.end():match.end() + _VERSION_WINDOW]\n        if re.search(r\"(?<![\\w.])\\d+\\.\\d+(?:\\.[\\w.\\-]+)?(?![\\w.])\", window):\n            return False, (\n                f\"Reported package outside the top 4 and the fifth-place tie: {name}\"\n            )\n\n    return True, (\n        f\"All 4 above-cutoff packages validated; fifth place satisfied by \"\n        f\"{len(matched_tied)} package(s) from the {len(TIED_AT_CUTOFF)}-way tie at \"\n        f\"{CUTOFF_STARS} stars.\"\n    )\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": "DEPS_DEV_V1 query 1 re-scored 2026-08-18 by re-running its validate.py under a revised validator (accepting any of the 95 packages tied at fifth place on 57779 stars rather than the single tied package recorded in ground_truth.csv, see issue #86), from the same submission JSONs, with no other query changed"
+ },
+ {
+  "id": "deps_dev_v1/2",
+  "dataset_key": "deps_dev_v1",
+  "query_id": 2,
+  "question": "Among all NPM packages with project license 'MIT' and marked as release, which 5 projects have the highest GitHub fork count?",
+  "gold_text": "﻿ProjectName,Version,ForksCount\nmui-org/material-ui,0.2.0,30522\nmoment/moment,2.22.2,7201\nsemantic-org/semantic-ui,2.2.11,4955\nreact-native-elements/react-native-elements,4.0.2,4623\nsveltejs/svelte,3.25.4,4091",
+  "gold_lines": 6,
+  "validator": {
+   "style": "substring",
+   "lines": 29,
+   "reads_gold_file": false,
+   "source": "def validate(llm_output: str):\n    \"\"\"\n    Validate that all ground truth project names appear in LLM output.\n    \n    Rules:\n    - Project names must be found in the output (case-insensitive)\n    - Order and exact formatting do not matter\n\n    Returns:\n        (True, \"OK\") if all found\n        (False, reason) if any missing\n    \"\"\"\n    ground_truth_projects = [\n        \"mui-org/material-ui\",\n        \"moment/moment\",\n        \"semantic-org/semantic-ui\",\n        \"react-native-elements/react-native-elements\",\n        \"sveltejs/svelte\",\n    ]\n\n    llm_output_lower = llm_output.lower()\n\n    for project in ground_truth_projects:\n        if project.lower() not in llm_output_lower:\n            reason = f\"Missing project name: {project}\"\n            \n            return False, reason\n\n    return True, \"All project names found.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "github_repos/1",
+  "dataset_key": "github_repos",
+  "query_id": 1,
+  "question": "Among repositories that do not use Python, what proportion of their README.md files include copyright information?",
+  "gold_text": "total_readmes,copyright_readmes,proportion\n3,1,0.3333333333333333",
+  "gold_lines": 2,
+  "validator": {
+   "style": "regex",
+   "lines": 23,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate LLM output:\n    - Ground truth is 0.3333333333333333\n    - Accept if any float in LLM output rounds to 0.33\n    \"\"\"\n    ground_truth = 0.3333333333333333\n    gt_rounded = round(ground_truth, 2)  # → 0.33\n\n    # Extract all float-like numbers from LLM output\n    matches = re.findall(r\"\\d+\\.\\d+\", llm_output)\n    for m in matches:\n        try:\n            val = float(m)\n            if round(val, 2) == gt_rounded:\n                return True, f\"Found matching value: {val} → ~{gt_rounded}\"\n        except:\n            continue\n\n    reason = f\"No value in LLM output rounds to {gt_rounded}\"\n    return False, reason\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "github_repos/2",
+  "dataset_key": "github_repos",
+  "query_id": 2,
+  "question": "Identify the repository that contains Swift code and the most frequently copied non-binary Swift (.swift) file in the dataset, ensuring that each file is uniquely determined by its ID in the files table.",
+  "gold_text": "repo_name\nSwiftAndroid/swift",
+  "gold_lines": 2,
+  "validator": {
+   "style": "levenshtein",
+   "lines": 21,
+   "reads_gold_file": false,
+   "source": "import re\nfrom common_scaffold.validate.levenshtein import levenshtein\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate if target string 'SwiftAndroid/swift' appears in LLM output,\n    allowing up to 3 character differences and ignoring case.\n    \"\"\"\n    ground_truth = \"SwiftAndroid/swift\"\n    target = ground_truth.lower()\n    llm_output_lower = llm_output.lower()\n\n    window_size = len(target) + 3  # allow 3-character fuzzy match\n    for i in range(len(llm_output_lower) - window_size + 1):\n        window = llm_output_lower[i : i + window_size]\n        dist = levenshtein(window, target)\n        if dist <= 3:\n            return True, f\"Fuzzy matched: '{window}' with distance {dist}\"\n\n    reason = f\"No fuzzy match found for '{target}' within 3-character distance\"\n    return False, reason\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": false,
+  "footnote": null
+ },
+ {
+  "id": "github_repos/3",
+  "dataset_key": "github_repos",
+  "query_id": 3,
+  "question": "How many commit messages are found in repositories that use the Shell programming language and are licensed under Apache-2.0, where each message exists, is shorter than 1,000 characters, and does not begin with 'merge', 'update', or 'test'?",
+  "gold_text": "num_messages\n1077",
+  "gold_lines": 2,
+  "validator": {
+   "style": "regex",
+   "lines": 21,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Check if the number 1077 appears in the LLM output.\n\n    The match should be exact (as a complete number, not part of another number),\n    and can be anywhere in the text.\n\n    Returns:\n        (True, \"OK\") if 1077 is found\n        (False, reason) otherwise\n    \"\"\"\n    cleaned = re.sub(r\"(?<=\\d),(?=\\d{3}\\b)\", \"\", llm_output)\n    matches = re.findall(r\"\\b1077\\b\", cleaned)\n    if matches:\n        return True, \"Found 1077 in LLM output.\"\n    else:\n        reason = \"Number 1077 not found in LLM output.\"\n        return False, reason\n\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "github_repos/4",
+  "dataset_key": "github_repos",
+  "query_id": 4,
+  "question": "List the repository names for the top five GitHub repositories whose main language is not Python, ordered by the highest number of commits.",
+  "gold_text": "repo_name,num_commits\napple/swift,1051\ntwbs/bootstrap,340\nMicrosoft/vscode,190\nfacebook/react,178\ntensorflow/tensorflow,156",
+  "gold_lines": 6,
+  "validator": {
+   "style": "levenshtein",
+   "lines": 32,
+   "reads_gold_file": false,
+   "source": "import re\nfrom common_scaffold.validate.levenshtein import levenshtein\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate whether all repo_names appear in LLM output,\n    using case-insensitive fuzzy matching (<= 3 char differences).\n    \"\"\"\n    ground_truth = [\n        \"apple/swift\",\n        \"twbs/bootstrap\",\n        \"Microsoft/vscode\",\n        \"facebook/react\",\n        \"tensorflow/tensorflow\"\n    ]\n\n    llm_output_lower = llm_output.lower()\n\n    for name in ground_truth:\n        target = name.lower()\n        window_size = len(target) + 3  # allow 3-character fuzzy match\n        found = False\n        for i in range(len(llm_output_lower) - window_size + 1):\n            window = llm_output_lower[i : i + window_size]\n            if levenshtein(window, target) <= 3:\n                found = True\n                break\n        if not found:\n            reason = f\"Could not match: '{name}'\"\n            return False, reason\n\n    return True, \"All repo names matched with fuzzy tolerance.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "pancancer_atlas/1",
+  "dataset_key": "pancancer_atlas",
+  "query_id": 1,
+  "question": "For LGG patients, compute the average log10-transformed expression of the IGF2 gene across different histology types. Only include patients with valid IGF2 expression values and histology annotations that are not enclosed in square brackets. Report the final average values with at least four decimal places of precision.",
+  "gold_text": "Histology_Type,Average_Log_Expression\n9382/3,2.713571305193452\n9400/3,2.6014163319762287\n9401/3,2.558390345072906\n9450/3,2.6967184429497295\n9451/3,2.5826348457075095",
+  "gold_lines": 6,
+  "validator": {
+   "style": "regex",
+   "lines": 50,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate LLM output for histology average expression task.\n\n    Validation strategy:\n    - For each ground truth histology code:\n        - Check if it's present in LLM output.\n        - Search the next 10 characters after it for any decimal values.\n        - Accept if any value matches the ground truth (rounded to 4 decimals).\n\n    Returns:\n        (True, \"OK\") if all matched\n        (False, reason) if any mismatch\n    \"\"\"\n\n    ground_truth = [\n        (\"9382/3\", 2.713571305193452),\n        (\"9400/3\", 2.6014163319762287),\n        (\"9401/3\", 2.558390345072906),\n        (\"9450/3\", 2.6967184429497295),\n        (\"9451/3\", 2.5826348457075095),\n    ]\n\n    for hist_code, true_score in ground_truth:\n        idx = llm_output.find(hist_code)\n        if idx == -1:\n            reason = f\"Missing histology type: {hist_code}\"\n            return False, reason\n\n        # Look 10 characters after the histology code (not including the code itself)\n        start = idx + len(hist_code)\n        window = llm_output[start:start+10]\n\n        matches = re.findall(r\"\\d+\\.\\d+\", window)\n        gt_rounded = round(true_score, 4)\n\n        for m in matches:\n            try:\n                val = float(m)\n                if round(val, 4) == gt_rounded:\n                    break\n            except ValueError:\n                continue\n        else:\n            reason = f\"No matching score found near {hist_code} (expected ~{gt_rounded})\"\n            return False, reason\n\n    return True, \"All histology codes and scores matched successfully.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "pancancer_atlas/2",
+  "dataset_key": "pancancer_atlas",
+  "query_id": 2,
+  "question": "Among BRCA patients in the PanCancer Atlas who are alive, which top three histological types show the highest percentage of CDH1 gene mutations?",
+  "gold_text": "Histological_Type,mutation_count,total,mutation_percentage\nInfiltrating Lobular Carcinoma,74,178,0.4157303370786517\nMixed Histology (please specify),3,24,0.125\nOther  specify,3,36,0.08333333333333333",
+  "gold_lines": 4,
+  "validator": {
+   "style": "levenshtein",
+   "lines": 36,
+   "reads_gold_file": false,
+   "source": "import re\nfrom common_scaffold.validate.levenshtein import levenshtein\n\ndef normalize(text: str) -> str:\n    # Lowercase and collapse multiple whitespaces\n    return re.sub(r'\\s+', ' ', text.lower().strip())\n\ndef fuzzy_match(name: str, text: str, max_distance: int = 3) -> bool:\n    name_len = len(name)\n    for i in range(0, len(text) - name_len + 1):\n        window = text[i:i + name_len + 3]  # add small buffer\n        if levenshtein(window, name) <= max_distance:\n            return True\n    return False\n\ndef validate(llm_output: str):\n    \"\"\"\n    Fuzzy validate histological type names in LLM output with max 3-character difference.\n    Case-insensitive and spacing-normalized.\n    \"\"\"\n\n    ground_truth_names = [\n        \"Infiltrating Lobular Carcinoma\",\n        \"Mixed Histology (please specify)\",\n        \"Other specify\",\n    ]\n\n    llm_output_norm = normalize(llm_output)\n\n    for name in ground_truth_names:\n        name_norm = normalize(name)\n        if not fuzzy_match(name_norm, llm_output_norm):\n            reason = f\"Not matched (fuzzy) within 3 chars: '{name}'\"\n            return False, reason\n\n    return True, \"All histological types matched (fuzzy).\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "pancancer_atlas/3",
+  "dataset_key": "pancancer_atlas",
+  "query_id": 3,
+  "question": "Calculate the chi-square statistic to assess the association between histological types and the presence of CDH1 gene mutations in female BRCA patients from the PanCancer Atlas, excluding categories with marginal totals less than or equal to 10, and only focusing on patients with known histological types and consider only reliable mutation entries.",
+  "gold_text": "Chi2\n305.1239198007461",
+  "gold_lines": 2,
+  "validator": {
+   "style": "regex",
+   "lines": 39,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate whether the LLM output contains a numeric value that matches\n    the ground truth (305.1239198007461) when rounded to 2 decimals,\n    or has a valid prefix (305.1 or 305).\n\n    Steps:\n    - Extract all numbers from LLM output\n    - Round them to 2 decimal places\n    - Match against 305.12, 305.1, or 305\n\n    Returns:\n        (True, \"OK\") if match found\n        (False, reason) otherwise\n    \"\"\"\n\n    ground_truth = 305.1239198007461\n    target_2dp = f\"{round(ground_truth, 2):.2f}\"  # '305.12'\n    target_1dp = f\"{round(ground_truth, 1):.1f}\"  # '305.1'\n    target_int = str(int(ground_truth))          # '305'\n\n    # Extract all number-like patterns from LLM output\n    matches = re.findall(r\"\\d+\\.\\d+|\\d+\", llm_output)\n\n    for raw in matches:\n        try:\n            value = float(raw)\n            rounded = f\"{round(value, 2):.2f}\"\n            if rounded in {target_2dp, target_1dp, target_int} or \\\n               f\"{round(value, 1):.1f}\" == target_1dp or \\\n               str(int(value)) == target_int:\n                return True, f\"Matched value: {raw} -> rounded {rounded}\"\n        except:\n            continue\n\n    reason = f\"No value in LLM output matches {target_2dp}, {target_1dp}, or {target_int}\"\n    return False, reason\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "patents/1",
+  "dataset_key": "patents",
+  "query_id": 1,
+  "question": "Identify the CPC technology areas with the highest exponential moving average of patent filings each year (smoothing factor 0.2), and return only the CPC group codes at level 5 whose best year is 2022.",
+  "gold_text": "cpc_group\nA22B\nA23J\nA23P\nA24D\nA24F\nA41G\nA47F\nA61G\nA61H\nA61P\nA62D\nA63H\nB04B\nB07B\nB08B\nB09C\nB21J\nB22F\nB24B\nB25B\nB25D\nB27C\nB27M\nB60D\nB60L\nB60P\nB61H\nB63C\nB63G\nB65G\nB66F\nC01D\nC01G\nC21B\nC21C\nC22C\nD21B\nE01H\nE02B\nE02D\nE03B\nE04B\nE04G\nE21D\nE21F\nF02K\nF04F\nF16M\nF25J\nF26B\nG01H\nG01L\nG01S\nG05D\nG06N\nG06Q\nG06T\nG06V\nG08G\nG09F\nG10L\nG16B\nG16C\nG16H\nG21F\nH01M\nH02B\nH02G\nH02J\nH03H\nH04K\nH05F",
+  "gold_lines": 73,
+  "validator": {
+   "style": "substring",
+   "lines": 32,
+   "reads_gold_file": false,
+   "source": "def validate(llm_output: str):\n    \"\"\"\n    Validate that all CPC codes in ground truth appear in the LLM output.\n\n    - Case-insensitive\n    - No proximity constraint\n    - Each code must appear at least once\n\n    Returns:\n        (True, \"OK\") if all CPC codes are present\n        (False, reason) if any are missing\n    \"\"\"\n    ground_truth = [\n        \"A22B\", \"A23J\", \"A23P\", \"A24D\", \"A24F\", \"A41G\", \"A47F\", \"A61G\", \"A61H\", \"A61P\",\n        \"A62D\", \"A63H\", \"B04B\", \"B07B\", \"B08B\", \"B09C\", \"B21J\", \"B22F\", \"B24B\", \"B25B\",\n        \"B25D\", \"B27C\", \"B27M\", \"B60D\", \"B60L\", \"B60P\", \"B61H\", \"B63C\", \"B63G\", \"B65G\",\n        \"B66F\", \"C01D\", \"C01G\", \"C21B\", \"C21C\", \"C22C\", \"D21B\", \"E01H\", \"E02B\", \"E02D\",\n        \"E03B\", \"E04B\", \"E04G\", \"E21D\", \"E21F\", \"F02K\", \"F04F\", \"F16M\", \"F25J\", \"F26B\",\n        \"G01H\", \"G01L\", \"G01S\", \"G05D\", \"G06N\", \"G06Q\", \"G06T\", \"G06V\", \"G08G\", \"G09F\",\n        \"G10L\", \"G16B\", \"G16C\", \"G16H\", \"G21F\", \"H01M\", \"H02B\", \"H02G\", \"H02J\", \"H03H\",\n        \"H04K\", \"H05F\"\n    ]\n\n    llm_lower = llm_output.lower()\n\n    for code in ground_truth:\n        if code.lower() not in llm_lower:\n            reason = f\"Missing CPC code: {code}\"\n            \n            return False, reason\n\n    return True, \"All CPC codes present in LLM output.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": "All Pass@1 scores recomputed 2026-06-12 by re-running each query's validate.py under the current validators (including the regenerated PATENTS ground truths), from the submission JSONs in this repository or in the corresponding submission PR branches"
+ },
+ {
+  "id": "patents/2",
+  "dataset_key": "patents",
+  "query_id": 2,
+  "question": "Find the CPC technology areas in Germany with the highest exponential moving average of patent filings each year (smoothing factor 0.1) for patents granted in the second half of 2019. Include the full title, CPC group code, and the best year for each CPC group at level 4.",
+  "gold_text": "titleFull,cpc_group,best_year\nBAKING; EDIBLE DOUGHS,A21,2015\nMEDICAL OR VETERINARY SCIENCE; HYGIENE,A61,2016\nMACHINE TOOLS; METAL-WORKING NOT OTHERWISE PROVIDED FOR,B23,2015\nWORKING OF PLASTICS; WORKING OF SUBSTANCES IN A PLASTIC STATE IN GENERAL,B29,2007\nPRINTING; LINING MACHINES; TYPEWRITERS; STAMPS,B41,2007\nVEHICLES IN GENERAL,B60,2009\nLAND VEHICLES FOR TRAVELLING OTHERWISE THAN ON RAILS,B62,2010\nSHIPS OR OTHER WATERBORNE VESSELS; RELATED EQUIPMENT,B63,2014\nDYES; PAINTS; POLISHES; NATURAL RESINS; ADHESIVES; COMPOSITIONS NOT OTHERWISE PROVIDED FOR; APPLICATIONS OF MATERIALS NOT OTHERWISE PROVIDED FOR,C09,2015\nHYDRAULIC ENGINEERING; FOUNDATIONS; SOIL SHIFTING,E02,2012\nLOCKS; KEYS; WINDOW OR DOOR FITTINGS; SAFES,E05,2012\nCOMBUSTION ENGINES; HOT-GAS OR COMBUSTION-PRODUCT ENGINE PLANTS,F02,2010\nENGINEERING ELEMENTS AND UNITS; GENERAL MEASURES FOR PRODUCING AND MAINTAINING EFFECTIVE FUNCTIONING OF MACHINES OR INSTALLATIONS; THERMAL INSULATION IN GENERAL,F16,2009\nCOMBUSTION APPARATUS; COMBUSTION PROCESSES,F23,2018\nHEATING; RANGES; VENTILATING,F24,2018\nWEAPONS,F41,2012\nMEASURING; TESTING,G01,2008\nOPTICS,G02,2016\nSIGNALLING,G08,2017\nELECTRIC ELEMENTS,H01,2008\nGENERATION; CONVERSION OR DISTRIBUTION OF ELECTRIC POWER,H02,2009\nELECTRONIC CIRCUITRY,H03,2015\nELECTRIC COMMUNICATION TECHNIQUE,H04,2015",
+  "gold_lines": 24,
+  "validator": {
+   "style": "levenshtein",
+   "lines": 74,
+   "reads_gold_file": false,
+   "source": "import re\nfrom common_scaffold.validate.levenshtein import levenshtein\n\ndef normalize(text: str) -> str:\n    return re.sub(r\"[^a-z0-9]\", \"\", text.lower())\n\n# -----------------------------\n# Ground Truth Data\n# -----------------------------\nground_truth = [\n    (\"BAKING; EDIBLE DOUGHS\", \"A21\", \"2015\"),\n    (\"MEDICAL OR VETERINARY SCIENCE; HYGIENE\", \"A61\", \"2016\"),\n    (\"MACHINE TOOLS; METAL-WORKING NOT OTHERWISE PROVIDED FOR\", \"B23\", \"2015\"),\n    (\"WORKING OF PLASTICS; WORKING OF SUBSTANCES IN A PLASTIC STATE IN GENERAL\", \"B29\", \"2007\"),\n    (\"PRINTING; LINING MACHINES; TYPEWRITERS; STAMPS\", \"B41\", \"2007\"),\n    (\"VEHICLES IN GENERAL\", \"B60\", \"2009\"),\n    (\"LAND VEHICLES FOR TRAVELLING OTHERWISE THAN ON RAILS\", \"B62\", \"2010\"),\n    (\"SHIPS OR OTHER WATERBORNE VESSELS; RELATED EQUIPMENT\", \"B63\", \"2014\"),\n    (\"DYES; PAINTS; POLISHES; NATURAL RESINS; ADHESIVES; COMPOSITIONS NOT OTHERWISE PROVIDED FOR; APPLICATIONS OF MATERIALS NOT OTHERWISE PROVIDED FOR\", \"C09\", \"2015\"),\n    (\"HYDRAULIC ENGINEERING; FOUNDATIONS; SOIL SHIFTING\", \"E02\", \"2012\"),\n    (\"LOCKS; KEYS; WINDOW OR DOOR FITTINGS; SAFES\", \"E05\", \"2012\"),\n    (\"COMBUSTION ENGINES; HOT-GAS OR COMBUSTION-PRODUCT ENGINE PLANTS\", \"F02\", \"2010\"),\n    (\"ENGINEERING ELEMENTS AND UNITS; GENERAL MEASURES FOR PRODUCING AND MAINTAINING EFFECTIVE FUNCTIONING OF MACHINES OR INSTALLATIONS; THERMAL INSULATION IN GENERAL\", \"F16\", \"2009\"),\n    (\"COMBUSTION APPARATUS; COMBUSTION PROCESSES\", \"F23\", \"2018\"),\n    (\"HEATING; RANGES; VENTILATING\", \"F24\", \"2018\"),\n    (\"WEAPONS\", \"F41\", \"2012\"),\n    (\"MEASURING; TESTING\", \"G01\", \"2008\"),\n    (\"OPTICS\", \"G02\", \"2016\"),\n    (\"SIGNALLING\", \"G08\", \"2017\"),\n    (\"ELECTRIC ELEMENTS\", \"H01\", \"2008\"),\n    (\"GENERATION; CONVERSION OR DISTRIBUTION OF ELECTRIC POWER\", \"H02\", \"2009\"),\n    (\"ELECTRONIC CIRCUITRY\", \"H03\", \"2015\"),\n    (\"ELECTRIC COMMUNICATION TECHNIQUE\", \"H04\", \"2015\"),\n]\n\n# -----------------------------\n# Main validate function\n# -----------------------------\ndef validate(llm_output: str):\n    llm_clean = normalize(llm_output)\n\n    for raw_name, cpc_code, year in ground_truth:\n        norm_name = normalize(raw_name)\n        name_len = len(norm_name)\n\n        # Fuzzy match window scan\n        best_match = None\n        best_dist = float('inf')\n        best_idx = -1\n\n        for i in range(len(llm_clean) - name_len + 1):\n            candidate = llm_clean[i:i + name_len]\n            dist = levenshtein(candidate, norm_name)\n            if dist < best_dist:\n                best_dist = dist\n                best_match = candidate\n                best_idx = i\n            if best_dist == 0:\n                break\n\n        if best_dist > 5:\n            reason = f\"Name fuzzy match failed for '{raw_name}' (best match: '{best_match}', distance={best_dist})\"\n            return False, reason\n\n        # Define window: 15 before and 15 after name end\n        start = max(0, best_idx - 15)\n        end = min(len(llm_clean), best_idx + name_len + 15)\n        window = llm_clean[start:end]\n\n        if normalize(cpc_code) not in window or normalize(year) not in window:\n            reason = f\"Code/year not found near '{raw_name}' (CPC: {cpc_code}, Year: {year}, Window: '{window}')\"\n            return False, reason\n\n    return True, \"All fuzzy names matched, and CPC/year found near each name.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": "All Pass@1 scores recomputed 2026-06-12 by re-running each query's validate.py under the current validators (including the regenerated PATENTS ground truths), from the submission JSONs in this repository or in the corresponding submission PR branches"
+ },
+ {
+  "id": "patents/3",
+  "dataset_key": "patents",
+  "query_id": 3,
+  "question": "Which assignees, excluding UNIV CALIFORNIA itself, have cited patents assigned to UNIV CALIFORNIA, and what are the titles of the primary CPC subclasses associated with these citations? Please provide the name of each citing assignee together with the full title of the CPC subclass.",
+  "gold_text": "citing_assignee,titleFull\nBLOOM ENERGY CORP,\"PROCESSES OR MEANS, e.g. BATTERIES, FOR THE DIRECT CONVERSION OF CHEMICAL ENERGY INTO ELECTRICAL ENERGY\"\nCRYSTAL IS INC,SINGLE-CRYSTAL GROWTH; UNIDIRECTIONAL SOLIDIFICATION OF EUTECTIC MATERIAL OR UNIDIRECTIONAL DEMIXING OF EUTECTOID MATERIAL; REFINING BY ZONE-MELTING OF MATERIAL; PRODUCTION OF A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; SINGLE CRYSTALS OR HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; AFTER-TREATMENT OF SINGLE CRYSTALS OR A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; APPARATUS THEREFOR\nSCHOWALTER LEO J,SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10",
+  "gold_lines": 4,
+  "validator": {
+   "style": "levenshtein",
+   "lines": 95,
+   "reads_gold_file": false,
+   "source": "import re\nimport unicodedata\nfrom typing import List, Tuple\nfrom common_scaffold.validate.levenshtein import levenshtein\n\n# ------------------------\n# Utility Functions\n# ------------------------\n\ndef normalize(text: str) -> str:\n    \"\"\"\n    Normalize text by lowercasing and removing all non-alphanumeric characters.\n    This version is used for global fuzzy matching.\n    \"\"\"\n    text = unicodedata.normalize(\"NFKD\", text)\n    text = text.lower()\n    return re.sub(r\"[^\\w]\", \"\", text)\n\n\ndef normalize_keep_space(text: str) -> str:\n    \"\"\"\n    Normalize text by lowercasing and removing punctuation,\n    but preserve whitespace. Used for local window matching.\n    \"\"\"\n    text = unicodedata.normalize(\"NFKD\", text)\n    text = text.lower()\n    text = re.sub(r\"[^\\w\\s]\", \"\", text)\n    text = re.sub(r\"\\s+\", \" \", text)\n    return text.strip()\n\n\n# ------------------------\n# Ground Truth: list of (assignee, CPC title)\n# ------------------------\n\nground_truth: List[Tuple[str, str]] = [\n    (\"BLOOM ENERGY CORP\", \"PROCESSES OR MEANS, e.g. BATTERIES, FOR THE DIRECT CONVERSION OF CHEMICAL ENERGY INTO ELECTRICAL ENERGY\"),\n    (\"CRYSTAL IS INC\", \"SINGLE-CRYSTAL GROWTH; UNIDIRECTIONAL SOLIDIFICATION OF EUTECTIC MATERIAL OR UNIDIRECTIONAL DEMIXING OF EUTECTOID MATERIAL; REFINING BY ZONE-MELTING OF MATERIAL; PRODUCTION OF A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; SINGLE CRYSTALS OR HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; AFTER-TREATMENT OF SINGLE CRYSTALS OR A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; APPARATUS THEREFOR\"),\n    (\"SCHOWALTER LEO J\", \"SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10\"),\n]\n\n# ------------------------\n# Validation Function\n# ------------------------\n\ndef validate(llm_output: str) -> Tuple[bool, str]:\n    \"\"\"\n    Validate the LLM output using two strategies:\n    \n    1. Fuzzy Matching:\n       Normalize the full output and slide a window over it to check if the\n       (assignee + title) combination matches with Levenshtein distance <= 10.\n\n    2. Local Window Match:\n       Normalize the output while preserving space, locate the assignee, and\n       check if the title appears within a ±15 character window.\n\n    Because LLM outputs are unstable and vary in structure, this dual-strategy\n    improves robustness. We only require one method to match for success.\n    \"\"\"\n\n    llm_output_norm = normalize(llm_output)\n    llm_output_with_space = normalize_keep_space(llm_output)\n\n    for assignee, title in ground_truth:\n        combined = normalize(assignee + title)\n        window_size = len(combined) + 10\n        found_fuzzy = False\n\n        # Fuzzy matching using sliding window + Levenshtein\n        for i in range(len(llm_output_norm) - window_size + 1):\n            window = llm_output_norm[i : i + window_size]\n            if levenshtein(window, combined) <= 10:\n                found_fuzzy = True\n                break\n\n        # Local window matching\n        norm_assignee = normalize(assignee)\n        norm_title = normalize(title)\n        idx = llm_output_with_space.find(norm_assignee)\n        found_local = False\n\n        if idx != -1:\n            start = max(0, idx - 200)\n            end = min(len(llm_output_with_space), idx + len(norm_assignee) + 200)\n            window = normalize(llm_output_with_space[start:end])\n            if norm_title in window:\n                found_local = True\n\n        # If neither method matches, return failure\n        if not (found_fuzzy or found_local):\n            reason = f\"No match for: {assignee} + {title}\"\n            return False, reason\n\n    return True, \"All assignee-title pairs matched successfully by at least one method.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": "All Pass@1 scores recomputed 2026-06-12 by re-running each query's validate.py under the current validators (including the regenerated PATENTS ground truths), from the submission JSONs in this repository or in the corresponding submission PR branches"
+ },
+ {
+  "id": "agnews/1",
+  "dataset_key": "agnews",
+  "query_id": 1,
+  "question": "What is the title of the sports article whose description has the greatest number of characters?",
+  "gold_text": "The Rundown",
+  "gold_lines": 1,
+  "validator": {
+   "style": "substring",
+   "lines": 11,
+   "reads_gold_file": false,
+   "source": "def validate(llm_output: str):\n    gt = \"The Rundown\"\n    cleaned_gt = \"\".join(gt.lower().split())\n    cleaned_llm_output = \"\".join(llm_output.lower().split())\n    if cleaned_gt in cleaned_llm_output:\n        return True, \"Ground truth found in LLM output.\"\n    else:\n        reason = f\"Ground truth '{gt}' not found in LLM output: {llm_output}\"\n        return False, reason\n\n        "
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "agnews/2",
+  "dataset_key": "agnews",
+  "query_id": 2,
+  "question": "What fraction of all articles authored by Amy Jones belong to the Science/Technology category?",
+  "gold_text": "0.14414414414414414",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 55,
+   "reads_gold_file": false,
+   "source": "import re\nfrom fractions import Fraction\n\nGROUND_TRUTH = 0.14414414414414414\nTOL = 1e-4\n\n\ndef extract_numeric_values(text):\n    \"\"\"\n    Extract all numeric interpretations from a line:\n    - Fractions (e.g., 16/111)\n    - Percentages (e.g., 14.4%)\n    - Decimals (e.g., 0.144)\n    Returns a list of floats.\n    \"\"\"\n    values = []\n\n    # --- Fractions ---\n    for num, den in re.findall(r'(\\d+)\\s*/\\s*(\\d+)', text):\n        try:\n            values.append(float(Fraction(int(num), int(den))))\n        except ZeroDivisionError:\n            pass\n\n    # --- Percentages ---\n    for pct in re.findall(r'(\\d+(?:\\.\\d+)?)\\s*%', text):\n        values.append(float(pct) / 100.0)\n\n    # --- Decimals / integers ---\n    for num in re.findall(r'\\b\\d+\\.\\d+|\\b\\d+\\b', text):\n        values.append(float(num))\n\n    return values\n\n\ndef is_correct(candidate, gt=GROUND_TRUTH, tol=TOL):\n    \"\"\"\n    Returns True if ANY extracted numeric value matches ground truth.\n    \"\"\"\n    values = extract_numeric_values(candidate)\n    return any(abs(v - gt) < tol for v in values)\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate if the LLM output contains a numeric value that matches the ground truth.\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    llm_output = llm_output.strip()\n    if is_correct(llm_output):\n        return True, \"Ground truth matched in LLM output.\"\n    else:\n        reason = f\"Ground truth '{GROUND_TRUTH}' (tol={TOL}) not found in LLM output: {llm_output}\"\n        return False, reason"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "agnews/3",
+  "dataset_key": "agnews",
+  "query_id": 3,
+  "question": "What is the average number of business articles published per year in Europe from 2010 to 2020, inclusive?",
+  "gold_text": "336.6363636363636",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 40,
+   "reads_gold_file": false,
+   "source": "import re\n\nGROUND_TRUTH = 336.6363636363636\nTOL = 1e-2\n\n\ndef extract_numeric_values(text):\n    \"\"\"\n    Extract all numeric values from a candidate answer.\n    Supports:\n      - integers\n      - decimals\n    Returns a list of floats.\n    \"\"\"\n    values = []\n\n    # Match integers and decimals (including standalone numbers like \"370\" or \"336.63\")\n    for num in re.findall(r'\\b\\d+\\.\\d+|\\b\\d+\\b', text):\n        try:\n            values.append(float(num))\n        except ValueError:\n            pass\n\n    return values\n\n\ndef is_correct(candidate, gt=GROUND_TRUTH, tol=TOL):\n    \"\"\"\n    Returns True if ANY extracted numeric value matches the ground truth.\n    \"\"\"\n    values = extract_numeric_values(candidate)\n    return any(abs(v - gt) < tol for v in values)\n\ndef validate(llm_output: str):\n    llm_output = llm_output.strip()\n    if is_correct(llm_output):\n        return True, \"Ground truth numeric value found in LLM output.\"\n    else:\n        reason = f\"Ground truth numeric value '{GROUND_TRUTH}' (tol={TOL}) not found in LLM output: {llm_output}\"\n        return False, reason"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "agnews/4",
+  "dataset_key": "agnews",
+  "query_id": 4,
+  "question": "In 2015, which region published the largest number of articles in the World category?",
+  "gold_text": "Africa",
+  "gold_lines": 1,
+  "validator": {
+   "style": "substring",
+   "lines": 9,
+   "reads_gold_file": false,
+   "source": "def validate(llm_output: str):\n    gt = \"Africa\"\n    if gt.lower() in llm_output.lower():\n        return True, \"Ground truth found in LLM output.\"\n    else:\n        reason = f\"Ground truth '{gt}' not found in LLM output: {llm_output}\"\n        return False, reason\n\n        "
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "bookreview/1",
+  "dataset_key": "bookreview",
+  "query_id": 1,
+  "question": "Which decade of publication (e.g., 1980s) has the highest average rating among decades with at least 10 distinct books that have been rated? Return the decade with the highest average rating.",
+  "gold_text": "2020",
+  "gold_lines": 1,
+  "validator": {
+   "style": "substring",
+   "lines": 14,
+   "reads_gold_file": false,
+   "source": "def validate(llm_output: str):\n    \"\"\"\n    Validate if ground truth '2020' is present in LLM output.\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    gt = \"2020\"\n\n    if gt in llm_output:\n        return True, \"Ground truth found in LLM output.\"\n    else:\n        reason = f\"Ground truth '{gt}' not found in LLM output.\"\n        return False, reason\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "bookreview/2",
+  "dataset_key": "bookreview",
+  "query_id": 2,
+  "question": "Which English-language books in the 'Literature & Fiction' category have a perfect average rating of 5.0? Return all matching books.",
+  "gold_text": "The Sludge\nSomething That Feels Like Truth (Switchgrass Books)\nKennebago Moments\nHollywood Confessions: Hollywood Headlines Book #3 (Hollywood Headlines Mysteries)\nForged in Blood (Freehold)\nLocal Honey\n\"Exits, Desires, & Slow Fires\"\nFire Cracker\nReunion: The Children of Lauderdale Park\nChilde Harold of Dysna\nThe Prophet: With Original 1923 Illustrations by the Author\nKnowing When To Die: Uncollected Stories\nLiza of Lambeth\nChild Of The King A Journey of Hope Book 1: Earthly Story With A Heavenly Message\nThe Melancholy Strumpet Master",
+  "gold_lines": 15,
+  "validator": {
+   "style": "regex",
+   "lines": 36,
+   "reads_gold_file": false,
+   "source": "import re\n\n\ndef _normalize_title(s: str) -> str:\n    s = s.lower()\n    s = re.sub(r\"\\([^)]*\\)\", \"\", s)\n    s = re.sub(r\"[^a-z0-9\\s]\", \" \", s)\n    s = re.sub(r\"\\s+\", \" \", s).strip()\n    return s\n\n\ndef validate(llm_output: str):\n    \"\"\"Check every ground-truth title appears in the LLM output after\n    normalization (strip parenthesized tags, lowercase, collapse whitespace).\"\"\"\n    ground_truth_books = [\n        \"The Sludge\",\n        \"Something That Feels Like Truth (Switchgrass Books)\",\n        \"Kennebago Moments\",\n        \"Hollywood Confessions: Hollywood Headlines Book #3 (Hollywood Headlines Mysteries)\",\n        \"Forged in Blood (Freehold)\",\n        \"Local Honey\",\n        \"Exits, Desires, & Slow Fires\",\n        \"Fire Cracker\",\n        \"Reunion: The Children of Lauderdale Park\",\n        \"Childe Harold of Dysna\",\n        \"The Prophet: With Original 1923 Illustrations by the Author\",\n        \"Knowing When To Die: Uncollected Stories\",\n        \"Liza of Lambeth\",\n        \"Child Of The King A Journey of Hope Book 1: Earthly Story With A Heavenly Message\",\n        \"The Melancholy Strumpet Master\",\n    ]\n    llm_norm = _normalize_title(llm_output)\n    for book in ground_truth_books:\n        if _normalize_title(book) not in llm_norm:\n            return False, f\"Missing book title in LLM output: {book}\"\n    return True, \"All book titles found in LLM output.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "bookreview/3",
+  "dataset_key": "bookreview",
+  "query_id": 3,
+  "question": "Which books categorized as 'Children's Books' have received an average rating of at least 4.5 based on reviews from 2020 onwards?",
+  "gold_text": "Around the World Mazes\nBehind the Wheel (Choose Your Own Adventure #35)(Paperback/Revised)\nBenny Goes To The Moon: The great new book from Top Children's entertainer Gerry Ogilvie (1)\n\"Cheer Up, Ben Franklin! (Young Historians)\"\nFavorite Thorton W. Burgess Stories: 6 Books\nEgypt (Enchantment of the World)\n\"Pokémon: Sun & Moon, Vol. 8 (8)\"\nThe Library Book\nLunaLu the Llamacorn\nMonstrous Stories #4: The Day the Mice Stood Still\nThe Old Man and the Pirate Princess\nTrouble in the CTC!: The Terra Prime Adventures Book 2\n\"Clark the Shark: Tooth Trouble, No. 1\"\nCleo Porter and the Body Electric",
+  "gold_lines": 14,
+  "validator": {
+   "style": "regex",
+   "lines": 43,
+   "reads_gold_file": false,
+   "source": "import re\n\n\ndef _normalize(s: str) -> str:\n    s = s.lower()\n    s = re.sub(r\"\\([^)]*\\)\", \"\", s)\n    s = re.sub(r\"[^a-z0-9\\s]\", \" \", s)\n    s = re.sub(r\"\\s+\", \" \", s).strip()\n    return s\n\n\ndef _gt_short(s: str) -> str:\n    # for the GT side only: also drop subtitle (after first ':') so abbreviated\n    # agent answers still match.\n    s = s.lower().split(\":\", 1)[0]\n    s = re.sub(r\"\\([^)]*\\)\", \"\", s)\n    s = re.sub(r\"[^a-z0-9\\s]\", \" \", s)\n    s = re.sub(r\"\\s+\", \" \", s).strip()\n    return s\n\n\ndef validate(llm_output: str):\n    ground_truth_books = [\n        \"Around the World Mazes\",\n        \"Behind the Wheel (Choose Your Own Adventure #35)(Paperback/Revised)\",\n        \"Benny Goes To The Moon: The great new book from Top Children's entertainer Gerry Ogilvie (1)\",\n        \"Cheer Up, Ben Franklin! (Young Historians)\",\n        \"Favorite Thorton W. Burgess Stories: 6 Books\",\n        \"Egypt (Enchantment of the World)\",\n        \"Pokémon: Sun & Moon, Vol. 8 (8)\",\n        \"The Library Book\",\n        \"LunaLu the Llamacorn\",\n        \"Monstrous Stories #4: The Day the Mice Stood Still\",\n        \"The Old Man and the Pirate Princess\",\n        \"Trouble in the CTC!: The Terra Prime Adventures Book 2\",\n        \"Clark the Shark: Tooth Trouble, No. 1\",\n        \"Cleo Porter and the Body Electric\",\n    ]\n    llm_norm = _normalize(llm_output)\n    for book in ground_truth_books:\n        if _gt_short(book) not in llm_norm:\n            return False, f\"Missing book title in LLM output: {book}\"\n    return True, \"All book titles found in LLM output.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "crmarenapro/1",
+  "dataset_key": "crmarenapro",
+  "query_id": 1,
+  "question": "Can this lead be qualified based on the latest discussions? If the answer is no, which factors—'Budget', 'Authority', 'Need', or 'Timeline'—are responsible? Return only one or several of the four BANT factors that the lead qualification fails to meet (i.e. 'Budget', 'Authority', 'Need', 'Timeline').\n\n## Lead qualification guide.\nLook for the voice call transcripts with the lead and relevant knowledge articles to justify the lead qualification.\n\n- Lead Id to be considered is: 00QWt0000089AekMAE",
+  "gold_text": "Authority",
+  "gold_lines": 1,
+  "validator": {
+   "style": "substring",
+   "lines": 30,
+   "reads_gold_file": false,
+   "source": "def validate(llm_output: str):\n    \"\"\"\n    Validate if LLM output contains the expected BANT factor(s).\n    Expected: Authority\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    expected = \"Authority\"\n\n    # Clean the output and check for exact match\n    llm_output_clean = llm_output.strip()\n\n    # Check for exact word match (case insensitive)\n    if expected.lower() in llm_output_clean.lower():\n        return True, f\"Found expected BANT factor: {expected}\"\n\n    # Check if any of the BANT factors are mentioned\n    bant_factors = [\"Budget\", \"Authority\", \"Need\", \"Timeline\"]\n    found_factors = []\n    for factor in bant_factors:\n        if factor.lower() in llm_output_clean.lower():\n            found_factors.append(factor)\n\n    if found_factors:\n        reason = f\"Found BANT factors {found_factors}, but expected '{expected}'\"\n        return False, reason\n    else:\n        reason = \"No BANT factors found in LLM output\"\n        return False, reason"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "crmarenapro/2",
+  "dataset_key": "crmarenapro",
+  "query_id": 2,
+  "question": "Does the cost and setup of this quote comply with our company policy? If it doesn't, which knowledge article is it in conflict with? Return only the Id of the knowledge article that the quote violates. If no violation is found, return None.\n\n## Quote approval guide.\nLook for relevant knowledge articles to justify the quote approval.\n\n- Quote Id to be considered is: 0Q0Wt000001WSDVKA4",
+  "gold_text": "ka0Wt000000Eq0MIAS",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 34,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate if LLM output contains the expected knowledge article ID.\n    Expected: ka0Wt000000Eq0MIAS\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    expected = \"ka0Wt000000Eq0MIAS\"\n\n    # Clean the output and check for exact match\n    llm_output_clean = llm_output.strip()\n\n    # Check for exact ID match (case sensitive for IDs)\n    if expected in llm_output_clean:\n        return True, f\"Found expected agent ID: {expected}\"\n\n    # Check if any knowledge article ID pattern is present (starts with 'ka0')\n    ka_pattern = r'ka0[A-Za-z0-9]{15}'\n    found_ids = re.findall(ka_pattern, llm_output_clean)\n\n    if found_ids:\n        reason = f\"Found knowledge article IDs {found_ids}, but expected '{expected}'\"\n        return False, reason\n    else:\n        # Check for \"None\" or \"No violation\" responses\n        if re.search(r'\\b(none|no violation|no policy violation)\\b', llm_output_clean, re.IGNORECASE):\n            reason = \"LLM output indicates no policy violation, but expected knowledge article ID\"\n            return False, reason\n        else:\n            reason = \"No knowledge article ID found in LLM output\"\n            return False, reason"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "crmarenapro/3",
+  "dataset_key": "crmarenapro",
+  "query_id": 3,
+  "question": "Is the stage name accurately representing the tasks for this opportunity? If it is not, what should the appropriate stage name be? Return only the correct stage label among ('Qualification', 'Discovery', 'Quote', 'Negotiation', 'Closed').\n\n- Opportunity Id to be considered is: 006Wt000007BGGjIAO",
+  "gold_text": "Negotiation",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 33,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate if LLM output contains the expected stage name.\n    Expected: Negotiation\n    Valid stages: ('Qualification', 'Discovery', 'Quote', 'Negotiation', 'Closed')\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    expected = \"Negotiation\"\n    valid_stages = [\"Qualification\", \"Discovery\", \"Quote\", \"Negotiation\", \"Closed\"]\n\n    # Clean the output and check for exact match\n    llm_output_clean = llm_output.strip()\n\n    # Check for exact stage match (case insensitive)\n    if expected.lower() in llm_output_clean.lower():\n        return True, f\"Found expected agent ID: {expected}\"\n\n    # Check if any valid stage is mentioned\n    found_stages = []\n    for stage in valid_stages:\n        if stage.lower() in llm_output_clean.lower():\n            found_stages.append(stage)\n\n    if found_stages:\n        reason = f\"Found stages {found_stages}, but expected '{expected}'\"\n        return False, reason\n    else:\n        reason = \"No valid stage name found in LLM output\"\n        return False, reason"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "crmarenapro/4",
+  "dataset_key": "crmarenapro",
+  "query_id": 4,
+  "question": "Is there a particular month in the past 10 months where the number of SecureAnalytics Pro cases significantly exceeds those of other months? The associated product Id is 01tWt000006hVJdIAM. Return only the month name.\n\n- Today's date: 2021-04-10",
+  "gold_text": "November",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 33,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate if LLM output contains the expected month name.\n    Expected: November\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    expected = \"November\"\n    months = [\"January\", \"February\", \"March\", \"April\", \"May\", \"June\",\n              \"July\", \"August\", \"September\", \"October\", \"November\", \"December\"]\n\n    # Clean the output and check for exact match\n    llm_output_clean = llm_output.strip()\n\n    # Check for exact month match (case insensitive)\n    if expected.lower() in llm_output_clean.lower():\n        return True, f\"Found expected agent ID: {expected}\"\n\n    # Check if any month is mentioned\n    found_months = []\n    for month in months:\n        if month.lower() in llm_output_clean.lower():\n            found_months.append(month)\n\n    if found_months:\n        reason = f\"Found months {found_months}, but expected '{expected}'\"\n        return False, reason\n    else:\n        reason = \"No month name found in LLM output\"\n        return False, reason"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "crmarenapro/5",
+  "dataset_key": "crmarenapro",
+  "query_id": 5,
+  "question": "What has been the most frequent problem AI Cirku-Tech encountered over the past five months? The associated product Id is 01tWt000006hV8LIAU. Return only the issue Id of the most reported issue for this product.\n\n- Today's date: 2023-01-16",
+  "gold_text": "a03Wt00000JqnHwIAJ",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 31,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate if LLM output contains the expected issue ID.\n    Expected: a03Wt00000JqnHwIAJ\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    expected = \"a03Wt00000JqnHwIAJ\"\n\n    # Clean the output and check for exact match\n    llm_output_clean = llm_output.strip()\n\n    # Check for exact ID match (case sensitive for IDs)\n    if expected in llm_output_clean:\n        return True, f\"Found expected agent ID: {expected}\"\n\n    # Check if any issue ID pattern is present (starts with 'a03')\n    issue_pattern = r'a03[A-Za-z0-9]{15}'\n    found_ids = re.findall(issue_pattern, llm_output_clean)\n\n    if found_ids:\n        reason = f\"Found issue IDs {found_ids}, but expected '{expected}'\"\n        \n        return False, reason\n    else:\n        reason = \"No issue ID found in LLM output\"\n        \n        return False, reason"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "crmarenapro/6",
+  "dataset_key": "crmarenapro",
+  "query_id": 6,
+  "question": "Is the product setup in this quotation, including elements like quantity and price, against company regulations? Return only the Id of the knowledge article that the invalid config violates.\n\n## Invalid config guide.\nLook for the relevant knowledge articles to justify the invalid config.\n\n- Quote Id to be considered is: 0Q0Wt000001WRAzKAO",
+  "gold_text": "ka0Wt000000EnwvIAC",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 31,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate if LLM output contains the expected knowledge article ID.\n    Expected: ka0Wt000000EnwvIAC\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    expected = \"ka0Wt000000EnwvIAC\"\n\n    # Clean the output and check for exact match\n    llm_output_clean = llm_output.strip()\n\n    # Check for exact ID match (case sensitive for IDs)\n    if expected in llm_output_clean:\n        return True, f\"Found expected agent ID: {expected}\"\n\n    # Check if any knowledge article ID pattern is present (starts with 'ka0')\n    ka_pattern = r'ka0[A-Za-z0-9]{15}'\n    found_ids = re.findall(ka_pattern, llm_output_clean)\n\n    if found_ids:\n        reason = f\"Found knowledge article IDs {found_ids}, but expected '{expected}'\"\n        \n        return False, reason\n    else:\n        reason = \"No knowledge article ID found in LLM output\"\n        \n        return False, reason"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "crmarenapro/7",
+  "dataset_key": "crmarenapro",
+  "query_id": 7,
+  "question": "Did the agent breach the policy, and if so, which knowledge article was breached? Return only the Id of the knowledge article or None if no violation is found.\n\n- Case Id to be considered is: 500Wt00000DDyznIAD",
+  "gold_text": "ka0Wt000000EoD3IAK",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 37,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate if LLM output contains the expected knowledge article ID or None.\n    Expected: ka0Wt000000EoD3IAK\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    expected = \"ka0Wt000000EoD3IAK\"\n\n    # Clean the output and check for exact match\n    llm_output_clean = llm_output.strip()\n\n    # Check for exact ID match (case sensitive for IDs)\n    if expected in llm_output_clean:\n        return True, f\"Found expected agent ID: {expected}\"\n\n    # Check if any knowledge article ID pattern is present (starts with 'ka0')\n    ka_pattern = r'ka0[A-Za-z0-9]{15}'\n    found_ids = re.findall(ka_pattern, llm_output_clean)\n\n    if found_ids:\n        reason = f\"Found knowledge article IDs {found_ids}, but expected '{expected}'\"\n        \n        return False, reason\n    else:\n        # Check for \"None\" response (which would be incorrect for this case)\n        if re.search(r'\\b(none|no violation|no policy violation)\\b', llm_output_clean, re.IGNORECASE):\n            reason = \"LLM output indicates no policy violation, but expected knowledge article ID\"\n            \n            return False, reason\n        else:\n            reason = \"No knowledge article ID found in LLM output\"\n            \n            return False, reason"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "crmarenapro/8",
+  "dataset_key": "crmarenapro",
+  "query_id": 8,
+  "question": "Identify the agent with the fewest transfer counts in the last 4 quarters among those who handled more than 0 cases. Return only the Id of the agent.\n\n## Transfer Count Policy\n- Definition: The number of instances a case was reassigned or transferred from one agent to another. Each transfer from agent A to agent B adds to the transfer count for agent A.\n- In the queries that specify 'agents managed/queries x cases' -- this filter applies to both the first agent that the case was first assigned to and the agent that the case was transferred to. This means that if an agent has 2 cases that was initially assigned to itself by admin and 1 case transferred from another agent, a filter like 'handled/managed at least 3 cases' would not filter this agent out.\n- For cases that have NOT been transferred to an other agent, there will be only ONE 'Owner Assignment', and for those that have been transferred, there will be MORE THAN ONE 'Owner Assignment'.\n\n## Today's date: 2023-04-10",
+  "gold_text": "005Wt000003NIliIAG",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 31,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate if LLM output contains the expected agent ID.\n    Expected: 005Wt000003NIliIAG\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    expected = \"005Wt000003NIliIAG\"\n\n    # Clean the output and check for exact match\n    llm_output_clean = llm_output.strip()\n\n    # Check for exact ID match (case sensitive for IDs)\n    if expected in llm_output_clean:\n        return True, f\"Found expected agent ID: {expected}\"\n\n    # Check if any agent ID pattern is present (starts with '005')\n    agent_pattern = r'005[A-Za-z0-9]{15}'\n    found_ids = re.findall(agent_pattern, llm_output_clean)\n\n    if found_ids:\n        reason = f\"Found agent IDs {found_ids}, but expected '{expected}'\"\n        \n        return False, reason\n    else:\n        reason = \"No agent ID found in LLM output\"\n        \n        return False, reason"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "crmarenapro/9",
+  "dataset_key": "crmarenapro",
+  "query_id": 9,
+  "question": "Which states have the quickest case closure time in the past 6 quarters? Return only the two-letter abbreviation of the most matching state (eg. CA).\n\n- Today's date: 2022-10-26",
+  "gold_text": "MI",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 42,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate if LLM output contains the expected state abbreviation.\n    Expected: MI\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    expected = \"MI\"\n\n    # Common US state abbreviations for reference\n    us_states = [\n        \"AL\", \"AK\", \"AZ\", \"AR\", \"CA\", \"CO\", \"CT\", \"DE\", \"FL\", \"GA\",\n        \"HI\", \"ID\", \"IL\", \"IN\", \"IA\", \"KS\", \"KY\", \"LA\", \"ME\", \"MD\",\n        \"MA\", \"MI\", \"MN\", \"MS\", \"MO\", \"MT\", \"NE\", \"NV\", \"NH\", \"NJ\",\n        \"NM\", \"NY\", \"NC\", \"ND\", \"OH\", \"OK\", \"OR\", \"PA\", \"RI\", \"SC\",\n        \"SD\", \"TN\", \"TX\", \"UT\", \"VT\", \"VA\", \"WA\", \"WV\", \"WI\", \"WY\"\n    ]\n\n    # Clean the output and check for exact match\n    llm_output_clean = llm_output.strip()\n\n    # Check for exact state match (case insensitive)\n    if re.search(r'\\b' + re.escape(expected) + r'\\b', llm_output_clean, re.IGNORECASE):\n        return True, f\"Found expected state: {expected}\"\n\n    # Check if any valid state abbreviation is mentioned\n    found_states = []\n    for state in us_states:\n        if re.search(r'\\b' + state + r'\\b', llm_output_clean, re.IGNORECASE):\n            found_states.append(state)\n\n    if found_states:\n        reason = f\"Found states {found_states}, but expected '{expected}'\"\n        \n        return False, reason\n    else:\n        reason = \"No state abbreviation found in LLM output\"\n        \n        return False, reason"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "crmarenapro/10",
+  "dataset_key": "crmarenapro",
+  "query_id": 10,
+  "question": "In the past four months, which agent had the lowest average handle time for those processing more than one case? Return only the Id of the agent.\n\n## Handle Time Policy\n- Definition: The duration taken to close a case. Specifically, it is the time from when a case is opened to when it is closed.\n- In the queries that specify 'agents managed/queries x cases' -- this filter applies to both the first agent that the case was first assigned to and the agent that the case was transferred to. This means that if an agent has 2 cases that was initially assigned to itself by admin and 1 case transferred from another agent, a filter like 'handled/managed at least 3 cases' would not filter this agent out.\n- When computing handle time, we do not compute handle time for cases that have been transferred to other agents.\n- For cases that have NOT been transferred to an other agent, there will be only ONE 'Owner Assignment', and for those that have been transferred, there will be MORE THAN ONE 'Owner Assignment'.\n\n## Today's date: 2023-09-02",
+  "gold_text": "005Wt000003NDqDIAW",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 29,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate if LLM output contains the expected agent ID.\n    Expected: 005Wt000003NDqDIAW\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    expected = \"005Wt000003NDqDIAW\"\n\n    # Clean the output and check for exact match\n    llm_output_clean = llm_output.strip()\n\n    # Check for exact ID match (case sensitive for IDs)\n    if expected in llm_output_clean:\n        return True, f\"Found expected agent ID: {expected}\"\n\n    # Check if any agent ID pattern is present (starts with '005')\n    agent_pattern = r'005[A-Za-z0-9]{15}'\n    found_ids = re.findall(agent_pattern, llm_output_clean)\n\n    if found_ids:\n        reason = f\"Found agent IDs {found_ids}, but expected '{expected}'\"\n        return False, reason\n    else:\n        reason = \"No agent ID found in LLM output\"\n        return False, reason"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "crmarenapro/11",
+  "dataset_key": "crmarenapro",
+  "query_id": 11,
+  "question": "Can you show me the AI processing unit I purchased last month? Return only the Id of the product from the contact's relevant past transaction.\n\n- Contact Id interacting: 003Wt00000Jqy8SIAR\n- Today's date: 2021-07-15",
+  "gold_text": "01tWt000006hV8LIAU",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 29,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate if LLM output contains the expected product ID.\n    Expected: 01tWt000006hV8LIAU\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    expected = \"01tWt000006hV8LIAU\"\n\n    # Clean the output and check for exact match\n    llm_output_clean = llm_output.strip()\n\n    # Check for exact ID match (case sensitive for IDs)\n    if expected in llm_output_clean:\n        return True, f\"Found expected product ID: {expected}\"\n\n    # Check if any product ID pattern is present (starts with '01t')\n    product_pattern = r'01t[A-Za-z0-9]{15}'\n    found_ids = re.findall(product_pattern, llm_output_clean)\n\n    if found_ids:\n        reason = f\"Found product IDs {found_ids}, but expected '{expected}'\"\n        return False, reason\n    else:\n        reason = \"No product ID found in LLM output\"\n        return False, reason"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "crmarenapro/12",
+  "dataset_key": "crmarenapro",
+  "query_id": 12,
+  "question": "Who had the quickest average turnaround from opening to closing opportunities among agents in April 2023? Return only the Id of the agent.\n\n## Sales Cycle Policy\n- Definition: The sales cycle is measured as the number of days between an opportunity's creation date and the company signed date on the corresponding contract.\n\n## Today's date: 2024-09-12",
+  "gold_text": "005Wt000003NDEBIA4",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 29,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate if LLM output contains the expected agent ID.\n    Expected: 005Wt000003NDEBIA4\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    expected = \"005Wt000003NDEBIA4\"\n\n    # Clean the output and check for exact match\n    llm_output_clean = llm_output.strip()\n\n    # Check for exact ID match (case sensitive for IDs)\n    if expected in llm_output_clean:\n        return True, f\"Found expected agent ID: {expected}\"\n\n    # Check if any agent ID pattern is present (starts with '005')\n    agent_pattern = r'005[A-Za-z0-9]{15}'\n    found_ids = re.findall(agent_pattern, llm_output_clean)\n\n    if found_ids:\n        reason = f\"Found agent IDs {found_ids}, but expected '{expected}'\"\n        return False, reason\n    else:\n        reason = \"No agent ID found in LLM output\"\n        return False, reason"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "crmarenapro/13",
+  "dataset_key": "crmarenapro",
+  "query_id": 13,
+  "question": "Identify the agent who achieved the top sales figures for orders made in the past five months. Return only the Id of the agent.\n\n## Sales Amount Policy\n- Definition: The sales amount for an order is calculated as the product of the quantity and the unit price from the Order object (Quantity * UnitPrice). An opportunity is eligible if its associated contract has a company signed date that falls within the time interval of interest.\n\n- Today's date: 2022-11-25",
+  "gold_text": "005Wt000003NIXCIA4",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 29,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate if LLM output contains the expected agent ID.\n    Expected: 005Wt000003NIXCIA4\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    expected = \"005Wt000003NIXCIA4\"\n\n    # Clean the output and check for exact match\n    llm_output_clean = llm_output.strip()\n\n    # Check for exact ID match (case sensitive for IDs)\n    if expected in llm_output_clean:\n        return True, f\"Found expected agent ID: {expected}\"\n\n    # Check if any agent ID pattern is present (starts with '005')\n    agent_pattern = r'005[A-Za-z0-9]{15}'\n    found_ids = re.findall(agent_pattern, llm_output_clean)\n\n    if found_ids:\n        reason = f\"Found agent IDs {found_ids}, but expected '{expected}'\"\n        return False, reason\n    else:\n        reason = \"No agent ID found in LLM output\"\n        return False, reason"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "googlelocal/1",
+  "dataset_key": "googlelocal",
+  "query_id": 1,
+  "question": "What are the top 5 businesses located in Los Angeles, California, ranked by highest average rating in descending order?",
+  "gold_text": "Widows Peak Salon,4.857142857142857\nCity Textile,4.5\nNobel Textile Co,4.285714285714286\nSan Soo Dang,4.277777777777778\nNova Fabrics,3.3333333333333335",
+  "gold_lines": 5,
+  "validator": {
+   "style": "substring",
+   "lines": 33,
+   "reads_gold_file": false,
+   "source": "def validate(llm_output: str):\n    \"\"\"\n    Validate LLM output for query1:\n    - All names from ground truth must appear (case-sensitive, exact).\n    - Names must appear in the same order as in ground truth.\n    Returns:\n        (True, \"OK\") if valid\n        (False, reason) if invalid\n    \"\"\"\n    ground_truth = [\n        \"Widows Peak Salon\",\n        \"City Textile\",\n        \"Nobel Textile Co\",\n        \"San Soo Dang\",\n        \"Nova Fabrics\"\n    ]\n\n    last_index = -1\n    for name in ground_truth:\n        idx = llm_output.find(name)\n        if idx == -1:\n            reason = f\"Missing name in LLM output: {name}\"\n            \n            return False, reason\n\n        if idx < last_index:\n            reason = f\"Name out of order: {name}\"\n            \n            return False, reason\n\n        last_index = idx\n\n    return True, \"All names are present and in correct order.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "googlelocal/2",
+  "dataset_key": "googlelocal",
+  "query_id": 2,
+  "question": "Which massage therapy businesses have an average rating of at least 4.0, and what are their respective average ratings?",
+  "gold_text": "Elite Massage,5.0\nAngel-A Massage,4.333333333333333\nAurora Massage,4.178571428571429\nJ B Oriental Inc,4.166666666666667",
+  "gold_lines": 4,
+  "validator": {
+   "style": "regex",
+   "lines": 47,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate LLM output for query1:\n    - All names from ground truth appear (case-sensitive exact match)\n    - For each name, a score appears in the next 50 characters (after name, excluding name itself)\n    - Score must round to ground truth score to 2 decimals\n    Returns:\n        (True, \"OK\") if valid\n        (False, reason) if invalid\n    \"\"\"\n    ground_truth = [\n        (\"Elite Massage\", 5.0),\n        (\"Angel-A Massage\", 4.333333333333333),\n        (\"Aurora Massage\", 4.178571428571429),\n        (\"J B Oriental Inc\", 4.166666666666667)\n    ]\n\n    for name, true_score in ground_truth:\n        idx = llm_output.find(name)\n        if idx == -1:\n            reason = f\"Missing name in LLM output: {name}\"\n            \n            return False, reason\n\n        # Get 10 characters AFTER the name (exclude name itself)\n        start = idx + len(name)\n        window = llm_output[start:start+10]\n        matches = re.findall(r\"(\\d+\\.\\d+)\", window)\n        if not matches:\n            reason = f\"No score found after name: {name}\"\n            \n            return False, reason\n\n        gt_rounded = round(true_score, 2)\n        for m in matches:\n            llm_val = float(m)\n            if round(llm_val, 2) == gt_rounded:\n                break\n        else:\n            reason = f\"Score mismatch for {name}: expected ~{gt_rounded:.2f}, but not found after name.\"\n            \n            return False, reason\n\n\n    return True, \"All names and scores matched successfully.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "googlelocal/3",
+  "dataset_key": "googlelocal",
+  "query_id": 3,
+  "question": "What are the top 5 businesses that remain open after 6:00 PM on at least one weekday, ranked by highest average rating? Include their names, operating hours, and average ratings.",
+  "gold_text": "TACOS LA CABANA,\"[['Thursday', 'Closed'], ['Friday', '5–11PM'], ['Saturday', '5–11PM'], ['Sunday', '5–11PM'], ['Monday', '5–11PM'], ['Tuesday', 'Closed'], ['Wednesday', 'Closed']]\",5.0\nWhite Barn Candle Co,\"[['Thursday', '10AM–9PM'], ['Friday', '10AM–9PM'], ['Saturday', '10AM–9PM'], ['Sunday', '11AM–7PM'], ['Monday', '10AM–9PM'], ['Tuesday', '10AM–9PM'], ['Wednesday', '10AM–9PM']]\",5.0\nMariscos el poblano,\"[['Thursday', 'Open 24 hours'], ['Friday', '8AM–3:30PM'], ['Saturday', '8AM–3:30PM'], ['Sunday', '8AM–3:30PM'], ['Monday', '9AM–3:30AM'], ['Tuesday', '8AM–3:30PM'], ['Wednesday', '8AM–3:30PM']]\",5.0\nBeauty Divine Artistry,\"[['Thursday', '9AM–8PM'], ['Friday', '9AM–8PM'], ['Saturday', '10AM–7PM'], ['Sunday', '11AM–6PM'], ['Monday', '9AM–8PM'], ['Tuesday', '9AM–8PM'], ['Wednesday', '9AM–8PM']]\",5.0\nTaba Rug Gallery,\"[['Thursday', '10AM–7PM'], ['Friday', '10AM–7PM'], ['Saturday', '10AM–7PM'], ['Sunday', '11AM–6PM'], ['Monday', '10AM–7PM'], ['Tuesday', '10AM–7PM'], ['Wednesday', '10AM–7PM']]\",5.0",
+  "gold_lines": 5,
+  "validator": {
+   "style": "regex",
+   "lines": 152,
+   "reads_gold_file": false,
+   "source": "import re\n\nground_truth = [\n    (\n        \"TACOS LA CABANA\",\n        [\n            ['Thursday', 'Closed'],\n            ['Friday', '5–11PM'],\n            ['Saturday', '5–11PM'],\n            ['Sunday', '5–11PM'],\n            ['Monday', '5–11PM'],\n            ['Tuesday', 'Closed'],\n            ['Wednesday', 'Closed']\n        ],\n        5.0\n    ),\n    (\n        \"White Barn Candle Co\",\n        [\n            ['Thursday', '10AM–9PM'],\n            ['Friday', '10AM–9PM'],\n            ['Saturday', '10AM–9PM'],\n            ['Sunday', '11AM–7PM'],\n            ['Monday', '10AM–9PM'],\n            ['Tuesday', '10AM–9PM'],\n            ['Wednesday', '10AM–9PM']\n        ],\n        5.0\n    ),\n    (\n        \"Mariscos el poblano\",\n        [\n            ['Thursday', 'Open 24 hours'],\n            ['Friday', '8AM–3:30PM'],\n            ['Saturday', '8AM–3:30PM'],\n            ['Sunday', '8AM–3:30PM'],\n            ['Monday', '9AM–3:30AM'],\n            ['Tuesday', '8AM–3:30PM'],\n            ['Wednesday', '8AM–3:30PM']\n        ],\n        5.0\n    ),\n    (\n        \"Beauty Divine Artistry\",\n        [\n            ['Thursday', '9AM–8PM'],\n            ['Friday', '9AM–8PM'],\n            ['Saturday', '10AM–7PM'],\n            ['Sunday', '11AM–6PM'],\n            ['Monday', '9AM–8PM'],\n            ['Tuesday', '9AM–8PM'],\n            ['Wednesday', '9AM–8PM']\n        ],\n        5.0\n    ),\n    (\n        \"Taba Rug Gallery\",\n        [\n            ['Thursday', '10AM–7PM'],\n            ['Friday', '10AM–7PM'],\n            ['Saturday', '10AM–7PM'],\n            ['Sunday', '11AM–6PM'],\n            ['Monday', '10AM–7PM'],\n            ['Tuesday', '10AM–7PM'],\n            ['Wednesday', '10AM–7PM']\n        ],\n        5.0\n    )\n]\n\n\n_DAY_ORDER = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']\n_DAY_RANGE_RE = re.compile(\n    r'\\b(mon|tue|wed|thu|fri|sat|sun)-(mon|tue|wed|thu|fri|sat|sun)\\b', re.I\n)\n\n\ndef _abbr_covered_by_range(abbr, norm_window):\n    \"\"\"Corner case: 'Tue-Thu' implies 'wed' even though 'wed' isn't written out.\"\"\"\n    if abbr not in _DAY_ORDER:\n        return False\n    target = _DAY_ORDER.index(abbr)\n    for m in _DAY_RANGE_RE.finditer(norm_window):\n        start = _DAY_ORDER.index(m.group(1).lower())\n        end = _DAY_ORDER.index(m.group(2).lower())\n        if start <= end:\n            covered = start <= target <= end\n        else:  # wrap-around: e.g. Sun-Tue covers Sun(6), Mon(0), Tue(1)\n            covered = target >= start or target <= end\n        if covered:\n            return True\n    return False\n\n\ndef _norm(s):\n    \"\"\"Normalize time tokens so surface-form variants match:\n      - 24-hour variants (\"Open 24 hours\" / \"24/7\" / \"24 hrs\") → \"24h\"\n      - en-dash / em-dash / hyphen all collapse to \"-\"\n      - spaces inside a \"5 - 11 PM\" style range collapse\n      - \"11 PM\" → \"11PM\"\n    \"\"\"\n    s = re.sub(r\"\\b(?:open\\s+)?24\\s*(?:/\\s*7|hours?|hrs?|h)\\b\", \"24h\", s, flags=re.I)\n    s = s.replace(\"–\", \"-\").replace(\"—\", \"-\")\n    s = re.sub(r\"\\s*-\\s*\", \"-\", s)\n    s = re.sub(r\"\\s+(am|pm|AM|PM)\\b\", r\"\\1\", s)\n    s = re.sub(r\"\\s+\", \" \", s)\n    return s\n\n\ndef validate(llm_output: str):\n    \"\"\"Validate LLM output for query3:\n    - Business names must appear\n    - All hours (day + hours) must appear in a 500-char window after the name\n      (after surface-form normalization — en-dash/space variants accepted)\n    - The business's score must appear somewhere in that window\n    \"\"\"\n    llm_lower = llm_output.lower()\n\n    for name, hours_list, score in ground_truth:\n        name_lower = name.lower()\n        idx = llm_lower.find(name_lower)\n        if idx == -1:\n            return False, f\"Missing business name: {name}\"\n\n        window = llm_output[idx:idx+500].lower()\n        norm_window = _norm(window)\n\n        for day, hours in hours_list:\n            day_l = day.lower()\n            abbr = day_l[:3]\n            hours_l = _norm(hours.lower())\n            day_present = (day_l in norm_window) or (abbr in norm_window) or _abbr_covered_by_range(abbr, norm_window)\n            if not (day_present and hours_l in norm_window):\n                return False, f\"Missing hours [{day}, {hours}] for business: {name}\"\n\n        matches = re.findall(r\"(\\d+(?:\\.\\d+)?)\", window)\n        if not matches:\n            return False, f\"No score found after hours info for business: {name}\"\n\n        gt_score_rounded = round(score, 2)\n        found = False\n        for m in matches:\n            try:\n                if round(float(m), 2) == gt_score_rounded:\n                    found = True\n                    break\n            except Exception:\n                continue\n        if not found:\n            return False, f\"Score mismatch for business: {name}, expected ~{gt_score_rounded:.2f}\"\n\n    return True, \"All businesses validated successfully.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "googlelocal/4",
+  "dataset_key": "googlelocal",
+  "query_id": 4,
+  "question": "Which 3 businesses received the highest number of reviews with ratings of 4.5 or higher during 2019? Include their names and the count of high-rating reviews.",
+  "gold_text": "Encino Dermatology & Laser: Alex Khadavi MD,19\nThe Boochyard @ Local Roots,17\nAurora Massage,14",
+  "gold_lines": 3,
+  "validator": {
+   "style": "regex",
+   "lines": 40,
+   "reads_gold_file": false,
+   "source": "import re\n\nground_truth = [\n    (\"Encino Dermatology & Laser\", 19),\n    (\"The Boochyard @ Local Roots\", 17),\n    (\"Aurora Massage\", 14),\n]\n\n\ndef _norm(s: str) -> str:\n    s = s.lower()\n    s = s.replace(\"&\", \" and \").replace(\"@\", \" at \")\n    s = re.sub(r\"[^a-z0-9\\s]\", \" \", s)\n    s = re.sub(r\"\\s+\", \" \", s).strip()\n    return s\n\n\ndef validate(llm_output: str):\n    \"\"\"Each (name, expected_num) pair: name present (normalized); the expected\n    number appears within ±150 chars of the name's position.\"\"\"\n    llm = llm_output\n    llm_n = _norm(llm)\n    for name, expected in ground_truth:\n        name_n = _norm(name)\n        idx = llm_n.find(name_n)\n        if idx == -1:\n            return False, f\"Missing business name: {name}\"\n        # anchor on the most distinctive token (longest alphabetic word)\n        tokens = [t for t in re.findall(r\"[A-Za-z]{4,}\", name) if t.lower() not in\n                  {\"the\", \"and\", \"inc\", \"ltd\", \"llc\", \"corp\"}]\n        anchor = max(tokens, key=len) if tokens else name.split()[0]\n        m = re.search(re.escape(anchor), llm, re.I)\n        pos = m.start() if m else 0\n        lo = max(0, pos - 150)\n        hi = min(len(llm), pos + len(name) + 150)\n        window = llm[lo:hi]\n        nums = re.findall(r\"\\d+\", window)\n        if not any(int(n) == expected for n in nums if n.isdigit()):\n            return False, f\"Number {expected} not found near {name}\"\n    return True, \"All names and numbers matched.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "music_brainz_20k/1",
+  "dataset_key": "music_brainz_20k",
+  "query_id": 1,
+  "question": "How much revenue in USD did Apple Music make from Beyoncé's song 'Get Me Bodied' in Canada?",
+  "gold_text": "1059.46",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 42,
+   "reads_gold_file": false,
+   "source": "import re\n\nGROUND_TRUTH = 1059.46\nTOL = 1e-2\n\n\ndef extract_numeric_values(text):\n    \"\"\"\n    Extract all numeric values from a candidate answer.\n    Handles:\n      - integers\n      - decimals\n      - currency formats like $1059.46 or 1059.46 USD\n    Returns a list of floats.\n    \"\"\"\n    values = []\n\n    # strip thousands separators so \"1,059.46\" is read as a single number\n    text = re.sub(r\"(?<=\\d),(?=\\d{3}\\b)\", \"\", text)\n    # Match numbers like 1059.46, 601.44, 0, etc.\n    for match in re.findall(r'\\$?\\b\\d+(?:\\.\\d+)?\\b', text):\n        try:\n            values.append(float(match.replace(\"$\", \"\")))\n        except ValueError:\n            pass\n\n    return values\n\n\ndef is_correct(candidate, gt=GROUND_TRUTH, tol=TOL):\n    \"\"\"\n    Returns True if ANY extracted numeric value matches the ground truth.\n    \"\"\"\n    values = extract_numeric_values(candidate)\n    return any(abs(v - gt) < tol for v in values)\n\ndef validate(llm_output: str):\n    if is_correct(llm_output):\n        return True, \"Ground truth found in LLM output.\"\n    else:\n        reason = f\"Ground truth '{GROUND_TRUTH}' not found in LLM output: {llm_output}\"\n        return False, reason"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "music_brainz_20k/2",
+  "dataset_key": "music_brainz_20k",
+  "query_id": 2,
+  "question": "Which store earned the most revenue in USD from Brucqe Maginnis' song 'Street Hype' across all countries?",
+  "gold_text": "Amazon Music",
+  "gold_lines": 1,
+  "validator": {
+   "style": "substring",
+   "lines": 11,
+   "reads_gold_file": false,
+   "source": "def validate(llm_output: str):\n    gt = \"Amazon Music\"\n    cleaned_gt = \"\".join(gt.lower().split())\n    cleaned_llm_output = \"\".join(llm_output.lower().split())\n    if cleaned_gt in cleaned_llm_output:\n        return True, \"Ground truth found in LLM output.\"\n    else:\n        reason = f\"Ground truth '{gt}' not found in LLM output: {llm_output}\"\n        return False, reason\n\n        "
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "music_brainz_20k/3",
+  "dataset_key": "music_brainz_20k",
+  "query_id": 3,
+  "question": "Which song generated the highest total revenue in USD across all stores and countries?",
+  "gold_text": "Zo gaat het leven aan je voor (Hillich fjoer | Heilig vuur)\nZo gaat het leven aan je voor\nZo gaat het leven aan je voor - Hillich fjoer | Heilig vuur\n006-Zo gaat het leven aan je voor\nSyb van der Ploeg - Zo gaat het leven aan je voor",
+  "gold_lines": 5,
+  "validator": {
+   "style": "regex",
+   "lines": 61,
+   "reads_gold_file": false,
+   "source": "import re\nfrom difflib import SequenceMatcher\n\nGROUND_TRUTH_VARIANTS = [\n    \"Zo gaat het leven aan je voor (Hillich fjoer | Heilig vuur)\",\n    \"Zo gaat het leven aan je voor\",\n    \"Zo gaat het leven aan je voor - Hillich fjoer | Heilig vuur\",\n    \"006-Zo gaat het leven aan je voor\",\n    \"Syb van der Ploeg - Zo gaat het leven aan je voor\",\n]\nTHRESHOLD = 0.75\n\ndef normalize(text: str) -> str:\n    text = text.lower()\n    # strip markdown markers (** __ ` * _)\n    text = re.sub(r\"[*_`]\", \"\", text)\n    # remove content inside parentheses\n    text = re.sub(r\"\\([^)]*\\)\", \"\", text)\n    # remove artist prefixes like \"artist - title\"\n    text = re.sub(r\"^.*?\\s-\\s\", \"\", text)\n    # remove non-alphanumeric characters\n    text = re.sub(r\"[^a-z0-9\\s]\", \"\", text)\n    # collapse whitespace\n    text = re.sub(r\"\\s+\", \" \", text).strip()\n    return text\n\ndef similarity(a: str, b: str) -> float:\n    return SequenceMatcher(None, a, b).ratio()\n\ndef fuzzy_match(\n    ground_truth_variants,\n    cand,\n    threshold=THRESHOLD\n):\n    gt_norm = [normalize(g) for g in ground_truth_variants]\n    cand_norm = normalize(cand)\n\n    # Primary check: any normalized variant appears as a substring.\n    for gt in gt_norm:\n        if gt and gt in cand_norm:\n            return cand, 1.0\n\n    # Fallback: best SequenceMatcher ratio across variants.\n    best_score = 0.0\n    for gt in gt_norm:\n        score = similarity(gt, cand_norm)\n        if score > best_score:\n            best_score = score\n\n    if best_score >= threshold:\n        return cand, best_score\n    return None, best_score\n\ndef validate(llm_output: str):\n    llm_output = llm_output.strip()\n    match, score = fuzzy_match(GROUND_TRUTH_VARIANTS, llm_output)\n    if match:\n        return True, f\"Fuzzy match found: '{match}' with score {score:.2f}\"\n    else:\n        reason = f\"No fuzzy match ({GROUND_TRUTH_VARIANTS[1]}) found in {llm_output}. Best score: {score:.2f}\"\n        return False, reason\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "stockindex/1",
+  "dataset_key": "stockindex",
+  "query_id": 1,
+  "question": "Which stock index in the Asia region has exhibited the highest average intraday volatility since 2020?",
+  "gold_text": "399001.SZ",
+  "gold_lines": 1,
+  "validator": {
+   "style": "substring",
+   "lines": 8,
+   "reads_gold_file": false,
+   "source": "def validate(llm_output: str):\n    \"\"\"Check the target ticker is present in the first 200 chars of the output\n    (so it's stated as THE answer, not just mentioned in a comparison list).\"\"\"\n    gt = \"399001.SZ\"\n    head = llm_output[:200].lower()\n    if gt.lower() not in head:\n        return False, f\"Target '{gt}' not stated as primary answer (not in first 200 chars).\"\n    return True, f\"Target '{gt}' present as primary answer.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "stockindex/2",
+  "dataset_key": "stockindex",
+  "query_id": 2,
+  "question": "Among North American stock indices, which indices had more up days than down days in 2018?",
+  "gold_text": "IXIC",
+  "gold_lines": 1,
+  "validator": {
+   "style": "substring",
+   "lines": 7,
+   "reads_gold_file": false,
+   "source": "def validate(llm_output: str):\n    \"\"\"Check the target ticker is present in the first 200 chars of the output.\"\"\"\n    gt = \"IXIC\"\n    head = llm_output[:200].lower()\n    if gt.lower() not in head:\n        return False, f\"Target '{gt}' not stated as primary answer (not in first 200 chars).\"\n    return True, f\"Target '{gt}' present as primary answer.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "stockindex/3",
+  "dataset_key": "stockindex",
+  "query_id": 3,
+  "question": "If an investor had made regular monthly investments in all indices since 2000, which 5 indices would have produced the highest overall returns, and what countries do they belong to?",
+  "gold_text": "399001.SZ,China\nNSEI,India\nIXIC,United States\n000001.SS,China\nNYA,United States",
+  "gold_lines": 5,
+  "validator": {
+   "style": "substring",
+   "lines": 54,
+   "reads_gold_file": false,
+   "source": "def validate(llm_output: str):\n    \"\"\"Accept either the buy-and-hold ranking or the genuine DCA ranking.\n\n    The question asks about \"regular monthly investments since 2000 …\n    highest overall returns\". That phrase admits two standard readings:\n\n      * Buy-and-hold total return (last_close / first_close − 1).\n      * Monthly dollar-cost-average return (sum $1/month, value at end).\n\n    Under buy-and-hold the top-5 is {399001.SZ, NSEI, IXIC, 000001.SS, NYA};\n    under real DCA it's {IXIC, NSEI, 399001.SZ, GDAXI, TWII}. Both are\n    defensible interpretations of the prompt, so either set is accepted.\n    For each set, each ticker must appear within 100 chars of its country\n    (or an alias).\n    \"\"\"\n    country_aliases = {\n        \"china\": [\"china\", \"cn\"],\n        \"india\": [\"india\", \"in\"],\n        \"united states\": [\"united states\", \"us\", \"usa\", \"u.s.\"],\n        \"germany\": [\"germany\", \"de\", \"deutschland\"],\n        \"taiwan\": [\"taiwan\", \"tw\"],\n    }\n    candidate_sets = [\n        [(\"399001.SZ\", \"China\"), (\"NSEI\", \"India\"), (\"IXIC\", \"United States\"),\n         (\"000001.SS\", \"China\"), (\"NYA\", \"United States\")],\n        [(\"IXIC\", \"United States\"), (\"NSEI\", \"India\"), (\"399001.SZ\", \"China\"),\n         (\"GDAXI\", \"Germany\"), (\"TWII\", \"Taiwan\")],\n    ]\n\n    llm_lower = llm_output.lower()\n    failures = []\n    for pairs in candidate_sets:\n        ok = True\n        reason = \"\"\n        for name, country in pairs:\n            name_lower = name.lower()\n            idx = llm_lower.find(name_lower)\n            if idx == -1:\n                ok = False\n                reason = f\"Missing name: {name}\"\n                break\n            aliases = country_aliases.get(country.lower(), [country.lower()])\n            lo = max(0, idx - 100)\n            hi = min(len(llm_lower), idx + len(name_lower) + 100)\n            window = llm_lower[lo:hi]\n            if not any(a in window for a in aliases):\n                ok = False\n                reason = (f\"Country '{country}' not within ±100 chars \"\n                          f\"of '{name}'\")\n                break\n        if ok:\n            return True, \"All name-country pairs matched.\"\n        failures.append(reason)\n    return False, \"Neither candidate ranking matched: \" + \" | \".join(failures)\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "stockmarket/1",
+  "dataset_key": "stockmarket",
+  "query_id": 1,
+  "question": "What was the maximum adjusted closing price in 2020 for The RealReal, Inc.?",
+  "gold_text": "18.440000534057617",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 30,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate if any number in LLM output (rounded to 2 decimals) equals ground truth.\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    gt_value = 18.440000534057617\n    gt_rounded = round(gt_value, 2)\n\n    # find all numbers\n    matches = re.findall(r\"(\\d+\\.\\d+)\", llm_output)\n    if not matches:\n        reason = \"No number found in LLM output.\"\n        \n        return False, reason\n\n    for m in matches:\n        try:\n            val = float(m)\n            if round(val, 2) == gt_rounded:\n                return True, f\"Found matching number: {val} ≈ {gt_rounded}\"\n        except:\n            continue\n\n    reason = f\"No number ≈ {gt_rounded} found in LLM output.\"\n    \n    return False, reason\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "stockmarket/2",
+  "dataset_key": "stockmarket",
+  "query_id": 2,
+  "question": "List all ETF securities listed on NYSE Arca that reached an adjusted closing price above $200 at any point during 2015, and also report the total number of such ETFs.",
+  "gold_text": "ProShares Ultra Bloomberg Natural Gas\nProShares UltraShort MSCI Brazil Capped\nDirexion Auspice Broad Commodity Strategy ETF\nDirexion Daily Gold Miners Index Bear 2X Shares\nDirexion Emerging Markets Bear 3X Shares\nDirexion Energy Bull 2X Shares\nDirexion Financial Bear 3X Shares\nProShares Ultrashort FTSE China 50\nGoldman Sachs Motif Finance Reimagined ETF\nDirexion Daily S&P Oil & Gas Exp. & Prod. Bull 2X Shares\nXtrackers High Beta High Yield Bond ETF\nDirexion Daily Junior Gold Miners Index Bear 2X Shares\nDirexion Daily Junior Gold Miners Index Bull 2X Shares\nXtrackers Japan JPX-Nikkei 400 Equity ETF\nDirexion Daily S&P Biotech Bear 3X Shares\nDirexion Daily S&P Biotech Bull 3X Shares\nDirexion Daily Latin America 3x Bull Shares\nSPDR MidCap Trust Series I\nPacer Trendpilot International ETF\nPacer Benchmark Retail Real Estate SCTR ETF\nUltraPro Short Dow30\nDirexion Daily Semiconductor Bear 3x Shares\nProShares UltraShort Semiconductors\nDirexion Technology Bear 3X Shares\nDirexion Small Cap Bear 3X Shares\nProShares Trust Ultra VIX Short Term Futures ETF\nProShares Trust VIX Short-Term Futures ETF\nVirtus Private Credit Strategy ETF\nSPDR Series Trust SPDR S&P Oil & Gas Equipment & Services ETF\nSPDR S&P Oil & Gas Explor & Product\nDirexion Daily FTSE China Bear 3x Shares\nTotal: 31",
+  "gold_lines": 32,
+  "validator": {
+   "style": "levenshtein",
+   "lines": 110,
+   "reads_gold_file": false,
+   "source": "import re\nfrom common_scaffold.validate.levenshtein import levenshtein\n\n# Ticker symbols for the 31 qualifying ETFs, derived from stockinfo.\n# Accepting ticker output avoids penalizing a correct list that uses the\n# short-form column (\"Symbol\") rather than \"Company Description\".\n_GT_TICKERS = [\n    \"BOIL\", \"BZQ\", \"COM\", \"DUST\", \"EDZ\", \"ERX\", \"FAZ\", \"FXP\",\n    \"GFIN\", \"GUSH\", \"HYUP\", \"JDST\", \"JNUG\", \"JPN\", \"LABD\", \"LABU\",\n    \"LBJ\", \"MDY\", \"PTIN\", \"RTL\", \"SDOW\", \"SOXS\", \"SSG\", \"TECS\",\n    \"TZA\", \"UVXY\", \"VIXY\", \"VPC\", \"XES\", \"XOP\", \"YANG\",\n]\n\n\ndef validate(llm_output: str):\n    \"\"\"Validate that:\n    - the number 31 appears in the output, AND\n    - either all 31 ground-truth security names are present (≤5 edits,\n      case-insensitive) OR all 31 ticker symbols are present.\n    \"\"\"\n    ground_truth_names = [\n        \"ProShares Ultra Bloomberg Natural Gas\",\n        \"ProShares UltraShort MSCI Brazil Capped\",\n        \"Direxion Auspice Broad Commodity Strategy ETF\",\n        \"Direxion Daily Gold Miners Index Bear 2X Shares\",\n        \"Direxion Emerging Markets Bear 3X Shares\",\n        \"Direxion Energy Bull 2X Shares\",\n        \"Direxion Financial Bear 3X Shares\",\n        \"ProShares Ultrashort FTSE China 50\",\n        \"Goldman Sachs Motif Finance Reimagined ETF\",\n        \"Direxion Daily S&P Oil & Gas Exp. & Prod. Bull 2X Shares\",\n        \"Xtrackers High Beta High Yield Bond ETF\",\n        \"Direxion Daily Junior Gold Miners Index Bear 2X Shares\",\n        \"Direxion Daily Junior Gold Miners Index Bull 2X Shares\",\n        \"Xtrackers Japan JPX-Nikkei 400 Equity ETF\",\n        \"Direxion Daily S&P Biotech Bear 3X Shares\",\n        \"Direxion Daily S&P Biotech Bull 3X Shares\",\n        \"Direxion Daily Latin America 3x Bull Shares\",\n        \"SPDR MidCap Trust Series I\",\n        \"Pacer Trendpilot International ETF\",\n        \"Pacer Benchmark Retail Real Estate SCTR ETF\",\n        \"UltraPro Short Dow30\",\n        \"Direxion Daily Semiconductor Bear 3x Shares\",\n        \"ProShares UltraShort Semiconductors\",\n        \"Direxion Technology Bear 3X Shares\",\n        \"Direxion Small Cap Bear 3X Shares\",\n        \"ProShares Trust Ultra VIX Short Term Futures ETF\",\n        \"ProShares Trust VIX Short-Term Futures ETF\",\n        \"Virtus Private Credit Strategy ETF\",\n        \"SPDR Series Trust SPDR S&P Oil & Gas Equipment & Services ETF\",\n        \"SPDR S&P Oil & Gas Explor & Product\",\n        \"Direxion Daily FTSE China Bear 3x Shares\",\n    ]\n\n    llm_output_clean = re.sub(r'\\s+', ' ', llm_output).strip().lower()\n\n    # check 31\n    matches = re.findall(r\"\\b\\d+\\b\", llm_output)\n    if not any(int(m) == 31 for m in matches):\n        return False, \"Missing number: 31\"\n\n    # ticker-equivalent acceptance: if all 31 tickers are present, accept.\n    tickers_hit = sum(\n        1 for t in _GT_TICKERS\n        if re.search(rf\"(?<![A-Z0-9]){re.escape(t)}(?![A-Z0-9])\", llm_output)\n    )\n    if tickers_hit >= len(_GT_TICKERS):\n        return True, f\"All {tickers_hit} ticker symbols matched (equivalent to names).\"\n\n    # check names\n    for gt_name in ground_truth_names:\n        gt_name_clean = gt_name.lower()\n        name_len = len(gt_name_clean)\n\n        # exact\n        if gt_name_clean in llm_output_clean:\n            continue\n\n        # fuzzy\n        min_distance = float('inf')\n        best_match = \"\"\n        window_range = 10\n\n        for i in range(len(llm_output_clean) - name_len + 1):\n            for extra in range(-window_range, window_range + 1):\n                start = i\n                end = i + name_len + extra\n                if end > len(llm_output_clean) or end <= start:\n                    continue\n\n                candidate = llm_output_clean[start:end]\n                candidate = re.sub(r'\\b\\d+([.,]\\d+)?\\b', '', candidate)\n                candidate = re.sub(r'\\s+', ' ', candidate).strip()\n                if not candidate:\n                    continue\n\n                dist = levenshtein(gt_name_clean, candidate)\n                if dist < min_distance:\n                    min_distance = dist\n                    best_match = candidate\n                    if min_distance == 0:\n                        break\n            if min_distance == 0:\n                break\n\n        if min_distance > 5:\n            return False, (f\"Name not found within 5 edits: '{gt_name}', \"\n                           f\"closest: '{best_match}' (distance={min_distance})\")\n\n    return True, \"Number 31 and all names (exact or ≤5 edits) found.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "stockmarket/3",
+  "dataset_key": "stockmarket",
+  "query_id": 3,
+  "question": "List all company names on the NASDAQ-listed Market that were financially troubled (delinquent, deficient, or both) and have trading volume in 2008, for each, report its exisiting non-null average daily trading volume in 2008.",
+  "gold_text": "Apex Global Brands Inc,23781.42\nBIO-key International, Inc,10988.14\nCBAK Energy Technology, Inc,86223.32\nChina Ceramics Co, Ltd,4366.80\nCorrevio Pharma Corp,145247.83\nCounterPath Corporation,375.49\nDASAN Zhone Solutions, Inc,15578.66\nFuture FinTech Group Inc,9.85\nFrontier Communications Corporation,254397.63\nIdeanomics, Inc,10.28\nOcean Power Technologies, Inc,254.15\nPacific Ethanol, Inc,10706.72\nSynthesis Energy Systems, Inc,2390.51\nSunesis Pharmaceuticals, Inc,781.82\nSypris Solutions, Inc,36836.36",
+  "gold_lines": 15,
+  "validator": {
+   "style": "levenshtein",
+   "lines": 110,
+   "reads_gold_file": false,
+   "source": "import re\nfrom common_scaffold.validate.levenshtein import levenshtein\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate that:\n    - All GT names appear in LLM output (case-insensitive, ≤5 edit distance allowed)\n    - For each name, a number appears nearby (within 50 chars after name)\n    - Both GT and LLM numbers are rounded to nearest integer before comparison\n\n    Returns:\n        (True, \"OK\") if all pass\n        (False, reason) if not\n    \"\"\"\n    gt_pairs = [\n        (\"Apex Global Brands Inc\", 23781.42),\n        (\"BIO-key International, Inc\", 10988.14),\n        (\"CBAK Energy Technology, Inc\", 86223.32),\n        (\"China Ceramics Co, Ltd\", 4366.80),\n        (\"Correvio Pharma Corp\", 145247.83),\n        (\"CounterPath Corporation\", 375.49),\n        (\"DASAN Zhone Solutions, Inc\", 15578.66),\n        (\"Future FinTech Group Inc\", 9.85),\n        (\"Frontier Communications Corporation\", 254397.63),\n        (\"Ideanomics, Inc\", 10.28),\n        (\"Ocean Power Technologies, Inc\", 254.15),\n        (\"Pacific Ethanol, Inc\", 10706.72),\n        (\"Synthesis Energy Systems, Inc\", 2390.51),\n        (\"Sunesis Pharmaceuticals, Inc\", 781.82),\n        (\"Sypris Solutions, Inc\", 36836.36),\n    ]\n\n    # strip thousand-separators so \"23,781.42\" reads as 23781.42\n    llm_output = re.sub(r\"(?<=\\d),(?=\\d{3}\\b)\", \"\", llm_output)\n    llm_output_clean = re.sub(r'\\s+', ' ', llm_output).strip().lower()\n\n    for name, value in gt_pairs:\n        name_clean = name.lower()\n        name_len = len(name_clean)\n\n        idx = llm_output_clean.find(name_clean)\n\n        if idx != -1:\n            best_match = name_clean\n            match_len = name_len\n            min_distance = 0\n        else:\n            # fuzzy match\n            min_distance = float('inf')\n            best_match = \"\"\n            best_idx = -1\n            window_range = 10\n\n            for i in range(len(llm_output_clean) - name_len + 1):\n                for extra in range(-window_range, window_range + 1):\n                    start = i\n                    end = i + name_len + extra\n                    if end > len(llm_output_clean) or end <= start:\n                        continue\n                    candidate = llm_output_clean[start:end]\n                    candidate = re.sub(r'\\b\\d+([.,]\\d+)?\\b', '', candidate)\n                    candidate = re.sub(r'\\s+', ' ', candidate).strip()\n                    if not candidate:\n                        continue\n\n                    dist = levenshtein(name_clean, candidate)\n                    if dist < min_distance:\n                        min_distance = dist\n                        best_match = candidate\n                        best_idx = start\n                        if min_distance == 0:\n                            break\n                if min_distance == 0:\n                    break\n\n            if min_distance <= 5:\n                idx = best_idx\n                match_len = len(best_match)\n            else:\n                reason = f\"Name not found within 5 edits: '{name}', closest: '{best_match}' (distance={min_distance})\"\n                return False, reason\n\n        # unified window based on match_len\n        window = llm_output_clean[idx: idx + match_len + 50]\n        matches = re.findall(r\"\\d+(?:\\.\\d+)?\", window)\n\n        if not matches:\n            reason = f\"No number found near name: {name}\"\n            \n            return False, reason\n\n        expected_rounded = round(value)\n        found_match = False\n\n        for m in matches:\n            try:\n                val_rounded = round(float(m))\n                if val_rounded == expected_rounded:\n                    found_match = True\n                    break\n            except Exception:\n                continue\n\n        if not found_match:\n            reason = f\"Number near '{name}' does not match rounded {expected_rounded}\"\n            \n            return False, reason\n\n    return True, \"All names (exact or ≤5 edits) and rounded numbers matched.\"\n\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "stockmarket/4",
+  "dataset_key": "stockmarket",
+  "query_id": 4,
+  "question": "What are the names (not symbol) of the top 5 non-ETF stocks listed on the New York Stock Exchange (NYSE) that had more up days than down days in 2017? (Up days: closing price > opening price; Down days: closing price < opening price)",
+  "gold_text": "MFA Financial, Inc\nArgo Group International Holdings, Ltd\nHDFC Bank Limited Common Stock\nAlbany International Corporation Common Stock\nDTE Energy Company",
+  "gold_lines": 5,
+  "validator": {
+   "style": "levenshtein",
+   "lines": 86,
+   "reads_gold_file": false,
+   "source": "import re\nfrom common_scaffold.validate.levenshtein import levenshtein\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate that:\n    - Each GT name appears in LLM output (case-insensitive, exact or <=5 edits)\n    - Use dynamic window length around GT name length for matching\n\n    Returns:\n        (True, \"OK\") if all pass\n        (False, reason) if not\n    \"\"\"\n    gt_names = [\n        \"MFA Financial, Inc\",\n        \"Argo Group International Holdings, Ltd\",\n        \"HDFC Bank Limited Common Stock\",\n        \"Albany International Corporation Common Stock\",\n        \"DTE Energy Company\"\n    ]\n\n    llm_output_clean = re.sub(r'\\s+', ' ', llm_output).strip().lower()\n\n    _SUFFIX_RE = re.compile(\n        r\"\\b(common\\s+stock|preferred\\s+stock|corporation|corp|company|co|\"\n        r\"incorporated|inc|ltd|limited|plc|holdings|group|trust|the)\\b\\.?\",\n        re.I,\n    )\n    def _strip(s):\n        s = _SUFFIX_RE.sub(\" \", s)\n        s = re.sub(r\"[,\\.]\", \" \", s)\n        return re.sub(r\"\\s+\", \" \", s).strip()\n\n    llm_stripped = _strip(llm_output_clean)\n\n    for gt_name in gt_names:\n        gt_name_clean = gt_name.lower()\n        gt_len = len(gt_name_clean)\n\n        # First: exact match\n        if gt_name_clean in llm_output_clean:\n            continue\n        # Suffix-stripped exact match (e.g. \"HDFC Bank Limited\" matches\n        # \"HDFC Bank Limited Common Stock\")\n        gt_stripped = _strip(gt_name_clean)\n        if gt_stripped and gt_stripped in llm_stripped:\n            continue\n\n        # Else: fuzzy match within a window\n        min_distance = float('inf')\n        best_match = \"\"\n        window_range = 10  # allow ±10 chars around GT length\n\n        for i in range(len(llm_output_clean) - gt_len + 1):\n            for extra in range(-window_range, window_range + 1):\n                start = i\n                end = i + gt_len + extra\n                if end > len(llm_output_clean) or end <= start:\n                    continue\n                candidate = llm_output_clean[start:end]\n\n                # Remove digits to avoid interference\n                candidate = re.sub(r'\\b\\d+([.,]\\d+)?\\b', '', candidate)\n                candidate = re.sub(r'\\s+', ' ', candidate).strip()\n                if not candidate:\n                    continue\n\n                dist = levenshtein(gt_name_clean, candidate)\n                if dist < min_distance:\n                    min_distance = dist\n                    best_match = candidate\n                    if min_distance == 0:\n                        break\n            if min_distance == 0:\n                break\n\n        if min_distance <= 5:\n            pass\n        else:\n            reason = (\n                f\"Name not found within 5 edits: '{gt_name}', \"\n                f\"closest: '{best_match}' (distance={min_distance})\"\n            )\n            return False, reason\n\n    return True, \"All names matched (exact or ≤5 edits).\""
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "stockmarket/5",
+  "dataset_key": "stockmarket",
+  "query_id": 5,
+  "question": "Which 5 companies listed on the NASDAQ Capital Market had the highest number of days in 2019 where the intraday price range exceeded 20% of the low price, list the company names please?",
+  "gold_text": "Synthesis Energy Systems, Inc. - Common Stock\nTD Holdings, Inc. - Common Stock\nTMSR Holding Company Limited - Common Stock\nVerb Technology Company, Inc. - Common Stock\nSunesis Pharmaceuticals, Inc. - Common Stock",
+  "gold_lines": 5,
+  "validator": {
+   "style": "levenshtein",
+   "lines": 64,
+   "reads_gold_file": false,
+   "source": "import re\nfrom common_scaffold.validate.levenshtein import levenshtein\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate:\n    - all gt names are present (case-insensitive, exact or ≤5 edits, dynamic window)\n\n    Returns:\n        (True, \"OK\") if all pass\n        (False, reason) if not\n    \"\"\"\n    ground_truth_names = [\n        \"Synthesis Energy Systems, Inc\",\n        \"TD Holdings, Inc\",\n        \"TMSR Holding Company Limited\",\n        \"Verb Technology Company, Inc\",\n        \"Sunesis Pharmaceuticals, Inc\",\n    ]\n\n    llm_output_clean = re.sub(r'\\s+', ' ', llm_output).strip().lower()\n\n    for gt_name in ground_truth_names:\n        gt_name_clean = gt_name.lower()\n        name_len = len(gt_name_clean)\n\n        # exact\n        if gt_name_clean in llm_output_clean:\n            continue\n\n        # fuzzy\n        min_distance = float('inf')\n        best_match = \"\"\n        window_range = 10\n\n        for i in range(len(llm_output_clean) - name_len + 1):\n            for extra in range(-window_range, window_range + 1):\n                start = i\n                end = i + name_len + extra\n                if end > len(llm_output_clean) or end <= start:\n                    continue\n\n                candidate = llm_output_clean[start:end]\n                candidate = re.sub(r'\\b\\d+([.,]\\d+)?\\b', '', candidate)\n                candidate = re.sub(r'\\s+', ' ', candidate).strip()\n                if not candidate:\n                    continue\n\n                dist = levenshtein(gt_name_clean, candidate)\n                if dist < min_distance:\n                    min_distance = dist\n                    best_match = candidate\n                    if min_distance == 0:\n                        break\n            if min_distance == 0:\n                break\n\n        if min_distance <= 5:\n            pass\n        else:\n            reason = f\"Name not found within 5 edits: '{gt_name}', closest: '{best_match}' (distance={min_distance})\"\n            return False, reason\n\n    return True, \"All names (exact or ≤5 edits) matched.\""
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "yelp/1",
+  "dataset_key": "yelp",
+  "query_id": 1,
+  "question": "What is the average rating of all businesses located in Indianapolis, Indiana?",
+  "gold_text": "3.547008547008547",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 30,
+   "reads_gold_file": false,
+   "source": "def validate(llm_output: str):\n    \"\"\"\n    Validate if ground truth number (rounded to 2 decimals) is present in LLM output.\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    import re\n\n    ground_truth = 3.547008547008547\n    gt_rounded = round(ground_truth, 2)\n\n    # 找出 LLM 输出里所有数字\n    matches = re.findall(r\"(\\d+\\.\\d+)\", llm_output)\n    if not matches:\n        reason = f\"No number found in LLM output.\"\n        \n        return False, reason\n\n    for m in matches:\n        try:\n            val = float(m)\n            if round(val, 2) == gt_rounded:\n                return True, f\"Found matching number: {val} ≈ {gt_rounded}\"\n        except:\n            continue\n\n    reason = f\"No matching number (≈ {gt_rounded:.2f}) found in LLM output.\"\n    \n    return False, reason\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "yelp/2",
+  "dataset_key": "yelp",
+  "query_id": 2,
+  "question": "Which U.S. state has the highest number of reviews, and what is the average rating of businesses in that state?",
+  "gold_text": "PA,3.699395770392749",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 23,
+   "reads_gold_file": false,
+   "source": "import re\n\n\ndef validate(llm_output: str):\n    \"\"\"Anchor on the target numeric value; require 'PA' or 'Pennsylvania'\n    within 150 chars on either side.\"\"\"\n    ground_truth_value = 3.699395770392749\n    gt_rounded = round(ground_truth_value, 2)\n    text = llm_output\n    lower = text.lower()\n\n    for m in re.finditer(r\"\\d+\\.\\d+\", text):\n        try:\n            if round(float(m.group()), 2) != gt_rounded:\n                continue\n        except Exception:\n            continue\n        start = max(0, m.start() - 150)\n        end = min(len(text), m.end() + 150)\n        window = lower[start:end]\n        if \"pa\" in re.findall(r\"\\b[a-z]+\\b\", window) or \"pennsylvania\" in window:\n            return True, f\"Found: value≈{gt_rounded} near PA/Pennsylvania\"\n    return False, f\"No occurrence of {gt_rounded} near PA/Pennsylvania.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "yelp/3",
+  "dataset_key": "yelp",
+  "query_id": 3,
+  "question": "During 2018, how many businesses that received reviews offered either business parking or bike parking?",
+  "gold_text": "35",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 26,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate if the integer 35 is present in LLM output.\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    ground_truth = 35\n\n    # find all integers in LLM output\n    matches = re.findall(r\"\\b\\d+\\b\", llm_output)\n\n    if not matches:\n        reason = \"No number found in LLM output.\"\n        \n        return False, reason\n\n    for m in matches:\n        if int(m) == ground_truth:\n            return True, f\"Found number: {ground_truth}\"\n\n    reason = f\"Number {ground_truth} not found in LLM output.\"\n    \n    return False, reason\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "yelp/4",
+  "dataset_key": "yelp",
+  "query_id": 4,
+  "question": "Which business category has the largest number of businesses that accept credit card payments, and what is its average rating?",
+  "gold_text": "Restaurant,3.633676092544987",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 43,
+   "reads_gold_file": false,
+   "source": "import re\n\ndef validate(llm_output: str):\n    \"\"\"\n    Validate if ground truth 'Restaurant,3.63' is present in LLM output.\n    - Category: ignore case\n    - Value: match 2 decimal places\n\n    Args:\n        llm_output (str): text output from LLM\n\n    Returns:\n        (True, \"OK\") if found\n        (False, reason) if not\n    \"\"\"\n    gt_category = \"Restaurant\"\n    gt_value = 3.633676092544987\n\n    gt_category_lower = gt_category.lower()\n    gt_value_str = f\"{gt_value:.2f}\"\n\n    # 检查类别\n    if gt_category_lower not in llm_output.lower():\n        reason = f\"Category '{gt_category}' not found in LLM output.\"\n        \n        return False, reason\n\n    # 提取所有浮点数\n    matches = re.findall(r\"\\d+\\.\\d+\", llm_output)\n\n    if not matches:\n        reason = \"No float number found in LLM output.\"\n        \n        return False, reason\n\n    # 检查是否有匹配的数值 (tolerate ±0.015 to absorb rounding disagreement)\n    for m in matches:\n        if abs(float(m) - gt_value) <= 0.015:\n            return True, f\"Found: {gt_category}, {gt_value_str}\"\n\n    reason = f\"Value '{gt_value_str}' not found in LLM output.\"\n    \n    return False, reason\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "yelp/5",
+  "dataset_key": "yelp",
+  "query_id": 5,
+  "question": "Which U.S. state has the highest number of businesses that offer WiFi, and what is the average rating for those businesses?",
+  "gold_text": "PA,3.48",
+  "gold_lines": 1,
+  "validator": {
+   "style": "regex",
+   "lines": 23,
+   "reads_gold_file": false,
+   "source": "import re\n\n\ndef validate(llm_output: str):\n    \"\"\"Anchor on the target numeric value; require 'PA' or 'Pennsylvania'\n    within 150 chars on either side.\"\"\"\n    ground_truth_value = 3.48\n    gt_rounded = round(ground_truth_value, 2)\n    text = llm_output\n    lower = text.lower()\n\n    for m in re.finditer(r\"\\d+(?:\\.\\d+)?\", text):\n        try:\n            if round(float(m.group()), 2) != gt_rounded:\n                continue\n        except Exception:\n            continue\n        start = max(0, m.start() - 150)\n        end = min(len(text), m.end() + 150)\n        window = lower[start:end]\n        if \"pa\" in re.findall(r\"\\b[a-z]+\\b\", window) or \"pennsylvania\" in window:\n            return True, f\"Found: value≈{gt_rounded} near PA/Pennsylvania\"\n    return False, f\"No occurrence of {gt_rounded} near PA/Pennsylvania.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "yelp/6",
+  "dataset_key": "yelp",
+  "query_id": 6,
+  "question": "Which business received the highest average rating between January 1, 2016 and June 30, 2016, and what category does it belong to? Consider only businesses with at least 5 reviews.",
+  "gold_text": "Coffee House Too Cafe, Restaurants, Breakfast & Brunch, American (New), Cafes",
+  "gold_lines": 1,
+  "validator": {
+   "style": "substring",
+   "lines": 33,
+   "reads_gold_file": false,
+   "source": "def validate(llm_output: str):\n    \"\"\"\n    Validate if:\n    - name is present\n    - all categories are present\n    (rating not required)\n\n    Returns:\n        (True, \"OK\") if all pass\n        (False, reason) if not\n    \"\"\"\n    # ground truth\n    name = \"Coffee House Too Cafe\"\n    categories = [\"Restaurants\", \"Breakfast & Brunch\", \"American (New)\", \"Cafes\"]\n\n    llm_lower = llm_output.lower()\n    name_lower = name.lower()\n    categories_lower = [c.lower() for c in categories]\n\n    # check name\n    if name_lower not in llm_lower:\n        reason = f\"Missing name: {name}\"\n        \n        return False, reason\n\n    # check all categories\n    for cat in categories_lower:\n        if cat not in llm_lower:\n            reason = f\"Missing category: {cat}\"\n            \n            return False, reason\n\n    return True, \"Name and all categories are present.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ },
+ {
+  "id": "yelp/7",
+  "dataset_key": "yelp",
+  "query_id": 7,
+  "question": "Among users who registered on Yelp in 2016, which 5 business categories have received the most total reviews from those users since 2016?",
+  "gold_text": "Restaurants\nFood\nAmerican (New)\nShopping\nBreakfast & Brunch",
+  "gold_lines": 5,
+  "validator": {
+   "style": "regex",
+   "lines": 19,
+   "reads_gold_file": false,
+   "source": "import re\n\n\ndef _norm(s: str) -> str:\n    s = s.lower()\n    s = s.replace(\"&\", \" and \")\n    s = re.sub(r\"[^a-z0-9\\s]\", \" \", s)\n    s = re.sub(r\"\\s+\", \" \", s).strip()\n    return s\n\n\ndef validate(llm_output: str):\n    \"\"\"All ground-truth categories present, normalizing '&' ↔ 'and' and punctuation.\"\"\"\n    categories = [\"Restaurants\", \"Food\", \"American (New)\", \"Shopping\", \"Breakfast & Brunch\"]\n    llm_norm = _norm(llm_output)\n    for cat in categories:\n        if _norm(cat) not in llm_norm:\n            return False, f\"Missing category: {cat}\"\n    return True, \"All categories are present.\"\n"
+  },
+  "released": true,
+  "on_site": true,
+  "site_text_matches": true,
+  "footnote": null
+ }
+]

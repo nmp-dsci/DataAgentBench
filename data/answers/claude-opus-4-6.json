@@ -1,0 +1,1352 @@
+[
+{
+"id": "bookreview/1",
+"run": 0,
+"answer": "The 2020s decade has the highest average rating among decades with at least 10 distinct rated books, with an average rating of approximately 4.66 across 21 distinct books."
+},
+{
+"id": "bookreview/1",
+"run": 1,
+"answer": "The 2020s decade has the highest average rating (approximately 4.66) among decades with at least 10 distinct books that have been rated."
+},
+{
+"id": "bookreview/1",
+"run": 2,
+"answer": "2020s"
+},
+{
+"id": "bookreview/1",
+"run": 3,
+"answer": "2020s"
+},
+{
+"id": "bookreview/1",
+"run": 4,
+"answer": "2020s"
+},
+{
+"id": "bookreview/2",
+"run": 0,
+"answer": "The following English-language books in the 'Literature & Fiction' category have a perfect average rating of 5.0:\n\n1. Reunion: The Children of Lauderdale Park (bookid_9)\n2. The Prophet: With Original 1923 Illustrations by the Author (bookid_38)\n3. The Melancholy Strumpet Master (bookid_39)\n4. Child Of The King A Journey of Hope Book 1: Earthly Story With A Heavenly Message (bookid_74)\n5. Fire Cracker (bookid_82)\n6. Local Honey (bookid_84)\n7. Hollywood Confessions: Hollywood Headlines Book #3 (Hollywood Headlines Mysteries) (bookid_98)\n8. Knowing When To Die: Uncollected Stories (bookid_101)\n9. Childe Harold of Dysna (bookid_122)\n10. Forged in Blood (Freehold) (bookid_144)\n11. Exits, Desires, & Slow Fires (bookid_171)\n12. Kennebago Moments (bookid_177)\n13. The Sludge (bookid_180)\n14. Liza of Lambeth (bookid_182)\n15. Something That Feels Like Truth (Switchgrass Books) (bookid_195)\n\nA total of 15 books match the criteria."
+},
+{
+"id": "bookreview/2",
+"run": 1,
+"answer": "The following English-language books in the 'Literature & Fiction' category have a perfect average rating of 5.0:\n\n1. Reunion: The Children of Lauderdale Park (bookid_9)\n2. The Prophet: With Original 1923 Illustrations by the Author (bookid_38)\n3. The Melancholy Strumpet Master (bookid_39)\n4. Child Of The King A Journey of Hope Book 1: Earthly Story With A Heavenly Message (bookid_74)\n5. Fire Cracker (bookid_82)\n6. Local Honey (bookid_84)\n7. Hollywood Confessions: Hollywood Headlines Book #3 (Hollywood Headlines Mysteries) (bookid_98)\n8. Knowing When To Die: Uncollected Stories (bookid_101)\n9. Childe Harold of Dysna (bookid_122)\n10. Forged in Blood (Freehold) (bookid_144)\n11. Exits, Desires, & Slow Fires (bookid_171)\n12. Kennebago Moments (bookid_177)\n13. The Sludge (bookid_180)\n14. Liza of Lambeth (bookid_182)\n15. Something That Feels Like Truth (Switchgrass Books) (bookid_195)\n\nA total of 15 books match the criteria."
+},
+{
+"id": "bookreview/2",
+"run": 2,
+"answer": "The following 15 English-language books in the 'Literature & Fiction' category have a perfect average rating of 5.0:\n\n1. Reunion: The Children of Lauderdale Park (bookid_9)\n2. The Prophet: With Original 1923 Illustrations by the Author (bookid_38)\n3. The Melancholy Strumpet Master (bookid_39)\n4. Child Of The King A Journey of Hope Book 1: Earthly Story With A Heavenly Message (bookid_74)\n5. Fire Cracker (bookid_82)\n6. Local Honey (bookid_84)\n7. Hollywood Confessions: Hollywood Headlines Book #3 (Hollywood Headlines Mysteries) (bookid_98)\n8. Knowing When To Die: Uncollected Stories (bookid_101)\n9. Childe Harold of Dysna (bookid_122)\n10. Forged in Blood (Freehold) (bookid_144)\n11. Exits, Desires, & Slow Fires (bookid_171)\n12. Kennebago Moments (bookid_177)\n13. The Sludge (bookid_180)\n14. Liza of Lambeth (bookid_182)\n15. Something That Feels Like Truth (Switchgrass Books) (bookid_195)"
+},
+{
+"id": "bookreview/2",
+"run": 3,
+"answer": "The following English-language books in the 'Literature & Fiction' category have a perfect average rating of 5.0:\n\n1. Reunion: The Children of Lauderdale Park (Genre Fiction)\n2. The Prophet: With Original 1923 Illustrations by the Author (Poetry)\n3. The Melancholy Strumpet Master (Humor & Satire)\n4. Child Of The King A Journey of Hope Book 1: Earthly Story With A Heavenly Message\n5. Fire Cracker (United States)\n6. Local Honey\n7. Hollywood Confessions: Hollywood Headlines Book #3 (Hollywood Headlines Mysteries) (Genre Fiction)\n8. Knowing When To Die: Uncollected Stories (Genre Fiction)\n9. Childe Harold of Dysna (History & Criticism)\n10. Forged in Blood (Freehold) (Short Stories & Anthologies)\n11. Exits, Desires, & Slow Fires (Poetry)\n12. Kennebago Moments (Poetry)\n13. The Sludge (Genre Fiction)\n14. Liza of Lambeth (Classics)\n15. Something That Feels Like Truth (Switchgrass Books) (Short Stories & Anthologies)\n\nA total of 15 English-language books in the 'Literature & Fiction' category have a perfect 5.0 average rating."
+},
+{
+"id": "bookreview/2",
+"run": 4,
+"answer": "The following English-language books in the 'Literature & Fiction' category have a perfect average rating of 5.0:\n\n1. Reunion: The Children of Lauderdale Park (bookid_9)\n2. The Prophet: With Original 1923 Illustrations by the Author (bookid_38)\n3. The Melancholy Strumpet Master (bookid_39)\n4. Child Of The King A Journey of Hope Book 1: Earthly Story With A Heavenly Message (bookid_74)\n5. Fire Cracker (bookid_82)\n6. Local Honey (bookid_84)\n7. Hollywood Confessions: Hollywood Headlines Book #3 (Hollywood Headlines Mysteries) (bookid_98)\n8. Knowing When To Die: Uncollected Stories (bookid_101)\n9. Childe Harold of Dysna (bookid_122)\n10. Forged in Blood (Freehold) (bookid_144)\n11. Exits, Desires, & Slow Fires (bookid_171)\n12. Kennebago Moments (bookid_177)\n13. The Sludge (bookid_180)\n14. Liza of Lambeth (bookid_182)\n15. Something That Feels Like Truth (Switchgrass Books) (bookid_195)\n\nA total of 15 books match the criteria."
+},
+{
+"id": "bookreview/3",
+"run": 0,
+"answer": "The following books categorized as 'Children's Books' have received an average rating of at least 4.5 based on reviews from 2020 onwards:\n\n1. The Library Book — Average Rating: 5.0\n2. Benny Goes To The Moon: The great new book from Top Children's entertainer Gerry Ogilvie (1) — Average Rating: 5.0\n3. The Old Man and the Pirate Princess — Average Rating: 5.0\n4. LunaLu the Llamacorn — Average Rating: 5.0\n5. Around the World Mazes — Average Rating: 5.0\n6. Pokémon: Sun & Moon, Vol. 8 (8) — Average Rating: 5.0\n7. Monstrous Stories #4: The Day the Mice Stood Still — Average Rating: 5.0\n8. Egypt (Enchantment of the World) — Average Rating: 5.0\n9. Favorite Thorton W. Burgess Stories: 6 Books — Average Rating: 5.0\n10. Behind the Wheel (Choose Your Own Adventure #35)(Paperback/Revised) — Average Rating: 5.0\n11. Cheer Up, Ben Franklin! (Young Historians) — Average Rating: 5.0\n12. Trouble in the CTC!: The Terra Prime Adventures Book 2 — Average Rating: 4.9\n13. Clark the Shark: Tooth Trouble, No. 1 — Average Rating: 4.75\n14. Cleo Porter and the Body Electric — Average Rating: ~4.71"
+},
+{
+"id": "bookreview/3",
+"run": 1,
+"answer": "The following books categorized as 'Children's Books' have received an average rating of at least 4.5 based on reviews from 2020 onwards:\n\n1. Around the World Mazes — Avg Rating: 5.0\n2. Behind the Wheel (Choose Your Own Adventure #35)(Paperback/Revised) — Avg Rating: 5.0\n3. Benny Goes To The Moon: The great new book from Top Children's entertainer Gerry Ogilvie (1) — Avg Rating: 5.0\n4. Cheer Up, Ben Franklin! (Young Historians) — Avg Rating: 5.0\n5. Egypt (Enchantment of the World) — Avg Rating: 5.0\n6. Favorite Thorton W. Burgess Stories: 6 Books — Avg Rating: 5.0\n7. LunaLu the Llamacorn — Avg Rating: 5.0\n8. Monstrous Stories #4: The Day the Mice Stood Still — Avg Rating: 5.0\n9. Pokémon: Sun & Moon, Vol. 8 (8) — Avg Rating: 5.0\n10. The Library Book — Avg Rating: 5.0\n11. The Old Man and the Pirate Princess — Avg Rating: 5.0\n12. Trouble in the CTC!: The Terra Prime Adventures Book 2 — Avg Rating: 4.9\n13. Clark the Shark: Tooth Trouble, No. 1 — Avg Rating: 4.75\n14. Cleo Porter and the Body Electric — Avg Rating: 4.71"
+},
+{
+"id": "bookreview/3",
+"run": 2,
+"answer": "The following Children's Books have received an average rating of at least 4.5 based on reviews from 2020 onwards:\n\n1. Around the World Mazes — Avg Rating: 5.0\n2. Behind the Wheel (Choose Your Own Adventure #35)(Paperback/Revised) — Avg Rating: 5.0\n3. Benny Goes To The Moon: The great new book from Top Children's entertainer Gerry Ogilvie (1) — Avg Rating: 5.0\n4. Cheer Up, Ben Franklin! (Young Historians) — Avg Rating: 5.0\n5. Clark the Shark: Tooth Trouble, No. 1 — Avg Rating: 4.75\n6. Cleo Porter and the Body Electric — Avg Rating: 4.71\n7. Egypt (Enchantment of the World) — Avg Rating: 5.0\n8. Favorite Thorton W. Burgess Stories: 6 Books — Avg Rating: 5.0\n9. LunaLu the Llamacorn — Avg Rating: 5.0\n10. Monstrous Stories #4: The Day the Mice Stood Still — Avg Rating: 5.0\n11. Pokémon: Sun & Moon, Vol. 8 (8) — Avg Rating: 5.0\n12. The Library Book — Avg Rating: 5.0\n13. The Old Man and the Pirate Princess — Avg Rating: 5.0\n14. Trouble in the CTC!: The Terra Prime Adventures Book 2 — Avg Rating: 4.9"
+},
+{
+"id": "bookreview/3",
+"run": 3,
+"answer": "The following books categorized as 'Children's Books' have received an average rating of at least 4.5 based on reviews from 2020 onwards:\n\n1. Around the World Mazes — Average Rating: 5.0\n2. Behind the Wheel (Choose Your Own Adventure #35)(Paperback/Revised) — Average Rating: 5.0\n3. Benny Goes To The Moon: The great new book from Top Children's entertainer Gerry Ogilvie (1) — Average Rating: 5.0\n4. Cheer Up, Ben Franklin! (Young Historians) — Average Rating: 5.0\n5. Clark the Shark: Tooth Trouble, No. 1 — Average Rating: 4.75\n6. Cleo Porter and the Body Electric — Average Rating: 4.71\n7. Egypt (Enchantment of the World) — Average Rating: 5.0\n8. Favorite Thorton W. Burgess Stories: 6 Books — Average Rating: 5.0\n9. LunaLu the Llamacorn — Average Rating: 5.0\n10. Monstrous Stories #4: The Day the Mice Stood Still — Average Rating: 5.0\n11. Pokémon: Sun & Moon, Vol. 8 (8) — Average Rating: 5.0\n12. The Library Book — Average Rating: 5.0\n13. The Old Man and the Pirate Princess — Average Rating: 5.0\n14. Trouble in the CTC!: The Terra Prime Adventures Book 2 — Average Rating: 4.9"
+},
+{
+"id": "bookreview/3",
+"run": 4,
+"answer": "The following books categorized as 'Children's Books' have received an average rating of at least 4.5 based on reviews from 2020 onwards:\n\n1. Around the World Mazes — Avg Rating: 5.0\n2. Behind the Wheel (Choose Your Own Adventure #35)(Paperback/Revised) — Avg Rating: 5.0\n3. Benny Goes To The Moon: The great new book from Top Children's entertainer Gerry Ogilvie (1) — Avg Rating: 5.0\n4. Cheer Up, Ben Franklin! (Young Historians) — Avg Rating: 5.0\n5. Clark the Shark: Tooth Trouble, No. 1 — Avg Rating: 4.75\n6. Cleo Porter and the Body Electric — Avg Rating: 4.71\n7. Egypt (Enchantment of the World) — Avg Rating: 5.0\n8. Favorite Thorton W. Burgess Stories: 6 Books — Avg Rating: 5.0\n9. LunaLu the Llamacorn — Avg Rating: 5.0\n10. Monstrous Stories #4: The Day the Mice Stood Still — Avg Rating: 5.0\n11. Pokémon: Sun & Moon, Vol. 8 (8) — Avg Rating: 5.0\n12. The Library Book — Avg Rating: 5.0\n13. The Old Man and the Pirate Princess — Avg Rating: 5.0\n14. Trouble in the CTC!: The Terra Prime Adventures Book 2 — Avg Rating: 4.9"
+},
+{
+"id": "crmarenapro/1",
+"run": 0,
+"answer": "Authority, Timeline"
+},
+{
+"id": "crmarenapro/1",
+"run": 1,
+"answer": "Authority, Timeline"
+},
+{
+"id": "crmarenapro/1",
+"run": 2,
+"answer": "Budget, Authority"
+},
+{
+"id": "crmarenapro/1",
+"run": 3,
+"answer": "Authority, Timeline"
+},
+{
+"id": "crmarenapro/1",
+"run": 4,
+"answer": "Authority, Timeline"
+},
+{
+"id": "crmarenapro/2",
+"run": 0,
+"answer": "ka0Wt000000Eq0MIAS"
+},
+{
+"id": "crmarenapro/2",
+"run": 1,
+"answer": "ka0Wt000000Eq0MIAS"
+},
+{
+"id": "crmarenapro/2",
+"run": 2,
+"answer": "ka0Wt000000Ens5IAC"
+},
+{
+"id": "crmarenapro/2",
+"run": 3,
+"answer": "ka0Wt000000Eq0MIAS"
+},
+{
+"id": "crmarenapro/2",
+"run": 4,
+"answer": "ka0Wt000000Ens5IAC"
+},
+{
+"id": "crmarenapro/3",
+"run": 0,
+"answer": "No, the current stage name \"Discovery\" is not accurately representing the tasks for this opportunity. The appropriate stage name should be **Negotiation**.\n\nThe opportunity (006Wt000007BGGjIAO) has clearly moved well beyond the Discovery phase. Discovery activities (understanding customer needs, initial outreach) were completed back in November 2021. The current state of the opportunity shows:\n- An 85% probability, which aligns with the Negotiation stage\n- Four OpportunityLineItems with defined products, quantities, and pricing already in place\n- A tailored proposal being prepared (In Progress)\n- A negotiation meeting and proposal follow-up scheduled\n- A contract preparation task planned ahead of the close date\n\nThese indicators collectively point to the **Negotiation** stage as the correct label."
+},
+{
+"id": "crmarenapro/3",
+"run": 1,
+"answer": "No, the current stage name \"Discovery\" is not accurately representing the tasks for this opportunity. The appropriate stage name should be **Negotiation**.\n\nHere's why: The discovery phase is clearly complete — two discovery/demo-planning calls have been conducted, client needs have been identified, and 4 product line items with specific quantities and pricing have already been defined on the opportunity. The task \"Prepare tailored proposal\" is already \"In Progress,\" and critically, there is a task \"Hold negotiation meeting\" (scheduled for 2022-02-10) described as \"Discuss terms and finalize pricing with the client,\" along with \"Follow up on proposal\" to \"address any questions and negotiate terms.\" The 85% probability also aligns with a Negotiation stage rather than Discovery. While no formal Quote record exists in the system, the proposal preparation is underway and the next active milestone tasks are focused on negotiation and finalizing terms — placing this opportunity squarely in the **Negotiation** stage."
+},
+{
+"id": "crmarenapro/3",
+"run": 2,
+"answer": "The current stage name \"Discovery\" is NOT accurately representing the tasks for this opportunity. The appropriate stage name should be **Negotiation**.\n\nWait — let me reconsider based on all evidence:\n\n- 4 OpportunityLineItems exist with products, quantities, and prices already defined.\n- Task \"Prepare tailored proposal\" is **In Progress** (actively building the quote/proposal).\n- Task \"Organize product demo\" and \"Send case studies\" are Not Started (supporting the proposal effort).\n- Task \"Hold negotiation meeting\" is **Not Started** (negotiation hasn't begun).\n- No formal Quote record exists yet.\n\nThe opportunity has clearly moved past Discovery (needs were identified, products selected) and is currently in the proposal/quoting phase. Negotiation has not yet started.\n\nThe correct stage label is: **Quote**"
+},
+{
+"id": "crmarenapro/3",
+"run": 3,
+"answer": "No, the current stage name \"Discovery\" is not accurately representing the tasks for this opportunity. The appropriate stage name should be **Negotiation**.\n\nThe evidence shows that Discovery activities (initial calls, needs assessment) were completed months ago, product demos have been organized, line items with specific pricing are defined, a tailored proposal is actively being prepared, and the upcoming tasks explicitly include \"Hold negotiation meeting\" and \"Follow up on proposal to negotiate terms.\" Additionally, the 85% probability is characteristic of the Negotiation stage, not Discovery."
+},
+{
+"id": "crmarenapro/3",
+"run": 4,
+"answer": "No, the current stage name \"Discovery\" is not accurately representing the tasks for this opportunity. The appropriate stage name should be **Quote**.\n\nThe opportunity (006Wt000007BGGjIAO) has already completed the Discovery phase — customer needs were identified through discovery calls in November 2021 and January 2022, and products/line items with specific quantities and pricing have been defined (4 OpportunityLineItems exist). The current activities center on preparing a tailored proposal (task \"Prepare tailored proposal\" is In Progress), organizing product demos, and sending case studies — all of which are Quote-stage activities. Negotiation has not yet begun (the \"Hold negotiation meeting\" task is still Not Started), and no formal quotes have been issued yet. Therefore, the correct stage is **Quote**."
+},
+{
+"id": "crmarenapro/4",
+"run": 0,
+"answer": "November"
+},
+{
+"id": "crmarenapro/4",
+"run": 1,
+"answer": "November"
+},
+{
+"id": "crmarenapro/4",
+"run": 2,
+"answer": "November"
+},
+{
+"id": "crmarenapro/4",
+"run": 3,
+"answer": "November"
+},
+{
+"id": "crmarenapro/4",
+"run": 4,
+"answer": "November"
+},
+{
+"id": "crmarenapro/5",
+"run": 0,
+"answer": "a03Wt00000JqnHwIAJ"
+},
+{
+"id": "crmarenapro/5",
+"run": 1,
+"answer": "a03Wt00000JqnHwIAJ"
+},
+{
+"id": "crmarenapro/5",
+"run": 2,
+"answer": "a03Wt00000JqnHwIAJ"
+},
+{
+"id": "crmarenapro/5",
+"run": 3,
+"answer": "a03Wt00000JqnHwIAJ"
+},
+{
+"id": "crmarenapro/5",
+"run": 4,
+"answer": "a03Wt00000JqnHwIAJ"
+},
+{
+"id": "crmarenapro/6",
+"run": 0,
+"answer": "ka0Wt000000EnwvIAC"
+},
+{
+"id": "crmarenapro/6",
+"run": 1,
+"answer": "ka0Wt000000EnwvIAC"
+},
+{
+"id": "crmarenapro/6",
+"run": 2,
+"answer": "ka0Wt000000EnwvIAC"
+},
+{
+"id": "crmarenapro/6",
+"run": 3,
+"answer": "ka0Wt000000Eq0MIAS"
+},
+{
+"id": "crmarenapro/6",
+"run": 4,
+"answer": "ka0Wt000000EnwvIAC"
+},
+{
+"id": "crmarenapro/7",
+"run": 0,
+"answer": "ka0Wt000000EpSUIA0"
+},
+{
+"id": "crmarenapro/7",
+"run": 1,
+"answer": "ka0Wt000000EoD3IAK"
+},
+{
+"id": "crmarenapro/7",
+"run": 2,
+"answer": "ka0Wt000000EpSUIA0"
+},
+{
+"id": "crmarenapro/7",
+"run": 3,
+"answer": "ka0Wt000000EpSUIA0"
+},
+{
+"id": "crmarenapro/7",
+"run": 4,
+"answer": "ka0Wt000000EoD3IAK"
+},
+{
+"id": "crmarenapro/8",
+"run": 0,
+"answer": "005Wt000003NIliIAG"
+},
+{
+"id": "crmarenapro/8",
+"run": 1,
+"answer": "005Wt000003NIliIAG"
+},
+{
+"id": "crmarenapro/8",
+"run": 2,
+"answer": "005Wt000003NIliIAG"
+},
+{
+"id": "crmarenapro/8",
+"run": 3,
+"answer": "005Wt000003NIliIAG"
+},
+{
+"id": "crmarenapro/8",
+"run": 4,
+"answer": "005Wt000003NIliIAG"
+},
+{
+"id": "crmarenapro/9",
+"run": 0,
+"answer": "MI"
+},
+{
+"id": "crmarenapro/9",
+"run": 1,
+"answer": "MI"
+},
+{
+"id": "crmarenapro/9",
+"run": 2,
+"answer": "MI"
+},
+{
+"id": "crmarenapro/9",
+"run": 3,
+"answer": "MI"
+},
+{
+"id": "crmarenapro/9",
+"run": 4,
+"answer": "MI"
+},
+{
+"id": "crmarenapro/10",
+"run": 0,
+"answer": "005Wt000003NDqDIAW"
+},
+{
+"id": "crmarenapro/10",
+"run": 1,
+"answer": "005Wt000003NDqDIAW"
+},
+{
+"id": "crmarenapro/10",
+"run": 2,
+"answer": "005Wt000003NDqDIAW"
+},
+{
+"id": "crmarenapro/10",
+"run": 3,
+"answer": "005Wt000003NDqDIAW"
+},
+{
+"id": "crmarenapro/10",
+"run": 4,
+"answer": "005Wt000003NDqDIAW"
+},
+{
+"id": "crmarenapro/11",
+"run": 0,
+"answer": "01tWt000006hV8LIAU"
+},
+{
+"id": "crmarenapro/11",
+"run": 1,
+"answer": "01tWt000006hV8LIAU"
+},
+{
+"id": "crmarenapro/11",
+"run": 2,
+"answer": "The AI processing unit purchased last month is **AI Cirku-Tech**, with Product Id: **01tWt000006hV8LIAU**."
+},
+{
+"id": "crmarenapro/11",
+"run": 3,
+"answer": "01tWt000006hV8LIAU"
+},
+{
+"id": "crmarenapro/11",
+"run": 4,
+"answer": "The AI processing unit purchased last month is **AI Cirku-Tech**, with Product Id: **01tWt000006hV8LIAU**."
+},
+{
+"id": "crmarenapro/12",
+"run": 0,
+"answer": "005Wt000003NJgAIAW"
+},
+{
+"id": "crmarenapro/12",
+"run": 1,
+"answer": "005Wt000003NJgAIAW"
+},
+{
+"id": "crmarenapro/12",
+"run": 2,
+"answer": "005Wt000003NJgAIAW"
+},
+{
+"id": "crmarenapro/12",
+"run": 3,
+"answer": "005Wt000003NJgAIAW"
+},
+{
+"id": "crmarenapro/12",
+"run": 4,
+"answer": "005Wt000003NJgAIAW"
+},
+{
+"id": "crmarenapro/13",
+"run": 0,
+"answer": "005Wt000003NEa3IAG"
+},
+{
+"id": "crmarenapro/13",
+"run": 1,
+"answer": "005Wt000003NIXCIA4"
+},
+{
+"id": "crmarenapro/13",
+"run": 2,
+"answer": "005Wt000003NEa3IAG"
+},
+{
+"id": "crmarenapro/13",
+"run": 3,
+"answer": "005Wt000003NIXCIA4"
+},
+{
+"id": "crmarenapro/13",
+"run": 4,
+"answer": "005Wt000003NHw5IAG"
+},
+{
+"id": "deps_dev_v1/1",
+"run": 0,
+"answer": "The top 5 most popular NPM packages (by GitHub stars), considering only their latest release versions, are:\n\n1. @dmrvos/infrajs>0.0.5>typescript — Version 2.6.2 — 94,931 stars\n2. @dmrvos/infrajs>0.0.6>typescript — Version 2.6.2 — 94,931 stars\n3. @dylanvann/svelte — Version 3.25.4 — 73,499 stars\n4. @dumc11/tailwindcss — Version 0.4.0 — 73,464 stars\n5. @dollarshaveclub/cli>1.0.0>lodash — Version 4.17.4 — 57,779 stars"
+},
+{
+"id": "deps_dev_v1/1",
+"run": 1,
+"answer": "The top 5 most popular NPM packages (by GitHub stars), considering only their latest release versions, are:\n\n1. @dylanvann/svelte (Version 3.25.4) — 73,499 GitHub stars\n2. @dumc11/tailwindcss (Version 0.4.0) — 73,464 GitHub stars\n3. @dreampie/semantic-ui (Version 2.2.11) — 51,069 GitHub stars\n4. @dongls/pdfjs-dist (Version 3.2.72) — 44,231 GitHub stars\n5. @dman777/shadow-dom-quill-temp (Version 1.0.0) — 42,407 GitHub stars"
+},
+{
+"id": "deps_dev_v1/1",
+"run": 2,
+"answer": ""
+},
+{
+"id": "deps_dev_v1/1",
+"run": 3,
+"answer": ""
+},
+{
+"id": "deps_dev_v1/1",
+"run": 4,
+"answer": "The top 5 most popular NPM packages (by GitHub stars, considering only their latest release versions) are:\n\n1. @dylanvann/svelte — Version: 3.25.4 — 73,499 GitHub stars (project: sveltejs/svelte)\n2. @dumc11/tailwindcss — Version: 0.4.0 — 73,464 GitHub stars (project: tailwindcss/tailwindcss)\n3. @dman777/shadow-dom-quill-temp — Version: 1.0.0 — 42,407 GitHub stars (project: quilljs/quill)\n4. @dynasty/styled-components — Version: 3.2.1 — 39,660 GitHub stars (project: styled-components/styled-components)\n5. @dothq/styled-components — Version: 1.0.0 — 39,660 GitHub stars (project: styled-components/styled-components)"
+},
+{
+"id": "deps_dev_v1/2",
+"run": 0,
+"answer": "The 5 NPM packages (with project license 'MIT' and marked as release) that have the highest GitHub fork count are:\n\n1. mui-org/material-ui — 30,522 forks\n2. moment/moment — 7,201 forks\n3. semantic-org/semantic-ui — 4,955 forks\n4. react-native-elements/react-native-elements — 4,623 forks\n5. sveltejs/svelte — 4,091 forks"
+},
+{
+"id": "deps_dev_v1/2",
+"run": 1,
+"answer": "The 5 NPM projects with license 'MIT' and marked as release that have the highest GitHub fork count are:\n\n1. mui-org/material-ui – 30,522 forks\n2. moment/moment – 7,201 forks\n3. semantic-org/semantic-ui – 4,955 forks\n4. react-native-elements/react-native-elements – 4,623 forks\n5. sveltejs/svelte – 4,091 forks"
+},
+{
+"id": "deps_dev_v1/2",
+"run": 2,
+"answer": "The 5 projects with the highest GitHub fork count among all NPM packages with project license 'MIT' and marked as release are:\n\n1. mui-org/material-ui – 30,522 forks\n2. semantic-org/semantic-ui – 4,955 forks\n3. react-native-elements/react-native-elements – 4,623 forks\n4. sveltejs/svelte – 4,091 forks\n5. tailwindcss/tailwindcss – 3,848 forks"
+},
+{
+"id": "deps_dev_v1/2",
+"run": 3,
+"answer": "The top 5 NPM projects with license 'MIT' and marked as release, ranked by highest GitHub fork count, are:\n\n1. mui-org/material-ui – 30,522 forks\n2. moment/moment – 7,201 forks\n3. semantic-org/semantic-ui – 4,955 forks\n4. react-native-elements/react-native-elements – 4,623 forks\n5. sveltejs/svelte – 4,091 forks"
+},
+{
+"id": "deps_dev_v1/2",
+"run": 4,
+"answer": "Among all NPM packages with project license 'MIT' and marked as release, the 5 projects with the highest GitHub fork count are:\n\n1. mui-org/material-ui — 30,522 forks\n2. moment/moment — 7,201 forks\n3. semantic-org/semantic-ui — 4,955 forks\n4. react-native-elements/react-native-elements — 4,623 forks\n5. sveltejs/svelte — 4,091 forks"
+},
+{
+"id": "github_repos/1",
+"run": 0,
+"answer": "Among repositories that do not use Python, approximately 19.05% (20 out of 105) of their README.md files include copyright information."
+},
+{
+"id": "github_repos/1",
+"run": 1,
+"answer": "Among repositories that do not use Python, 18 out of 105 README.md files include copyright information, which is a proportion of approximately 17.14% (0.1714)."
+},
+{
+"id": "github_repos/1",
+"run": 2,
+"answer": "Among repositories that do not use Python, approximately 19.05% (20 out of 105) of their README.md files include copyright information."
+},
+{
+"id": "github_repos/1",
+"run": 3,
+"answer": "Among repositories that do not use Python, approximately 19.13% (22 out of 115) of their README.md files include copyright information."
+},
+{
+"id": "github_repos/1",
+"run": 4,
+"answer": "Among repositories that do not use Python, 15.24% of their README.md files include copyright information (16 out of 105 README.md files)."
+},
+{
+"id": "github_repos/2",
+"run": 0,
+"answer": "uacaps/PageMenu"
+},
+{
+"id": "github_repos/2",
+"run": 1,
+"answer": "uacaps/PageMenu"
+},
+{
+"id": "github_repos/2",
+"run": 2,
+"answer": "uacaps/PageMenu"
+},
+{
+"id": "github_repos/2",
+"run": 3,
+"answer": "onmyway133/Github.swift"
+},
+{
+"id": "github_repos/2",
+"run": 4,
+"answer": "onmyway133/Github.swift"
+},
+{
+"id": "github_repos/3",
+"run": 0,
+"answer": "1077"
+},
+{
+"id": "github_repos/3",
+"run": 1,
+"answer": "1077"
+},
+{
+"id": "github_repos/3",
+"run": 2,
+"answer": "1077"
+},
+{
+"id": "github_repos/3",
+"run": 3,
+"answer": "1077"
+},
+{
+"id": "github_repos/3",
+"run": 4,
+"answer": "1077"
+},
+{
+"id": "github_repos/4",
+"run": 0,
+"answer": "The top five GitHub repositories whose main language is not Python, ordered by the highest number of commits, are:\n\n1. torvalds/linux (16,061 commits)\n2. apple/swift (1,051 commits)\n3. twbs/bootstrap (340 commits)\n4. Microsoft/vscode (190 commits)\n5. facebook/react (178 commits)"
+},
+{
+"id": "github_repos/4",
+"run": 1,
+"answer": "The top five GitHub repositories whose main language is not Python, ordered by the highest number of commits, are:\n\n1. torvalds/linux\n2. apple/swift\n3. twbs/bootstrap\n4. Microsoft/vscode\n5. facebook/react"
+},
+{
+"id": "github_repos/4",
+"run": 2,
+"answer": "The top five GitHub repositories whose main language is not Python, ordered by the highest number of commits, are:\n\n1. apple/swift (1,051 commits, main language: C++)\n2. twbs/bootstrap (340 commits, main language: JavaScript)\n3. Microsoft/vscode (190 commits, main language: TypeScript)\n4. facebook/react (178 commits, main language: JavaScript)\n5. tensorflow/tensorflow (156 commits, main language: C++)"
+},
+{
+"id": "github_repos/4",
+"run": 3,
+"answer": "The top five GitHub repositories whose main language is not Python, ordered by the highest number of commits, are:\n\n1. apple/swift (1,051 commits, main language: C++)\n2. twbs/bootstrap (340 commits, main language: JavaScript)\n3. Microsoft/vscode (190 commits, main language: TypeScript)\n4. facebook/react (178 commits, main language: JavaScript)\n5. tensorflow/tensorflow (156 commits, main language: C++)"
+},
+{
+"id": "github_repos/4",
+"run": 4,
+"answer": "The top five GitHub repositories whose main language is not Python, ordered by the highest number of commits, are:\n\n1. torvalds/linux\n2. apple/swift\n3. twbs/bootstrap\n4. Microsoft/vscode\n5. facebook/react"
+},
+{
+"id": "googlelocal/1",
+"run": 0,
+"answer": "The top 5 businesses located in Los Angeles, California, ranked by highest average rating in descending order are:\n\n1. Widows Peak Salon – Average Rating: 4.86\n2. City Textile – Average Rating: 4.50\n3. Nobel Textile Co – Average Rating: 4.29\n4. San Soo Dang – Average Rating: 4.28\n5. Nova Fabrics – Average Rating: 3.33"
+},
+{
+"id": "googlelocal/1",
+"run": 1,
+"answer": "The top 5 businesses located in Los Angeles, California, ranked by highest average rating in descending order are:\n\n1. Widows Peak Salon — Average Rating: 4.86\n2. City Textile — Average Rating: 4.50\n3. Nobel Textile Co — Average Rating: 4.29\n4. San Soo Dang — Average Rating: 4.28\n5. Nova Fabrics — Average Rating: 3.33"
+},
+{
+"id": "googlelocal/1",
+"run": 2,
+"answer": "The top 5 businesses located in Los Angeles, California, ranked by highest average rating in descending order are:\n\n1. Widows Peak Salon — Average Rating: 4.86\n2. City Textile — Average Rating: 4.50\n3. Nobel Textile Co — Average Rating: 4.29\n4. San Soo Dang — Average Rating: 4.28\n5. Nova Fabrics — Average Rating: 3.33"
+},
+{
+"id": "googlelocal/1",
+"run": 3,
+"answer": "The top 5 businesses located in Los Angeles, California, ranked by highest average rating in descending order are:\n\n1. Widows Peak Salon — Average Rating: 4.86\n2. City Textile — Average Rating: 4.50\n3. Nobel Textile Co — Average Rating: 4.29\n4. San Soo Dang — Average Rating: 4.28\n5. Nova Fabrics — Average Rating: 3.33"
+},
+{
+"id": "googlelocal/1",
+"run": 4,
+"answer": "The top 5 businesses located in Los Angeles, California, ranked by highest average rating in descending order are:\n\n1. Widows Peak Salon — Average Rating: 4.86\n2. City Textile — Average Rating: 4.50\n3. Nobel Textile Co — Average Rating: 4.29\n4. San Soo Dang — Average Rating: 4.28\n5. Nova Fabrics — Average Rating: 3.33"
+},
+{
+"id": "googlelocal/2",
+"run": 0,
+"answer": "The following massage therapy businesses have an average rating of at least 4.0:\n\n1. Elite Massage — Average Rating: 5.00\n2. Angel-A Massage — Average Rating: 4.33\n3. Aurora Massage — Average Rating: 4.18"
+},
+{
+"id": "googlelocal/2",
+"run": 1,
+"answer": "The massage therapy businesses with an average rating of at least 4.0 are:\n\n1. Elite Massage — Average Rating: 5.00\n2. Angel-A Massage — Average Rating: 4.33\n3. Aurora Massage — Average Rating: 4.18"
+},
+{
+"id": "googlelocal/2",
+"run": 2,
+"answer": "The massage therapy businesses with an average rating of at least 4.0 are:\n\n1. Elite Massage — Average Rating: 5.00\n2. Angel-A Massage — Average Rating: 4.33\n3. Aurora Massage — Average Rating: 4.18"
+},
+{
+"id": "googlelocal/2",
+"run": 3,
+"answer": "The following massage therapy businesses have an average rating of at least 4.0:\n\n1. Elite Massage — Average Rating: 5.00\n2. Angel-A Massage — Average Rating: 4.33\n3. Aurora Massage — Average Rating: 4.18"
+},
+{
+"id": "googlelocal/2",
+"run": 4,
+"answer": "The massage therapy businesses with an average rating of at least 4.0 are:\n\n1. Elite Massage – Average Rating: 5.0\n2. Angel-A Massage – Average Rating: 4.33\n3. Aurora Massage – Average Rating: 4.18"
+},
+{
+"id": "googlelocal/3",
+"run": 0,
+"answer": "Top 5 businesses that remain open after 6:00 PM on at least one weekday, ranked by highest average rating:\n\n1. Taba Rug Gallery (Average Rating: 5.0)\n   Hours: Thursday: 10AM–7PM, Friday: 10AM–7PM, Saturday: 10AM–7PM, Sunday: 11AM–6PM, Monday: 10AM–7PM, Tuesday: 10AM–7PM, Wednesday: 10AM–7PM\n\n2. Beauty Divine Artistry (Average Rating: 5.0)\n   Hours: Thursday: 9AM–8PM, Friday: 9AM–8PM, Saturday: 10AM–7PM, Sunday: 11AM–6PM, Monday: 9AM–8PM, Tuesday: 9AM–8PM, Wednesday: 9AM–8PM\n\n3. White Barn Candle Co (Average Rating: 5.0)\n   Hours: Thursday: 10AM–9PM, Friday: 10AM–9PM, Saturday: 10AM–9PM, Sunday: 11AM–7PM, Monday: 10AM–9PM, Tuesday: 10AM–9PM, Wednesday: 10AM–9PM\n\n4. TACOS LA CABANA (Average Rating: 5.0)\n   Hours: Thursday: Closed, Friday: 5–11PM, Saturday: 5–11PM, Sunday: 5–11PM, Monday: 5–11PM, Tuesday: Closed, Wednesday: Closed\n\n5. Mariscos el poblano (Average Rating: 5.0)\n   Hours: Thursday: Open 24 hours, Friday: 8AM–3:30PM, Saturday: 8AM–3:30PM, Sunday: 8AM–3:30PM, Monday: 9AM–3:30AM, Tuesday: 8AM–3:30PM, Wednesday: 8AM–3:30PM\n\nAll five businesses share the highest possible average rating of 5.0."
+},
+{
+"id": "googlelocal/3",
+"run": 1,
+"answer": "Top 5 businesses that remain open after 6:00 PM on at least one weekday, ranked by highest average rating:\n\n1. Taba Rug Gallery\n   - Hours: Thursday: 10AM–7PM; Friday: 10AM–7PM; Saturday: 10AM–7PM; Sunday: 11AM–6PM; Monday: 10AM–7PM; Tuesday: 10AM–7PM; Wednesday: 10AM–7PM\n   - Average Rating: 5.00\n\n2. Beauty Divine Artistry\n   - Hours: Thursday: 9AM–8PM; Friday: 9AM–8PM; Saturday: 10AM–7PM; Sunday: 11AM–6PM; Monday: 9AM–8PM; Tuesday: 9AM–8PM; Wednesday: 9AM–8PM\n   - Average Rating: 5.00\n\n3. White Barn Candle Co\n   - Hours: Thursday: 10AM–9PM; Friday: 10AM–9PM; Saturday: 10AM–9PM; Sunday: 11AM–7PM; Monday: 10AM–9PM; Tuesday: 10AM–9PM; Wednesday: 10AM–9PM\n   - Average Rating: 5.00\n\n4. TACOS LA CABANA\n   - Hours: Thursday: Closed; Friday: 5–11PM; Saturday: 5–11PM; Sunday: 5–11PM; Monday: 5–11PM; Tuesday: Closed; Wednesday: Closed\n   - Average Rating: 5.00\n\n5. Mariscos el poblano\n   - Hours: Thursday: Open 24 hours; Friday: 8AM–3:30PM; Saturday: 8AM–3:30PM; Sunday: 8AM–3:30PM; Monday: 9AM–3:30AM; Tuesday: 8AM–3:30PM; Wednesday: 8AM–3:30PM\n   - Average Rating: 5.00\n\nAll five businesses share the highest possible average rating of 5.00."
+},
+{
+"id": "googlelocal/3",
+"run": 2,
+"answer": "The top 5 businesses that remain open after 6:00 PM on at least one weekday, ranked by highest average rating, are:\n\n1. **Taba Rug Gallery** — Average Rating: 5.0\n   Hours: Thursday: 10AM–7PM; Friday: 10AM–7PM; Saturday: 10AM–7PM; Sunday: 11AM–6PM; Monday: 10AM–7PM; Tuesday: 10AM–7PM; Wednesday: 10AM–7PM\n\n2. **Beauty Divine Artistry** — Average Rating: 5.0\n   Hours: Thursday: 9AM–8PM; Friday: 9AM–8PM; Saturday: 10AM–7PM; Sunday: 11AM–6PM; Monday: 9AM–8PM; Tuesday: 9AM–8PM; Wednesday: 9AM–8PM\n\n3. **White Barn Candle Co** — Average Rating: 5.0\n   Hours: Thursday: 10AM–9PM; Friday: 10AM–9PM; Saturday: 10AM–9PM; Sunday: 11AM–7PM; Monday: 10AM–9PM; Tuesday: 10AM–9PM; Wednesday: 10AM–9PM\n\n4. **TACOS LA CABANA** — Average Rating: 5.0\n   Hours: Thursday: Closed; Friday: 5–11PM; Saturday: 5–11PM; Sunday: 5–11PM; Monday: 5–11PM; Tuesday: Closed; Wednesday: Closed\n\n5. **Mariscos el poblano** — Average Rating: 5.0\n   Hours: Thursday: Open 24 hours; Friday: 8AM–3:30PM; Saturday: 8AM–3:30PM; Sunday: 8AM–3:30PM; Monday: 9AM–3:30AM; Tuesday: 8AM–3:30PM; Wednesday: 8AM–3:30PM"
+},
+{
+"id": "googlelocal/3",
+"run": 3,
+"answer": "Top 5 businesses that remain open after 6:00 PM on at least one weekday, ranked by highest average rating:\n\n1. **Taba Rug Gallery** — Average Rating: 5.0\n   Operating Hours: Thursday 10AM–7PM, Friday 10AM–7PM, Saturday 10AM–7PM, Sunday 11AM–6PM, Monday 10AM–7PM, Tuesday 10AM–7PM, Wednesday 10AM–7PM\n\n2. **Beauty Divine Artistry** — Average Rating: 5.0\n   Operating Hours: Thursday 9AM–8PM, Friday 9AM–8PM, Saturday 10AM–7PM, Sunday 11AM–6PM, Monday 9AM–8PM, Tuesday 9AM–8PM, Wednesday 9AM–8PM\n\n3. **White Barn Candle Co** — Average Rating: 5.0\n   Operating Hours: Thursday 10AM–9PM, Friday 10AM–9PM, Saturday 10AM–9PM, Sunday 11AM–7PM, Monday 10AM–9PM, Tuesday 10AM–9PM, Wednesday 10AM–9PM\n\n4. **TACOS LA CABANA** — Average Rating: 5.0\n   Operating Hours: Thursday Closed, Friday 5–11PM, Saturday 5–11PM, Sunday 5–11PM, Monday 5–11PM, Tuesday Closed, Wednesday Closed\n\n5. **Mariscos el poblano** — Average Rating: 5.0\n   Operating Hours: Thursday Open 24 hours, Friday 8AM–3:30PM, Saturday 8AM–3:30PM, Sunday 8AM–3:30PM, Monday 9AM–3:30AM, Tuesday 8AM–3:30PM, Wednesday 8AM–3:30PM"
+},
+{
+"id": "googlelocal/3",
+"run": 4,
+"answer": "Top 5 businesses that remain open after 6:00 PM on at least one weekday, ranked by highest average rating:\n\n1. Taba Rug Gallery | Average Rating: 5.0\n   Operating Hours:\n   - Monday: 10AM–7PM\n   - Tuesday: 10AM–7PM\n   - Wednesday: 10AM–7PM\n   - Thursday: 10AM–7PM\n   - Friday: 10AM–7PM\n   - Saturday: 10AM–7PM\n   - Sunday: 11AM–6PM\n\n2. Beauty Divine Artistry | Average Rating: 5.0\n   Operating Hours:\n   - Monday: 9AM–8PM\n   - Tuesday: 9AM–8PM\n   - Wednesday: 9AM–8PM\n   - Thursday: 9AM–8PM\n   - Friday: 9AM–8PM\n   - Saturday: 10AM–7PM\n   - Sunday: 11AM–6PM\n\n3. White Barn Candle Co | Average Rating: 5.0\n   Operating Hours:\n   - Monday: 10AM–9PM\n   - Tuesday: 10AM–9PM\n   - Wednesday: 10AM–9PM\n   - Thursday: 10AM–9PM\n   - Friday: 10AM–9PM\n   - Saturday: 10AM–9PM\n   - Sunday: 11AM–7PM\n\n4. TACOS LA CABANA | Average Rating: 5.0\n   Operating Hours:\n   - Monday: 5–11PM\n   - Tuesday: Closed\n   - Wednesday: Closed\n   - Thursday: Closed\n   - Friday: 5–11PM\n   - Saturday: 5–11PM\n   - Sunday: 5–11PM\n\n5. Mariscos el poblano | Average Rating: 5.0\n   Operating Hours:\n   - Monday: 9AM–3:30AM\n   - Tuesday: 8AM–3:30PM\n   - Wednesday: 8AM–3:30PM\n   - Thursday: Open 24 hours\n   - Friday: 8AM–3:30PM\n   - Saturday: 8AM–3:30PM\n   - Sunday: 8AM–3:30PM\n\nAll five businesses share the highest possible average rating of 5.0 and are open past 6:00 PM on at least one weekday."
+},
+{
+"id": "googlelocal/4",
+"run": 0,
+"answer": "The 3 businesses that received the highest number of reviews with ratings of 4.5 or higher (i.e., rating = 5, since ratings are on an integer 1–5 scale) during 2019 are:\n\n1. Encino Dermatology & Laser: Alex Khadavi MD — 19 high-rating reviews\n2. The Boochyard @ Local Roots — 17 high-rating reviews\n3. Aurora Massage — 14 high-rating reviews"
+},
+{
+"id": "googlelocal/4",
+"run": 1,
+"answer": "The 3 businesses that received the highest number of reviews with ratings of 4.5 or higher during 2019 are:\n\n1. Encino Dermatology & Laser: Alex Khadavi MD — 19 high-rating reviews\n2. The Boochyard @ Local Roots — 17 high-rating reviews\n3. Aurora Massage — 14 high-rating reviews"
+},
+{
+"id": "googlelocal/4",
+"run": 2,
+"answer": "The 3 businesses that received the highest number of reviews with ratings of 4.5 or higher during 2019 are:\n\n1. Encino Dermatology & Laser: Alex Khadavi MD — 19 high-rating reviews\n2. The Boochyard @ Local Roots — 17 high-rating reviews\n3. Aurora Massage — 14 high-rating reviews"
+},
+{
+"id": "googlelocal/4",
+"run": 3,
+"answer": "The 3 businesses that received the highest number of reviews with ratings of 4.5 or higher (i.e., 5-star ratings) during 2019 are:\n\n1. Encino Dermatology & Laser: Alex Khadavi MD — 19 high-rating reviews\n2. The Boochyard @ Local Roots — 17 high-rating reviews\n3. Aurora Massage — 14 high-rating reviews"
+},
+{
+"id": "googlelocal/4",
+"run": 4,
+"answer": "The 3 businesses that received the highest number of reviews with ratings of 4.5 or higher during 2019 are:\n\n1. Encino Dermatology & Laser: Alex Khadavi MD — 19 high-rating reviews\n2. The Boochyard @ Local Roots — 17 high-rating reviews\n3. Aurora Massage — 14 high-rating reviews"
+},
+{
+"id": "pancancer_atlas/1",
+"run": 0,
+"answer": "For LGG (Brain Lower Grade Glioma) patients, the average log10-transformed IGF2 expression (computed as mean of log10(normalized_count + 1)) by histology type is:\n\n- Astrocytoma: 2.5713\n- Oligoastrocytoma: 2.7136\n- Oligodendroglioma: 2.6825"
+},
+{
+"id": "pancancer_atlas/1",
+"run": 1,
+"answer": "For LGG (Brain Lower Grade Glioma) patients, the average log10-transformed expression (log10(normalized_count + 1)) of the IGF2 gene across different histology types is:\n\n- Astrocytoma: 2.5713 (n = 10 patients)\n- Oligoastrocytoma: 2.7136 (n = 5 patients)\n- Oligodendroglioma: 2.6825 (n = 8 patients)\n\nOnly patients with valid IGF2 expression values and non-bracket-enclosed histology annotations were included."
+},
+{
+"id": "pancancer_atlas/1",
+"run": 2,
+"answer": "For LGG (Brain Lower Grade Glioma) patients, the average log10-transformed IGF2 expression (computed as mean of log10(normalized_count + 1)) across histology types is:\n\n- Astrocytoma: 2.5713 (based on 10 patients)\n- Oligoastrocytoma: 2.7136 (based on 5 patients)\n- Oligodendroglioma: 2.6825 (based on 8 patients)\n\nMore precisely:\n- Astrocytoma: 2.5713\n- Oligoastrocytoma: 2.7136\n- Oligodendroglioma: 2.6825"
+},
+{
+"id": "pancancer_atlas/1",
+"run": 3,
+"answer": "For LGG patients, the average log10-transformed IGF2 expression (computed as mean of log10(normalized_count + 1)) by histology type is:\n\n- Astrocytoma: 2.5713\n- Oligoastrocytoma: 2.7136\n- Oligodendroglioma: 2.6825"
+},
+{
+"id": "pancancer_atlas/1",
+"run": 4,
+"answer": "For LGG (Brain Lower Grade Glioma) patients, the average log10-transformed IGF2 expression (computed as mean of log10(normalized_count + 1)) across histology types is:\n\n- Astrocytoma: 2.5713 (based on 10 patients)\n- Oligoastrocytoma: 2.7136 (based on 5 patients)\n- Oligodendroglioma: 2.6825 (based on 8 patients)\n\nOnly patients with valid IGF2 expression values and histological type annotations not enclosed in square brackets were included."
+},
+{
+"id": "pancancer_atlas/2",
+"run": 0,
+"answer": "Among BRCA patients in the PanCancer Atlas who are alive, the top three histological types with the highest percentage of CDH1 gene mutations are:\n\n1. Infiltrating Lobular Carcinoma – 50.56% (90 out of 178 patients)\n2. Mixed Histology (please specify) – 16.67% (4 out of 24 patients)\n3. Other, specify – 8.33% (3 out of 36 patients)"
+},
+{
+"id": "pancancer_atlas/2",
+"run": 1,
+"answer": "Among BRCA patients in the PanCancer Atlas who are alive, the top three histological types with the highest percentage of CDH1 gene mutations are:\n\n1. Infiltrating Lobular Carcinoma – 50.56% (90 out of 178 patients)\n2. Mixed Histology (please specify) – 16.67% (4 out of 24 patients)\n3. Other, specify – 8.33% (3 out of 36 patients)"
+},
+{
+"id": "pancancer_atlas/2",
+"run": 2,
+"answer": "Among BRCA patients in the PanCancer Atlas who are alive, the top three histological types with the highest percentage of CDH1 gene mutations are:\n\n1. Infiltrating Lobular Carcinoma – 50.56% (90 out of 178 patients)\n2. Mixed Histology (please specify) – 16.67% (4 out of 24 patients)\n3. Other, specify – 8.33% (3 out of 36 patients)"
+},
+{
+"id": "pancancer_atlas/2",
+"run": 3,
+"answer": "Among BRCA patients in the PanCancer Atlas who are alive, the top three histological types with the highest percentage of CDH1 gene mutations are:\n\n1. Infiltrating Lobular Carcinoma – 50.56% (90 out of 178 patients)\n2. Mixed Histology (please specify) – 16.67% (4 out of 24 patients)\n3. Other, specify – 8.33% (3 out of 36 patients)"
+},
+{
+"id": "pancancer_atlas/2",
+"run": 4,
+"answer": "Among BRCA patients in the PanCancer Atlas who are alive, the top three histological types with the highest percentage of CDH1 gene mutations are:\n\n1. **Infiltrating Lobular Carcinoma** – 50.56% (90 out of 178 patients)\n2. **Mixed Histology (please specify)** – 16.67% (4 out of 24 patients)\n3. **Other, specify** – 8.33% (3 out of 36 patients)"
+},
+{
+"id": "pancancer_atlas/3",
+"run": 0,
+"answer": "The chi-square statistic assessing the association between histological types and CDH1 gene mutations in female BRCA patients from the PanCancer Atlas is approximately **325.34**.\n\nDetails:\n- Total patients included (after filtering): 762\n- Categories retained (row marginal totals > 10): Infiltrating Ductal Carcinoma (549), Infiltrating Lobular Carcinoma (142), Other specify (36), Mixed Histology (22), Mucinous Carcinoma (13)\n- Categories excluded (row marginal totals ≤ 10): Medullary Carcinoma (6), Metaplastic Carcinoma (6), Infiltrating Carcinoma NOS (1)\n- CDH1 mutated column total: 99; CDH1 not mutated column total: 663\n- Only reliable mutation entries (FILTER = 'PASS') were considered.\n\nThe dominant contribution comes from Infiltrating Lobular Carcinoma, which shows a very strong association with CDH1 mutations (83 observed vs 18.45 expected), consistent with the known biology of lobular breast cancer."
+},
+{
+"id": "pancancer_atlas/3",
+"run": 1,
+"answer": "The chi-square statistic assessing the association between histological types and CDH1 gene mutations in female BRCA patients from the PanCancer Atlas is **364.17**.\n\nDetails:\n- Analysis included 984 female BRCA patients with known histological types who had reliable (PASS filter) mutation data.\n- 5 histological types were retained (marginal totals > 10): Infiltrating Ductal Carcinoma (736), Infiltrating Lobular Carcinoma (164), Other specify (44), Mixed Histology (27), and Mucinous Carcinoma (13).\n- 3 histological types were excluded (marginal totals ≤ 10): Medullary Carcinoma (6), Metaplastic Carcinoma (6), and Infiltrating Carcinoma NOS (1).\n- 99 patients had CDH1 mutations; 885 did not.\n- The large chi-square value is driven primarily by Infiltrating Lobular Carcinoma, which shows a much higher rate of CDH1 mutations (83/164) compared to other types, especially Infiltrating Ductal Carcinoma (9/736)."
+},
+{
+"id": "pancancer_atlas/3",
+"run": 2,
+"answer": "The chi-square statistic assessing the association between histological types and the presence of CDH1 gene mutations in female BRCA patients from the PanCancer Atlas is approximately **305.1239**.\n\nDetails:\n- Only reliable mutation entries (FILTER = 'PASS') were considered for CDH1 mutations.\n- Categories with marginal totals ≤ 10 were excluded (Metaplastic Carcinoma, Medullary Carcinoma, and Infiltrating Carcinoma NOS were removed).\n- The analysis included 1,059 female BRCA patients across 5 histological types:\n  - Infiltrating Ductal Carcinoma: 757 without CDH1 mutation, 9 with CDH1 mutation\n  - Infiltrating Lobular Carcinoma: 118 without CDH1 mutation, 83 with CDH1 mutation\n  - Mixed Histology (please specify): 26 without CDH1 mutation, 4 with CDH1 mutation\n  - Mucinous Carcinoma: 17 without CDH1 mutation, 0 with CDH1 mutation\n  - Other specify: 42 without CDH1 mutation, 3 with CDH1 mutation\n\nThe very high chi-square value indicates a strong association between histological type and CDH1 mutation status, driven primarily by the significantly elevated CDH1 mutation rate in Infiltrating Lobular Carcinoma compared to other histological types."
+},
+{
+"id": "pancancer_atlas/3",
+"run": 3,
+"answer": "The chi-square statistic to assess the association between histological types and the presence of CDH1 gene mutations in female BRCA patients from the PanCancer Atlas is **305.12**.\n\nDetails:\n- Only reliable mutation entries were considered (FILTER = 'PASS').\n- Categories with marginal totals ≤ 10 were excluded (Infiltrating Carcinoma NOS [n=1], Medullary Carcinoma [n=6], and Metaplastic Carcinoma [n=8] were removed).\n- Remaining histological types included: Infiltrating Ductal Carcinoma (n=766), Infiltrating Lobular Carcinoma (n=201), Mixed Histology (n=30), Mucinous Carcinoma (n=17), and Other specify (n=45).\n- Grand total: 1,059 patients; 99 with CDH1 mutations, 960 without.\n- χ² = Σ (Oij - Eij)² / Eij = 305.12"
+},
+{
+"id": "pancancer_atlas/3",
+"run": 4,
+"answer": "The chi-square statistic assessing the association between histological types and the presence of CDH1 gene mutations in female BRCA patients from the PanCancer Atlas is approximately 325.34.\n\nDetails:\n- After filtering to female BRCA patients with known histological types and reliable mutation entries (FILTER = 'PASS'), 762 patients remained across 5 histological type categories (excluding categories with marginal totals ≤ 10).\n- Categories included: Infiltrating Ductal Carcinoma (549), Infiltrating Lobular Carcinoma (142), Other specify (36), Mixed Histology (22), and Mucinous Carcinoma (13).\n- Categories excluded (row total ≤ 10): Infiltrating Carcinoma NOS (1), Medullary Carcinoma (6), Metaplastic Carcinoma (6).\n- Column totals: CDH1 mutated = 99, No CDH1 mutation = 663.\n- The very large chi-square value (325.34) indicates a highly significant association, primarily driven by the strong enrichment of CDH1 mutations in Infiltrating Lobular Carcinoma (83 observed vs 18.45 expected) and depletion in Infiltrating Ductal Carcinoma (9 observed vs 71.33 expected)."
+},
+{
+"id": "patents/1",
+"run": 0,
+"answer": "The CPC group codes at level 5 whose highest exponential moving average (smoothing factor 0.2) of patent filings peaks in 2022 are (89 groups total, sorted by EMA value):\n\nY02E (868.07), G06Q (414.95), G06T (313.94), Y02T (311.57), G06N (280.29), H01M (239.78), G06V (228.66), Y02B (208.57), H02J (160.97), G01S (139.85), B65G (101.97), G16H (101.37), B60L (90.19), B08B (81.12), G08B (77.35), G10L (73.63), B33Y (59.37), G09F (56.95), Y04S (56.62), C01P (54.75), B22F (50.65), B05B (50.53), E04B (50.04), G01D (47.29), C21D (45.55), H02G (45.10), E02D (43.42), G01L (38.42), C07B (36.77), E04G (36.20), F16M (34.07), A24F (34.02), B02C (33.32), C01G (30.43), B22D (30.06), A61G (29.15), G01K (27.90), C22B (24.10), H03H (23.27), E01C (22.60), A62C (20.92), H02B (20.73), B07B (20.62), B66F (20.52), G16B (20.11), B60P (18.62), G01P (18.34), E01D (17.62), B21B (17.25), A23P (16.69), B21C (14.85), E03F (14.14), E21F (13.86), B09B (13.62), G01H (12.91), H04S (12.44), E03B (11.78), C01F (11.23), B03C (10.60), C21C (10.50), F02K (10.49), G16Y (9.96), E03D (9.23), C21B (8.04), B09C (7.73), C01D (7.47), G21F (6.96), F16N (6.50), A23J (6.25), F25J (6.10), B04B (6.05), B63C (5.96), B27M (5.05), F23N (4.89), B63G (4.86), B60D (4.80), D06H (3.88), B27G (3.82), B25D (3.78), F04F (3.73), A41H (3.59), B27C (3.10), G04F (2.82), F41C (2.74), F42C (2.23), G21G (1.69), B21H (1.64), D03J (1.47), A44D (1.42)"
+},
+{
+"id": "patents/1",
+"run": 1,
+"answer": "The CPC group codes at level 5 whose highest exponential moving average (smoothing factor 0.2) of patent filings peaks in 2022 are:\n\n1. Y02E (Best EMA: 868.07)\n2. G06Q (Best EMA: 414.95)\n3. G06T (Best EMA: 313.94)\n4. Y02T (Best EMA: 311.57)\n5. G06N (Best EMA: 280.29)\n6. H01M (Best EMA: 239.78)\n7. G06V (Best EMA: 228.66)\n8. Y02B (Best EMA: 208.57)\n9. H02J (Best EMA: 160.97)\n10. G01S (Best EMA: 139.85)\n11. B65G (Best EMA: 101.97)\n12. G16H (Best EMA: 101.37)\n13. B60L (Best EMA: 90.19)\n14. B08B (Best EMA: 81.12)\n15. G08B (Best EMA: 77.35)\n16. G10L (Best EMA: 73.63)\n17. B33Y (Best EMA: 59.38)\n18. G09F (Best EMA: 56.95)\n19. Y04S (Best EMA: 56.63)\n20. C01P (Best EMA: 54.75)\n21. B22F (Best EMA: 50.65)\n22. B05B (Best EMA: 50.53)\n23. E04B (Best EMA: 50.04)\n24. G01D (Best EMA: 47.29)\n25. C21D (Best EMA: 45.55)\n26. H02G (Best EMA: 45.10)\n27. E02D (Best EMA: 43.42)\n28. G01L (Best EMA: 38.42)\n29. C07B (Best EMA: 36.77)\n30. E04G (Best EMA: 36.20)\n31. F16M (Best EMA: 34.08)\n32. A24F (Best EMA: 34.03)\n33. B02C (Best EMA: 33.32)\n34. C01G (Best EMA: 30.43)\n35. B22D (Best EMA: 30.06)\n36. A61G (Best EMA: 29.15)\n37. G01K (Best EMA: 27.90)\n38. C22B (Best EMA: 24.10)\n39. H03H (Best EMA: 23.27)\n40. E01C (Best EMA: 22.60)\n41. A62C (Best EMA: 20.92)\n42. H02B (Best EMA: 20.73)\n43. B07B (Best EMA: 20.63)\n44. B66F (Best EMA: 20.52)\n45. G16B (Best EMA: 20.12)\n46. B60P (Best EMA: 18.62)\n47. G01P (Best EMA: 18.34)\n48. E01D (Best EMA: 17.62)\n49. B21B (Best EMA: 17.25)\n50. A23P (Best EMA: 16.69)\n51. B21C (Best EMA: 14.85)\n52. E03F (Best EMA: 14.14)\n53. E21F (Best EMA: 13.95)\n54. B09B (Best EMA: 13.63)\n55. G01H (Best EMA: 12.92)\n56. H04S (Best EMA: 12.44)\n57. E03B (Best EMA: 11.84)\n58. C01F (Best EMA: 11.23)\n59. B03C (Best EMA: 10.60)\n60. C21C (Best EMA: 10.51)\n61. F02K (Best EMA: 10.49)\n62. G16Y (Best EMA: 10.18)\n63. E03D (Best EMA: 9.34)\n64. C21B (Best EMA: 8.04)\n65. B09C (Best EMA: 7.77)\n66. C01D (Best EMA: 7.49)\n67. G21F (Best EMA: 6.97)\n68. F16N (Best EMA: 6.51)\n69. A23J (Best EMA: 6.25)\n70. F25J (Best EMA: 6.10)\n71. B04B (Best EMA: 6.05)\n72. B63C (Best EMA: 5.98)\n73. B27M (Best EMA: 5.07)\n74. F23N (Best EMA: 4.90)\n75. B63G (Best EMA: 4.89)\n76. D06H (Best EMA: 3.97)\n77. B27G (Best EMA: 3.92)\n78. B25D (Best EMA: 3.78)\n79. F04F (Best EMA: 3.76)\n80. A41H (Best EMA: 3.66)\n81. B27C (Best EMA: 3.20)\n82. G04F (Best EMA: 2.92)\n83. F41C (Best EMA: 2.79)\n84. F42C (Best EMA: 2.35)\n85. G21G (Best EMA: 2.17)\n86. D03J (Best EMA: 1.99)\n87. F28B (Best EMA: 1.95)\n88. A63K (Best EMA: 1.30)\n89. G06J (Best EMA: 1.24)\n\nA total of 89 CPC level-5 group codes have their peak EMA (α=0.2) in 2022. The top ones are Y02E (climate change mitigation related to energy), G06Q (data processing for business/finance), G06T (image data processing), Y02T (climate change mitigation in transportation), and G06N (computing arrangements based on specific computational models, including AI/ML)."
+},
+{
+"id": "patents/1",
+"run": 2,
+"answer": "The CPC group codes at level 5 whose highest exponential moving average (smoothing factor 0.2) of patent filings peaks in 2022 are (89 groups total, ranked by peak EMA):\n\nY02E, G06Q, G06T, Y02T, G06N, H01M, G06V, Y02B, H02J, G01S, B65G, G16H, B60L, B08B, G08B, G10L, B33Y, G09F, Y04S, C01P, B22F, B05B, E04B, G01D, C21D, H02G, E02D, G01L, C07B, E04G, F16M, A24F, B02C, C01G, B22D, A61G, G01K, C22B, H03H, E01C, A62C, H02B, B07B, B66F, G16B, B60P, G01P, E01D, B21B, A23P, B21C, E03F, E21F, B09B, G01H, H04S, E03B, C01F, B03C, C21C, F02K, G16Y, E03D, C21B, B09C, C01D, G21F, F16N, A23J, F25J, B04B, B63C, B27M, F23N, B63G, D06H, B27G, B25D, F04F, A41H, B27C, G04F, F41C, F42C, G21G, D03J, F28B, A63K, G06J"
+},
+{
+"id": "patents/1",
+"run": 3,
+"answer": "The CPC group codes at level 5 whose highest exponential moving average (smoothing factor 0.2) of patent filings peaks in 2022 are:\n\n1. Y02E (Best EMA: 868.07)\n2. G06Q (Best EMA: 414.95)\n3. G06T (Best EMA: 313.94)\n4. Y02T (Best EMA: 311.57)\n5. G06N (Best EMA: 280.29)\n6. H01M (Best EMA: 239.78)\n7. G06V (Best EMA: 228.66)\n8. Y02B (Best EMA: 208.57)\n9. H02J (Best EMA: 160.97)\n10. G01S (Best EMA: 139.85)\n11. B65G (Best EMA: 101.97)\n12. G16H (Best EMA: 101.37)\n13. B60L (Best EMA: 90.19)\n14. B08B (Best EMA: 81.12)\n15. G08B (Best EMA: 77.35)\n16. G10L (Best EMA: 73.63)\n17. B33Y (Best EMA: 59.37)\n18. G09F (Best EMA: 56.95)\n19. Y04S (Best EMA: 56.62)\n20. C01P (Best EMA: 54.75)\n21. B22F (Best EMA: 50.65)\n22. B05B (Best EMA: 50.53)\n23. E04B (Best EMA: 50.04)\n24. G01D (Best EMA: 47.29)\n25. C21D (Best EMA: 45.55)\n26. H02G (Best EMA: 45.10)\n27. E02D (Best EMA: 43.42)\n28. G01L (Best EMA: 38.42)\n29. C07B (Best EMA: 36.77)\n30. E04G (Best EMA: 36.20)\n31. F16M (Best EMA: 34.07)\n32. A24F (Best EMA: 34.02)\n33. B02C (Best EMA: 33.32)\n34. C01G (Best EMA: 30.43)\n35. B22D (Best EMA: 30.06)\n36. A61G (Best EMA: 29.15)\n37. G01K (Best EMA: 27.90)\n38. C22B (Best EMA: 24.10)\n39. H03H (Best EMA: 23.27)\n40. E01C (Best EMA: 22.60)\n41. A62C (Best EMA: 20.92)\n42. H02B (Best EMA: 20.73)\n43. B07B (Best EMA: 20.62)\n44. B66F (Best EMA: 20.52)\n45. G16B (Best EMA: 20.11)\n46. B60P (Best EMA: 18.62)\n47. G01P (Best EMA: 18.34)\n48. E01D (Best EMA: 17.62)\n49. B21B (Best EMA: 17.25)\n50. A23P (Best EMA: 16.69)\n51. B21C (Best EMA: 14.85)\n52. E03F (Best EMA: 14.14)\n53. E21F (Best EMA: 13.86)\n54. B09B (Best EMA: 13.62)\n55. G01H (Best EMA: 12.91)\n56. H04S (Best EMA: 12.44)\n57. E03B (Best EMA: 11.78)\n58. C01F (Best EMA: 11.23)\n59. B03C (Best EMA: 10.60)\n60. C21C (Best EMA: 10.50)\n61. F02K (Best EMA: 10.49)\n62. G16Y (Best EMA: 9.96)\n63. E03D (Best EMA: 9.23)\n64. C21B (Best EMA: 8.04)\n65. B09C (Best EMA: 7.73)\n66. C01D (Best EMA: 7.47)\n67. G21F (Best EMA: 6.96)\n68. F16N (Best EMA: 6.50)\n69. A23J (Best EMA: 6.25)\n70. F25J (Best EMA: 6.10)\n71. B04B (Best EMA: 6.05)\n72. B63C (Best EMA: 5.96)\n73. B27M (Best EMA: 5.05)\n74. F23N (Best EMA: 4.89)\n75. B63G (Best EMA: 4.86)\n76. B60D (Best EMA: 4.80)\n77. D06H (Best EMA: 3.88)\n78. B27G (Best EMA: 3.82)\n79. B25D (Best EMA: 3.78)\n80. F04F (Best EMA: 3.73)\n81. A41H (Best EMA: 3.59)\n82. B27C (Best EMA: 3.10)\n83. G04F (Best EMA: 2.82)\n84. F41C (Best EMA: 2.74)\n85. F42C (Best EMA: 2.23)\n86. G21G (Best EMA: 1.69)\n87. B21H (Best EMA: 1.64)\n88. D03J (Best EMA: 1.47)\n89. A44D (Best EMA: 1.42)"
+},
+{
+"id": "patents/1",
+"run": 4,
+"answer": "The CPC group codes at level 5 whose highest exponential moving average (smoothing factor 0.2) of patent filings peaks in 2022 are:\n\n1. Y02E (Highest EMA: 868.07)\n2. G06Q (Highest EMA: 414.95)\n3. G06T (Highest EMA: 313.94)\n4. Y02T (Highest EMA: 311.57)\n5. G06N (Highest EMA: 280.29)\n6. H01M (Highest EMA: 239.78)\n7. G06V (Highest EMA: 228.66)\n8. Y02B (Highest EMA: 208.57)\n9. H02J (Highest EMA: 160.97)\n10. G01S (Highest EMA: 139.85)\n11. B65G (Highest EMA: 101.97)\n12. G16H (Highest EMA: 101.37)\n13. B60L (Highest EMA: 90.19)\n14. B08B (Highest EMA: 81.12)\n15. G08B (Highest EMA: 77.35)\n16. G10L (Highest EMA: 73.63)\n17. B33Y (Highest EMA: 59.37)\n18. G09F (Highest EMA: 56.95)\n19. Y04S (Highest EMA: 56.62)\n20. C01P (Highest EMA: 54.75)\n21. B22F (Highest EMA: 50.65)\n22. B05B (Highest EMA: 50.53)\n23. E04B (Highest EMA: 50.04)\n24. G01D (Highest EMA: 47.29)\n25. C21D (Highest EMA: 45.55)\n26. H02G (Highest EMA: 45.10)\n27. E02D (Highest EMA: 43.42)\n28. G01L (Highest EMA: 38.42)\n29. C07B (Highest EMA: 36.77)\n30. E04G (Highest EMA: 36.20)\n31. F16M (Highest EMA: 34.07)\n32. A24F (Highest EMA: 34.02)\n33. B02C (Highest EMA: 33.32)\n34. C01G (Highest EMA: 30.43)\n35. B22D (Highest EMA: 30.06)\n36. A61G (Highest EMA: 29.15)\n37. G01K (Highest EMA: 27.90)\n38. C22B (Highest EMA: 24.10)\n39. H03H (Highest EMA: 23.27)\n40. E01C (Highest EMA: 22.60)\n41. A62C (Highest EMA: 20.92)\n42. H02B (Highest EMA: 20.73)\n43. B07B (Highest EMA: 20.62)\n44. B66F (Highest EMA: 20.52)\n45. G16B (Highest EMA: 20.11)\n46. B60P (Highest EMA: 18.62)\n47. G01P (Highest EMA: 18.34)\n48. E01D (Highest EMA: 17.62)\n49. B21B (Highest EMA: 17.25)\n50. A23P (Highest EMA: 16.69)\n51. B21C (Highest EMA: 14.85)\n52. E03F (Highest EMA: 14.14)\n53. E21F (Highest EMA: 13.86)\n54. B09B (Highest EMA: 13.62)\n55. G01H (Highest EMA: 12.91)\n56. H04S (Highest EMA: 12.44)\n57. E03B (Highest EMA: 11.78)\n58. C01F (Highest EMA: 11.23)\n59. B03C (Highest EMA: 10.60)\n60. C21C (Highest EMA: 10.50)\n61. F02K (Highest EMA: 10.49)\n62. G16Y (Highest EMA: 9.90)\n63. E03D (Highest EMA: 9.23)\n64. C21B (Highest EMA: 8.04)\n65. B09C (Highest EMA: 7.73)\n66. C01D (Highest EMA: 7.47)\n67. G21F (Highest EMA: 6.96)\n68. F16N (Highest EMA: 6.50)\n69. A23J (Highest EMA: 6.25)\n70. F25J (Highest EMA: 6.10)\n71. B04B (Highest EMA: 6.05)\n72. B63C (Highest EMA: 5.96)\n73. B27M (Highest EMA: 5.05)\n74. F23N (Highest EMA: 4.89)\n75. B63G (Highest EMA: 4.86)\n76. B60D (Highest EMA: 4.80)\n77. D06H (Highest EMA: 3.88)\n78. B27G (Highest EMA: 3.82)\n79. B25D (Highest EMA: 3.78)\n80. F04F (Highest EMA: 3.73)\n81. A41H (Highest EMA: 3.59)\n82. B27C (Highest EMA: 3.10)\n83. G04F (Highest EMA: 2.82)\n84. F41C (Highest EMA: 2.74)\n85. F42C (Highest EMA: 2.23)\n86. G21G (Highest EMA: 1.69)\n87. B21H (Highest EMA: 1.64)\n88. D03J (Highest EMA: 1.47)\n89. A44D (Highest EMA: 1.42)\n90. G06J (Highest EMA: 0.59)\n91. A63K (Highest EMA: 0.57)\n92. F17B (Highest EMA: 0.27)"
+},
+{
+"id": "patents/2",
+"run": 0,
+"answer": "For patents granted in the second half of 2019 (July–December) in Germany (country code DE), the CPC technology areas at level 4 ranked by highest exponential moving average (EMA) of patent filings per year (smoothing factor α = 0.1) are:\n\n1. **A61** – MEDICAL OR VETERINARY SCIENCE; HYGIENE | Best Year: 2016 | Highest EMA: 3.0\n2. **H04** – ELECTRIC COMMUNICATION TECHNIQUE | Best Year: 2015 | Highest EMA: 2.0\n3. **A43** – FOOTWEAR | Best Year: 2016 | Highest EMA: 1.0\n4. **B23** – MACHINE TOOLS; METAL-WORKING NOT OTHERWISE PROVIDED FOR | Best Year: 2015 | Highest EMA: 1.0\n5. **B29** – WORKING OF PLASTICS; WORKING OF SUBSTANCES IN A PLASTIC STATE IN GENERAL | Best Year: 2007 | Highest EMA: 1.0\n6. **B41** – PRINTING; LINING MACHINES; TYPEWRITERS; STAMPS | Best Year: 2007 | Highest EMA: 1.0\n7. **B60** – VEHICLES IN GENERAL | Best Year: 2009 | Highest EMA: 1.0\n8. **B64** – AIRCRAFT; AVIATION; COSMONAUTICS | Best Year: 2018 | Highest EMA: 1.0\n9. **E02** – HYDRAULIC ENGINEERING; FOUNDATIONS; SOIL SHIFTING | Best Year: 2012 | Highest EMA: 1.0\n10. **E05** – LOCKS; KEYS; WINDOW OR DOOR FITTINGS; SAFES | Best Year: 2012 | Highest EMA: 1.0\n11. **F01** – MACHINES OR ENGINES IN GENERAL; ENGINE PLANTS IN GENERAL; STEAM ENGINES | Best Year: 2018 | Highest EMA: 1.0\n12. **F02** – COMBUSTION ENGINES; HOT-GAS OR COMBUSTION-PRODUCT ENGINE PLANTS | Best Year: 2010 | Highest EMA: 1.0\n13. **F04** – POSITIVE - DISPLACEMENT MACHINES FOR LIQUIDS; PUMPS FOR LIQUIDS OR ELASTIC FLUIDS | Best Year: 2014 | Highest EMA: 1.0\n14. **F05** – INDEXING SCHEMES RELATING TO ENGINES OR PUMPS IN VARIOUS SUBCLASSES OF CLASSES F01-F04 | Best Year: 2018 | Highest EMA: 1.0\n15. **F16** – ENGINEERING ELEMENTS AND UNITS; GENERAL MEASURES FOR PRODUCING AND MAINTAINING EFFECTIVE FUNCTIONING OF MACHINES OR INSTALLATIONS; THERMAL INSULATION IN GENERAL | Best Year: 2009 | Highest EMA: 1.0\n16. **F23** – COMBUSTION APPARATUS; COMBUSTION PROCESSES | Best Year: 2018 | Highest EMA: 1.0\n17. **F24** – HEATING; RANGES; VENTILATING | Best Year: 2018 | Highest EMA: 1.0\n18. **F41** – WEAPONS | Best Year: 2012 | Highest EMA: 1.0\n19. **F42** – AMMUNITION; BLASTING | Best Year: 2012 | Highest EMA: 1.0\n20. **G01** – MEASURING; TESTING | Best Year: 2008 | Highest EMA: 1.0\n21. **G02** – OPTICS | Best Year: 2016 | Highest EMA: 1.0\n22. **G07** – CHECKING-DEVICES | Best Year: 2012 | Highest EMA: 1.0\n23. **G08** – SIGNALLING | Best Year: 2017 | Highest EMA: 1.0\n24. **H01** – ELECTRIC ELEMENTS | Best Year: 2011 | Highest EMA: 1.0\n25. **H02** – GENERATION; CONVERSION OR DISTRIBUTION OF ELECTRIC POWER | Best Year: 2009 | Highest EMA: 1.0\n26. **H03** – ELECTRONIC CIRCUITRY | Best Year: 2015 | Highest EMA: 1.0\n27. **Y02** – TECHNOLOGIES OR APPLICATIONS FOR MITIGATION OR ADAPTATION AGAINST CLIMATE CHANGE | Best Year: 2013 | Highest EMA: 1.0\n28. **Y10** – TECHNICAL SUBJECTS COVERED BY FORMER USPC | Best Year: 2012 | Highest EMA: 1.0\n\nThe CPC group with the highest EMA is **A61 (MEDICAL OR VETERINARY SCIENCE; HYGIENE)** with an EMA of 3.0, peaking in 2016, followed by **H04 (ELECTRIC COMMUNICATION TECHNIQUE)** with an EMA of 2.0, peaking in 2015."
+},
+{
+"id": "patents/2",
+"run": 1,
+"answer": "For German (DE) patents granted in the second half of 2019, the CPC technology areas (at level 4) ranked by their highest exponential moving average (EMA, smoothing factor α = 0.1) of patent filings per year are:\n\n1. **A61** – MEDICAL OR VETERINARY SCIENCE; HYGIENE | Highest EMA: 3.0 | Best Year: 2016\n2. **H04** – ELECTRIC COMMUNICATION TECHNIQUE | Highest EMA: 2.0 | Best Year: 2015\n3. **B41** – PRINTING; LINING MACHINES; TYPEWRITERS; STAMPS | Highest EMA: 1.0 | Best Year: 2007\n4. **F02** – COMBUSTION ENGINES; HOT-GAS OR COMBUSTION-PRODUCT ENGINE PLANTS | Highest EMA: 1.0 | Best Year: 2010\n5. **F04** – POSITIVE - DISPLACEMENT MACHINES FOR LIQUIDS; PUMPS FOR LIQUIDS OR ELASTIC FLUIDS | Highest EMA: 1.0 | Best Year: 2014\n6. **G01** – MEASURING; TESTING | Highest EMA: 1.0 | Best Year: 2008\n7. **B23** – MACHINE TOOLS; METAL-WORKING NOT OTHERWISE PROVIDED FOR | Highest EMA: 1.0 | Best Year: 2015\n8. **B63** – SHIPS OR OTHER WATERBORNE VESSELS; RELATED EQUIPMENT | Highest EMA: 1.0 | Best Year: 2014\n9. **Y02** – TECHNOLOGIES OR APPLICATIONS FOR MITIGATION OR ADAPTATION AGAINST CLIMATE CHANGE | Highest EMA: 1.0 | Best Year: 2013\n10. **B66** – HOISTING; LIFTING; HAULING | Highest EMA: 1.0 | Best Year: 2016\n11. **E02** – HYDRAULIC ENGINEERING; FOUNDATIONS; SOIL SHIFTING | Highest EMA: 1.0 | Best Year: 2012\n12. **B60** – VEHICLES IN GENERAL | Highest EMA: 1.0 | Best Year: 2009\n13. **F16** – ENGINEERING ELEMENTS AND UNITS; GENERAL MEASURES FOR PRODUCING AND MAINTAINING EFFECTIVE FUNCTIONING OF MACHINES OR INSTALLATIONS; THERMAL INSULATION IN GENERAL | Highest EMA: 1.0 | Best Year: 2009\n14. **A47** – FURNITURE; DOMESTIC ARTICLES OR APPLIANCES; COFFEE MILLS; SPICE MILLS; SUCTION CLEANERS IN GENERAL | Highest EMA: 1.0 | Best Year: 2015\n15. **A21** – BAKING; EDIBLE DOUGHS | Highest EMA: 1.0 | Best Year: 2015\n16. **A43** – FOOTWEAR | Highest EMA: 1.0 | Best Year: 2016\n17. **F24** – HEATING; RANGES; VENTILATING | Highest EMA: 1.0 | Best Year: 2018\n18. **F23** – COMBUSTION APPARATUS; COMBUSTION PROCESSES | Highest EMA: 1.0 | Best Year: 2018\n19. **H01** – ELECTRIC ELEMENTS | Highest EMA: 1.0 | Best Year: 2008\n20. **F05** – INDEXING SCHEMES RELATING TO ENGINES OR PUMPS IN VARIOUS SUBCLASSES OF CLASSES F01-F04 | Highest EMA: 1.0 | Best Year: 2018\n\nThe CPC group with the highest EMA is **A61 (MEDICAL OR VETERINARY SCIENCE; HYGIENE)** with an EMA of 3.0, peaking in filing year 2016. The second highest is **H04 (ELECTRIC COMMUNICATION TECHNIQUE)** with an EMA of 2.0, peaking in 2015. The remaining CPC groups all share the same highest EMA of 1.0."
+},
+{
+"id": "patents/2",
+"run": 2,
+"answer": "For patents from Germany (DE) granted in the second half of 2019, the CPC technology areas (level 4) ranked by their highest exponential moving average (EMA, smoothing factor 0.1) of patent filings per year are:\n\n1. A61 – MEDICAL OR VETERINARY SCIENCE; HYGIENE | Highest EMA: 3.0 | Best Year: 2016\n2. H04 – ELECTRIC COMMUNICATION TECHNIQUE | Highest EMA: 2.0 | Best Year: 2015\n3. F04 – POSITIVE - DISPLACEMENT MACHINES FOR LIQUIDS; PUMPS FOR LIQUIDS OR ELASTIC FLUIDS | Highest EMA: 1.0 | Best Year: 2013\n4. E21 – EARTH OR ROCK DRILLING; MINING | Highest EMA: 1.0 | Best Year: 2013\n5. F01 – MACHINES OR ENGINES IN GENERAL; ENGINE PLANTS IN GENERAL; STEAM ENGINES | Highest EMA: 1.0 | Best Year: 2013\n6. B41 – PRINTING; LINING MACHINES; TYPEWRITERS; STAMPS | Highest EMA: 1.0 | Best Year: 2007\n7. F02 – COMBUSTION ENGINES; HOT-GAS OR COMBUSTION-PRODUCT ENGINE PLANTS | Highest EMA: 1.0 | Best Year: 2010\n8. B23 – MACHINE TOOLS; METAL-WORKING NOT OTHERWISE PROVIDED FOR | Highest EMA: 1.0 | Best Year: 2015\n9. G01 – MEASURING; TESTING | Highest EMA: 1.0 | Best Year: 2008\n10. B63 – SHIPS OR OTHER WATERBORNE VESSELS; RELATED EQUIPMENT | Highest EMA: 1.0 | Best Year: 2014\n11. Y02 – TECHNOLOGIES OR APPLICATIONS FOR MITIGATION OR ADAPTATION AGAINST CLIMATE CHANGE | Highest EMA: 1.0 | Best Year: 2013\n12. B60 – VEHICLES IN GENERAL | Highest EMA: 1.0 | Best Year: 2009\n13. E02 – HYDRAULIC ENGINEERING; FOUNDATIONS; SOIL SHIFTING | Highest EMA: 1.0 | Best Year: 2012\n14. B66 – HOISTING; LIFTING; HAULING | Highest EMA: 1.0 | Best Year: 2016\n15. F16 – ENGINEERING ELEMENTS AND UNITS; GENERAL MEASURES FOR PRODUCING AND MAINTAINING EFFECTIVE FUNCTIONING OF MACHINES OR INSTALLATIONS; THERMAL INSULATION IN GENERAL | Highest EMA: 1.0 | Best Year: 2009\n16. A21 – BAKING; EDIBLE DOUGHS | Highest EMA: 1.0 | Best Year: 2015\n17. A47 – FURNITURE; DOMESTIC ARTICLES OR APPLIANCES; COFFEE MILLS; SPICE MILLS; SUCTION CLEANERS IN GENERAL | Highest EMA: 1.0 | Best Year: 2015\n18. A43 – FOOTWEAR | Highest EMA: 1.0 | Best Year: 2016\n19. F24 – HEATING; RANGES; VENTILATING | Highest EMA: 1.0 | Best Year: 2018\n20. F23 – COMBUSTION APPARATUS; COMBUSTION PROCESSES | Highest EMA: 1.0 | Best Year: 2018\n21. H01 – ELECTRIC ELEMENTS | Highest EMA: 1.0 | Best Year: 2008\n22. F05 – INDEXING SCHEMES RELATING TO ENGINES OR PUMPS IN VARIOUS SUBCLASSES OF CLASSES F01-F04 | Highest EMA: 1.0 | Best Year: 2018\n23. B64 – AIRCRAFT; AVIATION; COSMONAUTICS | Highest EMA: 1.0 | Best Year: 2018\n24. B62 – LAND VEHICLES FOR TRAVELLING OTHERWISE THAN ON RAILS | Highest EMA: 1.0 | Best Year: 2010\n25. C09 – DYES; PAINTS; POLISHES; NATURAL RESINS; ADHESIVES; COMPOSITIONS NOT OTHERWISE PROVIDED FOR; APPLICATIONS OF MATERIALS NOT OTHERWISE PROVIDED FOR | Highest EMA: 1.0 | Best Year: 2015\n26. C04 – CEMENTS; CONCRETE; ARTIFICIAL STONE; CERAMICS; REFRACTORIES | Highest EMA: 1.0 | Best Year: 2015\n27. B29 – WORKING OF PLASTICS; WORKING OF SUBSTANCES IN A PLASTIC STATE IN GENERAL | Highest EMA: 1.0 | Best Year: 2007\n28. G02 – OPTICS | Highest EMA: 1.0 | Best Year: 2016\n29. E05 – LOCKS; KEYS; WINDOW OR DOOR FITTINGS; SAFES | Highest EMA: 1.0 | Best Year: 2012\n30. Y10 – TECHNICAL SUBJECTS COVERED BY FORMER USPC | Highest EMA: 1.0 | Best Year: 2012\n31. G07 – CHECKING-DEVICES | Highest EMA: 1.0 | Best Year: 2012\n32. A24 – TOBACCO; CIGARS; CIGARETTES; SIMULATED SMOKING DEVICES; SMOKERS' REQUISITES | Highest EMA: 1.0 | Best Year: 2018\n33. H02 – GENERATION; CONVERSION OR DISTRIBUTION OF ELECTRIC POWER | Highest EMA: 1.0 | Best Year: 2009\n34. H03 – ELECTRONIC CIRCUITRY | Highest EMA: 1.0 | Best Year: 2015\n35. F41 – WEAPONS | Highest EMA: 1.0 | Best Year: 2012\n36. F42 – AMMUNITION; BLASTING | Highest EMA: 1.0 | Best Year: 2012\n37. G08 – SIGNALLING | Highest EMA: 1.0 | Best Year: 2017\n\nThe top CPC technology area is A61 (MEDICAL OR VETERINARY SCIENCE; HYGIENE) with the highest EMA of 3.0, peaking in 2016, followed by H04 (ELECTRIC COMMUNICATION TECHNIQUE) with an EMA of 2.0, peaking in 2015. The remaining 35 CPC groups all have a peak EMA of 1.0."
+},
+{
+"id": "patents/2",
+"run": 3,
+"answer": "For patents granted in the second half of 2019 in Germany (DE), the CPC technology areas at level 4 ranked by the highest exponential moving average (EMA, smoothing factor 0.1) of patent filings per year are:\n\n1. **A61** – MEDICAL OR VETERINARY SCIENCE; HYGIENE | Highest EMA: 3.0 | Best Year: 2016\n\n2. B41 – PRINTING; LINING MACHINES; TYPEWRITERS; STAMPS | Highest EMA: 1.0 | Best Year: 2007\n3. F02 – COMBUSTION ENGINES; HOT-GAS OR COMBUSTION-PRODUCT ENGINE PLANTS | Highest EMA: 1.0 | Best Year: 2010\n4. F04 – POSITIVE - DISPLACEMENT MACHINES FOR LIQUIDS; PUMPS FOR LIQUIDS OR ELASTIC FLUIDS | Highest EMA: 1.0 | Best Year: 2014\n5. B23 – MACHINE TOOLS; METAL-WORKING NOT OTHERWISE PROVIDED FOR | Highest EMA: 1.0 | Best Year: 2015\n6. G01 – MEASURING; TESTING | Highest EMA: 1.0 | Best Year: 2008\n7. B63 – SHIPS OR OTHER WATERBORNE VESSELS; RELATED EQUIPMENT | Highest EMA: 1.0 | Best Year: 2014\n8. H04 – ELECTRIC COMMUNICATION TECHNIQUE | Highest EMA: 1.0 | Best Year: 2015\n9. Y02 – TECHNOLOGIES OR APPLICATIONS FOR MITIGATION OR ADAPTATION AGAINST CLIMATE CHANGE | Highest EMA: 1.0 | Best Year: 2013\n10. E02 – HYDRAULIC ENGINEERING; FOUNDATIONS; SOIL SHIFTING | Highest EMA: 1.0 | Best Year: 2012\n11. B60 – VEHICLES IN GENERAL | Highest EMA: 1.0 | Best Year: 2013\n12. B66 – HOISTING; LIFTING; HAULING | Highest EMA: 1.0 | Best Year: 2016\n13. A21 – BAKING; EDIBLE DOUGHS | Highest EMA: 1.0 | Best Year: 2015\n14. A47 – FURNITURE; DOMESTIC ARTICLES OR APPLIANCES; COFFEE MILLS; SPICE MILLS; SUCTION CLEANERS IN GENERAL | Highest EMA: 1.0 | Best Year: 2015\n15. A43 – FOOTWEAR | Highest EMA: 1.0 | Best Year: 2016\n16. F23 – COMBUSTION APPARATUS; COMBUSTION PROCESSES | Highest EMA: 1.0 | Best Year: 2018\n17. F24 – HEATING; RANGES; VENTILATING | Highest EMA: 1.0 | Best Year: 2018\n18. H01 – ELECTRIC ELEMENTS | Highest EMA: 1.0 | Best Year: 2011\n19. B64 – AIRCRAFT; AVIATION; COSMONAUTICS | Highest EMA: 1.0 | Best Year: 2018\n20. C04 – CEMENTS; CONCRETE; ARTIFICIAL STONE; CERAMICS; REFRACTORIES | Highest EMA: 1.0 | Best Year: 2015\n21. C09 – DYES; PAINTS; POLISHES; NATURAL RESINS; ADHESIVES; COMPOSITIONS NOT OTHERWISE PROVIDED FOR; APPLICATIONS OF MATERIALS NOT OTHERWISE PROVIDED FOR | Highest EMA: 1.0 | Best Year: 2015\n22. B29 – WORKING OF PLASTICS; WORKING OF SUBSTANCES IN A PLASTIC STATE IN GENERAL | Highest EMA: 1.0 | Best Year: 2007\n23. G02 – OPTICS | Highest EMA: 1.0 | Best Year: 2016\n24. G07 – CHECKING-DEVICES | Highest EMA: 1.0 | Best Year: 2012\n25. E05 – LOCKS; KEYS; WINDOW OR DOOR FITTINGS; SAFES | Highest EMA: 1.0 | Best Year: 2012\n26. Y10 – TECHNICAL SUBJECTS COVERED BY FORMER USPC | Highest EMA: 1.0 | Best Year: 2012\n27. F16 – ENGINEERING ELEMENTS AND UNITS; GENERAL MEASURES FOR PRODUCING AND MAINTAINING EFFECTIVE FUNCTIONING OF MACHINES OR INSTALLATIONS; THERMAL INSULATION IN GENERAL | Highest EMA: 1.0 | Best Year: 2009\n28. H02 – GENERATION; CONVERSION OR DISTRIBUTION OF ELECTRIC POWER | Highest EMA: 1.0 | Best Year: 2009\n29. F42 – AMMUNITION; BLASTING | Highest EMA: 1.0 | Best Year: 2012\n30. F41 – WEAPONS | Highest EMA: 1.0 | Best Year: 2012\n\nThe CPC group with the highest EMA of patent filings is **A61 (MEDICAL OR VETERINARY SCIENCE; HYGIENE)** with an EMA of 3.0 and best year 2016."
+},
+{
+"id": "patents/2",
+"run": 4,
+"answer": "For patents granted in the second half of 2019 in Germany (DE), the CPC technology areas at level 4, ranked by highest exponential moving average (EMA, smoothing factor α=0.1) of patent filings per year, are:\n\n1. F02 – \"COMBUSTION ENGINES; HOT-GAS OR COMBUSTION-PRODUCT ENGINE PLANTS\" | Highest EMA: 0.4095 | Best Year: 2018\n2. Y02 – \"TECHNOLOGIES OR APPLICATIONS FOR MITIGATION OR ADAPTATION AGAINST CLIMATE CHANGE\" | Highest EMA: 0.3710 | Best Year: 2018\n3. H01 – \"ELECTRIC ELEMENTS\" | Highest EMA: 0.3439 | Best Year: 2018\n4. A61 – \"MEDICAL OR VETERINARY SCIENCE; HYGIENE\" | Highest EMA: 0.3000 | Best Year: 2016\n5. G01 – \"MEASURING; TESTING\" | Highest EMA: 0.2710 | Best Year: 2016\n6. B60 – \"VEHICLES IN GENERAL\" | Highest EMA: 0.2710 | Best Year: 2018\n7. E02 – \"HYDRAULIC ENGINEERING; FOUNDATIONS; SOIL SHIFTING\" | Highest EMA: 0.1900 | Best Year: 2016\n8. B29 – \"WORKING OF PLASTICS; WORKING OF SUBSTANCES IN A PLASTIC STATE IN GENERAL\" | Highest EMA: 0.1900 | Best Year: 2012\n9. B41 – \"PRINTING; LINING MACHINES; TYPEWRITERS; STAMPS\" | Highest EMA: 0.1000 | Best Year: 2007\n10. F04 – \"POSITIVE - DISPLACEMENT MACHINES FOR LIQUIDS; PUMPS FOR LIQUIDS OR ELASTIC FLUIDS\" | Highest EMA: 0.1000 | Best Year: 2014\n\nThe CPC group with the highest EMA is F02 (Combustion Engines; Hot-Gas or Combustion-Product Engine Plants) with a peak EMA of ~0.41 in 2018."
+},
+{
+"id": "patents/3",
+"run": 0,
+"answer": "The following assignees (excluding UNIV CALIFORNIA) have cited patents assigned to UNIV CALIFORNIA, along with the full titles of the primary CPC subclasses associated with those citations:\n\n1. CALIFORNIA INST OF TECHN — CPC Subclass: G01V — \"GEOPHYSICS; GRAVITATIONAL MEASUREMENTS; DETECTING MASSES OR OBJECTS; TAGS\"\n\n2. CRYSTAL IS INC — CPC Subclass: C30B — \"SINGLE-CRYSTAL GROWTH; UNIDIRECTIONAL SOLIDIFICATION OF EUTECTIC MATERIAL OR UNIDIRECTIONAL DEMIXING OF EUTECTOID MATERIAL; REFINING BY ZONE-MELTING OF MATERIAL; PRODUCTION OF A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; SINGLE CRYSTALS OR HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; AFTER-TREATMENT OF SINGLE CRYSTALS OR A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; APPARATUS THEREFOR\"\n\n3. SCHOWALTER LEO J — CPC Subclass: H01L — \"SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10\""
+},
+{
+"id": "patents/3",
+"run": 1,
+"answer": "The following assignees (excluding UNIV CALIFORNIA) have cited patents assigned to UNIV CALIFORNIA, along with the titles of the primary CPC subclasses associated with these citations:\n\n1. CALIFORNIA INST OF TECHN — CPC Subclass G01V: \"GEOPHYSICS; GRAVITATIONAL MEASUREMENTS; DETECTING MASSES OR OBJECTS; TAGS\"\n\n2. CRYSTAL IS INC — CPC Subclass C30B: \"SINGLE-CRYSTAL GROWTH; UNIDIRECTIONAL SOLIDIFICATION OF EUTECTIC MATERIAL OR UNIDIRECTIONAL DEMIXING OF EUTECTOID MATERIAL; REFINING BY ZONE-MELTING OF MATERIAL; PRODUCTION OF A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; SINGLE CRYSTALS OR HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; AFTER-TREATMENT OF SINGLE CRYSTALS OR A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; APPARATUS THEREFOR\"\n\n3. SCHOWALTER LEO J — CPC Subclass H01L: \"SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10\""
+},
+{
+"id": "patents/3",
+"run": 2,
+"answer": "The following assignees (excluding UNIV CALIFORNIA itself) have cited patents assigned to UNIV CALIFORNIA, along with the titles of the primary CPC subclasses associated with these citations:\n\n1. **CALIFORNIA INST OF TECHN**\n   - CPC Subclass: G01V\n   - Title: GEOPHYSICS; GRAVITATIONAL MEASUREMENTS; DETECTING MASSES OR OBJECTS; TAGS\n\n2. **BLOOM ENERGY CORP**\n   - CPC Subclass: H01M\n   - Title: PROCESSES OR MEANS, e.g. BATTERIES, FOR THE DIRECT CONVERSION OF CHEMICAL ENERGY INTO ELECTRICAL ENERGY\n\n3. **CRYSTAL IS INC**\n   - CPC Subclass: C30B\n   - Title: SINGLE-CRYSTAL GROWTH; UNIDIRECTIONAL SOLIDIFICATION OF EUTECTIC MATERIAL OR UNIDIRECTIONAL DEMIXING OF EUTECTOID MATERIAL; REFINING BY ZONE-MELTING OF MATERIAL; PRODUCTION OF A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; SINGLE CRYSTALS OR HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; AFTER-TREATMENT OF SINGLE CRYSTALS OR A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; APPARATUS THEREFOR"
+},
+{
+"id": "patents/3",
+"run": 3,
+"answer": "The following assignees (excluding UNIV CALIFORNIA) have cited patents assigned to UNIV CALIFORNIA, along with the titles of their primary CPC subclasses:\n\n1. CALIFORNIA INST OF TECHN — CPC Subclass G01V: \"GEOPHYSICS; GRAVITATIONAL MEASUREMENTS; DETECTING MASSES OR OBJECTS; TAGS\"\n\n2. BLOOM ENERGY CORP — CPC Subclass H01M: \"PROCESSES OR MEANS, e.g. BATTERIES, FOR THE DIRECT CONVERSION OF CHEMICAL ENERGY INTO ELECTRICAL ENERGY\"\n\n3. CRYSTAL IS INC — CPC Subclass C30B: \"SINGLE-CRYSTAL GROWTH; UNIDIRECTIONAL SOLIDIFICATION OF EUTECTIC MATERIAL OR UNIDIRECTIONAL DEMIXING OF EUTECTOID MATERIAL; REFINING BY ZONE-MELTING OF MATERIAL; PRODUCTION OF A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; SINGLE CRYSTALS OR HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; AFTER-TREATMENT OF SINGLE CRYSTALS OR A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; APPARATUS THEREFOR\"\n\n4. SCHOWALTER LEO J — CPC Subclass H01L: \"SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10\""
+},
+{
+"id": "patents/3",
+"run": 4,
+"answer": "The following assignees (excluding UNIV CALIFORNIA itself) have cited patents assigned to UNIV CALIFORNIA, along with the CPC subclass titles associated with their primary CPC codes:\n\n1. CALIFORNIA INST OF TECHN — CPC Subclass G01V: \"GEOPHYSICS; GRAVITATIONAL MEASUREMENTS; DETECTING MASSES OR OBJECTS; TAGS\"\n\n2. BLOOM ENERGY CORP — CPC Subclass H01M: \"PROCESSES OR MEANS, e.g. BATTERIES, FOR THE DIRECT CONVERSION OF CHEMICAL ENERGY INTO ELECTRICAL ENERGY\"\n\n3. CRYSTAL IS INC — CPC Subclass C30B: \"SINGLE-CRYSTAL GROWTH; UNIDIRECTIONAL SOLIDIFICATION OF EUTECTIC MATERIAL OR UNIDIRECTIONAL DEMIXING OF EUTECTOID MATERIAL; REFINING BY ZONE-MELTING OF MATERIAL; PRODUCTION OF A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; SINGLE CRYSTALS OR HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; AFTER-TREATMENT OF SINGLE CRYSTALS OR A HOMOGENEOUS POLYCRYSTALLINE MATERIAL WITH DEFINED STRUCTURE; APPARATUS THEREFOR\"\n\n4. SCHOWALTER LEO J — CPC Subclass H01L: \"SEMICONDUCTOR DEVICES NOT COVERED BY CLASS H10\""
+},
+{
+"id": "stockindex/1",
+"run": 0,
+"answer": "The stock index in the Asia region with the highest average intraday volatility since 2020 is 399001.SZ (Shenzhen Stock Exchange, China), with an average intraday volatility of approximately 0.0202 (2.02%). This is computed as the average of (High - Low) / Open across all trading days from 2020 onward."
+},
+{
+"id": "stockindex/1",
+"run": 1,
+"answer": "The stock index in the Asia region with the highest average intraday volatility since 2020 is **399001.SZ** (Shenzhen Stock Exchange Composite Index), with an average intraday volatility of approximately **0.0202** (or about 2.02%). This is computed as the average of (High - Low) / Open across all trading days from 2020 onward."
+},
+{
+"id": "stockindex/1",
+"run": 2,
+"answer": "The stock index in the Asia region with the highest average intraday volatility since 2020 is **399001.SZ** (Shenzhen Stock Exchange Composite Index), with an average intraday volatility of approximately 0.0202 (or about 2.02%). This is calculated as the average of (High - Low) / Open for each trading day from 2020 onward."
+},
+{
+"id": "stockindex/1",
+"run": 3,
+"answer": "The stock index in the Asia region with the highest average intraday volatility since 2020 is **399001.SZ** (Shenzhen Stock Exchange Composite Index), with an average intraday volatility of approximately **0.0202 (2.02%)**. This is calculated as the average of (High - Low) / Open for each trading day from 2020 onward."
+},
+{
+"id": "stockindex/1",
+"run": 4,
+"answer": "The stock index in the Asia region with the highest average intraday volatility since 2020 is **399001.SZ** (Shenzhen Component Index, tracking the Shenzhen Stock Exchange in China), with an average intraday volatility of approximately 0.0202 (or about 2.02%). This is computed as the average of (High - Low) / Open across all trading days since January 1, 2020."
+},
+{
+"id": "stockindex/2",
+"run": 0,
+"answer": "Among North American stock indices, the following had more up days than down days in 2018:\n\n1. GSPTSE (Toronto Stock Exchange) — 44 up days vs. 41 down days\n2. IXIC (NASDAQ) — 44 up days vs. 31 down days\n\nThe NYA (New York Stock Exchange) did not qualify, as it had 37 up days versus 42 down days."
+},
+{
+"id": "stockindex/2",
+"run": 1,
+"answer": "Among North American stock indices, the following had more up days than down days in 2018:\n\n1. GSPTSE (Toronto Stock Exchange) — 44 up days vs. 41 down days\n2. IXIC (NASDAQ) — 44 up days vs. 31 down days\n\nThe NYA (New York Stock Exchange) did not qualify, as it had 37 up days vs. 42 down days."
+},
+{
+"id": "stockindex/2",
+"run": 2,
+"answer": "Among North American stock indices, the following had more up days than down days in 2018:\n\n1. GSPTSE (Toronto Stock Exchange) — 44 up days vs. 41 down days\n2. IXIC (NASDAQ) — 44 up days vs. 31 down days\n\nThe NYA (New York Stock Exchange) did not qualify, as it had 37 up days vs. 42 down days."
+},
+{
+"id": "stockindex/2",
+"run": 3,
+"answer": "Among North American stock indices, the following had more up days than down days in 2018:\n\n1. IXIC (NASDAQ) — 44 up days vs. 31 down days\n2. GSPTSE (Toronto Stock Exchange) — 44 up days vs. 41 down days\n\nThe NYA (New York Stock Exchange) did not qualify, as it had 37 up days vs. 42 down days."
+},
+{
+"id": "stockindex/2",
+"run": 4,
+"answer": "Among North American stock indices, the following had more up days than down days in 2018:\n\n1. NASDAQ (IXIC): 44 up days vs. 31 down days\n2. Toronto Stock Exchange (GSPTSE): 44 up days vs. 41 down days\n\nThe New York Stock Exchange (NYA) did not qualify, as it had 37 up days and 42 down days."
+},
+{
+"id": "stockindex/3",
+"run": 0,
+"answer": "If an investor had made regular monthly investments (Dollar Cost Averaging) in all indices since 2000, the 5 indices with the highest overall returns would be:\n\n1. **IXIC (NASDAQ Composite)** – Overall return: 3,922.22% – Country: **United States**\n2. **NYA (NYSE Composite)** – Overall return: 1,126.80% – Country: **United States**\n3. **N225 (Nikkei 225)** – Overall return: 362.42% – Country: **Japan**\n4. **GDAXI (DAX)** – Overall return: 329.00% – Country: **Germany**\n5. **GSPTSE (S&P/TSX Composite)** – Overall return: 296.57% – Country: **Canada**\n\nThe top-performing indices are dominated by the United States (2 out of 5), with Japan, Germany, and Canada rounding out the top five."
+},
+{
+"id": "stockindex/3",
+"run": 1,
+"answer": "If an investor had made regular monthly investments (dollar-cost averaging) in all indices since 2000, the 5 indices that would have produced the highest overall returns are:\n\n1. IXIC (NASDAQ) — United States — 382.67% overall return\n2. NSEI (National Stock Exchange of India) — India — 135.84% overall return\n3. GDAXI (Frankfurt Stock Exchange) — Germany — 134.82% overall return\n4. 399001.SZ (Shenzhen Stock Exchange) — China — 134.79% overall return\n5. TWII (Taiwan Stock Exchange) — Taiwan — 129.66% overall return\n\nThe countries they belong to are: United States, India, Germany, China, and Taiwan."
+},
+{
+"id": "stockindex/3",
+"run": 2,
+"answer": "If an investor had made regular monthly investments (dollar-cost averaging with $1/month in USD terms) in all indices since 2000, the 5 indices that would have produced the highest overall returns are:\n\n1. **IXIC (NASDAQ)** — United States — Overall Return: ~3,922%\n2. **NYA (New York Stock Exchange)** — United States — Overall Return: ~1,127%\n3. **N225 (Tokyo Stock Exchange / Nikkei 225)** — Japan — Overall Return: ~362%\n4. **GDAXI (Frankfurt Stock Exchange / DAX)** — Germany — Overall Return: ~329%\n5. **GSPTSE (Toronto Stock Exchange)** — Canada — Overall Return: ~297%\n\nThe top two indices are both from the United States, followed by Japan, Germany, and Canada."
+},
+{
+"id": "stockindex/3",
+"run": 3,
+"answer": "If an investor had made regular monthly investments (Dollar Cost Averaging) in all indices since 2000, the 5 indices with the highest overall returns would be:\n\n1. IXIC (NASDAQ) — United States — 3,922.22% return\n2. NYA (New York Stock Exchange) — United States — 1,126.80% return\n3. N225 (Tokyo Stock Exchange) — Japan — 362.42% return\n4. GDAXI (Frankfurt Stock Exchange) — Germany — 329.00% return\n5. GSPTSE (Toronto Stock Exchange) — Canada — 296.57% return\n\nThe top two indices both belong to the United States, followed by Japan, Germany, and Canada."
+},
+{
+"id": "stockindex/3",
+"run": 4,
+"answer": "If an investor had made regular monthly $1 investments (dollar-cost averaging using USD-equivalent prices) in all indices since 2000, the 5 indices producing the highest overall returns would be:\n\n1. **IXIC (NASDAQ)** — United States — ~3,922% total return\n2. **NYA (New York Stock Exchange)** — United States — ~1,127% total return\n3. **N225 (Tokyo Stock Exchange)** — Japan — ~362% total return\n4. **GDAXI (Frankfurt Stock Exchange)** — Germany — ~329% total return\n5. **GSPTSE (Toronto Stock Exchange)** — Canada — ~297% total return\n\nThe countries they belong to are: United States (2 indices), Japan, Germany, and Canada."
+},
+{
+"id": "stockmarket/1",
+"run": 0,
+"answer": "The maximum adjusted closing price for The RealReal, Inc. (ticker: REAL) in 2020 was $18.44."
+},
+{
+"id": "stockmarket/1",
+"run": 1,
+"answer": "The maximum adjusted closing price for The RealReal, Inc. (ticker: REAL) in 2020 was $18.44."
+},
+{
+"id": "stockmarket/1",
+"run": 2,
+"answer": "The maximum adjusted closing price for The RealReal, Inc. (ticker: REAL) in 2020 was $18.44."
+},
+{
+"id": "stockmarket/1",
+"run": 3,
+"answer": "The maximum adjusted closing price in 2020 for The RealReal, Inc. (ticker: REAL) was $18.44."
+},
+{
+"id": "stockmarket/1",
+"run": 4,
+"answer": "The maximum adjusted closing price in 2020 for The RealReal, Inc. (ticker: REAL) was $18.44."
+},
+{
+"id": "stockmarket/2",
+"run": 0,
+"answer": "There are 29 ETF securities listed on NYSE Arca that reached an adjusted closing price above $200 at any point during 2015. Here is the complete list:\n\n1. BOIL – Max Adj Close: $382.20\n2. BZQ – Max Adj Close: $462.78\n3. CEZ – Max Adj Close: $549.71\n4. CSB – Max Adj Close: $288.03\n5. DUST – Max Adj Close: $1,923.28\n6. EDZ – Max Adj Close: $302.01\n7. ERX – Max Adj Close: $645.16\n8. FAZ – Max Adj Close: $288.54\n9. FXP – Max Adj Close: $206.00\n10. GUSH – Max Adj Close: $78,699.22\n11. JDST – Max Adj Close: $12,988.41\n12. JNUG – Max Adj Close: $451.07\n13. JPN – Max Adj Close: $201.52\n14. LABD – Max Adj Close: $624.08\n15. LABU – Max Adj Close: $230.28\n16. MDY – Max Adj Close: $263.77\n17. PTIN – Max Adj Close: $843.53\n18. RTL – Max Adj Close: $13,306.76\n19. SDOW – Max Adj Close: $415.17\n20. SOXS – Max Adj Close: $3,886.62\n21. SSG – Max Adj Close: $263.87\n22. TECS – Max Adj Close: $253.30\n23. TZA – Max Adj Close: $272.63\n24. UVXY – Max Adj Close: $81,500.00\n25. VIXY – Max Adj Close: $491.00\n26. VPC – Max Adj Close: $2,250.14\n27. XES – Max Adj Close: $278.55\n28. XOP – Max Adj Close: $208.74\n29. YANG – Max Adj Close: $347.35\n\nTotal number of such ETFs: 29"
+},
+{
+"id": "stockmarket/2",
+"run": 1,
+"answer": "ETF securities listed on NYSE Arca that reached an adjusted closing price above $200 at any point during 2015:\n\n1. BOIL – ProShares Ultra Bloomberg Natural Gas\n2. BZQ – ProShares UltraShort MSCI Brazil Capped\n3. DUST – Direxion Daily Gold Miners Index Bear 2X Shares\n4. EDZ – Direxion Emerging Markets Bear 3X Shares\n5. ERX – Direxion Energy Bull 2X Shares\n6. FAZ – Direxion Financial Bear 3X Shares\n7. FXP – ProShares Ultrashort FTSE China 50\n8. GFIN – Goldman Sachs Motif Finance Reimagined ETF\n9. GUSH – Direxion Daily S&P Oil & Gas Exp. & Prod. Bull 2X Shares\n10. JDST – Direxion Daily Junior Gold Miners Index Bear 2X Shares\n11. JNUG – Direxion Daily Junior Gold Miners Index Bull 2X Shares\n12. LABD – Direxion Daily S&P Biotech Bear 3X Shares\n13. LABU – Direxion Daily S&P Biotech Bull 3X Shares\n14. MDY – SPDR MidCap Trust Series I\n15. SOXS – Direxion Daily Semiconductor Bear 3x Shares\n16. TZA – Direxion Small Cap Bear 3X Shares\n17. UVXY – ProShares Trust Ultra VIX Short Term Futures ETF\n18. VIXY – ProShares Trust VIX Short-Term Futures ETF\n19. XOP – SPDR S&P Oil & Gas Exploration & Production\n20. YANG – Direxion Daily FTSE China Bear 3x Shares\n\nTotal number of such ETFs: 20"
+},
+{
+"id": "stockmarket/2",
+"run": 2,
+"answer": ""
+},
+{
+"id": "stockmarket/2",
+"run": 3,
+"answer": ""
+},
+{
+"id": "stockmarket/2",
+"run": 4,
+"answer": ""
+},
+{
+"id": "stockmarket/3",
+"run": 0,
+"answer": "The following NASDAQ-listed companies were financially troubled (deficient, delinquent, or both) and had trading volume data in 2008, along with their average daily trading volume:\n\n1. Apex Global Brands Inc. (APEX) - Avg Daily Volume: 23,781.42\n2. BIO-key International, Inc. (BKYI) - Avg Daily Volume: 10,988.14\n3. CBAK Energy Technology, Inc. (CBAT) - Avg Daily Volume: 86,223.32\n4. China Ceramics Co., Ltd. (CCCL) - Avg Daily Volume: 4,366.80\n5. Correvio Pharma Corp. (CORV) - Avg Daily Volume: 145,247.83\n6. CounterPath Corporation (CPAH) - Avg Daily Volume: 375.49\n7. DASAN Zhone Solutions, Inc. (DZSI) - Avg Daily Volume: 15,578.66\n8. Future FinTech Group Inc. (FTFT) - Avg Daily Volume: 9.85\n9. Frontier Communications Corporation (FTR) - Avg Daily Volume: 254,397.63\n10. Ideanomics, Inc. (IDEX) - Avg Daily Volume: 10.28\n11. Ocean Power Technologies, Inc. (OPTT) - Avg Daily Volume: 254.15\n12. Pacific Ethanol, Inc. (PEIX) - Avg Daily Volume: 10,706.72\n13. Synthesis Energy Systems, Inc. (SES) - Avg Daily Volume: 2,390.51 (Financial Status: H - Deficient and Delinquent)\n14. Sunesis Pharmaceuticals, Inc. (SNSS) - Avg Daily Volume: 781.82\n15. Sypris Solutions, Inc. (SYPR) - Avg Daily Volume: 36,836.36"
+},
+{
+"id": "stockmarket/3",
+"run": 1,
+"answer": "Below are all NASDAQ-listed companies that are financially troubled (deficient, delinquent, or both) and have trading volume data in 2008, along with their average daily trading volume in 2008:\n\n1. Apex Global Brands Inc. (APEX) — Avg Daily Volume: 23,781.42\n2. BIO-key International, Inc. (BKYI) — Avg Daily Volume: 10,988.14\n3. CBAK Energy Technology, Inc. (CBAT) — Avg Daily Volume: 86,223.32\n4. China Ceramics Co., Ltd. (CCCL) — Avg Daily Volume: 4,366.80\n5. Correvio Pharma Corp. (CORV) — Avg Daily Volume: 145,247.83\n6. CounterPath Corporation (CPAH) — Avg Daily Volume: 375.49\n7. DASAN Zhone Solutions, Inc. (DZSI) — Avg Daily Volume: 15,578.66\n8. Future FinTech Group Inc. (FTFT) — Avg Daily Volume: 9.85\n9. Frontier Communications Corporation (FTR) — Avg Daily Volume: 254,397.63\n10. Ideanomics, Inc. (IDEX) — Avg Daily Volume: 10.28\n11. Ocean Power Technologies, Inc. (OPTT) — Avg Daily Volume: 254.15\n12. Pacific Ethanol, Inc. (PEIX) — Avg Daily Volume: 10,706.72\n13. Synthesis Energy Systems, Inc. (SES) — Avg Daily Volume: 2,390.51\n14. Sunesis Pharmaceuticals, Inc. (SNSS) — Avg Daily Volume: 781.82\n15. Sypris Solutions, Inc. (SYPR) — Avg Daily Volume: 36,836.36"
+},
+{
+"id": "stockmarket/3",
+"run": 2,
+"answer": "Below are all NASDAQ-listed companies that were financially troubled (deficient, delinquent, or both) and had non-null trading volume in 2008, along with their average daily trading volume:\n\n1. Apex Global Brands Inc. (APEX) — Avg Daily Volume: 23,781.42\n2. BIO-key International, Inc. (BKYI) — Avg Daily Volume: 10,988.14\n3. CBAK Energy Technology, Inc. (CBAT) — Avg Daily Volume: 86,223.32\n4. China Ceramics Co., Ltd. (CCCL) — Avg Daily Volume: 4,366.80\n5. Correvio Pharma Corp. (CORV) — Avg Daily Volume: 145,247.83\n6. CounterPath Corporation (CPAH) — Avg Daily Volume: 375.49\n7. DASAN Zhone Solutions, Inc. (DZSI) — Avg Daily Volume: 15,578.66\n8. Future FinTech Group Inc. (FTFT) — Avg Daily Volume: 9.85\n9. Frontier Communications Corporation (FTR) — Avg Daily Volume: 254,397.63\n10. Ideanomics, Inc. (IDEX) — Avg Daily Volume: 10.28\n11. Ocean Power Technologies, Inc. (OPTT) — Avg Daily Volume: 254.15\n12. Pacific Ethanol, Inc. (PEIX) — Avg Daily Volume: 10,706.72\n13. Synthesis Energy Systems, Inc. (SES) — Avg Daily Volume: 2,390.51\n14. Sunesis Pharmaceuticals, Inc. (SNSS) — Avg Daily Volume: 781.82\n15. Sypris Solutions, Inc. (SYPR) — Avg Daily Volume: 36,836.36"
+},
+{
+"id": "stockmarket/3",
+"run": 3,
+"answer": "The following NASDAQ-listed companies were financially troubled (deficient, delinquent, or both) and had trading volume in 2008, along with their average daily trading volume:\n\n1. Apex Global Brands Inc. (APEX) — Avg Daily Volume: 23,781.42\n2. BIO-key International, Inc. (BKYI) — Avg Daily Volume: 11,209.68\n3. CBAK Energy Technology, Inc. (CBAT) — Avg Daily Volume: 86,223.32\n4. China Ceramics Co., Ltd. (CCCL) — Avg Daily Volume: 11,159.60\n5. Correvio Pharma Corp. (CORV) — Avg Daily Volume: 145,247.83\n6. CounterPath Corporation (CPAH) — Avg Daily Volume: 625.00\n7. DASAN Zhone Solutions, Inc. (DZSI) — Avg Daily Volume: 15,578.66\n8. Future FinTech Group Inc. (FTFT) — Avg Daily Volume: 66.16\n9. Frontier Communications Corporation (FTR) — Avg Daily Volume: 254,397.63\n10. Ideanomics, Inc. (IDEX) — Avg Daily Volume: 216.67\n11. Ocean Power Technologies, Inc. (OPTT) — Avg Daily Volume: 299.07\n12. Pacific Ethanol, Inc. (PEIX) — Avg Daily Volume: 10,706.72\n13. Synthesis Energy Systems, Inc. (SES) — Avg Daily Volume: 2,520.00\n14. Sunesis Pharmaceuticals, Inc. (SNSS) — Avg Daily Volume: 933.02\n15. Sypris Solutions, Inc. (SYPR) — Avg Daily Volume: 36,836.36"
+},
+{
+"id": "stockmarket/3",
+"run": 4,
+"answer": "Here are all NASDAQ-listed, financially troubled (deficient, delinquent, or both) companies with trading volume in 2008, along with their average daily trading volume:\n\n1. Apex Global Brands Inc. (APEX) — Avg Daily Volume: 23,781.42\n2. BIO-key International, Inc. (BKYI) — Avg Daily Volume: 10,988.14\n3. CBAK Energy Technology, Inc. (CBAT) — Avg Daily Volume: 86,223.32\n4. China Ceramics Co., Ltd. (CCCL) — Avg Daily Volume: 4,366.80\n5. Correvio Pharma Corp. (CORV) — Avg Daily Volume: 145,247.83\n6. CounterPath Corporation (CPAH) — Avg Daily Volume: 375.49\n7. DASAN Zhone Solutions, Inc. (DZSI) — Avg Daily Volume: 15,578.66\n8. Future FinTech Group Inc. (FTFT) — Avg Daily Volume: 9.85\n9. Frontier Communications Corporation (FTR) — Avg Daily Volume: 254,397.63\n10. Ideanomics, Inc. (IDEX) — Avg Daily Volume: 10.28\n11. Ocean Power Technologies, Inc. (OPTT) — Avg Daily Volume: 254.15\n12. Pacific Ethanol, Inc. (PEIX) — Avg Daily Volume: 10,706.72\n13. Synthesis Energy Systems, Inc. (SES) — Avg Daily Volume: 2,390.51\n14. Sunesis Pharmaceuticals, Inc. (SNSS) — Avg Daily Volume: 781.82\n15. Sypris Solutions, Inc. (SYPR) — Avg Daily Volume: 36,836.36"
+},
+{
+"id": "stockmarket/4",
+"run": 0,
+"answer": "The top 5 non-ETF stocks listed on the NYSE that had more up days than down days in 2017, ranked by the difference (up days minus down days), are:\n\n1. MFA Financial, Inc. (MFO) — 139 up days, 67 down days (difference: 72)\n2. Argo Group International Holdings, Ltd. (ARGD) — 133 up days, 82 down days (difference: 51)\n3. HDFC Bank Limited (HDB) — 146 up days, 102 down days (difference: 44)\n4. Albany International Corporation (AIN) — 143 up days, 101 down days (difference: 42)\n5. DTE Energy Company (DTQ) — 139 up days, 98 down days (difference: 41)"
+},
+{
+"id": "stockmarket/4",
+"run": 1,
+"answer": "The top 5 non-ETF stocks listed on the NYSE that had the most up days exceeding down days in 2017 are:\n\n1. MFA Financial, Inc. (MFO) — 139 up days vs. 67 down days (difference: 72)\n2. Argo Group International Holdings, Ltd. (ARGD) — 133 up days vs. 82 down days (difference: 51)\n3. HDFC Bank Limited (HDB) — 146 up days vs. 102 down days (difference: 44)\n4. Albany International Corporation (AIN) — 143 up days vs. 101 down days (difference: 42)\n5. DTE Energy Company (DTQ) — 139 up days vs. 98 down days (difference: 41)"
+},
+{
+"id": "stockmarket/4",
+"run": 2,
+"answer": "The top 5 non-ETF stocks listed on the NYSE that had more up days than down days in 2017, ranked by the difference (up days minus down days), are:\n\n1. MFA Financial, Inc. (MFO) — 139 up days, 67 down days (net +72)\n2. Argo Group International Holdings, Ltd. (ARGD) — 133 up days, 82 down days (net +51)\n3. HDFC Bank Limited (HDB) — 146 up days, 102 down days (net +44)\n4. Albany International Corporation (AIN) — 143 up days, 101 down days (net +42)\n5. Getty Realty Corporation (GTY) — 143 up days, 104 down days (net +39)"
+},
+{
+"id": "stockmarket/4",
+"run": 3,
+"answer": "The top 5 non-ETF stocks listed on the NYSE that had the most up days exceeding down days in 2017 are:\n\n1. MFA Financial, Inc. (MFO) — 139 up days vs 67 down days (difference: 72)\n2. Argo Group International Holdings, Ltd. (ARGD) — 133 up days vs 82 down days (difference: 51)\n3. HDFC Bank Limited (HDB) — 146 up days vs 102 down days (difference: 44)\n4. Albany International Corporation (AIN) — 143 up days vs 101 down days (difference: 42)\n5. DTE Energy Company (DTQ) — 139 up days vs 98 down days (difference: 41)"
+},
+{
+"id": "stockmarket/4",
+"run": 4,
+"answer": "The top 5 non-ETF stocks listed on the NYSE that had more up days than down days in 2017, ranked by the difference (up days minus down days), are:\n\n1. MFA Financial, Inc. (MFO) — 139 up days, 67 down days\n2. Argo Group International Holdings, Ltd. (ARGD) — 133 up days, 82 down days\n3. HDFC Bank Limited (HDB) — 146 up days, 102 down days\n4. Albany International Corporation (AIN) — 143 up days, 101 down days\n5. DTE Energy Company (DTQ) — 139 up days, 98 down days"
+},
+{
+"id": "stockmarket/5",
+"run": 0,
+"answer": "The 5 companies listed on the NASDAQ Capital Market with the highest number of days in 2019 where the intraday price range exceeded 20% of the low price are:\n\n1. Synthesis Energy Systems, Inc. (SES) — 51 days\n2. TD Holdings, Inc. (GLG) — 42 days\n3. TMSR Holding Company Limited (TMSR) — 40 days\n4. Verb Technology Company, Inc. (VERB) — 38 days\n5. Sunesis Pharmaceuticals, Inc. (SNSS) — 32 days"
+},
+{
+"id": "stockmarket/5",
+"run": 1,
+"answer": "The 5 companies listed on the NASDAQ Capital Market with the highest number of days in 2019 where the intraday price range exceeded 20% of the low price are:\n\n1. Synthesis Energy Systems, Inc. (SES) — 51 days\n2. TD Holdings, Inc. (GLG) — 42 days\n3. TMSR Holding Company Limited (TMSR) — 40 days\n4. Verb Technology Company, Inc. (VERB) — 38 days\n5. Sunesis Pharmaceuticals, Inc. (SNSS) — 32 days"
+},
+{
+"id": "stockmarket/5",
+"run": 2,
+"answer": "The 5 companies listed on the NASDAQ Capital Market with the highest number of days in 2019 where the intraday price range exceeded 20% of the low price are:\n\n1. Synthesis Energy Systems, Inc. (SES) — 51 days\n2. TD Holdings, Inc. (GLG) — 42 days\n3. TMSR Holding Company Limited (TMSR) — 40 days\n4. Verb Technology Company, Inc. (VERB) — 38 days\n5. Sunesis Pharmaceuticals, Inc. (SNSS) — 32 days"
+},
+{
+"id": "stockmarket/5",
+"run": 3,
+"answer": "The 5 companies listed on the NASDAQ Capital Market with the highest number of days in 2019 where the intraday price range exceeded 20% of the low price are:\n\n1. Synthesis Energy Systems, Inc. (SES) — 51 days\n2. TD Holdings, Inc. (GLG) — 42 days\n3. TMSR Holding Company Limited (TMSR) — 40 days\n4. Verb Technology Company, Inc. (VERB) — 38 days\n5. Sunesis Pharmaceuticals, Inc. (SNSS) — 32 days"
+},
+{
+"id": "stockmarket/5",
+"run": 4,
+"answer": "The 5 companies listed on the NASDAQ Capital Market with the highest number of days in 2019 where the intraday price range exceeded 20% of the low price are:\n\n1. Synthesis Energy Systems, Inc. (SES) – 51 days\n2. TD Holdings, Inc. (GLG) – 42 days\n3. TMSR Holding Company Limited (TMSR) – 40 days\n4. Verb Technology Company, Inc. (VERB) – 38 days\n5. Sunesis Pharmaceuticals, Inc. (SNSS) – 32 days"
+},
+{
+"id": "yelp/1",
+"run": 0,
+"answer": "The average rating of all businesses located in Indianapolis, Indiana is approximately 3.55 (out of 5)."
+},
+{
+"id": "yelp/1",
+"run": 1,
+"answer": "The average rating of all businesses located in Indianapolis, Indiana is approximately 3.55 (out of 5)."
+},
+{
+"id": "yelp/1",
+"run": 2,
+"answer": "The average rating of all businesses located in Indianapolis, Indiana is approximately 3.55 (out of 5)."
+},
+{
+"id": "yelp/1",
+"run": 3,
+"answer": "The average rating of all businesses located in Indianapolis, Indiana is approximately 3.86 (out of 5)."
+},
+{
+"id": "yelp/1",
+"run": 4,
+"answer": "The average rating of all businesses located in Indianapolis, Indiana is approximately 3.86 (out of 5)."
+},
+{
+"id": "yelp/2",
+"run": 0,
+"answer": "Pennsylvania (PA) has the highest number of reviews among U.S. states, with 617 reviews. The average rating of businesses in Pennsylvania is approximately 3.76 (out of 5)."
+},
+{
+"id": "yelp/2",
+"run": 1,
+"answer": "Pennsylvania (PA) has the highest number of reviews with 662 reviews. The average rating of businesses in Pennsylvania is 3.70."
+},
+{
+"id": "yelp/2",
+"run": 2,
+"answer": "Pennsylvania (PA) has the highest number of reviews with 662 reviews, and the average rating of businesses in that state is 3.70."
+},
+{
+"id": "yelp/2",
+"run": 3,
+"answer": "The U.S. state with the highest number of reviews is **Pennsylvania (PA)**, with **662 reviews** and an **average rating of 3.70** (out of 5)."
+},
+{
+"id": "yelp/2",
+"run": 4,
+"answer": "The U.S. state with the highest number of reviews is Pennsylvania (PA), with 662 reviews. The average rating of businesses in Pennsylvania is 3.70 (out of 5)."
+},
+{
+"id": "yelp/3",
+"run": 0,
+"answer": "21"
+},
+{
+"id": "yelp/3",
+"run": 1,
+"answer": "21"
+},
+{
+"id": "yelp/3",
+"run": 2,
+"answer": "3"
+},
+{
+"id": "yelp/3",
+"run": 3,
+"answer": "35"
+},
+{
+"id": "yelp/3",
+"run": 4,
+"answer": "35"
+},
+{
+"id": "yelp/4",
+"run": 0,
+"answer": "The business category with the largest number of businesses that accept credit card payments is **Restaurants**, with 20 businesses. The average rating for these businesses is **3.53**."
+},
+{
+"id": "yelp/4",
+"run": 1,
+"answer": "The business category with the largest number of businesses that accept credit card payments is **Restaurants**, with **23** businesses. Its average rating is **3.40**."
+},
+{
+"id": "yelp/4",
+"run": 2,
+"answer": "The business category with the largest number of businesses that accept credit card payments is **Restaurants**, with **22** businesses. The average rating for these businesses is **3.61** (out of 5)."
+},
+{
+"id": "yelp/4",
+"run": 3,
+"answer": "The business category with the largest number of businesses that accept credit card payments is **Restaurants**, with 20 businesses. The average rating for these businesses is **3.57**."
+},
+{
+"id": "yelp/4",
+"run": 4,
+"answer": "The business category with the largest number of businesses that accept credit card payments is **Restaurants**, with 27 businesses. The average rating of reviews for these Restaurant businesses is approximately **3.63**."
+},
+{
+"id": "yelp/5",
+"run": 0,
+"answer": "Pennsylvania (PA) has the highest number of businesses that offer WiFi, with 8 such businesses. The average rating for those businesses is 3.48 (out of 5)."
+},
+{
+"id": "yelp/5",
+"run": 1,
+"answer": "Pennsylvania (PA) has the highest number of businesses that offer WiFi, with 8 such businesses. The average rating for those businesses is approximately 3.48 (out of 5)."
+},
+{
+"id": "yelp/5",
+"run": 2,
+"answer": "Pennsylvania (PA) has the highest number of businesses that offer WiFi, with 8 such businesses. The average rating for those businesses is approximately 3.48 (out of 5)."
+},
+{
+"id": "yelp/5",
+"run": 3,
+"answer": "Pennsylvania (PA) has the highest number of businesses that offer WiFi, with 8 such businesses. The average rating for those businesses is approximately 3.48 (out of 5)."
+},
+{
+"id": "yelp/5",
+"run": 4,
+"answer": "Pennsylvania (PA) has the highest number of businesses that offer WiFi, with 8 such businesses. The average rating for those businesses is approximately 3.48."
+},
+{
+"id": "yelp/6",
+"run": 0,
+"answer": "The business that received the highest average rating between January 1, 2016 and June 30, 2016 (with at least 5 reviews) is **Coffee House Too Cafe**, with an average rating of **4.0** based on 5 reviews. It belongs to the categories: **Restaurants, Breakfast & Brunch, American (New), Cafes**."
+},
+{
+"id": "yelp/6",
+"run": 1,
+"answer": "The business that received the highest average rating between January 1, 2016 and June 30, 2016 (with at least 5 reviews) is **Coffee House Too Cafe**, with an average rating of **4.0** based on 5 reviews. It belongs to the categories: **Restaurants, Breakfast & Brunch, American (New), Cafes**."
+},
+{
+"id": "yelp/6",
+"run": 2,
+"answer": "The business that received the highest average rating between January 1, 2016 and June 30, 2016 (with at least 5 reviews) is **Coffee House Too Cafe**, with an average rating of **4.0** based on 5 reviews. It belongs to the categories: **Restaurants, Breakfast & Brunch, American (New), Cafes**."
+},
+{
+"id": "yelp/6",
+"run": 3,
+"answer": "The business that received the highest average rating between January 1, 2016 and June 30, 2016 (with at least 5 reviews) is **Coffee House Too Cafe**, with an average rating of **4.0** based on 5 reviews. It belongs to the categories: **Restaurants, Breakfast & Brunch, American (New), Cafes**."
+},
+{
+"id": "yelp/6",
+"run": 4,
+"answer": "The business that received the highest average rating between January 1, 2016 and June 30, 2016 (with at least 5 reviews) is **Coffee House Too Cafe**, with an average rating of **4.0** based on 5 reviews. It belongs to the categories: **Restaurants, Breakfast & Brunch, American (New), Cafes**."
+},
+{
+"id": "yelp/7",
+"run": 0,
+"answer": "Among users who registered on Yelp in 2016, the 5 business categories that received the most total reviews from those users since 2016 are:\n\n1. Restaurants — 50 total reviews\n2. Food — 34 total reviews\n3. American (New) — 24 total reviews\n4. Shopping — 20 total reviews\n5. Breakfast & Brunch — 19 total reviews"
+},
+{
+"id": "yelp/7",
+"run": 1,
+"answer": "Among users who registered on Yelp in 2016, the 5 business categories that received the most total reviews from those users since 2016 are:\n\n1. Restaurants — 44 reviews\n2. Food — 29 reviews\n3. American (New) — 23 reviews\n4. Breakfast & Brunch — 19 reviews\n5. Local Services — 17 reviews"
+},
+{
+"id": "yelp/7",
+"run": 2,
+"answer": "Among users who registered on Yelp in 2016, the 5 business categories that received the most total reviews from those users since 2016 are:\n\n1. Restaurants — 58 reviews\n2. Food — 35 reviews\n3. American (New) — 23 reviews\n4. Shopping — 20 reviews\n5. Breakfast & Brunch — 19 reviews"
+},
+{
+"id": "yelp/7",
+"run": 3,
+"answer": "Among users who registered on Yelp in 2016, the 5 business categories that received the most total reviews from those users since 2016 are:\n\n1. Restaurants — 21 reviews\n2. Food — 15 reviews\n3. Shopping — 15 reviews\n4. American (New) — 12 reviews\n5. Bars — 10 reviews"
+},
+{
+"id": "yelp/7",
+"run": 4,
+"answer": "Among users who registered on Yelp in 2016, the 5 business categories that received the most total reviews from those users since 2016 are:\n\n1. Restaurants — 54 reviews\n2. Food — 30 reviews\n3. American (New) — 23 reviews\n4. Shopping — 20 reviews\n5. Breakfast & Brunch — 19 reviews"
+},
+{
+"id": "agnews/1",
+"run": 0,
+"answer": "The Rundown"
+},
+{
+"id": "agnews/1",
+"run": 1,
+"answer": "The Rundown"
+},
+{
+"id": "agnews/1",
+"run": 2,
+"answer": "The Rundown"
+},
+{
+"id": "agnews/1",
+"run": 3,
+"answer": "The Rundown"
+},
+{
+"id": "agnews/1",
+"run": 4,
+"answer": "The Rundown"
+},
+{
+"id": "agnews/2",
+"run": 0,
+"answer": "30 out of 111 articles authored by Amy Jones belong to the Science/Technology category, which is a fraction of approximately 0.2703 (27.03%, or 30/111)."
+},
+{
+"id": "agnews/2",
+"run": 1,
+"answer": "Approximately 0.23 (25 out of 111), meaning about 22.5% of all articles authored by Amy Jones belong to the Science/Technology category."
+},
+{
+"id": "agnews/2",
+"run": 2,
+"answer": "24 out of 111 articles authored by Amy Jones belong to the Science/Technology category, which is a fraction of approximately 24/111 ≈ 0.2162 (about 21.62%)."
+},
+{
+"id": "agnews/2",
+"run": 3,
+"answer": "14/111, which is approximately 0.1261 or about 12.61% of all articles authored by Amy Jones belong to the Science/Technology category."
+},
+{
+"id": "agnews/2",
+"run": 4,
+"answer": "19/111, which is approximately 0.171 (or about 17.1%) of all articles authored by Amy Jones belong to the Science/Technology category."
+},
+{
+"id": "agnews/3",
+"run": 0,
+"answer": "The average number of business articles published per year in Europe from 2010 to 2020 is approximately 536.91 (5,906 total business articles over 11 years)."
+},
+{
+"id": "agnews/3",
+"run": 1,
+"answer": ""
+},
+{
+"id": "agnews/3",
+"run": 2,
+"answer": "The average number of business articles published per year in Europe from 2010 to 2020 is approximately 345.75."
+},
+{
+"id": "agnews/3",
+"run": 3,
+"answer": "The average number of business articles published per year in Europe from 2010 to 2020 (inclusive) is approximately 248.27 articles per year (2,731 total business articles over 11 years)."
+},
+{
+"id": "agnews/3",
+"run": 4,
+"answer": "The average number of business articles published per year in Europe from 2010 to 2020 (inclusive) is approximately 486.09."
+},
+{
+"id": "agnews/4",
+"run": 0,
+"answer": "South America"
+},
+{
+"id": "agnews/4",
+"run": 1,
+"answer": "South America"
+},
+{
+"id": "agnews/4",
+"run": 2,
+"answer": "Africa"
+},
+{
+"id": "agnews/4",
+"run": 3,
+"answer": "South America"
+},
+{
+"id": "agnews/4",
+"run": 4,
+"answer": "South America"
+},
+{
+"id": "music_brainz_20k/1",
+"run": 0,
+"answer": "Apple Music made $601.44 USD in revenue from Beyoncé's song 'Get Me Bodied' in Canada."
+},
+{
+"id": "music_brainz_20k/1",
+"run": 1,
+"answer": "Apple Music made $601.44 USD in revenue from Beyoncé's song 'Get Me Bodied' in Canada."
+},
+{
+"id": "music_brainz_20k/1",
+"run": 2,
+"answer": "Apple Music made $601.44 USD in revenue from Beyoncé's song \"Get Me Bodied\" in Canada."
+},
+{
+"id": "music_brainz_20k/1",
+"run": 3,
+"answer": "Apple Music made $601.44 USD in revenue from Beyoncé's song \"Get Me Bodied\" in Canada."
+},
+{
+"id": "music_brainz_20k/1",
+"run": 4,
+"answer": "Apple Music made $601.44 USD in revenue from Beyoncé's song 'Get Me Bodied' in Canada."
+},
+{
+"id": "music_brainz_20k/2",
+"run": 0,
+"answer": "iTunes earned the most revenue in USD from Brucqe Maginnis' song 'Street Hype' across all countries, with a total of $505.61."
+},
+{
+"id": "music_brainz_20k/2",
+"run": 1,
+"answer": "iTunes earned the most revenue in USD from Brucqe Maginnis' song 'Street Hype' across all countries, with a total of approximately $505.61."
+},
+{
+"id": "music_brainz_20k/2",
+"run": 2,
+"answer": "iTunes earned the most revenue in USD from Brucqe Maginnis' song 'Street Hype' across all countries, with a total of approximately $505.61."
+},
+{
+"id": "music_brainz_20k/2",
+"run": 3,
+"answer": "iTunes earned the most revenue in USD from Brucqe Maginnis' song 'Street Hype' across all countries, with a total of approximately $505.61."
+},
+{
+"id": "music_brainz_20k/2",
+"run": 4,
+"answer": "Amazon Music earned the most revenue in USD from Brucqe Maginnis' song 'Street Hype' across all countries, with a total of $682.23."
+},
+{
+"id": "music_brainz_20k/3",
+"run": 0,
+"answer": "The song that generated the highest total revenue in USD across all stores and countries is \"Zo gaat het leven aan je voor\" by Syb van der Ploeg, with a total revenue of $9,013.69 USD. This song appeared across 5 duplicate track entries (track IDs: 3024, 3435, 12620, 12854, 13225) from different sources, and their combined sales across all stores and countries yielded the highest total revenue."
+},
+{
+"id": "music_brainz_20k/3",
+"run": 1,
+"answer": "The song that generated the highest total revenue in USD across all stores and countries is \"Zo gaat het leven aan je voor\" by Syb van der Ploeg (from the album \"Hillich fjoer | Heilig vuur\"), with a total revenue of $9,013.69 USD."
+},
+{
+"id": "music_brainz_20k/3",
+"run": 2,
+"answer": "The song that generated the highest total revenue in USD across all stores and countries is \"Zo gaat het leven aan je voor\" by Syb van der Ploeg (from the album \"Hillich fjoer | Heilig vuur\"), with a combined total revenue of $9,013.69. This song appeared as 5 duplicate entries across different sources (track IDs: 3024, 3435, 12620, 12854, 13225), and after entity resolution, their revenues were summed to determine the highest-earning song."
+},
+{
+"id": "music_brainz_20k/3",
+"run": 3,
+"answer": "The song that generated the highest total revenue in USD across all stores and countries is \"Zo gaat het leven aan je voor\" by Syb van der Ploeg, with a total revenue of $9,013.69. This song appeared across 5 different track records (track_ids: 3024, 3435, 12620, 12854, 13225) from different sources in the database, and their combined sales across all stores and countries yielded the highest total revenue."
+},
+{
+"id": "music_brainz_20k/3",
+"run": 4,
+"answer": "The song that generated the highest total revenue in USD across all stores and countries is \"Zo gaat het leven aan je voor\" by Syb van der Ploeg, with a total revenue of $9,013.69. This song appeared as 5 duplicate track records across different sources in the database, and after entity resolution (merging duplicates), its combined revenue across all stores and countries was the highest."
+}
+]

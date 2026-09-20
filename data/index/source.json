@@ -1,0 +1,27 @@
+{
+ "repo": "https://github.com/ucbepic/DataAgentBench.git",
+ "commit": "0290945c2b38ccbe1ccec6f4765d078350291129",
+ "paper": "https://arxiv.org/abs/2603.20576",
+ "ingested_at": "2026-09-20T06:07:53Z",
+ "datasets_total": 17,
+ "queries_total": 104,
+ "in_scope": {
+  "datasets": 12,
+  "queries": 54
+ },
+ "deferred": {
+  "datasets": [
+   "civic_unstructured",
+   "cve",
+   "imdb",
+   "krama",
+   "usaspending"
+  ],
+  "queries": 50
+ },
+ "answer_rows": 14480,
+ "answer_rows_unmatched": 0,
+ "warnings": [
+  "github_repos/2: question text differs from docs/data/queries.json"
+ ]
+}
