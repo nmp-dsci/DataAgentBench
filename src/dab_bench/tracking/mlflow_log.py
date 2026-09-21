@@ -122,15 +122,32 @@ def log_run(run_dir: Path, meta: RunMeta, results: list[TrialResult]) -> str:
                 if rate.get("rate") is not None:
                     metrics[f"ds_{ds}_pass_rate"] = float(rate["rate"])
         mlflow.log_metrics(metrics)
+        # per trial: pass, tokens, turns, cost; per query (mean over its trials): the same
         per_trial: dict[str, float] = {}
+        by_query: dict[str, list[TrialResult]] = {}
         for r in results:
-            key = f"q_{r.query_id.replace('/', '_')}_t{r.trial}"
+            q = r.query_id.replace("/", "_")
+            key = f"q_{q}_t{r.trial}"
             if r.passed is not None:
                 per_trial[key] = 1.0 if r.passed else 0.0
-            per_trial[f"tokens_{key}"] = float(
-                r.input_tokens + r.cache_read_tokens + r.cache_creation_tokens + r.output_tokens
-            )
+            per_trial[f"tokens_{key}"] = float(_total_tokens(r))
+            per_trial[f"turns_{key}"] = float(r.n_turns)
             per_trial[f"cost_{key}"] = float(r.cost_usd or 0.0)
+            by_query.setdefault(q, []).append(r)
+        for q, rs in by_query.items():
+            n = len(rs)
+            per_trial[f"query_{q}_tokens"] = sum(_total_tokens(r) for r in rs) / n
+            per_trial[f"query_{q}_input_tokens"] = (
+                sum(r.input_tokens + r.cache_creation_tokens for r in rs) / n
+            )
+            per_trial[f"query_{q}_cache_read_tokens"] = sum(r.cache_read_tokens for r in rs) / n
+            per_trial[f"query_{q}_output_tokens"] = sum(r.output_tokens for r in rs) / n
+            per_trial[f"query_{q}_turns"] = sum(r.n_turns for r in rs) / n
+            per_trial[f"query_{q}_tool_calls"] = sum(r.tool_calls for r in rs) / n
+            per_trial[f"query_{q}_cost_usd"] = sum(r.cost_usd or 0.0 for r in rs) / n
+            scored = [r for r in rs if r.passed is not None]
+            if scored:
+                per_trial[f"query_{q}_pass_rate"] = sum(1 for r in scored if r.passed) / len(scored)
         mlflow.log_metrics(per_trial)
         for name in ("run.json", "results.jsonl"):
             if (run_dir / name).exists():
@@ -139,6 +156,10 @@ def log_run(run_dir: Path, meta: RunMeta, results: list[TrialResult]) -> str:
             if (run_dir / sub).is_dir():
                 mlflow.log_artifacts(str(run_dir / sub), artifact_path=sub)
         return str(run.info.run_id)
+
+
+def _total_tokens(r: TrialResult) -> int:
+    return r.input_tokens + r.cache_read_tokens + r.cache_creation_tokens + r.output_tokens
 
 
 def log_curation(cur: Curation) -> str | None:
