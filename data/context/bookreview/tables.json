@@ -1,0 +1,94 @@
+[
+ {
+  "store": "books_database",
+  "source_table": "books_info",
+  "table": "bookreview_books_info",
+  "rows": 200,
+  "columns": [
+   {
+    "name": "title",
+    "type": "text"
+   },
+   {
+    "name": "subtitle",
+    "type": "text"
+   },
+   {
+    "name": "author",
+    "type": "text"
+   },
+   {
+    "name": "rating_number",
+    "type": "bigint"
+   },
+   {
+    "name": "features",
+    "type": "text"
+   },
+   {
+    "name": "description",
+    "type": "text"
+   },
+   {
+    "name": "price",
+    "type": "double precision"
+   },
+   {
+    "name": "store",
+    "type": "text"
+   },
+   {
+    "name": "categories",
+    "type": "text"
+   },
+   {
+    "name": "details",
+    "type": "text"
+   },
+   {
+    "name": "book_id",
+    "type": "text"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "review_database",
+  "source_table": "review",
+  "table": "bookreview_review",
+  "rows": 1833,
+  "columns": [
+   {
+    "name": "rating",
+    "type": "bigint"
+   },
+   {
+    "name": "title",
+    "type": "character varying"
+   },
+   {
+    "name": "text",
+    "type": "character varying"
+   },
+   {
+    "name": "review_time",
+    "type": "character varying"
+   },
+   {
+    "name": "helpful_vote",
+    "type": "bigint"
+   },
+   {
+    "name": "verified_purchase",
+    "type": "bigint"
+   },
+   {
+    "name": "purchase_id",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ }
+]

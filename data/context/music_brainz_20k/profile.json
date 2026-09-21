@@ -1,0 +1,137 @@
+{
+ "music_brainz_20k_sales": {
+  "sale_id": {
+   "type": "integer",
+   "null_rate": 0.0,
+   "distinct": 58049,
+   "min": "1",
+   "max": "58049"
+  },
+  "track_id": {
+   "type": "integer",
+   "null_rate": 0.0,
+   "distinct": 19375,
+   "min": "1",
+   "max": "19375"
+  },
+  "country": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 5,
+   "top": [
+    [
+     "France",
+     11712
+    ],
+    [
+     "Canada",
+     11684
+    ],
+    [
+     "UK",
+     11589
+    ],
+    [
+     "Germany",
+     11549
+    ],
+    [
+     "USA",
+     11515
+    ]
+   ]
+  },
+  "store": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 5,
+   "top": [
+    [
+     "Google Play",
+     11748
+    ],
+    [
+     "iTunes",
+     11635
+    ],
+    [
+     "Apple Music",
+     11622
+    ],
+    [
+     "Spotify",
+     11549
+    ],
+    [
+     "Amazon Music",
+     11495
+    ]
+   ]
+  },
+  "units_sold": {
+   "type": "integer",
+   "null_rate": 0.0,
+   "distinct": 499,
+   "min": "1",
+   "max": "499"
+  },
+  "revenue_usd": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 37003,
+   "min": "0.99",
+   "max": "641.82"
+  }
+ },
+ "music_brainz_20k_tracks": {
+  "track_id": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 19375,
+   "min": "1",
+   "max": "19375"
+  },
+  "source_id": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 5,
+   "min": "1",
+   "max": "5"
+  },
+  "source_track_id": {
+   "type": "character varying",
+   "null_rate": 0.0059,
+   "distinct": 19208
+  },
+  "title": {
+   "type": "character varying",
+   "null_rate": 0.0035,
+   "distinct": 18967
+  },
+  "artist": {
+   "type": "character varying",
+   "null_rate": 0.2094,
+   "distinct": 8994
+  },
+  "album": {
+   "type": "character varying",
+   "null_rate": 0.1966,
+   "distinct": 11765
+  },
+  "year": {
+   "type": "character varying",
+   "null_rate": 0.3978,
+   "distinct": 378
+  },
+  "length": {
+   "type": "character varying",
+   "null_rate": 0.0543,
+   "distinct": 5935
+  },
+  "language": {
+   "type": "character varying",
+   "null_rate": 0.2313,
+   "distinct": 667
+  }
+ }
+}

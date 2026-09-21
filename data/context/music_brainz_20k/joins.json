@@ -1,0 +1,21 @@
+[
+ {
+  "a": "music_brainz_20k_sales.\"track_id\"",
+  "b": "music_brainz_20k_tracks.\"track_id\"",
+  "raw": {
+   "distinct_a": 19375,
+   "matched": 19375,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 19375,
+   "matched": 19375,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 19375,
+   "matched": 19375,
+   "share": 1.0
+  }
+ }
+]

@@ -1,0 +1,140 @@
+[
+ {
+  "store": "package_database",
+  "source_table": "packageinfo",
+  "table": "deps_dev_v1_packageinfo",
+  "rows": 661372,
+  "columns": [
+   {
+    "name": "System",
+    "type": "character varying"
+   },
+   {
+    "name": "Name",
+    "type": "character varying"
+   },
+   {
+    "name": "Version",
+    "type": "character varying"
+   },
+   {
+    "name": "Licenses",
+    "type": "character varying"
+   },
+   {
+    "name": "Links",
+    "type": "character varying"
+   },
+   {
+    "name": "Advisories",
+    "type": "character varying"
+   },
+   {
+    "name": "VersionInfo",
+    "type": "character varying"
+   },
+   {
+    "name": "Hashes",
+    "type": "character varying"
+   },
+   {
+    "name": "DependenciesProcessed",
+    "type": "bigint"
+   },
+   {
+    "name": "DependencyError",
+    "type": "bigint"
+   },
+   {
+    "name": "UpstreamPublishedAt",
+    "type": "double precision"
+   },
+   {
+    "name": "Registries",
+    "type": "character varying"
+   },
+   {
+    "name": "SLSAProvenance",
+    "type": "double precision"
+   },
+   {
+    "name": "UpstreamIdentifiers",
+    "type": "character varying"
+   },
+   {
+    "name": "Purl",
+    "type": "double precision"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "project_database",
+  "source_table": "project_info",
+  "table": "deps_dev_v1_project_info",
+  "rows": 770,
+  "columns": [
+   {
+    "name": "Project_Information",
+    "type": "character varying"
+   },
+   {
+    "name": "Licenses",
+    "type": "character varying"
+   },
+   {
+    "name": "Description",
+    "type": "character varying"
+   },
+   {
+    "name": "Homepage",
+    "type": "character varying"
+   },
+   {
+    "name": "OSSFuzz",
+    "type": "double precision"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "project_database",
+  "source_table": "project_packageversion",
+  "table": "deps_dev_v1_project_packageversion",
+  "rows": 597602,
+  "columns": [
+   {
+    "name": "System",
+    "type": "character varying"
+   },
+   {
+    "name": "Name",
+    "type": "character varying"
+   },
+   {
+    "name": "Version",
+    "type": "character varying"
+   },
+   {
+    "name": "ProjectType",
+    "type": "character varying"
+   },
+   {
+    "name": "ProjectName",
+    "type": "character varying"
+   },
+   {
+    "name": "RelationProvenance",
+    "type": "character varying"
+   },
+   {
+    "name": "RelationType",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ }
+]

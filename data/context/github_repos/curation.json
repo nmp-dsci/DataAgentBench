@@ -1,0 +1,9 @@
+{
+ "model": "claude-sonnet-5",
+ "n_turns": 1,
+ "duration_ms": 44106,
+ "cost_usd": 0.105861,
+ "input_tokens": 52176,
+ "output_tokens": 4380,
+ "error": null
+}

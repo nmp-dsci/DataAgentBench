@@ -1,0 +1,401 @@
+[
+ {
+  "a": "stockmarket_stocktrade_all.\"Date\"",
+  "b": "stockmarket_cvx.\"Date\"",
+  "raw": {
+   "distinct_a": 10887,
+   "matched": 10887,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 11337,
+   "matched": 11337,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 11156,
+   "matched": 11156,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "stockmarket_stocktrade_all.\"Date\"",
+  "b": "stockmarket_cmi.\"Date\"",
+  "raw": {
+   "distinct_a": 11196,
+   "matched": 10668,
+   "share": 0.9528
+  },
+  "normalised": {
+   "distinct_a": 10610,
+   "matched": 10490,
+   "share": 0.9887
+  },
+  "digits": {
+   "distinct_a": 10629,
+   "matched": 10541,
+   "share": 0.9917
+  }
+ },
+ {
+  "a": "stockmarket_stocktrade_all.\"Open\"",
+  "b": "stockmarket_cvx.\"Open\"",
+  "raw": {
+   "distinct_a": 32972,
+   "matched": 4106,
+   "share": 0.1245
+  },
+  "normalised": {
+   "distinct_a": 33640,
+   "matched": 4110,
+   "share": 0.1222
+  },
+  "digits": {
+   "distinct_a": 33282,
+   "matched": 4061,
+   "share": 0.122
+  }
+ },
+ {
+  "a": "stockmarket_stocktrade_all.\"Open\"",
+  "b": "stockmarket_cmi.\"Open\"",
+  "raw": {
+   "distinct_a": 33040,
+   "matched": 3268,
+   "share": 0.0989
+  },
+  "normalised": {
+   "distinct_a": 32972,
+   "matched": 3399,
+   "share": 0.1031
+  },
+  "digits": {
+   "distinct_a": 33799,
+   "matched": 3253,
+   "share": 0.0962
+  }
+ },
+ {
+  "a": "stockmarket_stocktrade_all.\"High\"",
+  "b": "stockmarket_cvx.\"High\"",
+  "raw": {
+   "distinct_a": 34925,
+   "matched": 4181,
+   "share": 0.1197
+  },
+  "normalised": {
+   "distinct_a": 34610,
+   "matched": 4329,
+   "share": 0.1251
+  },
+  "digits": {
+   "distinct_a": 34294,
+   "matched": 4138,
+   "share": 0.1207
+  }
+ },
+ {
+  "a": "stockmarket_stocktrade_all.\"High\"",
+  "b": "stockmarket_cmi.\"High\"",
+  "raw": {
+   "distinct_a": 34838,
+   "matched": 3356,
+   "share": 0.0963
+  },
+  "normalised": {
+   "distinct_a": 34849,
+   "matched": 3234,
+   "share": 0.0928
+  },
+  "digits": {
+   "distinct_a": 33215,
+   "matched": 3520,
+   "share": 0.106
+  }
+ },
+ {
+  "a": "stockmarket_stocktrade_all.\"Low\"",
+  "b": "stockmarket_cvx.\"Low\"",
+  "raw": {
+   "distinct_a": 34475,
+   "matched": 4120,
+   "share": 0.1195
+  },
+  "normalised": {
+   "distinct_a": 35760,
+   "matched": 4243,
+   "share": 0.1187
+  },
+  "digits": {
+   "distinct_a": 34358,
+   "matched": 4218,
+   "share": 0.1228
+  }
+ },
+ {
+  "a": "stockmarket_stocktrade_all.\"Low\"",
+  "b": "stockmarket_cmi.\"Low\"",
+  "raw": {
+   "distinct_a": 34526,
+   "matched": 3275,
+   "share": 0.0949
+  },
+  "normalised": {
+   "distinct_a": 34271,
+   "matched": 3230,
+   "share": 0.0942
+  },
+  "digits": {
+   "distinct_a": 35472,
+   "matched": 3547,
+   "share": 0.1
+  }
+ },
+ {
+  "a": "stockmarket_stocktrade_all.\"Close\"",
+  "b": "stockmarket_cvx.\"Close\"",
+  "raw": {
+   "distinct_a": 35832,
+   "matched": 4261,
+   "share": 0.1189
+  },
+  "normalised": {
+   "distinct_a": 35841,
+   "matched": 4317,
+   "share": 0.1204
+  },
+  "digits": {
+   "distinct_a": 33695,
+   "matched": 4211,
+   "share": 0.125
+  }
+ },
+ {
+  "a": "stockmarket_stocktrade_all.\"Close\"",
+  "b": "stockmarket_cmi.\"Close\"",
+  "raw": {
+   "distinct_a": 35767,
+   "matched": 3364,
+   "share": 0.0941
+  },
+  "normalised": {
+   "distinct_a": 34852,
+   "matched": 3440,
+   "share": 0.0987
+  },
+  "digits": {
+   "distinct_a": 35221,
+   "matched": 3370,
+   "share": 0.0957
+  }
+ },
+ {
+  "a": "stockmarket_stocktrade_all.\"Adj Close\"",
+  "b": "stockmarket_cvx.\"Adj Close\"",
+  "raw": {
+   "distinct_a": 141081,
+   "matched": 307,
+   "share": 0.0022
+  },
+  "normalised": {
+   "distinct_a": 144311,
+   "matched": 497,
+   "share": 0.0034
+  },
+  "digits": {
+   "distinct_a": 148329,
+   "matched": 547,
+   "share": 0.0037
+  }
+ },
+ {
+  "a": "stockmarket_stocktrade_all.\"Adj Close\"",
+  "b": "stockmarket_cmi.\"Adj Close\"",
+  "raw": {
+   "distinct_a": 151835,
+   "matched": 21,
+   "share": 0.0001
+  },
+  "normalised": {
+   "distinct_a": 149234,
+   "matched": 24,
+   "share": 0.0002
+  },
+  "digits": {
+   "distinct_a": 148506,
+   "matched": 20,
+   "share": 0.0001
+  }
+ },
+ {
+  "a": "stockmarket_stocktrade_all.\"Volume\"",
+  "b": "stockmarket_cvx.\"Volume\"",
+  "raw": {
+   "distinct_a": 29507,
+   "matched": 3569,
+   "share": 0.121
+  },
+  "normalised": {
+   "distinct_a": 29978,
+   "matched": 3643,
+   "share": 0.1215
+  },
+  "digits": {
+   "distinct_a": 30172,
+   "matched": 3470,
+   "share": 0.115
+  }
+ },
+ {
+  "a": "stockmarket_stocktrade_all.\"Volume\"",
+  "b": "stockmarket_cmi.\"Volume\"",
+  "raw": {
+   "distinct_a": 31015,
+   "matched": 3632,
+   "share": 0.1171
+  },
+  "normalised": {
+   "distinct_a": 30727,
+   "matched": 3779,
+   "share": 0.123
+  },
+  "digits": {
+   "distinct_a": 29823,
+   "matched": 3770,
+   "share": 0.1264
+  }
+ },
+ {
+  "a": "stockmarket_cvx.\"Date\"",
+  "b": "stockmarket_cmi.\"Date\"",
+  "raw": {
+   "distinct_a": 14663,
+   "matched": 11884,
+   "share": 0.8105
+  },
+  "normalised": {
+   "distinct_a": 14663,
+   "matched": 11884,
+   "share": 0.8105
+  },
+  "digits": {
+   "distinct_a": 14663,
+   "matched": 11884,
+   "share": 0.8105
+  }
+ },
+ {
+  "a": "stockmarket_cvx.\"Open\"",
+  "b": "stockmarket_cmi.\"Open\"",
+  "raw": {
+   "distinct_a": 5022,
+   "matched": 1231,
+   "share": 0.2451
+  },
+  "normalised": {
+   "distinct_a": 5022,
+   "matched": 1231,
+   "share": 0.2451
+  },
+  "digits": {
+   "distinct_a": 4893,
+   "matched": 1221,
+   "share": 0.2495
+  }
+ },
+ {
+  "a": "stockmarket_cvx.\"High\"",
+  "b": "stockmarket_cmi.\"High\"",
+  "raw": {
+   "distinct_a": 5252,
+   "matched": 1321,
+   "share": 0.2515
+  },
+  "normalised": {
+   "distinct_a": 5252,
+   "matched": 1321,
+   "share": 0.2515
+  },
+  "digits": {
+   "distinct_a": 5112,
+   "matched": 1340,
+   "share": 0.2621
+  }
+ },
+ {
+  "a": "stockmarket_cvx.\"Low\"",
+  "b": "stockmarket_cmi.\"Low\"",
+  "raw": {
+   "distinct_a": 5247,
+   "matched": 1316,
+   "share": 0.2508
+  },
+  "normalised": {
+   "distinct_a": 5247,
+   "matched": 1316,
+   "share": 0.2508
+  },
+  "digits": {
+   "distinct_a": 5114,
+   "matched": 1341,
+   "share": 0.2622
+  }
+ },
+ {
+  "a": "stockmarket_cvx.\"Close\"",
+  "b": "stockmarket_cmi.\"Close\"",
+  "raw": {
+   "distinct_a": 5328,
+   "matched": 1319,
+   "share": 0.2476
+  },
+  "normalised": {
+   "distinct_a": 5328,
+   "matched": 1319,
+   "share": 0.2476
+  },
+  "digits": {
+   "distinct_a": 5202,
+   "matched": 1352,
+   "share": 0.2599
+  }
+ },
+ {
+  "a": "stockmarket_cvx.\"Adj Close\"",
+  "b": "stockmarket_cmi.\"Adj Close\"",
+  "raw": {
+   "distinct_a": 9763,
+   "matched": 1,
+   "share": 0.0001
+  },
+  "normalised": {
+   "distinct_a": 9763,
+   "matched": 1,
+   "share": 0.0001
+  },
+  "digits": {
+   "distinct_a": 9763,
+   "matched": 1,
+   "share": 0.0001
+  }
+ },
+ {
+  "a": "stockmarket_cvx.\"Volume\"",
+  "b": "stockmarket_cmi.\"Volume\"",
+  "raw": {
+   "distinct_a": 9667,
+   "matched": 2045,
+   "share": 0.2115
+  },
+  "normalised": {
+   "distinct_a": 9667,
+   "matched": 2045,
+   "share": 0.2115
+  },
+  "digits": {
+   "distinct_a": 9667,
+   "matched": 2045,
+   "share": 0.2115
+  }
+ }
+]

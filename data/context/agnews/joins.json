@@ -1,0 +1,40 @@
+[
+ {
+  "a": "agnews_articles.\"article_id\"",
+  "b": "agnews_article_metadata.\"article_id\"",
+  "raw": {
+   "distinct_a": 127600,
+   "matched": 127600,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 127600,
+   "matched": 127600,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 127600,
+   "matched": 127600,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "agnews_article_metadata.\"author_id\"",
+  "b": "agnews_authors.\"author_id\"",
+  "raw": {
+   "distinct_a": 994,
+   "matched": 994,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 994,
+   "matched": 994,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 994,
+   "matched": 994,
+   "share": 1.0
+  }
+ }
+]

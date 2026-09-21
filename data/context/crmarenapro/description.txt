@@ -1,0 +1,81 @@
+You are working with six databases to solve this query.
+
+Here are the descriptions of these six databases:
+
+1. core_crm
+   - This database is stored in a SQLite database and contains core CRM data including users, accounts, and contacts from Salesforce CRMArena.
+   - This database consists of three tables:
+    - User: Sales team information
+      - Fields: Id, FirstName, LastName, Email, Phone, Username, Alias, LanguageLocaleKey, EmailEncodingKey, TimeZoneSidKey, LocaleSidKey
+    - Account: Company/customer data
+      - Fields: Id, Name, Phone, Industry, Description, NumberOfEmployees, ShippingState
+    - Contact: Individual contacts
+      - Fields: Id, FirstName, LastName, Email, AccountId
+
+2. sales_pipeline
+   - This database is stored in a DuckDB database and contains sales pipeline data including opportunities, quotes, contracts, and leads.
+   - This database consists of six tables:
+     - Contract: Signed contracts
+      - Fields: Id, AccountId, Status, StartDate, CustomerSignedDate, CompanySignedDate, Description, ContractTerm
+     - Lead: Sales leads
+      - Fields: Id, FirstName, LastName, Email, Phone, Company, Status, ConvertedContactId, ConvertedAccountId, Title, CreatedDate, ConvertedDate, IsConverted, OwnerId
+     - Opportunity: Sales deals
+      - Fields: Id, ContractID__c, AccountId, ContactId, OwnerId, Probability, Amount, StageName, Name, Description, CreatedDate, CloseDate
+     - OpportunityLineItem: Deal line items
+      - Fields: Id, OpportunityId, Product2Id, PricebookEntryId, Quantity, TotalPrice
+     - Quote: Price quotes
+      - Fields: Id, OpportunityId, AccountId, ContactId, Name, Description, Status, CreatedDate, ExpirationDate
+     - QuoteLineItem: Quote details
+      - Fields: Id, QuoteId, OpportunityLineItemId, Product2Id, PricebookEntryId, Quantity, UnitPrice, Discount, TotalPrice
+
+3. support
+   - This database is stored in a PostgreSQL database and contains customer support data including cases, knowledge articles, and communications.
+   - This database consists of six tables:
+     - Case: Support cases
+      - Fields: id, priority, subject, description, status, contactid, createddate, closeddate, orderitemid__c, issueid__c, accountid, ownerid
+     - knowledge__kav: Knowledge articles
+      - Fields: id, title, faq_answer__c, summary, urlname
+     - issue__c: Custom issues
+      - Fields: id, name, description__c
+     - casehistory__c: Case history
+      - Fields: id, caseid__c, oldvalue__c, newvalue__c, createddate, field__c
+     - emailmessage: Email communications
+      - Fields: id, subject, textbody, parentid, fromaddress, toids, messagedate, relatedtoid
+     - livechattranscript: Chat logs
+      - Fields: id, caseid, accountid, ownerid, body, endtime, livechatvisitorid, contactid
+
+4. products_orders
+   - This database is stored in a SQLite database and contains product catalog and order data.
+   - This database consists of seven tables:
+     - ProductCategory: Product categories
+      - Fields: Id, Name, CatalogId
+     - Product2: Product catalog
+      - Fields: Id, Name, Description, IsActive, External_ID__c
+     - ProductCategoryProduct: one of the pricing and mapping tables
+      - Fields: Id, ProductCategoryId, ProductId
+     - Pricebook2: one of the pricing and mapping tables
+      - Fields: Id, Name, Description, IsActive, ValidFrom, ValidTo
+     - PricebookEntry: one of the pricing and mapping tables
+      - Fields: Id, Pricebook2Id, Product2Id, UnitPrice
+     - Order: Customer orders
+      - Fields: Id, AccountId, Status, EffectiveDate, Pricebook2Id, OwnerId
+     - OrderItem: Order details
+      - Fields: Id, OrderId, Product2Id, Quantity, UnitPrice, PriceBookEntryId
+
+5. activities
+   - This database is stored in a DuckDB database and contains activity data including tasks, events, and voice call transcripts.
+   - This database consists of three tables:
+     - Event: Calendar events
+      - Fields: Id, WhatId, OwnerId, StartDateTime, Subject, Description, DurationInMinutes, Location, IsAllDayEvent
+     - Task: Activities and tasks
+      - Fields: Id, WhatId, OwnerId, Priority, Status, ActivityDate, Subject, Description
+     - VoiceCallTranscript__c: Call records
+      - Fields: Id, OpportunityId__c, LeadId__c, Body__c, CreatedDate, EndTime__c
+
+6. territory
+   - This database is stored in a SQLite database and contains sales territory management data.
+   - This database consists of two tables:
+     - Territory2: Sales territories
+      - Fields: Id, Name, Description
+     - UserTerritory2Association: Territory assignments
+      - Id, UserId, Territory2Id

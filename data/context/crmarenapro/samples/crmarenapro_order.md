@@ -1,0 +1,9 @@
+# crmarenapro_order (163 rows) · first 5
+
+| Id | AccountId | Status | EffectiveDate | Pricebook2Id | OwnerId |
+|---|---|---|---|---|---|
+| 801Wt00000PFsjPIAT | 001Wt00000PFttwIAD | Activated | 2023-06-25 | 01sWt000000imiTIAQ | 005Wt000003NJ0EIAW |
+| 801Wt00000PFsjQIAT | #001Wt00000PHVqdIAH | Activated | 2021-09-30 | 01sWt000000imiTIAQ | 005Wt000003NGjwIAG |
+| #801Wt00000PFt7UIAT | 001Wt00000PGzSaIAL | Activated | 2022-09-15 | 01sWt000000imiTIAQ | 005Wt000003NIiUIAW |
+| 801Wt00000PFtAmIAL | 001Wt00000PHVdhIAH | Activated   | 2020-09-01 | 01sWt000000imiTIAQ | 005Wt000003NIljIAG |
+| 801Wt00000PFtAnIAL | #001Wt00000PGaNjIAL | Activated | 2023-06-01 | #01sWt000000imiTIAQ | 005Wt000003NEdJIAW |

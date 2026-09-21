@@ -1,0 +1,22 @@
+- `github_repos_commits.difference_truncated` is always NULL (null_rate 1.0) despite description.txt calling it a boolean indicator — it cannot be used to filter truncated diffs in this dataset.
+- `github_repos_commits.encoding` is NULL for 99.96% of rows; absence of a value does not mean ASCII/UTF-8, just unrecorded.
+- `github_repos_commits.repo_name` has only 6 distinct values total — this table is not a general commit history, it's dominated by torvalds/linux (16,061 of 17,976 rows).
+- `github_repos_repos.repo_name`, `github_repos_languages.repo_name`, `github_repos_licenses.repo_name`, and `github_repos_files.repo_name` overlap only partially with each other (raw shares between 0.024 and 0.50 per joins.md) — a naive inner join across these tables will silently drop most rows.
+- `github_repos_languages.repo_name` ↔ `github_repos_licenses.repo_name` raw overlap is only 0.0601 — joining these two directly loses ~94% of one side.
+- Normalisation (trim/`#`-strip/lower-case) barely improves overlap for most repo_name join pairs (e.g. `licenses`↔`repos` goes from 0.0255 to 0.0254) — case/whitespace is not the main mismatch cause.
+- Digits-only share is much higher than raw/normalised share for several pairs (e.g. `files`↔`repos`: 0.83 vs 0.50 raw) — the mismatch pattern is more complex than simple prefix/whitespace differences and is not fully explained in the material.
+- `github_repos_contents.id` has zero measured overlap with `github_repos_files.ref` (0.0 on raw, normalised, and digits-only) — this is not a valid join path between `contents` and `files`.
+- `github_repos_contents.sample_symlink_target` is NULL for 99.99% of rows; a non-null value only appears when the sampled file is itself a symlink.
+- `github_repos_files.symlink_target` is NULL for 99.66% of rows (sampled profile) — same caveat as above, only relevant for symlink-mode rows.
+- `github_repos_files.mode` is a raw POSIX file-mode integer (min 33188, max 57344 per profile) — it encodes file-type/permission bits, not a simple flag; interpreting "executable" or "symlink" requires knowing mode-bit conventions not spelled out in the material.
+- `github_repos_commits.author` and `.committer` `email` fields (per sample rows) are hashed hex strings, not real email addresses — string matching against a literal email will not work.
+- `github_repos_commits.parent` is a JSON-like array (can contain multiple SHAs for merge commits per description.txt), not a scalar SHA string.
+- `github_repos_commits.trailer` and `.difference` are JSON-like arrays of objects embedded in a `character varying` column — values must be parsed/extracted from text, not queried as structured JSON columns (schema types them as `character varying`, not `jsonb`).
+- `github_repos_languages.language_description` packs multiple languages and byte counts into one free-text sentence per repo — there is no separate numeric bytes column; extracting "the language" requires parsing this text per the hint: "compare the relative number of bytes across languages."
+- `github_repos_contents.repo_data_description` similarly packs size, binary flag, and copy count into free text rather than separate typed columns.
+- `github_repos_contents.content` is NULL for 15.76% of rows, and per description.txt "large or binary files ... may contain placeholders or truncated values" — non-null content is not guaranteed to be complete or exact.
+- `github_repos_languages.repo_name` and `github_repos_licenses.repo_name` each have far more distinct values (196k–198k, sampled) than `github_repos_repos.repo_name` overlap suggests are jointly usable — most repos named in one metadata table are absent from the others.
+- `github_repos_commits.subject` has a tiny null_rate (0.0001) despite `message` (which contains subject as its first line) never being null — a small number of rows lack a subject line while still having a message.
+- No table has a dedicated typed date/timestamp column; all temporal data (`date`, `time_sec`, `tz_offset`) lives inside the JSON-like text of `commits.author`/`commits.committer`, requiring text extraction and casting rather than direct comparison.
+- `github_repos_repos.watch_count` ranges 2–90,457 (sampled) with 909 distinct values — a numeric popularity metric, not a boolean "watched" flag.
+- Row counts for `github_repos_languages` and `github_repos_licenses` are identical (3,325,634) but their `repo_name` overlap is only ~6% raw — identical row counts do not imply the same repo population.

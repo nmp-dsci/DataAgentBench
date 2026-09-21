@@ -1,0 +1,82 @@
+[
+ {
+  "store": "sales_database",
+  "source_table": "sales",
+  "table": "music_brainz_20k_sales",
+  "rows": 58049,
+  "columns": [
+   {
+    "name": "sale_id",
+    "type": "integer"
+   },
+   {
+    "name": "track_id",
+    "type": "integer"
+   },
+   {
+    "name": "country",
+    "type": "character varying"
+   },
+   {
+    "name": "store",
+    "type": "character varying"
+   },
+   {
+    "name": "units_sold",
+    "type": "integer"
+   },
+   {
+    "name": "revenue_usd",
+    "type": "double precision"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "tracks_database",
+  "source_table": "tracks",
+  "table": "music_brainz_20k_tracks",
+  "rows": 19375,
+  "columns": [
+   {
+    "name": "track_id",
+    "type": "bigint"
+   },
+   {
+    "name": "source_id",
+    "type": "bigint"
+   },
+   {
+    "name": "source_track_id",
+    "type": "character varying"
+   },
+   {
+    "name": "title",
+    "type": "character varying"
+   },
+   {
+    "name": "artist",
+    "type": "character varying"
+   },
+   {
+    "name": "album",
+    "type": "character varying"
+   },
+   {
+    "name": "year",
+    "type": "character varying"
+   },
+   {
+    "name": "length",
+    "type": "character varying"
+   },
+   {
+    "name": "language",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ }
+]

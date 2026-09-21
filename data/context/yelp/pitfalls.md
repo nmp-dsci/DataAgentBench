@@ -1,0 +1,20 @@
+- `yelp_business.business_id` and `yelp_review.business_ref` / `yelp_tip.business_ref` never match on raw text (0.0 overlap) — only after stripping the `businessid_`/`businessref_` prefixes (digits-only share 1.0 and 0.75 respectively).
+- `yelp_checkin.business_id` also uses the `businessid_` prefix and only matches `yelp_review.business_ref`/`yelp_tip.business_ref` after the same prefix strip (digits-only shares 1.0 and 0.7889).
+- `yelp_review.user_id` is NULL in 21.7% of rows — a join or filter on user_id will silently drop these reviews.
+- `yelp_tip.user_id` is NULL in 19.13% of rows — same silent-drop risk on tips.
+- `yelp_business.attributes` is NULL for 9% of businesses; `yelp_business.hours` is NULL for 17% — absence of these JSONB fields does not mean the business has no attributes/hours in reality, just none recorded.
+- `yelp_business.attributes` values are stored as Python-repr strings (e.g. `"True"`, `"u'no'"`), not JSON booleans/nulls — exact-match filters must use the string forms, not SQL boolean/JSON semantics.
+- `yelp_business.attributes.BusinessParking` is itself a stringified nested Python dict (e.g. `"{'garage': False, 'street': False, ...}"`), not a JSON object — extracting sub-keys (garage, street, lot, valet) requires text parsing, not `->>` on a nested key.
+- `yelp_checkin.date` holds a comma-separated list of many timestamps in a single text field, not one date per row — counting checkins requires splitting this string.
+- Date columns (`yelp_review.date`, `yelp_tip.date`, `yelp_user.yelping_since`) are plain text with multiple inconsistent formats mixed within the same column (e.g. `"August 01, 2016 at 03:44 AM"`, `"29 May 2013, 23:01"`, `"2013-12-04 02:46:01"`) — naive date casts will fail on some rows.
+- `yelp_checkin.date`, `yelp_review.date`, and `yelp_tip.date` do not overlap at all (0.0 share in joins.md) — do not attempt to join or reconcile check-in dates against review/tip dates.
+- `yelp_user.elite` contains malformed entries like `"20,20,2021"` (partial/truncated year tokens) and can be an empty string — do not assume every comma-separated token is a valid 4-digit year.
+- `yelp_review.business_ref` and `yelp_tip.business_ref` share the same prefix (`businessref_`) already, so joining review-to-tip business references needs no prefix cleaning, only a direct string comparison.
+- `yelp_review.user_id` to `yelp_tip.user_id` overlap is very low (raw share 0.0428) — most reviewers and tippers are largely disjoint sets; do not assume a reviewer also left tips.
+- `yelp_business.business_id` to `yelp_checkin.business_id` overlap is only 0.9 — 10% of businesses have no checkin record, so an inner join will drop them.
+- `yelp_review.text` and `yelp_tip.text` are near-fully disjoint (raw share 0.0005) — they are independent free-text fields, not duplicated content between the two tables.
+- `yelp_business._id` (Mongo ObjectId-style string) is distinct from `yelp_business.business_id` (the semantic identifier used for joins) — do not use `_id` as the join key.
+- `yelp_review.business_ref` and `yelp_tip.business_ref` distinct counts (100 and 75) are lower than total row counts (2,000 and 784) — both tables have many rows per business, not one row per business.
+- `yelp_user.user_id` has 1,999 distinct values matching the table's 1,999 rows, but `yelp_review.user_id` only has 1,518 distinct non-null values out of 2,000 rows — most users in `yelp_review` are duplicated across multiple reviews.
+- `yelp_business.description` embeds location (address/city/state) and category/service tags as free text rather than in structured columns — filtering by city or service category requires text extraction from this field, not a dedicated column.
+- Column names ending in `_ref` (`business_ref`) versus `_id` (`business_id`) refer to the same real-world entity (a business) despite different naming and different literal prefixes — treat them as the same key conceptually, not as unrelated columns.

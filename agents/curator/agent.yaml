@@ -1,0 +1,5 @@
+# The curator runs once per dataset (`dab context curate`), never inside an eval.
+model: sonnet
+effort: medium
+max_turns: 1
+timeout_s: 600

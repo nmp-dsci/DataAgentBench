@@ -1,0 +1,302 @@
+{
+ "stockmarket_stockinfo": {
+  "Nasdaq Traded": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1,
+   "top": [
+    [
+     "Y",
+     2752
+    ]
+   ]
+  },
+  "Symbol": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 2752
+  },
+  "Listing Exchange": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 5,
+   "top": [
+    [
+     "P",
+     1444
+    ],
+    [
+     "Q",
+     710
+    ],
+    [
+     "Z",
+     336
+    ],
+    [
+     "N",
+     234
+    ],
+    [
+     "A",
+     28
+    ]
+   ]
+  },
+  "Market Category": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 4,
+   "top": [
+    [
+     "Not applicable or not NASDAQ-listed",
+     2042
+    ],
+    [
+     "G",
+     451
+    ],
+    [
+     "Q",
+     173
+    ],
+    [
+     "S",
+     86
+    ]
+   ]
+  },
+  "ETF": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "top": [
+    [
+     "Y",
+     2165
+    ],
+    [
+     "N",
+     587
+    ]
+   ]
+  },
+  "Round Lot Size": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 1,
+   "min": "100.0",
+   "max": "100.0"
+  },
+  "Test Issue": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1,
+   "top": [
+    [
+     "N",
+     2752
+    ]
+   ]
+  },
+  "Financial Status": {
+   "type": "character varying",
+   "null_rate": 0.742,
+   "distinct": 3,
+   "top": [
+    [
+     "N",
+     685
+    ],
+    [
+     "D",
+     24
+    ],
+    [
+     "H",
+     1
+    ]
+   ]
+  },
+  "NextShares": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "top": [
+    [
+     "N",
+     2751
+    ],
+    [
+     "Y",
+     1
+    ]
+   ]
+  },
+  "Company Description": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 2752
+  }
+ },
+ "stockmarket_stocktrade_all": {
+  "_table": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 1292,
+   "sampled": true
+  },
+  "Date": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 10225,
+   "sampled": true
+  },
+  "Open": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 33402,
+   "min": "0.0",
+   "max": "24500.0",
+   "sampled": true
+  },
+  "High": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 35005,
+   "min": "0.0",
+   "max": "137388.0",
+   "sampled": true
+  },
+  "Low": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 34187,
+   "min": "0.0",
+   "max": "30000.0",
+   "sampled": true
+  },
+  "Close": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 35776,
+   "min": "0.001953125",
+   "max": "43770.0",
+   "sampled": true
+  },
+  "Adj Close": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 143385,
+   "min": "0.0014084839494898",
+   "max": "61207.75390625",
+   "sampled": true
+  },
+  "Volume": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 30299,
+   "min": "0",
+   "max": "1030963200",
+   "sampled": true
+  }
+ },
+ "stockmarket_cvx": {
+  "Date": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 14663
+  },
+  "Open": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 5022,
+   "min": "0.0",
+   "max": "134.5800018310547"
+  },
+  "High": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 5252,
+   "min": "2.4296875",
+   "max": "135.10000610351562"
+  },
+  "Low": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 5247,
+   "min": "2.375",
+   "max": "133.69000244140625"
+  },
+  "Close": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 5328,
+   "min": "2.40625",
+   "max": "134.85000610351562"
+  },
+  "Adj Close": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 9763,
+   "min": "0.049089927226305",
+   "max": "122.5973892211914"
+  },
+  "Volume": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 9667,
+   "min": "41600",
+   "max": "48207200"
+  }
+ },
+ "stockmarket_cmi": {
+  "Date": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 11885
+  },
+  "Open": {
+   "type": "double precision",
+   "null_rate": 0.0001,
+   "distinct": 4824,
+   "min": "0.0",
+   "max": "192.0500030517578"
+  },
+  "High": {
+   "type": "double precision",
+   "null_rate": 0.0001,
+   "distinct": 5121,
+   "min": "1.578125",
+   "max": "194.17999267578125"
+  },
+  "Low": {
+   "type": "double precision",
+   "null_rate": 0.0001,
+   "distinct": 5045,
+   "min": "1.453125",
+   "max": "190.07000732421875"
+  },
+  "Close": {
+   "type": "double precision",
+   "null_rate": 0.0001,
+   "distinct": 5159,
+   "min": "1.46875",
+   "max": "192.5"
+  },
+  "Adj Close": {
+   "type": "double precision",
+   "null_rate": 0.0001,
+   "distinct": 7926,
+   "min": "0.0442070513963699",
+   "max": "183.66635131835935"
+  },
+  "Volume": {
+   "type": "double precision",
+   "null_rate": 0.0001,
+   "distinct": 6347,
+   "min": "0.0",
+   "max": "31219200.0"
+  }
+ }
+}

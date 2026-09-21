@@ -231,6 +231,7 @@ def load_file_db(store: Store, con: psycopg.Connection[Any], rep: LoadReport) ->
             "AND schema_name = 'main' ORDER BY table_name"
         ).fetchall()
     ]
+    signatures: dict[tuple[str, ...], list[str]] = {}
     for t in tables:
         target = pg_table(store.dataset, t)
         # drop through DuckDB, not psycopg: DuckDB caches the attached catalog at ATTACH time and a
@@ -239,7 +240,57 @@ def load_file_db(store: Store, con: psycopg.Connection[Any], rep: LoadReport) ->
         n = int(ddb.execute(f'SELECT count(*) FROM src."{t}"').fetchone()[0])  # type: ignore[index]
         ddb.execute(f'CREATE TABLE pg.{PG_SCHEMA}."{target}" AS SELECT * FROM src."{t}"')
         rep.tables.append(LoadedTable(store.dataset, store.name, t, target, n))
+        sig = tuple(
+            f"{c}:{ty}"
+            for c, ty in ddb.execute(
+                "SELECT column_name, data_type FROM duckdb_columns() WHERE database_name = 'src' "
+                "AND table_name = ? ORDER BY column_index",
+                [t],
+            ).fetchall()
+        )
+        signatures.setdefault(sig, []).append(target)
     ddb.close()
+    # one union table per store, for its largest family of identical-signature tables
+    families = sorted(signatures.values(), key=len, reverse=True)
+    if families and len(families[0]) >= FAMILY_MIN:
+        materialise_family(store, families[0], con, rep)
+
+
+FAMILY_MIN = 10
+
+
+def family_table(store: Store) -> str:
+    """`<dataset>_<store>_all`, the store name without a `_database` suffix."""
+    short = store.name.removesuffix("_database").removesuffix("_db")
+    return pg_table(store.dataset, f"{short}_all")
+
+
+def materialise_family(
+    store: Store, members: list[str], con: psycopg.Connection[Any], rep: LoadReport
+) -> None:
+    """A store that ships one table per entity (stockmarket: one per ticker, 2 753 of them)
+    also gets one union table with a `_table` column naming the member, so the agent can
+    query across the family in one statement. The members stay as loaded."""
+    target = family_table(store)
+    cols = pg.columns(con, members[0])
+    col_list = ", ".join(f'"{c}"' for c, _ in cols)
+    pg.drop_table(con, target)
+    con.execute(
+        f'CREATE TABLE {PG_SCHEMA}."{target}" AS SELECT NULL::text AS "_table", {col_list} '
+        f'FROM {PG_SCHEMA}."{members[0]}" WHERE false'
+    )
+    total = 0
+    with con.cursor() as cur:
+        for m in members:
+            cur.execute(
+                f'INSERT INTO {PG_SCHEMA}."{target}" SELECT %s, {col_list} FROM {PG_SCHEMA}."{m}"',
+                (m.removeprefix(store.dataset + "_"),),
+            )
+            total += cur.rowcount
+    con.execute(f'CREATE INDEX ON {PG_SCHEMA}."{target}" ("_table")')
+    rep.tables.append(
+        LoadedTable(store.dataset, store.name, f"*({len(members)} tables)", target, total)
+    )
 
 
 # ----------------------------------------------------------------------------- mongo dumps

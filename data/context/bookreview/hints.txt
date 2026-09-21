@@ -1,0 +1,4 @@
+HINTS: 
+- In books_info, the "description", "categories", and "features" content appears to be in list or dictionary format, but they are actually stored as strings in the .sql file.
+- The fields "book_id" in books_info and "purchase_id" in review refer to the same book entities across different tables. While the field names are not exact matches, they can be joined using a fuzzy join approach to solve the query.
+- For some queries, you could get needed information from "categories" or "details" columns in books_info.

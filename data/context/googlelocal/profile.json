@@ -1,0 +1,154 @@
+{
+ "googlelocal_business_description": {
+  "name": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 79
+  },
+  "gmap_id": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 79
+  },
+  "description": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 79
+  },
+  "num_of_reviews": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 31,
+   "min": "1",
+   "max": "378"
+  },
+  "hours": {
+   "type": "text",
+   "null_rate": 0.1646,
+   "distinct": 54
+  },
+  "MISC": {
+   "type": "text",
+   "null_rate": 0.2025,
+   "distinct": 36,
+   "top": [
+    [
+     "{\"Accessibility\": [\"Wheelchair accessible entrance\"]}",
+     21
+    ],
+    [
+     "{\"Accessibility\": [\"Wheelchair accessible entrance\"], \"Planning\": [\"Appointments recommended\"]}",
+     5
+    ],
+    [
+     "{\"Accessibility\": [\"Wheelchair accessible entrance\"], \"Offerings\": [\"Oil change\"], \"Amenities\": [\"Mechanic\"], \"Planning\": [\"Appointments recommended\"]}",
+     2
+    ],
+    [
+     "{\"Amenities\": [\"Good for kids\"]}",
+     2
+    ],
+    [
+     "{\"Service options\": [\"In-store shopping\"], \"Accessibility\": [\"Wheelchair accessible entrance\"], \"Planning\": [\"Quick visit\"]}",
+     2
+    ],
+    [
+     "{\"Health & safety\": [\"Mask required\", \"Staff wear masks\"], \"Accessibility\": [\"Wheelchair accessible entrance\"]}",
+     1
+    ],
+    [
+     "{\"Service options\": [\"In-store shopping\", \"Delivery\"], \"Health & safety\": [\"Mask required\"], \"Accessibility\": [\"Wheelchair accessible entrance\"], \"Planning\": [\"Quick visit\"]}",
+     1
+    ],
+    [
+     "{\"Service options\": [\"Delivery\"], \"Accessibility\": [\"Wheelchair accessible entrance\"], \"Amenities\": [\"Bar onsite\"]}",
+     1
+    ],
+    [
+     "{\"Accessibility\": [\"Wheelchair accessible entrance\"], \"Amenities\": [\"Wi-Fi\"], \"Planning\": [\"Appointments recommended\"], \"Payments\": [\"Debit cards\", \"NFC mobile payments\", \"Credit cards\"]}",
+     1
+    ],
+    [
+     "{\"Accessibility\": [\"Wheelchair accessible entrance\"], \"Offerings\": [\"Repair services\"], \"Payments\": [\"Credit cards\"]}",
+     1
+    ]
+   ]
+  },
+  "state": {
+   "type": "text",
+   "null_rate": 0.1139,
+   "distinct": 27,
+   "top": [
+    [
+     "Open ⋅ Closes 5PM",
+     18
+    ],
+    [
+     "Closed ⋅ Opens 10AM",
+     5
+    ],
+    [
+     "Open ⋅ Closes 9:30PM",
+     4
+    ],
+    [
+     "Open now",
+     4
+    ],
+    [
+     "Open ⋅ Closes 6PM",
+     3
+    ],
+    [
+     "Open ⋅ Closes 4PM",
+     3
+    ],
+    [
+     "Permanently closed",
+     3
+    ],
+    [
+     "Open ⋅ Closes 7PM",
+     3
+    ],
+    [
+     "Open ⋅ Closes 8PM",
+     3
+    ],
+    [
+     "Closed ⋅ Opens 9AM",
+     3
+    ]
+   ]
+  }
+ },
+ "googlelocal_review": {
+  "name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1917
+  },
+  "time": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1990
+  },
+  "rating": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 5,
+   "min": "1",
+   "max": "5"
+  },
+  "text": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1982
+  },
+  "gmap_id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 79
+  }
+ }
+}

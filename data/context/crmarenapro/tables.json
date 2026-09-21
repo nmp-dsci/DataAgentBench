@@ -1,0 +1,1012 @@
+[
+ {
+  "store": "activities",
+  "source_table": "Event",
+  "table": "crmarenapro_event",
+  "rows": 54,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "WhatId",
+    "type": "character varying"
+   },
+   {
+    "name": "OwnerId",
+    "type": "character varying"
+   },
+   {
+    "name": "StartDateTime",
+    "type": "character varying"
+   },
+   {
+    "name": "Subject",
+    "type": "character varying"
+   },
+   {
+    "name": "Description",
+    "type": "character varying"
+   },
+   {
+    "name": "DurationInMinutes",
+    "type": "character varying"
+   },
+   {
+    "name": "Location",
+    "type": "character varying"
+   },
+   {
+    "name": "IsAllDayEvent",
+    "type": "bigint"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "activities",
+  "source_table": "Task",
+  "table": "crmarenapro_task",
+  "rows": 4783,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "WhatId",
+    "type": "character varying"
+   },
+   {
+    "name": "OwnerId",
+    "type": "character varying"
+   },
+   {
+    "name": "Priority",
+    "type": "character varying"
+   },
+   {
+    "name": "Status",
+    "type": "character varying"
+   },
+   {
+    "name": "ActivityDate",
+    "type": "character varying"
+   },
+   {
+    "name": "Subject",
+    "type": "character varying"
+   },
+   {
+    "name": "Description",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "activities",
+  "source_table": "VoiceCallTranscript__c",
+  "table": "crmarenapro_voicecalltranscript__c",
+  "rows": 4033,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "OpportunityId__c",
+    "type": "character varying"
+   },
+   {
+    "name": "LeadId__c",
+    "type": "character varying"
+   },
+   {
+    "name": "Body__c",
+    "type": "character varying"
+   },
+   {
+    "name": "CreatedDate",
+    "type": "character varying"
+   },
+   {
+    "name": "EndTime__c",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "core_crm",
+  "source_table": "Account",
+  "table": "crmarenapro_account",
+  "rows": 101,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "Name",
+    "type": "character varying"
+   },
+   {
+    "name": "Phone",
+    "type": "character varying"
+   },
+   {
+    "name": "Industry",
+    "type": "character varying"
+   },
+   {
+    "name": "Description",
+    "type": "character varying"
+   },
+   {
+    "name": "NumberOfEmployees",
+    "type": "double precision"
+   },
+   {
+    "name": "ShippingState",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "core_crm",
+  "source_table": "Contact",
+  "table": "crmarenapro_contact",
+  "rows": 886,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "FirstName",
+    "type": "character varying"
+   },
+   {
+    "name": "LastName",
+    "type": "character varying"
+   },
+   {
+    "name": "Email",
+    "type": "character varying"
+   },
+   {
+    "name": "AccountId",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "core_crm",
+  "source_table": "User",
+  "table": "crmarenapro_user",
+  "rows": 212,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "FirstName",
+    "type": "character varying"
+   },
+   {
+    "name": "LastName",
+    "type": "character varying"
+   },
+   {
+    "name": "Email",
+    "type": "character varying"
+   },
+   {
+    "name": "Phone",
+    "type": "character varying"
+   },
+   {
+    "name": "Username",
+    "type": "character varying"
+   },
+   {
+    "name": "Alias",
+    "type": "character varying"
+   },
+   {
+    "name": "LanguageLocaleKey",
+    "type": "character varying"
+   },
+   {
+    "name": "EmailEncodingKey",
+    "type": "character varying"
+   },
+   {
+    "name": "TimeZoneSidKey",
+    "type": "character varying"
+   },
+   {
+    "name": "LocaleSidKey",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "products_orders",
+  "source_table": "Order",
+  "table": "crmarenapro_order",
+  "rows": 163,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "AccountId",
+    "type": "character varying"
+   },
+   {
+    "name": "Status",
+    "type": "character varying"
+   },
+   {
+    "name": "EffectiveDate",
+    "type": "character varying"
+   },
+   {
+    "name": "Pricebook2Id",
+    "type": "character varying"
+   },
+   {
+    "name": "OwnerId",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "products_orders",
+  "source_table": "OrderItem",
+  "table": "crmarenapro_orderitem",
+  "rows": 689,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "OrderId",
+    "type": "character varying"
+   },
+   {
+    "name": "Product2Id",
+    "type": "character varying"
+   },
+   {
+    "name": "Quantity",
+    "type": "character varying"
+   },
+   {
+    "name": "UnitPrice",
+    "type": "character varying"
+   },
+   {
+    "name": "PriceBookEntryId",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "products_orders",
+  "source_table": "Pricebook2",
+  "table": "crmarenapro_pricebook2",
+  "rows": 2,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "Name",
+    "type": "character varying"
+   },
+   {
+    "name": "Description",
+    "type": "character varying"
+   },
+   {
+    "name": "IsActive",
+    "type": "bigint"
+   },
+   {
+    "name": "ValidFrom",
+    "type": "character varying"
+   },
+   {
+    "name": "ValidTo",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "products_orders",
+  "source_table": "PricebookEntry",
+  "table": "crmarenapro_pricebookentry",
+  "rows": 50,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "Pricebook2Id",
+    "type": "character varying"
+   },
+   {
+    "name": "Product2Id",
+    "type": "character varying"
+   },
+   {
+    "name": "UnitPrice",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "products_orders",
+  "source_table": "Product2",
+  "table": "crmarenapro_product2",
+  "rows": 51,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "Name",
+    "type": "character varying"
+   },
+   {
+    "name": "Description",
+    "type": "character varying"
+   },
+   {
+    "name": "IsActive",
+    "type": "bigint"
+   },
+   {
+    "name": "External_ID__c",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "products_orders",
+  "source_table": "ProductCategory",
+  "table": "crmarenapro_productcategory",
+  "rows": 10,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "Name",
+    "type": "character varying"
+   },
+   {
+    "name": "CatalogId",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "products_orders",
+  "source_table": "ProductCategoryProduct",
+  "table": "crmarenapro_productcategoryproduct",
+  "rows": 100,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "ProductCategoryId",
+    "type": "character varying"
+   },
+   {
+    "name": "ProductId",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "sales_pipeline",
+  "source_table": "Contract",
+  "table": "crmarenapro_contract",
+  "rows": 163,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "AccountId",
+    "type": "character varying"
+   },
+   {
+    "name": "Status",
+    "type": "character varying"
+   },
+   {
+    "name": "StartDate",
+    "type": "character varying"
+   },
+   {
+    "name": "CustomerSignedDate",
+    "type": "character varying"
+   },
+   {
+    "name": "CompanySignedDate",
+    "type": "character varying"
+   },
+   {
+    "name": "Description",
+    "type": "character varying"
+   },
+   {
+    "name": "ContractTerm",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "sales_pipeline",
+  "source_table": "Lead",
+  "table": "crmarenapro_lead",
+  "rows": 1465,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "FirstName",
+    "type": "character varying"
+   },
+   {
+    "name": "LastName",
+    "type": "character varying"
+   },
+   {
+    "name": "Email",
+    "type": "character varying"
+   },
+   {
+    "name": "Phone",
+    "type": "character varying"
+   },
+   {
+    "name": "Company",
+    "type": "character varying"
+   },
+   {
+    "name": "Status",
+    "type": "character varying"
+   },
+   {
+    "name": "ConvertedContactId",
+    "type": "character varying"
+   },
+   {
+    "name": "ConvertedAccountId",
+    "type": "character varying"
+   },
+   {
+    "name": "Title",
+    "type": "character varying"
+   },
+   {
+    "name": "CreatedDate",
+    "type": "character varying"
+   },
+   {
+    "name": "ConvertedDate",
+    "type": "character varying"
+   },
+   {
+    "name": "IsConverted",
+    "type": "bigint"
+   },
+   {
+    "name": "OwnerId",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "sales_pipeline",
+  "source_table": "Opportunity",
+  "table": "crmarenapro_opportunity",
+  "rows": 1170,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "ContractID__c",
+    "type": "character varying"
+   },
+   {
+    "name": "AccountId",
+    "type": "character varying"
+   },
+   {
+    "name": "ContactId",
+    "type": "character varying"
+   },
+   {
+    "name": "OwnerId",
+    "type": "character varying"
+   },
+   {
+    "name": "Probability",
+    "type": "character varying"
+   },
+   {
+    "name": "Amount",
+    "type": "double precision"
+   },
+   {
+    "name": "StageName",
+    "type": "character varying"
+   },
+   {
+    "name": "Name",
+    "type": "character varying"
+   },
+   {
+    "name": "Description",
+    "type": "character varying"
+   },
+   {
+    "name": "CreatedDate",
+    "type": "character varying"
+   },
+   {
+    "name": "CloseDate",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "sales_pipeline",
+  "source_table": "OpportunityLineItem",
+  "table": "crmarenapro_opportunitylineitem",
+  "rows": 4926,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "OpportunityId",
+    "type": "character varying"
+   },
+   {
+    "name": "Product2Id",
+    "type": "character varying"
+   },
+   {
+    "name": "PricebookEntryId",
+    "type": "character varying"
+   },
+   {
+    "name": "Quantity",
+    "type": "character varying"
+   },
+   {
+    "name": "TotalPrice",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "sales_pipeline",
+  "source_table": "Quote",
+  "table": "crmarenapro_quote",
+  "rows": 704,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "OpportunityId",
+    "type": "character varying"
+   },
+   {
+    "name": "AccountId",
+    "type": "character varying"
+   },
+   {
+    "name": "ContactId",
+    "type": "character varying"
+   },
+   {
+    "name": "Name",
+    "type": "character varying"
+   },
+   {
+    "name": "Description",
+    "type": "character varying"
+   },
+   {
+    "name": "Status",
+    "type": "character varying"
+   },
+   {
+    "name": "CreatedDate",
+    "type": "character varying"
+   },
+   {
+    "name": "ExpirationDate",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "sales_pipeline",
+  "source_table": "QuoteLineItem",
+  "table": "crmarenapro_quotelineitem",
+  "rows": 2966,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "QuoteId",
+    "type": "character varying"
+   },
+   {
+    "name": "OpportunityLineItemId",
+    "type": "character varying"
+   },
+   {
+    "name": "Product2Id",
+    "type": "character varying"
+   },
+   {
+    "name": "PricebookEntryId",
+    "type": "character varying"
+   },
+   {
+    "name": "Quantity",
+    "type": "character varying"
+   },
+   {
+    "name": "UnitPrice",
+    "type": "character varying"
+   },
+   {
+    "name": "Discount",
+    "type": "character varying"
+   },
+   {
+    "name": "TotalPrice",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "support",
+  "source_table": "case",
+  "table": "crmarenapro_case",
+  "rows": 153,
+  "columns": [
+   {
+    "name": "id",
+    "type": "text"
+   },
+   {
+    "name": "priority",
+    "type": "text"
+   },
+   {
+    "name": "subject",
+    "type": "text"
+   },
+   {
+    "name": "description",
+    "type": "text"
+   },
+   {
+    "name": "status",
+    "type": "text"
+   },
+   {
+    "name": "contactid",
+    "type": "text"
+   },
+   {
+    "name": "createddate",
+    "type": "text"
+   },
+   {
+    "name": "closeddate",
+    "type": "text"
+   },
+   {
+    "name": "orderitemid__c",
+    "type": "text"
+   },
+   {
+    "name": "issueid__c",
+    "type": "text"
+   },
+   {
+    "name": "accountid",
+    "type": "text"
+   },
+   {
+    "name": "ownerid",
+    "type": "text"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "support",
+  "source_table": "casehistory__c",
+  "table": "crmarenapro_casehistory__c",
+  "rows": 393,
+  "columns": [
+   {
+    "name": "id",
+    "type": "text"
+   },
+   {
+    "name": "caseid__c",
+    "type": "text"
+   },
+   {
+    "name": "oldvalue__c",
+    "type": "text"
+   },
+   {
+    "name": "newvalue__c",
+    "type": "text"
+   },
+   {
+    "name": "createddate",
+    "type": "text"
+   },
+   {
+    "name": "field__c",
+    "type": "text"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "support",
+  "source_table": "emailmessage",
+  "table": "crmarenapro_emailmessage",
+  "rows": 5686,
+  "columns": [
+   {
+    "name": "id",
+    "type": "text"
+   },
+   {
+    "name": "subject",
+    "type": "text"
+   },
+   {
+    "name": "textbody",
+    "type": "text"
+   },
+   {
+    "name": "parentid",
+    "type": "text"
+   },
+   {
+    "name": "fromaddress",
+    "type": "text"
+   },
+   {
+    "name": "toids",
+    "type": "text"
+   },
+   {
+    "name": "messagedate",
+    "type": "text"
+   },
+   {
+    "name": "relatedtoid",
+    "type": "text"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "support",
+  "source_table": "issue__c",
+  "table": "crmarenapro_issue__c",
+  "rows": 15,
+  "columns": [
+   {
+    "name": "id",
+    "type": "text"
+   },
+   {
+    "name": "name",
+    "type": "text"
+   },
+   {
+    "name": "description__c",
+    "type": "text"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "support",
+  "source_table": "knowledge__kav",
+  "table": "crmarenapro_knowledge__kav",
+  "rows": 194,
+  "columns": [
+   {
+    "name": "id",
+    "type": "text"
+   },
+   {
+    "name": "title",
+    "type": "text"
+   },
+   {
+    "name": "faq_answer__c",
+    "type": "text"
+   },
+   {
+    "name": "summary",
+    "type": "text"
+   },
+   {
+    "name": "urlname",
+    "type": "text"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "support",
+  "source_table": "livechattranscript",
+  "table": "crmarenapro_livechattranscript",
+  "rows": 58,
+  "columns": [
+   {
+    "name": "id",
+    "type": "text"
+   },
+   {
+    "name": "caseid",
+    "type": "text"
+   },
+   {
+    "name": "accountid",
+    "type": "text"
+   },
+   {
+    "name": "ownerid",
+    "type": "text"
+   },
+   {
+    "name": "body",
+    "type": "text"
+   },
+   {
+    "name": "endtime",
+    "type": "text"
+   },
+   {
+    "name": "livechatvisitorid",
+    "type": "text"
+   },
+   {
+    "name": "contactid",
+    "type": "text"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "territory",
+  "source_table": "Territory2",
+  "table": "crmarenapro_territory2",
+  "rows": 10,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "Name",
+    "type": "character varying"
+   },
+   {
+    "name": "Description",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "territory",
+  "source_table": "UserTerritory2Association",
+  "table": "crmarenapro_userterritory2association",
+  "rows": 184,
+  "columns": [
+   {
+    "name": "Id",
+    "type": "character varying"
+   },
+   {
+    "name": "UserId",
+    "type": "character varying"
+   },
+   {
+    "name": "Territory2Id",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ }
+]

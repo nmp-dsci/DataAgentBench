@@ -1,0 +1,21 @@
+[
+ {
+  "a": "pancancer_atlas_mutation_data.\"ParticipantBarcode\"",
+  "b": "pancancer_atlas_rnaseq_expression.\"ParticipantBarcode\"",
+  "raw": {
+   "distinct_a": 8017,
+   "matched": 4036,
+   "share": 0.5034
+  },
+  "normalised": {
+   "distinct_a": 7953,
+   "matched": 4050,
+   "share": 0.5092
+  },
+  "digits": {
+   "distinct_a": 3572,
+   "matched": 1859,
+   "share": 0.5204
+  }
+ }
+]

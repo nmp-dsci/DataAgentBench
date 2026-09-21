@@ -1,0 +1,374 @@
+{
+ "patents_cpc_definition": {
+  "applicationReferences": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 774,
+   "sampled": true
+  },
+  "breakdownCode": {
+   "type": "boolean",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "top": [
+    [
+     "false",
+     139391
+    ],
+    [
+     "true",
+     59501
+    ]
+   ],
+   "sampled": true
+  },
+  "childGroups": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 528,
+   "sampled": true
+  },
+  "children": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 57108,
+   "sampled": true
+  },
+  "dateRevised": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 54,
+   "min": "20130101.0",
+   "max": "20240501.0",
+   "sampled": true
+  },
+  "definition": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 21771,
+   "sampled": true
+  },
+  "glossary": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 1571,
+   "sampled": true
+  },
+  "informativeReferences": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 15086,
+   "sampled": true
+  },
+  "ipcConcordant": {
+   "type": "text",
+   "null_rate": 0.0033,
+   "distinct": 63156,
+   "sampled": true
+  },
+  "level": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 16,
+   "min": "2.0",
+   "max": "19.0",
+   "sampled": true
+  },
+  "limitingReferences": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 8536,
+   "sampled": true
+  },
+  "notAllocatable": {
+   "type": "boolean",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "top": [
+    [
+     "false",
+     200366
+    ],
+    [
+     "true",
+     612
+    ]
+   ],
+   "sampled": true
+  },
+  "parents": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 59787,
+   "sampled": true
+  },
+  "precedenceLimitingReferences": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 7187,
+   "sampled": true
+  },
+  "residualReferences": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 125,
+   "sampled": true
+  },
+  "rules": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 4791,
+   "sampled": true
+  },
+  "scopeLimitingReferences": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 13800,
+   "sampled": true
+  },
+  "status": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "top": [
+    [
+     "published",
+     199355
+    ],
+    [
+     "frozen",
+     168
+    ]
+   ],
+   "sampled": true
+  },
+  "symbol": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 200259,
+   "sampled": true
+  },
+  "synonyms": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 593,
+   "sampled": true
+  },
+  "titleFull": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 180801,
+   "sampled": true
+  },
+  "titlePart": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 167736,
+   "sampled": true
+  }
+ },
+ "patents_publicationinfo": {
+  "Patents_info": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 200348,
+   "sampled": true
+  },
+  "kind_code": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 61,
+   "sampled": true
+  },
+  "application_kind": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 11,
+   "top": [
+    [
+     "A",
+     178689
+    ],
+    [
+     "U",
+     10429
+    ],
+    [
+     "W",
+     6762
+    ],
+    [
+     "T",
+     4116
+    ],
+    [
+     "D",
+     345
+    ],
+    [
+     "C",
+     25
+    ],
+    [
+     "V",
+     15
+    ],
+    [
+     "F",
+     5
+    ],
+    [
+     "K",
+     3
+    ],
+    [
+     "Q",
+     3
+    ]
+   ],
+   "sampled": true
+  },
+  "pct_number": {
+   "type": "character varying",
+   "null_rate": 0.797,
+   "distinct": 40415,
+   "sampled": true
+  },
+  "family_id": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 199054,
+   "min": "-1",
+   "max": "92461923",
+   "sampled": true
+  },
+  "title_localized": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 191208,
+   "sampled": true
+  },
+  "abstract_localized": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 157316,
+   "sampled": true
+  },
+  "claims_localized_html": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 33762,
+   "sampled": true
+  },
+  "description_localized_html": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 41219,
+   "sampled": true
+  },
+  "publication_date": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 85054,
+   "sampled": true
+  },
+  "filing_date": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 97982,
+   "sampled": true
+  },
+  "grant_date": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 46216,
+   "sampled": true
+  },
+  "priority_date": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 99497,
+   "sampled": true
+  },
+  "priority_claim": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 196050,
+   "sampled": true
+  },
+  "inventor_harmonized": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 150114,
+   "sampled": true
+  },
+  "examiner": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 21865,
+   "sampled": true
+  },
+  "uspc": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 24292,
+   "sampled": true
+  },
+  "ipc": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 164865,
+   "sampled": true
+  },
+  "cpc": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 182377,
+   "sampled": true
+  },
+  "citation": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 98361,
+   "sampled": true
+  },
+  "parent": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 13267,
+   "sampled": true
+  },
+  "child": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 11357,
+   "sampled": true
+  },
+  "entity_status": {
+   "type": "character varying",
+   "null_rate": 0.9298,
+   "distinct": 3,
+   "top": [
+    [
+     "large",
+     10776
+    ],
+    [
+     "small",
+     2824
+    ],
+    [
+     "micro",
+     179
+    ]
+   ],
+   "sampled": true
+  },
+  "art_unit": {
+   "type": "character varying",
+   "null_rate": 0.9319,
+   "distinct": 1311,
+   "sampled": true
+  }
+ }
+}

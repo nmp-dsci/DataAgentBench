@@ -1,0 +1,40 @@
+[
+ {
+  "a": "googlelocal_business_description.\"name\"",
+  "b": "googlelocal_review.\"name\"",
+  "raw": {
+   "distinct_a": 79,
+   "matched": 1,
+   "share": 0.0127
+  },
+  "normalised": {
+   "distinct_a": 79,
+   "matched": 1,
+   "share": 0.0127
+  },
+  "digits": {
+   "distinct_a": 6,
+   "matched": 1,
+   "share": 0.1667
+  }
+ },
+ {
+  "a": "googlelocal_business_description.\"gmap_id\"",
+  "b": "googlelocal_review.\"gmap_id\"",
+  "raw": {
+   "distinct_a": 79,
+   "matched": 79,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 79,
+   "matched": 79,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 79,
+   "matched": 79,
+   "share": 1.0
+  }
+ }
+]

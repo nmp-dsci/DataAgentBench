@@ -1,0 +1,186 @@
+[
+ {
+  "store": "artifacts_database",
+  "source_table": "commits",
+  "table": "github_repos_commits",
+  "rows": 17976,
+  "columns": [
+   {
+    "name": "commit",
+    "type": "character varying"
+   },
+   {
+    "name": "tree",
+    "type": "character varying"
+   },
+   {
+    "name": "parent",
+    "type": "character varying"
+   },
+   {
+    "name": "author",
+    "type": "character varying"
+   },
+   {
+    "name": "committer",
+    "type": "character varying"
+   },
+   {
+    "name": "subject",
+    "type": "character varying"
+   },
+   {
+    "name": "message",
+    "type": "character varying"
+   },
+   {
+    "name": "trailer",
+    "type": "character varying"
+   },
+   {
+    "name": "difference",
+    "type": "character varying"
+   },
+   {
+    "name": "difference_truncated",
+    "type": "double precision"
+   },
+   {
+    "name": "repo_name",
+    "type": "character varying"
+   },
+   {
+    "name": "encoding",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "artifacts_database",
+  "source_table": "contents",
+  "table": "github_repos_contents",
+  "rows": 24286,
+  "columns": [
+   {
+    "name": "id",
+    "type": "character varying"
+   },
+   {
+    "name": "content",
+    "type": "character varying"
+   },
+   {
+    "name": "sample_repo_name",
+    "type": "character varying"
+   },
+   {
+    "name": "sample_ref",
+    "type": "character varying"
+   },
+   {
+    "name": "sample_path",
+    "type": "character varying"
+   },
+   {
+    "name": "sample_symlink_target",
+    "type": "character varying"
+   },
+   {
+    "name": "repo_data_description",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "artifacts_database",
+  "source_table": "files",
+  "table": "github_repos_files",
+  "rows": 524077,
+  "columns": [
+   {
+    "name": "repo_name",
+    "type": "character varying"
+   },
+   {
+    "name": "ref",
+    "type": "character varying"
+   },
+   {
+    "name": "path",
+    "type": "character varying"
+   },
+   {
+    "name": "mode",
+    "type": "bigint"
+   },
+   {
+    "name": "id",
+    "type": "character varying"
+   },
+   {
+    "name": "symlink_target",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "metadata_database",
+  "source_table": "languages",
+  "table": "github_repos_languages",
+  "rows": 3325634,
+  "columns": [
+   {
+    "name": "repo_name",
+    "type": "character varying"
+   },
+   {
+    "name": "language_description",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "metadata_database",
+  "source_table": "licenses",
+  "table": "github_repos_licenses",
+  "rows": 3325634,
+  "columns": [
+   {
+    "name": "repo_name",
+    "type": "character varying"
+   },
+   {
+    "name": "license",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "metadata_database",
+  "source_table": "repos",
+  "table": "github_repos_repos",
+  "rows": 400000,
+  "columns": [
+   {
+    "name": "repo_name",
+    "type": "character varying"
+   },
+   {
+    "name": "watch_count",
+    "type": "bigint"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ }
+]

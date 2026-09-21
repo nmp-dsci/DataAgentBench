@@ -39,6 +39,22 @@ data: ## download the 12 datasets' database files (8.4 GB, sha256-verified) and 
 	uv run dab data load
 	uv run dab data check
 
+context: ## generate the context pack from Postgres (schema, profile, samples, joins) — no model
+	uv run dab context build
+
+curate: ## the curator agent writes summary.md + pitfalls.md per dataset (Sonnet 5, once, never sees a question)
+	uv run dab context curate
+
+sandbox: ## build the execute_python sandbox image (python:3.12-slim + pandas, duckdb, scipy)
+	docker build -t dab-sandbox:py312 -f infra/sandbox.Dockerfile infra
+
+AGENT ?= champion
+SPLIT ?= smoke
+TRIALS ?= 1
+EVAL_WORKERS ?= 4
+eval: ## run AGENT (default champion) on SPLIT (smoke|all) × TRIALS; needs db-up, platform-up, sandbox
+	uv run dab eval --agent $(AGENT) --split $(SPLIT) --trials $(TRIALS) --workers $(EVAL_WORKERS)
+
 dev: ## run the API on :$(PORT) (frontend: cd frontend && npm run dev → :5173)
 	uv run dab serve --port $(PORT) --reload
 
@@ -55,4 +71,4 @@ lint: ## ruff + mypy (+ frontend typecheck and design lint when node_modules exi
 fmt: ## ruff format + fix
 	uv run ruff format src tests && uv run ruff check --fix src tests
 
-.PHONY: help setup upstream ingest rescore stats dev build test lint fmt db-up db-down platform-up data
+.PHONY: help setup upstream ingest rescore stats dev build test lint fmt db-up db-down platform-up data context curate sandbox eval

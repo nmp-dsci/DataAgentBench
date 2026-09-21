@@ -1,0 +1,211 @@
+[
+ {
+  "a": "github_repos_commits.\"repo_name\"",
+  "b": "github_repos_files.\"repo_name\"",
+  "raw": {
+   "distinct_a": 6,
+   "matched": 4,
+   "share": 0.6667
+  },
+  "normalised": {
+   "distinct_a": 6,
+   "matched": 3,
+   "share": 0.5
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "github_repos_commits.\"repo_name\"",
+  "b": "github_repos_languages.\"repo_name\"",
+  "raw": {
+   "distinct_a": 6,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 6,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "github_repos_commits.\"repo_name\"",
+  "b": "github_repos_licenses.\"repo_name\"",
+  "raw": {
+   "distinct_a": 6,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 6,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "github_repos_commits.\"repo_name\"",
+  "b": "github_repos_repos.\"repo_name\"",
+  "raw": {
+   "distinct_a": 6,
+   "matched": 4,
+   "share": 0.6667
+  },
+  "normalised": {
+   "distinct_a": 6,
+   "matched": 3,
+   "share": 0.5
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "github_repos_files.\"repo_name\"",
+  "b": "github_repos_languages.\"repo_name\"",
+  "raw": {
+   "distinct_a": 25796,
+   "matched": 1346,
+   "share": 0.0522
+  },
+  "normalised": {
+   "distinct_a": 24325,
+   "matched": 1291,
+   "share": 0.0531
+  },
+  "digits": {
+   "distinct_a": 829,
+   "matched": 583,
+   "share": 0.7033
+  }
+ },
+ {
+  "a": "github_repos_files.\"repo_name\"",
+  "b": "github_repos_licenses.\"repo_name\"",
+  "raw": {
+   "distinct_a": 24749,
+   "matched": 1307,
+   "share": 0.0528
+  },
+  "normalised": {
+   "distinct_a": 25362,
+   "matched": 1348,
+   "share": 0.0532
+  },
+  "digits": {
+   "distinct_a": 803,
+   "matched": 549,
+   "share": 0.6837
+  }
+ },
+ {
+  "a": "github_repos_files.\"repo_name\"",
+  "b": "github_repos_repos.\"repo_name\"",
+  "raw": {
+   "distinct_a": 24566,
+   "matched": 12185,
+   "share": 0.496
+  },
+  "normalised": {
+   "distinct_a": 24967,
+   "matched": 12677,
+   "share": 0.5078
+  },
+  "digits": {
+   "distinct_a": 835,
+   "matched": 693,
+   "share": 0.8299
+  }
+ },
+ {
+  "a": "github_repos_languages.\"repo_name\"",
+  "b": "github_repos_licenses.\"repo_name\"",
+  "raw": {
+   "distinct_a": 196061,
+   "matched": 11790,
+   "share": 0.0601
+  },
+  "normalised": {
+   "distinct_a": 197116,
+   "matched": 12055,
+   "share": 0.0612
+  },
+  "digits": {
+   "distinct_a": 6793,
+   "matched": 2755,
+   "share": 0.4056
+  }
+ },
+ {
+  "a": "github_repos_languages.\"repo_name\"",
+  "b": "github_repos_repos.\"repo_name\"",
+  "raw": {
+   "distinct_a": 197300,
+   "matched": 4765,
+   "share": 0.0242
+  },
+  "normalised": {
+   "distinct_a": 205917,
+   "matched": 5123,
+   "share": 0.0249
+  },
+  "digits": {
+   "distinct_a": 6726,
+   "matched": 1969,
+   "share": 0.2927
+  }
+ },
+ {
+  "a": "github_repos_licenses.\"repo_name\"",
+  "b": "github_repos_repos.\"repo_name\"",
+  "raw": {
+   "distinct_a": 192436,
+   "matched": 4901,
+   "share": 0.0255
+  },
+  "normalised": {
+   "distinct_a": 201476,
+   "matched": 5119,
+   "share": 0.0254
+  },
+  "digits": {
+   "distinct_a": 6678,
+   "matched": 1897,
+   "share": 0.2841
+  }
+ },
+ {
+  "a": "github_repos_contents.\"id\"",
+  "b": "github_repos_files.\"ref\"",
+  "raw": {
+   "distinct_a": 24286,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 24286,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 24286,
+   "matched": 0,
+   "share": 0.0
+  }
+ }
+]

@@ -1,0 +1,62 @@
+[
+ {
+  "store": "indexinfo_database",
+  "source_table": "index_info",
+  "table": "stockindex_index_info",
+  "rows": 14,
+  "columns": [
+   {
+    "name": "Exchange",
+    "type": "character varying"
+   },
+   {
+    "name": "Currency",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "indextrade_database",
+  "source_table": "index_trade",
+  "table": "stockindex_index_trade",
+  "rows": 104224,
+  "columns": [
+   {
+    "name": "Index",
+    "type": "character varying"
+   },
+   {
+    "name": "Date",
+    "type": "character varying"
+   },
+   {
+    "name": "Open",
+    "type": "double precision"
+   },
+   {
+    "name": "High",
+    "type": "double precision"
+   },
+   {
+    "name": "Low",
+    "type": "double precision"
+   },
+   {
+    "name": "Close",
+    "type": "double precision"
+   },
+   {
+    "name": "Adj Close",
+    "type": "double precision"
+   },
+   {
+    "name": "CloseUSD",
+    "type": "double precision"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ }
+]

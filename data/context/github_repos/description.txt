@@ -1,0 +1,59 @@
+You are working with two databases to solve this query.
+
+Here are the descriptions of these two databases:
+
+1. metadata_database  
+   - This database is stored in SQLite database format and contains metadata about GitHub repositories, including their declared programming languages, licenses, and repository-level statistics. It consists of three tables:  
+   - This database consists of three tables:
+    - languages  
+      - Fields:  
+        - repo_name (str): Name of the GitHub repository in `owner/repo` format.  
+        - language_description (str): Programming language(s) used in the repository, represented in natural language format.  
+
+    - licenses  
+      - Fields:  
+        - repo_name (str): Name of the GitHub repository in `owner/repo` format.  
+        - license (str): License identifier associated with the repository (e.g., `apache-2.0`, `mit`).  
+
+    - repos  
+      - Fields:  
+        - repo_name (str): Name of the GitHub repository in `owner/repo` format.  
+        - watch_count (int): Number of users watching the repository on GitHub.  
+
+
+2. artifacts_database  
+   - This database is stored in DuckDB format and contains GitHub repository artifacts, including file contents, commit history, and file-level metadata. It consists of three tables:  
+   - This database consists of three tables:
+    - contents  
+      - Fields:  
+        - id (str): Identifier of the file blob in the repository.  
+        - content (str): The file content (textual data). For large or binary files, this may contain placeholders or truncated values.  
+        - sample_repo_name (str): Name of the repository where the file resides, in `owner/repo` format.  
+        - sample_ref (str): Reference name (e.g., branch or commit SHA).  
+        - sample_path (str): Path of the file within the repository.  
+        - sample_symlink_target (str): If the file is a symlink, indicates the symlink target path.  
+        - repo_data_description (str): Natural language description summarizing the file’s metadata (derived from original size, binary, copies, and mode fields).  
+
+    - commits  
+      - Fields:  
+        - commit (str): Unique identifier (SHA) of the commit.  
+        - tree (str): SHA identifier of the commit’s associated tree object.  
+        - parent (str): One or more parent commit SHAs (JSON-like format for merge commits).  
+        - author (str): JSON-like object containing author information (name, email, timestamp).  
+        - committer (str): JSON-like object containing committer information (name, email, timestamp).  
+        - subject (str): Short subject line of the commit message.  
+        - message (str): Full commit message.  
+        - trailer (str): Additional metadata fields attached to the commit (JSON-like).  
+        - difference (str): JSON-like structure representing file changes introduced by the commit.  
+        - difference_truncated (bool): Indicator if the difference data is truncated.  
+        - repo_name (str): Repository name in `owner/repo` format.  
+        - encoding (str): Encoding format of the commit data (if applicable).  
+
+    - files  
+      - Fields:  
+        - repo_name (str): Name of the GitHub repository in `owner/repo` format.  
+        - ref (str): Reference name (branch or commit SHA) at which the file metadata is recorded.  
+        - path (str): Path of the file within the repository.  
+        - mode (int): File mode (e.g., normal file, executable, symlink).  
+        - id (str): Identifier of the file blob.  
+        - symlink_target (str): If the file is a symlink, the target path it points to.  

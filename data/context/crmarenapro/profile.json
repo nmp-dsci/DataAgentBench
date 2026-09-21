@@ -1,0 +1,2701 @@
+{
+ "crmarenapro_event": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 54
+  },
+  "WhatId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 31,
+   "top": [
+    [
+     "006Wt000007BF7mIAG",
+     5
+    ],
+    [
+     "006Wt000007BDvaIAG",
+     4
+    ],
+    [
+     "006Wt000007BCMrIAO",
+     4
+    ],
+    [
+     "006Wt000007BIaHIAW",
+     3
+    ],
+    [
+     "006Wt000007Aw3WIAS",
+     3
+    ],
+    [
+     "006Wt000007B49SIAS",
+     3
+    ],
+    [
+     "006Wt000007BERtIAO",
+     3
+    ],
+    [
+     "006Wt000007BCwJIAW",
+     2
+    ],
+    [
+     "006Wt000007B6cUIAS",
+     2
+    ],
+    [
+     "#006Wt000007BCMrIAO",
+     2
+    ]
+   ]
+  },
+  "OwnerId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 45,
+   "top": [
+    [
+     "005Wt000003NIgrIAG",
+     3
+    ],
+    [
+     "005Wt000003NJ9uIAG",
+     3
+    ],
+    [
+     "005Wt000003NDEBIA4",
+     3
+    ],
+    [
+     "005Wt000003NBp4IAG",
+     2
+    ],
+    [
+     "005Wt000003NIAdIAO",
+     2
+    ],
+    [
+     "005Wt000003NIx1IAG",
+     2
+    ],
+    [
+     "005Wt000003NJmbIAG",
+     1
+    ],
+    [
+     "005Wt000003NHpdIAG",
+     1
+    ],
+    [
+     "005Wt000003NF9WIAW",
+     1
+    ],
+    [
+     "#005Wt000003NIXDIA4",
+     1
+    ]
+   ]
+  },
+  "StartDateTime": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 46,
+   "top": [
+    [
+     "2024-06-15T13:00:00.000+0000",
+     3
+    ],
+    [
+     "2024-06-20T09:00:00.000+0000",
+     3
+    ],
+    [
+     "2024-07-01T14:00:00.000+0000",
+     2
+    ],
+    [
+     "2024-07-10T13:30:00.000+0000",
+     2
+    ],
+    [
+     "2024-06-20T11:00:00.000+0000",
+     2
+    ],
+    [
+     "2024-07-19T09:00:00.000+0000",
+     2
+    ],
+    [
+     "2024-06-15T15:00:00.000+0000",
+     1
+    ],
+    [
+     "2024-07-05T11:30:00.000+0000",
+     1
+    ],
+    [
+     "2024-07-30T09:00:00.000+0000",
+     1
+    ],
+    [
+     "2024-06-15T15:30:00.000+0000",
+     1
+    ]
+   ]
+  },
+  "Subject": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 48,
+   "top": [
+    [
+     "Customer Kick-off Meeting",
+     3
+    ],
+    [
+     "Organize Customer Kick-off Meeting",
+     2
+    ],
+    [
+     "Prepare Contract for Review ",
+     2
+    ],
+    [
+     "Internal Review Meeting",
+     2
+    ],
+    [
+     "Customer Kick-Off Meeting ",
+     2
+    ],
+    [
+     "Retarget Lost Leads",
+     1
+    ],
+    [
+     "Post-Sale Follow-Up Activities",
+     1
+    ],
+    [
+     "Customer Kick-off Meeting ",
+     1
+    ],
+    [
+     "Negotiate Agreement Terms",
+     1
+    ],
+    [
+     "Complete Post-Sale Follow-Up",
+     1
+    ]
+   ]
+  },
+  "Description": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 54
+  },
+  "DurationInMinutes": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 6,
+   "top": [
+    [
+     "60",
+     29
+    ],
+    [
+     "90",
+     10
+    ],
+    [
+     "30",
+     8
+    ],
+    [
+     "120",
+     5
+    ],
+    [
+     "45",
+     1
+    ],
+    [
+     "210",
+     1
+    ]
+   ]
+  },
+  "Location": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 3,
+   "top": [
+    [
+     "Office",
+     26
+    ],
+    [
+     "Virtual",
+     15
+    ],
+    [
+     "Client Site",
+     13
+    ]
+   ]
+  },
+  "IsAllDayEvent": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 1,
+   "min": "0",
+   "max": "0"
+  }
+ },
+ "crmarenapro_task": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 4783
+  },
+  "WhatId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1698
+  },
+  "OwnerId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 180
+  },
+  "Priority": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 3,
+   "top": [
+    [
+     "High",
+     2447
+    ],
+    [
+     "Normal",
+     2101
+    ],
+    [
+     "Low",
+     235
+    ]
+   ]
+  },
+  "Status": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 15,
+   "top": [
+    [
+     "Not Started",
+     3093
+    ],
+    [
+     "In Progress",
+     717
+    ],
+    [
+     "Not Started ",
+     264
+    ],
+    [
+     "Not Started  ",
+     254
+    ],
+    [
+     "Not Started   ",
+     245
+    ],
+    [
+     "In Progress ",
+     67
+    ],
+    [
+     "In Progress  ",
+     51
+    ],
+    [
+     "In Progress   ",
+     48
+    ],
+    [
+     "Deferred",
+     29
+    ],
+    [
+     "Waiting",
+     5
+    ]
+   ]
+  },
+  "ActivityDate": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 959
+  },
+  "Subject": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 2467
+  },
+  "Description": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 4772
+  }
+ },
+ "crmarenapro_voicecalltranscript__c": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 4033
+  },
+  "OpportunityId__c": {
+   "type": "character varying",
+   "null_rate": 0.1436,
+   "distinct": 1170
+  },
+  "LeadId__c": {
+   "type": "character varying",
+   "null_rate": 0.8564,
+   "distinct": 579
+  },
+  "Body__c": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 4033
+  },
+  "CreatedDate": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 3261
+  },
+  "EndTime__c": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1161
+  }
+ },
+ "crmarenapro_account": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 101
+  },
+  "Name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 101
+  },
+  "Phone": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 101
+  },
+  "Industry": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 69
+  },
+  "Description": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 101
+  },
+  "NumberOfEmployees": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 39,
+   "min": "300.0",
+   "max": "1800.0"
+  },
+  "ShippingState": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 24,
+   "top": [
+    [
+     "CA",
+     12
+    ],
+    [
+     "TX",
+     11
+    ],
+    [
+     "NY",
+     10
+    ],
+    [
+     "FL",
+     10
+    ],
+    [
+     "WA",
+     8
+    ],
+    [
+     "GA",
+     6
+    ],
+    [
+     "CO",
+     6
+    ],
+    [
+     "OR",
+     5
+    ],
+    [
+     "MA",
+     5
+    ],
+    [
+     "IL",
+     3
+    ]
+   ]
+  }
+ },
+ "crmarenapro_contact": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 886
+  },
+  "FirstName": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 508
+  },
+  "LastName": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 593
+  },
+  "Email": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 886
+  },
+  "AccountId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 188
+  }
+ },
+ "crmarenapro_user": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 212
+  },
+  "FirstName": {
+   "type": "character varying",
+   "null_rate": 0.0189,
+   "distinct": 172
+  },
+  "LastName": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 180
+  },
+  "Email": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 209
+  },
+  "Phone": {
+   "type": "character varying",
+   "null_rate": 0.0566,
+   "distinct": 178
+  },
+  "Username": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 212
+  },
+  "Alias": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 199
+  },
+  "LanguageLocaleKey": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1,
+   "top": [
+    [
+     "en_US",
+     212
+    ]
+   ]
+  },
+  "EmailEncodingKey": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1,
+   "top": [
+    [
+     "UTF-8",
+     212
+    ]
+   ]
+  },
+  "TimeZoneSidKey": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1,
+   "top": [
+    [
+     "America/Los_Angeles",
+     212
+    ]
+   ]
+  },
+  "LocaleSidKey": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1,
+   "top": [
+    [
+     "en_US",
+     212
+    ]
+   ]
+  }
+ },
+ "crmarenapro_order": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 163
+  },
+  "AccountId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 99
+  },
+  "Status": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 4,
+   "top": [
+    [
+     "Activated",
+     129
+    ],
+    [
+     "Activated  ",
+     14
+    ],
+    [
+     "Activated ",
+     11
+    ],
+    [
+     "Activated   ",
+     9
+    ]
+   ]
+  },
+  "EffectiveDate": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 106
+  },
+  "Pricebook2Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "top": [
+    [
+     "01sWt000000imiTIAQ",
+     118
+    ],
+    [
+     "#01sWt000000imiTIAQ",
+     45
+    ]
+   ]
+  },
+  "OwnerId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 101
+  }
+ },
+ "crmarenapro_orderitem": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 689
+  },
+  "OrderId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 274
+  },
+  "Product2Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 71
+  },
+  "Quantity": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 36,
+   "top": [
+    [
+     "10.0",
+     120
+    ],
+    [
+     "8.0",
+     77
+    ],
+    [
+     "1.0",
+     72
+    ],
+    [
+     "12.0",
+     63
+    ],
+    [
+     "15.0",
+     57
+    ],
+    [
+     "7.0",
+     46
+    ],
+    [
+     "5.0",
+     45
+    ],
+    [
+     "20.0",
+     42
+    ],
+    [
+     "3.0",
+     37
+    ],
+    [
+     "2.0",
+     29
+    ]
+   ]
+  },
+  "UnitPrice": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 66
+  },
+  "PriceBookEntryId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 39,
+   "top": [
+    [
+     "01uWt0000027P5NIAU",
+     121
+    ],
+    [
+     "01uWt0000027P8cIAE",
+     99
+    ],
+    [
+     "01uWt0000027P6zIAE",
+     73
+    ],
+    [
+     "01uWt0000027P3lIAE",
+     47
+    ],
+    [
+     "01uWt0000027P8bIAE",
+     45
+    ],
+    [
+     "01uWt0000027PBpIAM",
+     26
+    ],
+    [
+     "01uWt0000027PIHIA2",
+     23
+    ],
+    [
+     "01uWt0000027PGfIAM",
+     23
+    ],
+    [
+     "01uWt0000027PjhIAE",
+     23
+    ],
+    [
+     "01uWt0000027PJtIAM",
+     19
+    ]
+   ]
+  }
+ },
+ "crmarenapro_pricebook2": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "top": [
+    [
+     "01sWt000000iu1hIAA",
+     1
+    ],
+    [
+     "01sWt000000imiTIAQ",
+     1
+    ]
+   ]
+  },
+  "Name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "top": [
+    [
+     "Standard Pricebook",
+     1
+    ],
+    [
+     "Standard Price Book",
+     1
+    ]
+   ]
+  },
+  "Description": {
+   "type": "character varying",
+   "null_rate": 0.5,
+   "distinct": 1,
+   "top": [
+    [
+     "The standard pricebook.",
+     1
+    ]
+   ]
+  },
+  "IsActive": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 1,
+   "min": "1",
+   "max": "1"
+  },
+  "ValidFrom": {
+   "type": "character varying",
+   "null_rate": 1.0,
+   "distinct": 0
+  },
+  "ValidTo": {
+   "type": "character varying",
+   "null_rate": 1.0,
+   "distinct": 0
+  }
+ },
+ "crmarenapro_pricebookentry": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 50,
+   "top": [
+    [
+     "01uWt0000027PdFIAU",
+     1
+    ],
+    [
+     "01uWt0000027Pa1IAE",
+     1
+    ],
+    [
+     "#01uWt0000027PGfIAM",
+     1
+    ],
+    [
+     "#01uWt0000027PRxIAM",
+     1
+    ],
+    [
+     "01uWt0000027PIHIA2",
+     1
+    ],
+    [
+     "01uWt0000027PerIAE",
+     1
+    ],
+    [
+     "01uWt0000027PlJIAU",
+     1
+    ],
+    [
+     "01uWt0000027PIIIA2",
+     1
+    ],
+    [
+     "01uWt0000027P5NIAU",
+     1
+    ],
+    [
+     "01uWt0000027P3lIAE",
+     1
+    ]
+   ]
+  },
+  "Pricebook2Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "top": [
+    [
+     "01sWt000000imiTIAQ",
+     33
+    ],
+    [
+     "#01sWt000000imiTIAQ",
+     17
+    ]
+   ]
+  },
+  "Product2Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 50,
+   "top": [
+    [
+     "01tWt000006hTUkIAM",
+     1
+    ],
+    [
+     "01tWt000006hUgwIAE",
+     1
+    ],
+    [
+     "01tWt000006hVY9IAM",
+     1
+    ],
+    [
+     "01tWt000006hV57IAE",
+     1
+    ],
+    [
+     "01tWt000006hVebIAE",
+     1
+    ],
+    [
+     "01tWt000006hVUvIAM",
+     1
+    ],
+    [
+     "01tWt000006hVrWIAU",
+     1
+    ],
+    [
+     "01tWt000006hVjRIAU",
+     1
+    ],
+    [
+     "01tWt000006hVt7IAE",
+     1
+    ],
+    [
+     "#01tWt000006hVGPIA2",
+     1
+    ]
+   ]
+  },
+  "UnitPrice": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 22,
+   "top": [
+    [
+     "399.99",
+     5
+    ],
+    [
+     "529.99",
+     4
+    ],
+    [
+     "599.99",
+     4
+    ],
+    [
+     "299.99",
+     4
+    ],
+    [
+     "459.99",
+     4
+    ],
+    [
+     "559.99",
+     3
+    ],
+    [
+     "499.99",
+     3
+    ],
+    [
+     "429.99",
+     3
+    ],
+    [
+     "349.99",
+     3
+    ],
+    [
+     "489.99",
+     2
+    ]
+   ]
+  }
+ },
+ "crmarenapro_product2": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 51
+  },
+  "Name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 51
+  },
+  "Description": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 51
+  },
+  "IsActive": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 1,
+   "min": "1",
+   "max": "1"
+  },
+  "External_ID__c": {
+   "type": "character varying",
+   "null_rate": 0.0196,
+   "distinct": 50,
+   "top": [
+    [
+     "AI-Powered Circuit Design Tools,Cloud-Based Design Collaboration_47",
+     1
+    ],
+    [
+     "Simulation and Verification Software,Data Analytics Platforms_50",
+     1
+    ],
+    [
+     "Security and Compliance Modules,Cloud-Based Design Collaboration_24",
+     1
+    ],
+    [
+     "Simulation and Verification Software,Data Analytics Platforms_19",
+     1
+    ],
+    [
+     "Integrated Development Environments,PCB Design Solutions_17",
+     1
+    ],
+    [
+     "Customizable Workflow Automation,Cloud-Based Design Collaboration_10",
+     1
+    ],
+    [
+     "Power Optimization Tools,Customizable Workflow Automation_15",
+     1
+    ],
+    [
+     "AI-Powered Circuit Design Tools,Cloud-Based Design Collaboration_21",
+     1
+    ],
+    [
+     "AI-Powered Circuit Design Tools,Customizable Workflow Automation_5",
+     1
+    ],
+    [
+     "Security and Compliance Modules,Data Analytics Platforms_2",
+     1
+    ]
+   ]
+  }
+ },
+ "crmarenapro_productcategory": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 10,
+   "top": [
+    [
+     "0ZGWt0000005Xg5OAE",
+     1
+    ],
+    [
+     "0ZGWt0000005Xo9OAE",
+     1
+    ],
+    [
+     "0ZGWt0000005XrNOAU",
+     1
+    ],
+    [
+     "0ZGWt0000005XeTOAU",
+     1
+    ],
+    [
+     "0ZGWt0000005XmXOAU",
+     1
+    ],
+    [
+     "0ZGWt0000005XcrOAE",
+     1
+    ],
+    [
+     "0ZGWt0000005XplOAE",
+     1
+    ],
+    [
+     "0ZGWt0000005XjJOAU",
+     1
+    ],
+    [
+     "0ZGWt0000005XkvOAE",
+     1
+    ],
+    [
+     "#0ZGWt0000005XhhOAE",
+     1
+    ]
+   ]
+  },
+  "Name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 10,
+   "top": [
+    [
+     "Cloud-Based Design Collaboration   ",
+     1
+    ],
+    [
+     "Customizable Workflow Automation",
+     1
+    ],
+    [
+     "PCB Design Solutions",
+     1
+    ],
+    [
+     "Security and Compliance Modules",
+     1
+    ],
+    [
+     "Simulation and Verification Software",
+     1
+    ],
+    [
+     "Educational and Training Platforms",
+     1
+    ],
+    [
+     "Integrated Development Environments ",
+     1
+    ],
+    [
+     "Power Optimization Tools",
+     1
+    ],
+    [
+     "Data Analytics Platforms",
+     1
+    ],
+    [
+     "AI-Powered Circuit Design Tools",
+     1
+    ]
+   ]
+  },
+  "CatalogId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1,
+   "top": [
+    [
+     "0ZSWt0000005B9JOAU",
+     10
+    ]
+   ]
+  }
+ },
+ "crmarenapro_productcategoryproduct": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 100
+  },
+  "ProductCategoryId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 19,
+   "top": [
+    [
+     "0ZGWt0000005XcrOAE",
+     9
+    ],
+    [
+     "0ZGWt0000005XeTOAU",
+     9
+    ],
+    [
+     "0ZGWt0000005XkvOAE",
+     8
+    ],
+    [
+     "0ZGWt0000005Xg5OAE",
+     8
+    ],
+    [
+     "0ZGWt0000005XmXOAU",
+     8
+    ],
+    [
+     "0ZGWt0000005Xo9OAE",
+     8
+    ],
+    [
+     "0ZGWt0000005XplOAE",
+     6
+    ],
+    [
+     "0ZGWt0000005XjJOAU",
+     6
+    ],
+    [
+     "0ZGWt0000005XhhOAE",
+     5
+    ],
+    [
+     "0ZGWt0000005XrNOAU",
+     5
+    ]
+   ]
+  },
+  "ProductId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 50,
+   "top": [
+    [
+     "01tWt000006hUtqIAE",
+     2
+    ],
+    [
+     "01tWt000006hV8LIAU",
+     2
+    ],
+    [
+     "01tWt000006hVZlIAM",
+     2
+    ],
+    [
+     "01tWt000006hV0IIAU",
+     2
+    ],
+    [
+     "01tWt000006hVEnIAM",
+     2
+    ],
+    [
+     "01tWt000006hVczIAE",
+     2
+    ],
+    [
+     "01tWt000006hVrVIAU",
+     2
+    ],
+    [
+     "01tWt000006hVBZIA2",
+     2
+    ],
+    [
+     "01tWt000006hOd8IAE",
+     2
+    ],
+    [
+     "01tWt000006hVTJIA2",
+     2
+    ]
+   ]
+  }
+ },
+ "crmarenapro_contract": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 163
+  },
+  "AccountId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 91
+  },
+  "Status": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 4,
+   "top": [
+    [
+     "Activated",
+     123
+    ],
+    [
+     "Activated   ",
+     16
+    ],
+    [
+     "Activated ",
+     13
+    ],
+    [
+     "Activated  ",
+     11
+    ]
+   ]
+  },
+  "StartDate": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 106
+  },
+  "CustomerSignedDate": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 144
+  },
+  "CompanySignedDate": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 151
+  },
+  "Description": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 163
+  },
+  "ContractTerm": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 3,
+   "top": [
+    [
+     "12",
+     126
+    ],
+    [
+     "24",
+     36
+    ],
+    [
+     "36",
+     1
+    ]
+   ]
+  }
+ },
+ "crmarenapro_lead": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1465
+  },
+  "FirstName": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 660
+  },
+  "LastName": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 751
+  },
+  "Email": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1465
+  },
+  "Phone": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1221
+  },
+  "Company": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 512
+  },
+  "Status": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 16,
+   "top": [
+    [
+     "Converted",
+     1023
+    ],
+    [
+     "Converted ",
+     91
+    ],
+    [
+     "Converted  ",
+     83
+    ],
+    [
+     "Converted   ",
+     72
+    ],
+    [
+     "New",
+     56
+    ],
+    [
+     "Working",
+     56
+    ],
+    [
+     "Qualified",
+     43
+    ],
+    [
+     "Working   ",
+     8
+    ],
+    [
+     "New   ",
+     7
+    ],
+    [
+     "New  ",
+     5
+    ]
+   ]
+  },
+  "ConvertedContactId": {
+   "type": "character varying",
+   "null_rate": 0.3959,
+   "distinct": 885
+  },
+  "ConvertedAccountId": {
+   "type": "character varying",
+   "null_rate": 0.3959,
+   "distinct": 101
+  },
+  "Title": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 937
+  },
+  "CreatedDate": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1440
+  },
+  "ConvertedDate": {
+   "type": "character varying",
+   "null_rate": 0.3959,
+   "distinct": 680
+  },
+  "IsConverted": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "min": "0",
+   "max": "1"
+  },
+  "OwnerId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 174
+  }
+ },
+ "crmarenapro_opportunity": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1170
+  },
+  "ContractID__c": {
+   "type": "character varying",
+   "null_rate": 0.8607,
+   "distinct": 163
+  },
+  "AccountId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 196
+  },
+  "ContactId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 806
+  },
+  "OwnerId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 170
+  },
+  "Probability": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 33,
+   "top": [
+    [
+     "75.0",
+     394
+    ],
+    [
+     "85.0",
+     330
+    ],
+    [
+     "65.0",
+     165
+    ],
+    [
+     "78.0",
+     69
+    ],
+    [
+     "45.0",
+     31
+    ],
+    [
+     "70.0",
+     23
+    ],
+    [
+     "72.0",
+     22
+    ],
+    [
+     "67.0",
+     21
+    ],
+    [
+     "87.0",
+     20
+    ],
+    [
+     "68.0",
+     18
+    ]
+   ]
+  },
+  "Amount": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 1119,
+   "min": "2309.94",
+   "max": "297493.625"
+  },
+  "StageName": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 20,
+   "top": [
+    [
+     "Closed",
+     197
+    ],
+    [
+     "Discovery",
+     191
+    ],
+    [
+     "Quote",
+     183
+    ],
+    [
+     "Negotiation",
+     178
+    ],
+    [
+     "Qualification",
+     175
+    ],
+    [
+     "Discovery ",
+     22
+    ],
+    [
+     "Closed   ",
+     22
+    ],
+    [
+     "Quote   ",
+     21
+    ],
+    [
+     "Closed ",
+     20
+    ],
+    [
+     "Qualification   ",
+     20
+    ]
+   ]
+  },
+  "Name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1130
+  },
+  "Description": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1170
+  },
+  "CreatedDate": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1129
+  },
+  "CloseDate": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 313
+  }
+ },
+ "crmarenapro_opportunitylineitem": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 4926
+  },
+  "OpportunityId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1975
+  },
+  "Product2Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 88
+  },
+  "PricebookEntryId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 46,
+   "top": [
+    [
+     "01uWt0000027P5NIAU",
+     872
+    ],
+    [
+     "01uWt0000027P8cIAE",
+     702
+    ],
+    [
+     "01uWt0000027P6zIAE",
+     551
+    ],
+    [
+     "01uWt0000027P3lIAE",
+     349
+    ],
+    [
+     "01uWt0000027P8bIAE",
+     294
+    ],
+    [
+     "01uWt0000027PBpIAM",
+     247
+    ],
+    [
+     "01uWt0000027PjhIAE",
+     149
+    ],
+    [
+     "01uWt0000027PIHIA2",
+     141
+    ],
+    [
+     "01uWt0000027PGfIAM",
+     130
+    ],
+    [
+     "01uWt0000027PJtIAM",
+     126
+    ]
+   ]
+  },
+  "Quantity": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 55
+  },
+  "TotalPrice": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 538
+  }
+ },
+ "crmarenapro_quote": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 704
+  },
+  "OpportunityId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 704
+  },
+  "AccountId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 185
+  },
+  "ContactId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 550
+  },
+  "Name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 698
+  },
+  "Description": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 702
+  },
+  "Status": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 31,
+   "top": [
+    [
+     "Approved",
+     169
+    ],
+    [
+     "Accepted",
+     139
+    ],
+    [
+     "Needs Review",
+     88
+    ],
+    [
+     "In Review",
+     81
+    ],
+    [
+     "Presented",
+     71
+    ],
+    [
+     "Approved ",
+     14
+    ],
+    [
+     "Approved  ",
+     12
+    ],
+    [
+     "Draft",
+     12
+    ],
+    [
+     "Needs Review  ",
+     12
+    ],
+    [
+     "Rejected",
+     10
+    ]
+   ]
+  },
+  "CreatedDate": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 641
+  },
+  "ExpirationDate": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 350
+  }
+ },
+ "crmarenapro_quotelineitem": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 2966
+  },
+  "QuoteId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1159
+  },
+  "OpportunityLineItemId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 2966
+  },
+  "Product2Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 85
+  },
+  "PricebookEntryId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 44,
+   "top": [
+    [
+     "01uWt0000027P5NIAU",
+     514
+    ],
+    [
+     "01uWt0000027P8cIAE",
+     410
+    ],
+    [
+     "01uWt0000027P6zIAE",
+     334
+    ],
+    [
+     "01uWt0000027P3lIAE",
+     215
+    ],
+    [
+     "01uWt0000027P8bIAE",
+     184
+    ],
+    [
+     "01uWt0000027PBpIAM",
+     151
+    ],
+    [
+     "01uWt0000027PGfIAM",
+     89
+    ],
+    [
+     "01uWt0000027PjhIAE",
+     88
+    ],
+    [
+     "01uWt0000027PIHIA2",
+     80
+    ],
+    [
+     "01uWt0000027PJtIAM",
+     75
+    ]
+   ]
+  },
+  "Quantity": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 52
+  },
+  "UnitPrice": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 19,
+   "top": [
+    [
+     "599.99",
+     689
+    ],
+    [
+     "529.99",
+     503
+    ],
+    [
+     "399.99",
+     426
+    ],
+    [
+     "499.99",
+     221
+    ],
+    [
+     "349.99",
+     190
+    ],
+    [
+     "449.99",
+     177
+    ],
+    [
+     "549.99",
+     142
+    ],
+    [
+     "299.99",
+     109
+    ],
+    [
+     "459.99",
+     108
+    ],
+    [
+     "479.99",
+     89
+    ]
+   ]
+  },
+  "Discount": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 7,
+   "top": [
+    [
+     "10.0",
+     987
+    ],
+    [
+     "5.0",
+     810
+    ],
+    [
+     "0.0",
+     620
+    ],
+    [
+     "15.0",
+     423
+    ],
+    [
+     "20.0",
+     76
+    ],
+    [
+     "25.0",
+     43
+    ],
+    [
+     "30.0",
+     7
+    ]
+   ]
+  },
+  "TotalPrice": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 486
+  }
+ },
+ "crmarenapro_case": {
+  "id": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 153
+  },
+  "priority": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 3,
+   "top": [
+    [
+     "Medium",
+     76
+    ],
+    [
+     "High",
+     69
+    ],
+    [
+     "Low",
+     8
+    ]
+   ]
+  },
+  "subject": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 134
+  },
+  "description": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 153
+  },
+  "status": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 10,
+   "top": [
+    [
+     "Closed",
+     64
+    ],
+    [
+     "Waiting on Customer",
+     57
+    ],
+    [
+     "Working",
+     12
+    ],
+    [
+     "Closed ",
+     6
+    ],
+    [
+     "Closed  ",
+     4
+    ],
+    [
+     "Waiting on Customer  ",
+     4
+    ],
+    [
+     "Waiting on Customer   ",
+     3
+    ],
+    [
+     "Working  ",
+     1
+    ],
+    [
+     "Closed   ",
+     1
+    ],
+    [
+     "Waiting on Customer ",
+     1
+    ]
+   ]
+  },
+  "contactid": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 104
+  },
+  "createddate": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 152
+  },
+  "closeddate": {
+   "type": "text",
+   "null_rate": 0.5098,
+   "distinct": 75
+  },
+  "orderitemid__c": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 109
+  },
+  "issueid__c": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 13,
+   "top": [
+    [
+     "a03Wt00000JqzR3IAJ",
+     24
+    ],
+    [
+     "a03Wt00000JqzSfIAJ",
+     17
+    ],
+    [
+     "a03Wt00000JqxVjIAJ",
+     17
+    ],
+    [
+     "a03Wt00000JqvNUIAZ",
+     16
+    ],
+    [
+     "a03Wt00000JqxtvIAB",
+     15
+    ],
+    [
+     "a03Wt00000JqzPSIAZ",
+     13
+    ],
+    [
+     "a03Wt00000JqmX6IAJ",
+     11
+    ],
+    [
+     "a03Wt00000JqnHwIAJ",
+     9
+    ],
+    [
+     "a03Wt00000JqzKcIAJ",
+     9
+    ],
+    [
+     "a03Wt00000JqhItIAJ",
+     6
+    ]
+   ]
+  },
+  "accountid": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 78
+  },
+  "ownerid": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 99
+  }
+ },
+ "crmarenapro_casehistory__c": {
+  "id": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 393
+  },
+  "caseid__c": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 153
+  },
+  "oldvalue__c": {
+   "type": "text",
+   "null_rate": 0.9695,
+   "distinct": 11,
+   "top": [
+    [
+     "005Wt000003NJ6gIAG",
+     2
+    ],
+    [
+     "005Wt000003NIliIAG",
+     1
+    ],
+    [
+     "005Wt000003NH3GIAW",
+     1
+    ],
+    [
+     "005Wt000003NIc2IAG",
+     1
+    ],
+    [
+     "005Wt000003NHg0IAG",
+     1
+    ],
+    [
+     "005Wt000003NHGAIA4",
+     1
+    ],
+    [
+     "005Wt000003NJ6fIAG",
+     1
+    ],
+    [
+     "005Wt000003NHuUIAW",
+     1
+    ],
+    [
+     "005Wt000003NF1SIAW",
+     1
+    ],
+    [
+     "005Wt000003NFhOIAW",
+     1
+    ]
+   ]
+  },
+  "newvalue__c": {
+   "type": "text",
+   "null_rate": 0.5802,
+   "distinct": 78
+  },
+  "createddate": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 239
+  },
+  "field__c": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 3,
+   "top": [
+    [
+     "Owner Assignment",
+     165
+    ],
+    [
+     "Case Creation",
+     153
+    ],
+    [
+     "Case Closed",
+     75
+    ]
+   ]
+  }
+ },
+ "crmarenapro_emailmessage": {
+  "id": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 5686
+  },
+  "subject": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 2926
+  },
+  "textbody": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 5686
+  },
+  "parentid": {
+   "type": "text",
+   "null_rate": 0.9105,
+   "distinct": 95
+  },
+  "fromaddress": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 713
+  },
+  "toids": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 720
+  },
+  "messagedate": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 4736
+  },
+  "relatedtoid": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 1119
+  }
+ },
+ "crmarenapro_issue__c": {
+  "id": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 15,
+   "top": [
+    [
+     "#a03Wt00000JqxtvIAB",
+     1
+    ],
+    [
+     "a03Wt00000JqvvOIAR",
+     1
+    ],
+    [
+     "#a03Wt00000JqtOtIAJ",
+     1
+    ],
+    [
+     "a03Wt00000JqnHwIAJ",
+     1
+    ],
+    [
+     "a03Wt00000JqzSfIAJ",
+     1
+    ],
+    [
+     "a03Wt00000JqzPSIAZ",
+     1
+    ],
+    [
+     "a03Wt00000JqzKcIAJ",
+     1
+    ],
+    [
+     "a03Wt00000JqmX6IAJ",
+     1
+    ],
+    [
+     "a03Wt00000JqzR3IAJ",
+     1
+    ],
+    [
+     "#a03Wt00000JqzUHIAZ",
+     1
+    ]
+   ]
+  },
+  "name": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 15,
+   "top": [
+    [
+     "Data Loss Incident",
+     1
+    ],
+    [
+     "Billing Discrepancy",
+     1
+    ],
+    [
+     "Scalability Issue",
+     1
+    ],
+    [
+     "Data Integration Error",
+     1
+    ],
+    [
+     "Feature Update Notification",
+     1
+    ],
+    [
+     "Training Module Access   ",
+     1
+    ],
+    [
+     "User Interface Bug",
+     1
+    ],
+    [
+     "ROI Assessment Discrepancy",
+     1
+    ],
+    [
+     "Support Response Delay",
+     1
+    ],
+    [
+     "License Renewal Confusion",
+     1
+    ]
+   ]
+  },
+  "description__c": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 15,
+   "top": [
+    [
+     "Some users face delays in getting timely responses from the TechPulse support team during peak times.",
+     1
+    ],
+    [
+     "In rare cases, clients experience unanticipated data loss during software updates, causing significant operational setbacks.",
+     1
+    ],
+    [
+     "Despite customization options, some users find it challenging to tailor solutions to fit extremely niche industry needs.",
+     1
+    ],
+    [
+     "Customers report occasional technical difficulties accessing online training modules crucial for product adoption.",
+     1
+    ],
+    [
+     "A few customers need assistance reconciling their expected ROI with performance metrics delivered by the solutions.",
+     1
+    ],
+    [
+     "Some enterprises report difficulties in scaling TechPulse solutions to meet increasing demands, impacting their expansion efforts.",
+     1
+    ],
+    [
+     "Customers are not consistently notified of new feature updates, leading to underutilization of the software's full capabilities.",
+     1
+    ],
+    [
+     "Users experience challenges when integrating TechPulse solutions with specific third-party software, leading to workflow disruptions.",
+     1
+    ],
+    [
+     "Clients have concerns about understanding and adhering to the evolving security compliance standards set by TechPulse Solutions.",
+     1
+    ],
+    [
+     "Some AI-powered features intermittently fail to operate, resulting in reduced efficiency and user frustration.",
+     1
+    ]
+   ]
+  }
+ },
+ "crmarenapro_knowledge__kav": {
+  "id": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 194
+  },
+  "title": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 194
+  },
+  "faq_answer__c": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 194
+  },
+  "summary": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 194
+  },
+  "urlname": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 194
+  }
+ },
+ "crmarenapro_livechattranscript": {
+  "id": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 58
+  },
+  "caseid": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 58
+  },
+  "accountid": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 49,
+   "top": [
+    [
+     "#001Wt00000PGZZoIAP",
+     2
+    ],
+    [
+     "001Wt00000PFt7TIAT",
+     2
+    ],
+    [
+     "001Wt00000PHViZIAX",
+     2
+    ],
+    [
+     "001Wt00000PGzM9IAL",
+     2
+    ],
+    [
+     "#001Wt00000PHVvRIAX",
+     2
+    ],
+    [
+     "001Wt00000PH9ITIA1",
+     2
+    ],
+    [
+     "001Wt00000PHRTeIAP",
+     2
+    ],
+    [
+     "#001Wt00000PHVtpIAH",
+     2
+    ],
+    [
+     "001Wt00000PGzSaIAL",
+     2
+    ],
+    [
+     "#001Wt00000PFsjOIAT",
+     1
+    ]
+   ]
+  },
+  "ownerid": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 46,
+   "top": [
+    [
+     "005Wt000003NJ6gIAG",
+     4
+    ],
+    [
+     "005Wt000003NJhlIAG",
+     3
+    ],
+    [
+     "005Wt000003NFKoIAO",
+     2
+    ],
+    [
+     "005Wt000003NIk7IAG",
+     2
+    ],
+    [
+     "#005Wt000003NJbJIAW",
+     2
+    ],
+    [
+     "005Wt000003NJzVIAW",
+     2
+    ],
+    [
+     "005Wt000003NJGLIA4",
+     2
+    ],
+    [
+     "005Wt000003NFr4IAG",
+     2
+    ],
+    [
+     "005Wt000003NJ0DIAW",
+     2
+    ],
+    [
+     "#005Wt000003NHuUIAW",
+     1
+    ]
+   ]
+  },
+  "body": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 58
+  },
+  "endtime": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 58
+  },
+  "livechatvisitorid": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 58
+  },
+  "contactid": {
+   "type": "text",
+   "null_rate": 1.0,
+   "distinct": 0
+  }
+ },
+ "crmarenapro_territory2": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 10,
+   "top": [
+    [
+     "0MIWt0000007xFeOAI",
+     1
+    ],
+    [
+     "0MIWt0000007xxpOAA",
+     1
+    ],
+    [
+     "0MIWt0000007xCQOAY",
+     1
+    ],
+    [
+     "#0MIWt0000007xrNOAQ",
+     1
+    ],
+    [
+     "0MIWt0000007xCROAY",
+     1
+    ],
+    [
+     "0MIWt0000007xwDOAQ",
+     1
+    ],
+    [
+     "0MIWt0000007xubOAA",
+     1
+    ],
+    [
+     "0MIWt0000007xszOAA",
+     1
+    ],
+    [
+     "0MIWt0000007y13OAA",
+     1
+    ],
+    [
+     "#0MIWt0000007xzROAQ",
+     1
+    ]
+   ]
+  },
+  "Name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 10,
+   "top": [
+    [
+     "US-Northeast",
+     1
+    ],
+    [
+     "US-Southwest",
+     1
+    ],
+    [
+     "US-West",
+     1
+    ],
+    [
+     "US-Mountain",
+     1
+    ],
+    [
+     "US-Southeast",
+     1
+    ],
+    [
+     "US-Northwest   ",
+     1
+    ],
+    [
+     "US-Midwest",
+     1
+    ],
+    [
+     "US-Mid-Atlantic",
+     1
+    ],
+    [
+     "US-Great Lakes",
+     1
+    ],
+    [
+     "US-Central",
+     1
+    ]
+   ]
+  },
+  "Description": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 10,
+   "top": [
+    [
+     "AZ,NM,TX",
+     1
+    ],
+    [
+     "CA,NV,UT",
+     1
+    ],
+    [
+     "FL,GA,AL",
+     1
+    ],
+    [
+     "MI,WI,MN",
+     1
+    ],
+    [
+     "PA,NJ,DE",
+     1
+    ],
+    [
+     "MT,WY,CO",
+     1
+    ],
+    [
+     "WA,OR,ID",
+     1
+    ],
+    [
+     "MO,KS,OK",
+     1
+    ],
+    [
+     "IL,OH,IN",
+     1
+    ],
+    [
+     "NY,VT,NH",
+     1
+    ]
+   ]
+  }
+ },
+ "crmarenapro_userterritory2association": {
+  "Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 184
+  },
+  "UserId": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 115
+  },
+  "Territory2Id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 20,
+   "top": [
+    [
+     "0MIWt0000007xCQOAY",
+     17
+    ],
+    [
+     "0MIWt0000007xzROAQ",
+     17
+    ],
+    [
+     "0MIWt0000007xrNOAQ",
+     17
+    ],
+    [
+     "0MIWt0000007xFeOAI",
+     16
+    ],
+    [
+     "0MIWt0000007xubOAA",
+     13
+    ],
+    [
+     "0MIWt0000007y13OAA",
+     12
+    ],
+    [
+     "0MIWt0000007xxpOAA",
+     12
+    ],
+    [
+     "0MIWt0000007xszOAA",
+     11
+    ],
+    [
+     "0MIWt0000007xwDOAQ",
+     11
+    ],
+    [
+     "#0MIWt0000007xubOAA",
+     9
+    ]
+   ]
+  }
+ }
+}

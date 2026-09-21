@@ -1,0 +1,20 @@
+- `patents_publicationinfo.cpc` is not a scalar CPC code column — it is a JSON-like array of objects (`code`, `first`, `inventive`, `tree`); joining to `patents_cpc_definition.symbol` requires extracting `code` from each array element, not comparing the raw column.
+- `patents_publicationinfo.cpc` "primary" codes are only those elements with `first = true`; the same `code` can appear multiple times in the array (e.g. as both inventive and non-inventive), so counting rows/elements naively will overcount.
+- `patents_cpc_definition.dateRevised` is typed `double precision` and stored as `YYYYMMDD.0` (e.g. `20130101.0`), not a date or text field — despite description.txt describing it as a natural-language date string.
+- `patents_publicationinfo.publication_date`, `filing_date`, `grant_date`, `priority_date` are free-text natural-language dates with inconsistent phrasing (e.g. "Aug 3rd, 2021" vs "dated 5th March 2019" vs "2020, April 7th") — there is no single reliable string format to parse across rows.
+- `patents_publicationinfo.application_kind` values are single-letter codes (`A`, `U`, `W`, `T`, `D`, `C`, `V`, `F`, `K`, `Q`), not spelled-out labels like "utility patent application" as description.txt's example suggests.
+- `patents_publicationinfo.entity_status` is null in 92.98% of rows — absence is the overwhelmingly common case, not an edge case.
+- `patents_publicationinfo.art_unit` is null in 93.19% of rows.
+- `patents_publicationinfo.pct_number` is null in 79.7% of rows.
+- `patents_publicationinfo.family_id` includes a sentinel value of `-1` (min observed), which likely does not represent a real patent family and should not be treated as a valid family identifier without checking.
+- `patents_publicationinfo.title_localized` and `abstract_localized` are JSON-like arrays of `{language, text}` objects, not plain strings — the human-readable title/abstract is nested under a `text` key.
+- `patents_publicationinfo.Patents_info` embeds application number, publication number, assignee, and country as prose inside a sentence (e.g. "PANASONIC IP MAN CO LTD holds the US patent application (ID US-201916293577-A) ..."); there are no separate structured columns for these values.
+- `patents_publicationinfo.citation`, `priority_claim`, `parent`, `child` are JSON-like arrays of objects with their own `application_number`, `category`, `filing_date`, `publication_number`, `type` keys, requiring per-element extraction, not direct string matching.
+- `patents_publicationinfo.claims_localized_html` and `description_localized_html` contain embedded HTML/XML tags (`<claims>`, `<description>`, `<heading>`, `<p>` with `mxw-id`/`num` attributes); plain substring search will pick up markup, not just content.
+- `patents_cpc_definition.titlePart` is a JSON-like list of strings (e.g. `["Swine"]`), not a plain string, even though `titleFull` for the same row is plain text.
+- `patents_cpc_definition.parents`, `childGroups`, `children` are JSON-like text lists of CPC symbol strings, not foreign-key scalar columns.
+- `patents_cpc_definition.breakdownCode` and `notAllocatable` are boolean-typed columns whose sample values print as the strings `"false"`/`"true"` — compare as booleans, not string-match variants like "False"/"FALSE".
+- `patents_cpc_definition.status` has only two observed values, `published` and `frozen` — `frozen` is rare (168 of 260,808 rows) and easy to omit if only skimming the top value.
+- No populated rows exist in joins.md — there are no measured overlap percentages (raw/normalised/digits-only) for any column pair in this dataset; any join between `patents_publicationinfo` and `patents_cpc_definition` is documented only conceptually in hints.txt, not empirically verified.
+- `patents_publicationinfo.family_id` is typed `bigint` but description.txt describes it as a string identifier — the stored type and the documented type disagree.
+- `patents_publicationinfo.Patents_info` has 200,348 distinct values across 277,813 rows, meaning it is not unique per row and may repeat or overlap in ways not otherwise explained.

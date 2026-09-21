@@ -1,0 +1,344 @@
+[
+ {
+  "a": "yelp_business.\"business_id\"",
+  "b": "yelp_checkin.\"business_id\"",
+  "raw": {
+   "distinct_a": 100,
+   "matched": 90,
+   "share": 0.9
+  },
+  "normalised": {
+   "distinct_a": 100,
+   "matched": 90,
+   "share": 0.9
+  },
+  "digits": {
+   "distinct_a": 100,
+   "matched": 90,
+   "share": 0.9
+  }
+ },
+ {
+  "a": "yelp_business.\"business_id\"",
+  "b": "yelp_review.\"business_ref\"",
+  "raw": {
+   "distinct_a": 100,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 100,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 100,
+   "matched": 100,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "yelp_business.\"business_id\"",
+  "b": "yelp_tip.\"business_ref\"",
+  "raw": {
+   "distinct_a": 100,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 100,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 100,
+   "matched": 75,
+   "share": 0.75
+  }
+ },
+ {
+  "a": "yelp_business.\"name\"",
+  "b": "yelp_user.\"name\"",
+  "raw": {
+   "distinct_a": 100,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 100,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 4,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "yelp_checkin.\"business_id\"",
+  "b": "yelp_review.\"business_ref\"",
+  "raw": {
+   "distinct_a": 90,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 90,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 90,
+   "matched": 90,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "yelp_checkin.\"business_id\"",
+  "b": "yelp_tip.\"business_ref\"",
+  "raw": {
+   "distinct_a": 90,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 90,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 90,
+   "matched": 71,
+   "share": 0.7889
+  }
+ },
+ {
+  "a": "yelp_review.\"user_id\"",
+  "b": "yelp_tip.\"user_id\"",
+  "raw": {
+   "distinct_a": 1518,
+   "matched": 65,
+   "share": 0.0428
+  },
+  "normalised": {
+   "distinct_a": 1518,
+   "matched": 65,
+   "share": 0.0428
+  },
+  "digits": {
+   "distinct_a": 1518,
+   "matched": 65,
+   "share": 0.0428
+  }
+ },
+ {
+  "a": "yelp_review.\"user_id\"",
+  "b": "yelp_user.\"user_id\"",
+  "raw": {
+   "distinct_a": 1518,
+   "matched": 1518,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 1518,
+   "matched": 1518,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 1518,
+   "matched": 1518,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "yelp_review.\"business_ref\"",
+  "b": "yelp_tip.\"business_ref\"",
+  "raw": {
+   "distinct_a": 100,
+   "matched": 75,
+   "share": 0.75
+  },
+  "normalised": {
+   "distinct_a": 100,
+   "matched": 75,
+   "share": 0.75
+  },
+  "digits": {
+   "distinct_a": 100,
+   "matched": 75,
+   "share": 0.75
+  }
+ },
+ {
+  "a": "yelp_tip.\"user_id\"",
+  "b": "yelp_user.\"user_id\"",
+  "raw": {
+   "distinct_a": 546,
+   "matched": 546,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 546,
+   "matched": 546,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 546,
+   "matched": 546,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "yelp_business.\"review_count\"",
+  "b": "yelp_user.\"review_count\"",
+  "raw": {
+   "distinct_a": 49,
+   "matched": 44,
+   "share": 0.898
+  },
+  "normalised": {
+   "distinct_a": 49,
+   "matched": 44,
+   "share": 0.898
+  },
+  "digits": {
+   "distinct_a": 49,
+   "matched": 44,
+   "share": 0.898
+  }
+ },
+ {
+  "a": "yelp_checkin.\"date\"",
+  "b": "yelp_review.\"date\"",
+  "raw": {
+   "distinct_a": 90,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 90,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 90,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "yelp_checkin.\"date\"",
+  "b": "yelp_tip.\"date\"",
+  "raw": {
+   "distinct_a": 90,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 90,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 90,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "yelp_review.\"useful\"",
+  "b": "yelp_user.\"useful\"",
+  "raw": {
+   "distinct_a": 39,
+   "matched": 39,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 39,
+   "matched": 39,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 39,
+   "matched": 39,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "yelp_review.\"funny\"",
+  "b": "yelp_user.\"funny\"",
+  "raw": {
+   "distinct_a": 10,
+   "matched": 10,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 10,
+   "matched": 10,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 10,
+   "matched": 10,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "yelp_review.\"cool\"",
+  "b": "yelp_user.\"cool\"",
+  "raw": {
+   "distinct_a": 17,
+   "matched": 17,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 17,
+   "matched": 17,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 17,
+   "matched": 17,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "yelp_review.\"text\"",
+  "b": "yelp_tip.\"text\"",
+  "raw": {
+   "distinct_a": 1998,
+   "matched": 1,
+   "share": 0.0005
+  },
+  "normalised": {
+   "distinct_a": 1998,
+   "matched": 1,
+   "share": 0.0005
+  },
+  "digits": {
+   "distinct_a": 548,
+   "matched": 30,
+   "share": 0.0547
+  }
+ },
+ {
+  "a": "yelp_review.\"date\"",
+  "b": "yelp_tip.\"date\"",
+  "raw": {
+   "distinct_a": 2000,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 2000,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1999,
+   "matched": 1,
+   "share": 0.0005
+  }
+ }
+]

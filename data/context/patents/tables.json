@@ -1,0 +1,206 @@
+[
+ {
+  "store": "CPCDefinition_database",
+  "source_table": "cpc_definition",
+  "table": "patents_cpc_definition",
+  "rows": 260808,
+  "columns": [
+   {
+    "name": "applicationReferences",
+    "type": "text"
+   },
+   {
+    "name": "breakdownCode",
+    "type": "boolean"
+   },
+   {
+    "name": "childGroups",
+    "type": "text"
+   },
+   {
+    "name": "children",
+    "type": "text"
+   },
+   {
+    "name": "dateRevised",
+    "type": "double precision"
+   },
+   {
+    "name": "definition",
+    "type": "text"
+   },
+   {
+    "name": "glossary",
+    "type": "text"
+   },
+   {
+    "name": "informativeReferences",
+    "type": "text"
+   },
+   {
+    "name": "ipcConcordant",
+    "type": "text"
+   },
+   {
+    "name": "level",
+    "type": "double precision"
+   },
+   {
+    "name": "limitingReferences",
+    "type": "text"
+   },
+   {
+    "name": "notAllocatable",
+    "type": "boolean"
+   },
+   {
+    "name": "parents",
+    "type": "text"
+   },
+   {
+    "name": "precedenceLimitingReferences",
+    "type": "text"
+   },
+   {
+    "name": "residualReferences",
+    "type": "text"
+   },
+   {
+    "name": "rules",
+    "type": "text"
+   },
+   {
+    "name": "scopeLimitingReferences",
+    "type": "text"
+   },
+   {
+    "name": "status",
+    "type": "text"
+   },
+   {
+    "name": "symbol",
+    "type": "text"
+   },
+   {
+    "name": "synonyms",
+    "type": "text"
+   },
+   {
+    "name": "titleFull",
+    "type": "text"
+   },
+   {
+    "name": "titlePart",
+    "type": "text"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "publication_database",
+  "source_table": "publicationinfo",
+  "table": "patents_publicationinfo",
+  "rows": 277813,
+  "columns": [
+   {
+    "name": "Patents_info",
+    "type": "character varying"
+   },
+   {
+    "name": "kind_code",
+    "type": "character varying"
+   },
+   {
+    "name": "application_kind",
+    "type": "character varying"
+   },
+   {
+    "name": "pct_number",
+    "type": "character varying"
+   },
+   {
+    "name": "family_id",
+    "type": "bigint"
+   },
+   {
+    "name": "title_localized",
+    "type": "character varying"
+   },
+   {
+    "name": "abstract_localized",
+    "type": "character varying"
+   },
+   {
+    "name": "claims_localized_html",
+    "type": "character varying"
+   },
+   {
+    "name": "description_localized_html",
+    "type": "character varying"
+   },
+   {
+    "name": "publication_date",
+    "type": "character varying"
+   },
+   {
+    "name": "filing_date",
+    "type": "character varying"
+   },
+   {
+    "name": "grant_date",
+    "type": "character varying"
+   },
+   {
+    "name": "priority_date",
+    "type": "character varying"
+   },
+   {
+    "name": "priority_claim",
+    "type": "character varying"
+   },
+   {
+    "name": "inventor_harmonized",
+    "type": "character varying"
+   },
+   {
+    "name": "examiner",
+    "type": "character varying"
+   },
+   {
+    "name": "uspc",
+    "type": "character varying"
+   },
+   {
+    "name": "ipc",
+    "type": "character varying"
+   },
+   {
+    "name": "cpc",
+    "type": "character varying"
+   },
+   {
+    "name": "citation",
+    "type": "character varying"
+   },
+   {
+    "name": "parent",
+    "type": "character varying"
+   },
+   {
+    "name": "child",
+    "type": "character varying"
+   },
+   {
+    "name": "entity_status",
+    "type": "character varying"
+   },
+   {
+    "name": "art_unit",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ }
+]

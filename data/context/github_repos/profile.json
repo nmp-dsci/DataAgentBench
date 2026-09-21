@@ -1,0 +1,277 @@
+{
+ "github_repos_commits": {
+  "commit": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 17976
+  },
+  "tree": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 17969
+  },
+  "parent": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 17746
+  },
+  "author": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 17935
+  },
+  "committer": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 17496
+  },
+  "subject": {
+   "type": "character varying",
+   "null_rate": 0.0001,
+   "distinct": 17710
+  },
+  "message": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 17924
+  },
+  "trailer": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 10133
+  },
+  "difference": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 17965
+  },
+  "difference_truncated": {
+   "type": "double precision",
+   "null_rate": 1.0,
+   "distinct": 0
+  },
+  "repo_name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 6,
+   "top": [
+    [
+     "torvalds/linux",
+     16061
+    ],
+    [
+     "apple/swift",
+     1051
+    ],
+    [
+     "twbs/bootstrap",
+     340
+    ],
+    [
+     "Microsoft/vscode",
+     190
+    ],
+    [
+     "facebook/react",
+     178
+    ],
+    [
+     "tensorflow/tensorflow",
+     156
+    ]
+   ]
+  },
+  "encoding": {
+   "type": "character varying",
+   "null_rate": 0.9996,
+   "distinct": 2,
+   "top": [
+    [
+     "ISO-8859-1",
+     6
+    ],
+    [
+     "ISO-8859-2",
+     1
+    ]
+   ]
+  }
+ },
+ "github_repos_contents": {
+  "id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 24286
+  },
+  "content": {
+   "type": "character varying",
+   "null_rate": 0.1576,
+   "distinct": 20458
+  },
+  "sample_repo_name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 12837
+  },
+  "sample_ref": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 469
+  },
+  "sample_path": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 23750
+  },
+  "sample_symlink_target": {
+   "type": "character varying",
+   "null_rate": 0.9999,
+   "distinct": 3,
+   "top": [
+    [
+     "dark_system-help.svg",
+     1
+    ],
+    [
+     "gpm-keyboard-000.svg",
+     1
+    ],
+    [
+     "unicode/1f6b0.png",
+     1
+    ]
+   ]
+  },
+  "repo_data_description": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 23467
+  }
+ },
+ "github_repos_files": {
+  "repo_name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 25729,
+   "sampled": true
+  },
+  "ref": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 639,
+   "sampled": true
+  },
+  "path": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 185269,
+   "sampled": true
+  },
+  "mode": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 4,
+   "min": "33188",
+   "max": "57344",
+   "sampled": true
+  },
+  "id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 182918,
+   "sampled": true
+  },
+  "symlink_target": {
+   "type": "character varying",
+   "null_rate": 0.9966,
+   "distinct": 614,
+   "sampled": true
+  }
+ },
+ "github_repos_languages": {
+  "repo_name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 198140,
+   "sampled": true
+  },
+  "language_description": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 171634,
+   "sampled": true
+  }
+ },
+ "github_repos_licenses": {
+  "repo_name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 197759,
+   "sampled": true
+  },
+  "license": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 15,
+   "top": [
+    [
+     "mit",
+     104879
+    ],
+    [
+     "apache-2.0",
+     29762
+    ],
+    [
+     "gpl-3.0",
+     21852
+    ],
+    [
+     "gpl-2.0",
+     20487
+    ],
+    [
+     "bsd-3-clause",
+     6924
+    ],
+    [
+     "bsd-2-clause",
+     3276
+    ],
+    [
+     "unlicense",
+     2486
+    ],
+    [
+     "lgpl-3.0",
+     2189
+    ],
+    [
+     "agpl-3.0",
+     2170
+    ],
+    [
+     "cc0-1.0",
+     1637
+    ]
+   ],
+   "sampled": true
+  }
+ },
+ "github_repos_repos": {
+  "repo_name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 201502,
+   "sampled": true
+  },
+  "watch_count": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 909,
+   "min": "2",
+   "max": "90457",
+   "sampled": true
+  }
+ }
+}

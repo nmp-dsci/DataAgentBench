@@ -1,0 +1,23 @@
+HINTS: 
+Below are the definitions of stock market symbols for the relevant columns.  
+- Listing Exchange Codes:
+  - A = NYSE MKT
+  - N = New York Stock Exchange (NYSE)
+  - P = NYSE ARCA
+  - Z = BATS Global Markets (BATS)
+  - V = Investors' Exchange, LLC (IEXG)
+  - Q = NASDAQ Global Select Market (top-tier NASDAQ market)
+- Financial Status Codes:
+  - D = Deficient: Issuer failed to meet NASDAQ continued listing requirements
+  - E = Delinquent: Issuer missed regulatory filing deadline
+  - Q = Bankrupt: Issuer has filed for bankruptcy
+  - N = Normal (default): Issuer is NOT deficient, delinquent, or bankrupt
+  - G = Deficient and bankrupt
+  - H = Deficient and delinquent
+  - J = Delinquent and bankrupt
+  - K = Deficient, delinquent, and bankrupt
+- A company is considered financially troubled if it is deficient, delinquent, or both.
+- Market Category Codes:
+  - Q = NASDAQ Global Select Market
+  - G = NASDAQ Global Market
+  - S = NASDAQ Capital Market

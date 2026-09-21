@@ -1,0 +1,31 @@
+You are working with two databases to solve this query.
+
+Here are the descriptions of these two databases:
+
+1. articles_database
+   - This database is stored in a MongoDB database and contains information about news articles. It serves as the primary source for the content of each article, including its title and description.
+   - This database consists of one collection:
+     - articles
+       - This collection contains the actual news articles. Each document in the collection represents a single news article with its unique identifier, title, and description.
+       - Fields:
+         - _id
+         - article_id (int): Unique identifier for the article
+         - title (str): Title of the news article
+         - description (str): Description of the news article
+
+2. metadata_database
+   - This database is stored in a SQLite database and contains metadata about the news articles. It includes information about the authors, the regions in which the articles were published, and the publication dates.
+   - This database consists of two tables:
+     - authors
+       - This table contains information about all authors who contributed to the articles in the articles_database.
+       - Fields:
+         - author_id (int): Unique identifier for the author
+         - name (str): Full name of the author
+
+     - article_metadata
+       - This table contains metadata linking each article to its author and providing details about its publication. Each row represents a single article and connects it to an author and publication information.
+       - Fields:
+         - article_id (int): Article identifier linking to the articles collection
+         - author_id (int): Author identifier linking to the authors table
+         - region (str): Geographic region where the article was published
+         - publication_date (str): Publication date in the format YYYY-MM-DD

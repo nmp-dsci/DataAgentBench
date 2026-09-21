@@ -204,6 +204,140 @@ def context_curate(datasets: str | None = None, model: str | None = None) -> Non
     console.print(f"curated {len(keys)} datasets · ${total:.2f}")
 
 
+@app.command("eval")
+def eval_cmd(
+    agent: str = "champion",
+    split: str = "smoke",
+    trials: int = 1,
+    workers: int = 4,
+    model: str | None = None,
+    effort: str | None = None,
+    hints: bool | None = None,
+    dry_run: bool = False,
+    queries: str | None = None,
+    note: str = "",
+    no_mlflow: bool = False,
+    challenger_of: str | None = None,
+) -> None:
+    """Run an agent version over a split; judge every answer; write runs/<id>/ and log to MLflow."""
+    import asyncio
+
+    from dab_bench.eval.runner import run_eval
+    from dab_bench.tracking.mlflow_log import TrackingDownError
+
+    try:
+        meta, _ = asyncio.run(
+            run_eval(
+                agent=agent,
+                split=split,
+                trials=trials,
+                workers=workers,
+                model=model,
+                effort=effort,
+                hints=hints,
+                dry_run=dry_run,
+                query_ids=_datasets_arg(queries),
+                note=note,
+                track=not no_mlflow,
+                challenger_of=challenger_of,
+            )
+        )
+    except TrackingDownError as e:
+        console.print(f"[red]{e}[/]  (or pass --no-mlflow for an offline test run)")
+        raise typer.Exit(1) from None
+    console.print(f"run folder: runs/{meta.run_id}")
+
+
+runs_app = typer.Typer(no_args_is_help=True, help="Run folders: list, profile, re-log.")
+app.add_typer(runs_app, name="runs")
+
+
+@runs_app.command("list")
+def runs_list() -> None:
+    """Every run folder with its headline numbers."""
+    from dab_bench.eval.runner import list_runs
+
+    t = Table(box=None)
+    for c in ("run", "agent", "split", "model", "trials", "pass", "macro", "cost", "note"):
+        t.add_column(c)
+    for m in list_runs():
+        s = m.summary or {}
+        macro = s.get("pass_rate_macro")
+        t.add_row(
+            m.run_id,
+            f"{m.agent}@{m.fingerprint}",
+            m.split,
+            m.model.replace("claude-", ""),
+            str(m.trials),
+            f"{s.get('passed', '—')}/{s.get('scored', '—')}",
+            f"{macro:.0%}" if isinstance(macro, float) else "—",
+            f"${s.get('cost_usd', 0):.2f}" if s else "—",
+            m.note[:40],
+        )
+    console.print(t)
+
+
+@runs_app.command("profile")
+def runs_profile(run_id: str) -> None:
+    """Token and turn profile of a run: p50/p90 turns, the four token counts, cost per trial."""
+    import statistics
+
+    from dab_bench.eval.runner import load_run
+
+    meta, results = load_run(run_id)
+    if not results:
+        console.print("no results")
+        raise typer.Exit(1)
+
+    def pct(values: list[float], p: float) -> float:
+        v = sorted(values)
+        return v[min(len(v) - 1, int(round(p * (len(v) - 1))))]
+
+    turns = [float(r.n_turns) for r in results]
+    fresh = [float(r.input_tokens + r.cache_creation_tokens) for r in results]
+    reads = [float(r.cache_read_tokens) for r in results]
+    outs = [float(r.output_tokens) for r in results]
+    costs = [r.cost_usd or 0.0 for r in results]
+    t = Table(box=None)
+    for c in ("metric", "p50", "p90", "mean", "total"):
+        t.add_column(c)
+    for name, vals in (
+        ("turns", turns),
+        ("fresh input tokens", fresh),
+        ("cache read tokens", reads),
+        ("output tokens", outs),
+        ("cost usd", costs),
+    ):
+        t.add_row(
+            name,
+            f"{pct(vals, 0.5):,.2f}" if name == "cost usd" else f"{pct(vals, 0.5):,.0f}",
+            f"{pct(vals, 0.9):,.2f}" if name == "cost usd" else f"{pct(vals, 0.9):,.0f}",
+            f"{statistics.mean(vals):,.3f}"
+            if name == "cost usd"
+            else f"{statistics.mean(vals):,.0f}",
+            f"{sum(vals):,.2f}" if name == "cost usd" else f"{sum(vals):,.0f}",
+        )
+    console.print(t)
+    console.print(
+        f"{len(results)} trials · {meta.model} @ {meta.effort} · fingerprint {meta.fingerprint} · context {meta.context_sha}"
+    )
+
+
+@runs_app.command("log")
+def runs_log(run_id: str) -> None:
+    """Re-log a run folder to the central MLflow (after an outage, or for a run made with --no-mlflow)."""
+    from dab_bench.eval.runner import _write_meta, load_run
+    from dab_bench.tracking.mlflow_log import log_run, preflight
+
+    preflight()
+    meta, results = load_run(run_id)
+    from dab_bench.config import RUNS_DIR
+
+    meta.mlflow_run_id = log_run(RUNS_DIR / run_id, meta, results)
+    _write_meta(RUNS_DIR / run_id, meta)
+    console.print(f"logged {run_id} → mlflow run {meta.mlflow_run_id}")
+
+
 @app.command()
 def serve(port: int = 8091, host: str = "127.0.0.1", reload: bool = False) -> None:
     """Run the API (and the built explorer when frontend/dist exists)."""

@@ -1,0 +1,13 @@
+- `stockindex_index_trade.Date` is stored as `character varying`, not a date/timestamp type — any date comparison or extraction requires casting/parsing text.
+- `stockindex_index_trade.Date` contains mixed formats within the same column: "31 Dec 1986, 00:00" (day-month-year with comma), "January 02, 1987 at 12:00 AM" (month-day-year with "at"), "1987-01-05 00:00:00" (ISO), "06 Jan 1987, 00:00" — a single parsing pattern will fail on some rows.
+- `stockindex_index_info` and `stockindex_index_trade` have no shared key column (`Exchange` vs `Index`); joining them requires an external exchange-name-to-symbol mapping not present in either table (per hints.txt), not a direct equality or normalisation join.
+- joins.md lists no rows — no measured overlap exists for this dataset; any join correspondence between `Exchange` and `Index` is asserted only in hints.txt, not verified against the live data.
+- `stockindex_index_info` has 14 rows (14 exchanges) but `stockindex_index_trade.Index` has only 13 distinct symbols — counts don't align 1:1, so a complete exchange-to-index mapping covering all 14 rows is not guaranteed by the data.
+- `stockindex_index_trade` has no region/country column — region (Asia, Europe, North America, etc.) is not stored anywhere and must be inferred per hints.txt ("You must infer the region using geographic knowledge"), not looked up.
+- `stockindex_index_info.Currency` values are 3-letter ISO-style codes (e.g. "USD", "JPY", "CNY") — case and spelling must match exactly (all appear uppercase in the profile).
+- `stockindex_index_trade.Index` symbols are inconsistent in style: some are plain tickers ("HSI", "N225", "NYA"), others include a dot-suffix ("000001.SS", "399001.SZ") — exact string match required, no normalisation observed/measured.
+- "Adj Close" and "Close" are separate columns with overlapping but distinct value ranges (both span "54.869999" to "68775.0625" per the profile) — do not assume they are always equal.
+- `stockindex_index_trade.CloseUSD` is a distinct column from `Close`/`Adj Close` and is on a different scale (min "10.2048999", max "18934.3761734") — it is the USD-converted price, not the native-currency close.
+- No row-count/primary-key column exists in `stockindex_index_trade` (no id column listed in schema.md) — duplicate-detection or row identity must rely on the full column set, e.g. `Index` + `Date`.
+- "Up days"/"down days" per hints.txt are defined only by comparing `Close` to `Open` within the same row — no separate flag column exists for this.
+- "Average intraday volatility" per hints.txt is a derived metric `(High - Low) / Open` averaged over time — no precomputed volatility column exists in the schema.
