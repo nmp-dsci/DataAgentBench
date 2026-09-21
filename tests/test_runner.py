@@ -1,0 +1,102 @@
+"""The harness without a model: the split, the summary arithmetic, the run folder round trip, the runs API.
+
+`summarise()` must match the index's arithmetic: micro = rows passed / rows
+scored, macro = mean over datasets of the mean per-query rate; a rate-limited
+row is not scored and never counts as a fail.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+from fastapi.testclient import TestClient
+
+from dab_bench.eval import runner
+from dab_bench.eval.score import TrialResult, read_results, summarise, write_results
+from dab_bench.eval.splits import load_split
+from dab_bench.serving import app as serving
+
+
+def _row(q: str, trial: int, passed: bool | None, **kw: object) -> TrialResult:
+    ds = q.split("/")[0]
+    return TrialResult(q, ds, trial, "question?", "42", passed, **kw)  # type: ignore[arg-type]
+
+
+def test_smoke_split_is_one_query_per_dataset() -> None:
+    qs = load_split("smoke")
+    assert len(qs) == 12
+    assert len({q.dataset for q in qs}) == 12
+    assert len(load_split("all")) == 54
+
+
+def test_summary_macro_is_mean_over_datasets_and_rate_limited_is_not_scored() -> None:
+    rows = [
+        _row("a/1", 1, True),
+        _row("a/1", 2, False),
+        _row("a/2", 1, True),
+        _row("b/1", 1, False),
+        _row("b/1", 2, None, rate_limited=True, error="rate_limited: window closed"),
+    ]
+    s = summarise(rows)
+    assert (s.n, s.scored, s.passed) == (5, 4, 2)
+    assert s.pass_rate_micro == 0.5
+    # a: queries at 0.5 and 1.0 → 0.75; b: 0.0 → macro 0.375
+    assert s.pass_rate_macro == pytest.approx(0.375)
+    assert s.per_dataset["a"] == {"passed": 2, "n": 3, "rate": 0.75, "queries": 2}
+    assert s.rate_limited == 1 and s.errors == 0
+    assert s.failed_queries == ["b/1"]
+
+
+def test_results_round_trip(tmp_path: Path) -> None:
+    rows = [_row("a/1", 1, True, cost_usd=0.1, n_turns=3), _row("a/1", 2, None, rate_limited=True)]
+    write_results(tmp_path / "r.jsonl", rows)
+    back = read_results(tmp_path / "r.jsonl")
+    assert back == rows
+
+
+def test_runs_api_lists_folders_and_serves_traces(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    run_dir = tmp_path / "20260101T000000Z_v0_smoke_haiku"
+    (run_dir / "traces").mkdir(parents=True)
+    rows = [_row("bookreview/2", 1, True, trace_file="traces/bookreview_2_t1.json")]
+    write_results(run_dir / "results.jsonl", rows)
+    meta = runner.RunMeta(
+        run_id=run_dir.name,
+        agent="v0",
+        fingerprint="abc",
+        context_sha="def",
+        model="claude-haiku-4-5",
+        effort="medium",
+        split="smoke",
+        n_queries=1,
+        trials=1,
+        workers=1,
+        hints=False,
+        dry_run=False,
+        started_at="2026-01-01T00:00:00+00:00",
+        max_turns=60,
+    )
+    from dataclasses import asdict
+
+    meta.summary = asdict(summarise(rows))
+    (run_dir / "run.json").write_text(json.dumps(asdict(meta)))
+    (run_dir / "traces" / "bookreview_2_t1.json").write_text(
+        json.dumps({"answer": "42", "trace": []})
+    )
+    monkeypatch.setattr(runner, "RUNS_DIR", tmp_path)
+    monkeypatch.setattr(serving, "RUNS_DIR", tmp_path)
+    client = TestClient(serving.create_app())
+    listed = client.get("/api/runs").json()
+    assert [r["run_id"] for r in listed] == [run_dir.name]
+    assert (
+        listed[0]["passed"] == 1
+        and listed[0]["scored"] == 1
+        and listed[0]["pass_rate_macro"] == 1.0
+    )
+    detail = client.get(f"/api/runs/{run_dir.name}").json()
+    assert detail["passed"] == 1 and detail["results"][0]["query_id"] == "bookreview/2"
+    assert client.get(f"/api/runs/{run_dir.name}/traces/bookreview_2_t1").json()["answer"] == "42"
+    assert client.get("/api/runs/nope").status_code == 404

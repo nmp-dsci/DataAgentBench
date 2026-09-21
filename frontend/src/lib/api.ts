@@ -157,3 +157,100 @@ export const STYLE_LABEL: Record<string, string> = {
   substring: 'substring / list',
   levenshtein: 'levenshtein',
 };
+
+// ── our runs (runs/<id>/ on disk, served by /api/runs) ────────────────────────
+export type DatasetRate = { passed: number; n: number; rate: number | null; queries: number };
+export type RunSummary = {
+  run_id: string;
+  agent: string;
+  fingerprint: string;
+  context_sha: string;
+  model: string;
+  effort: string;
+  split: string;
+  n_queries: number;
+  trials: number;
+  hints: boolean;
+  dry_run: boolean;
+  started_at: string;
+  finished_at: string | null;
+  note: string;
+  kind: string;
+  challenger_of: string | null;
+  mlflow_run_id: string | null;
+  mlflow_url: string | null;
+  passed: number | null;
+  scored: number | null;
+  n: number | null;
+  pass_rate_macro: number | null;
+  pass_rate_micro: number | null;
+  cost_usd: number | null;
+  duration_ms: number | null;
+  errors: number | null;
+  timeouts: number | null;
+  per_dataset: Record<string, DatasetRate> | null;
+};
+export type TrialRow = {
+  query_id: string;
+  dataset: string;
+  trial: number;
+  question: string;
+  answer: string;
+  passed: boolean | null;
+  reason: string;
+  n_turns: number;
+  duration_ms: number;
+  cost_usd: number | null;
+  input_tokens: number;
+  cache_read_tokens: number;
+  cache_creation_tokens: number;
+  output_tokens: number;
+  tool_calls: number;
+  error: string | null;
+  terminal_reason: string | null;
+  timed_out: boolean;
+  rate_limited?: boolean;
+  trace_file: string | null;
+  mlflow_trace_id: string | null;
+  mlflow_trace_url: string | null;
+};
+export type RunDetail = RunSummary & { max_turns: number; workers: number; code_sha: string; upstream_commit: string; query_ids: string[]; results: TrialRow[] };
+export type TraceBlock = { type: string; text?: string; thinking?: string; name?: string; input?: Record<string, unknown>; content?: string; is_error?: boolean; tool_use_id?: string; id?: string };
+export type TraceEntry = { role: 'system' | 'user' | 'assistant' | 'tool'; content: string | TraceBlock[]; t?: number };
+export type ToolCall = { tool: string; input: Record<string, unknown>; output: string; chars: number; elapsed_s: number; error: boolean };
+export type Trace = {
+  query_id: string;
+  dataset: string;
+  trial: number;
+  answer: string;
+  final_text: string;
+  trace: TraceEntry[];
+  tool_calls: ToolCall[];
+  n_turns: number;
+  duration_ms: number;
+  cost_usd: number | null;
+  input_tokens: number;
+  cache_read_tokens: number;
+  cache_creation_tokens: number;
+  output_tokens: number;
+  error: string | null;
+  model: string;
+  effort: string;
+  context_sha: string;
+  system_prompt_chars: number;
+};
+export type ContextPack = { dataset: string; files: Record<string, string>; curation: { model: string; cost_usd: number | null; input_tokens: number; output_tokens: number; duration_ms: number } | null };
+
+export function fmtUsd(x: number | null | undefined, digits = 2): string {
+  return x == null ? '—' : `$${x.toFixed(digits)}`;
+}
+export function fmtDur(ms: number | null | undefined): string {
+  if (ms == null) return '—';
+  const s = Math.round(ms / 1000);
+  if (s < 90) return `${s}s`;
+  const m = Math.round(s / 60);
+  return m < 90 ? `${m} min` : `${(m / 60).toFixed(1)} h`;
+}
+export function traceKey(r: { dataset: string; query_id: string; trial: number }): string {
+  return `${r.dataset}_${r.query_id.split('/')[1]}_t${r.trial}`;
+}

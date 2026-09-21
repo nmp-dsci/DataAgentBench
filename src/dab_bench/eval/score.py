@@ -33,6 +33,7 @@ class TrialResult:
     error: str | None = None
     terminal_reason: str | None = None
     timed_out: bool = False
+    rate_limited: bool = False  # the subscription window closed: not scored, re-run with --resume
     trace_file: str | None = None
     mlflow_trace_id: str | None = None
     session_id: str | None = None
@@ -60,6 +61,7 @@ class Summary:
     per_query: dict[str, dict[str, Any]]
     errors: int
     timeouts: int
+    rate_limited: int
     cost_usd: float
     duration_ms: int
     turns_total: int
@@ -107,8 +109,9 @@ def summarise(results: list[TrialResult]) -> Summary:
         pass_rate_macro=macro,
         per_dataset=per_dataset,
         per_query=per_query,
-        errors=sum(1 for r in results if r.error),
+        errors=sum(1 for r in results if r.error and not r.rate_limited),
         timeouts=sum(1 for r in results if r.timed_out),
+        rate_limited=sum(1 for r in results if r.rate_limited),
         cost_usd=sum(r.cost_usd or 0.0 for r in results),
         duration_ms=sum(r.duration_ms for r in results),
         turns_total=sum(r.n_turns for r in results),

@@ -7,6 +7,7 @@ const NAV: [string, string][] = [
   ['/queries', 'Queries'],
   ['/validators', 'Validators'],
   ['/leaderboard', 'Leaderboard'],
+  ['/runs', 'Runs'],
 ];
 
 export function Shell() {

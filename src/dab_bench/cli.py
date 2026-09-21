@@ -218,8 +218,11 @@ def eval_cmd(
     note: str = "",
     no_mlflow: bool = False,
     challenger_of: str | None = None,
+    resume: str | None = None,
 ) -> None:
-    """Run an agent version over a split; judge every answer; write runs/<id>/ and log to MLflow."""
+    """Run an agent version over a split; judge every answer; write runs/<id>/ and log to MLflow.
+
+    --resume RUN_ID re-runs only that run's rate-limited or errored trials into the same folder."""
     import asyncio
 
     from dab_bench.eval.runner import run_eval
@@ -240,6 +243,7 @@ def eval_cmd(
                 note=note,
                 track=not no_mlflow,
                 challenger_of=challenger_of,
+                resume=resume,
             )
         )
     except TrackingDownError as e:

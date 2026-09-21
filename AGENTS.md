@@ -23,8 +23,11 @@ databases at once (SQLite, DuckDB, PostgreSQL, MongoDB), each with a
    and commits the per-query summary, which reproduces the site's Pass@1;
 4. serves a read-only explorer (React + FastAPI) over all of it.
 
-Agents, evals of our own, the loop and optimisation are later builds on this
-skeleton. **This build calls no model and needs no key.**
+The agent build (§8, plan `.lavish/s01_agent-blueprint.html`, approved for
+M0–M3 on 2026-09-21) adds one Claude Agent SDK analyst over the same 54
+questions, the data re-hosted in Postgres, a generated-then-curated context
+pack, and runs judged by the same validators. Only the agent, the curator and
+`llm_extract` call a model, all on the subscription through the Agent SDK.
 
 ## 2 · Decisions, and the reasons
 
@@ -111,9 +114,59 @@ page shows the answers verbatim. Nothing in the frontend is hand-maintained.
 
 ## 7 · Later builds
 
-Per-dataset `make data` and the DB servers; one Claude Agent SDK agent with
-the benchmark's four tools (list DBs, query DB, execute Python, return
-answer), given each dataset's config and description per run as the reference
-`run_agent.py` does — never an agent per dataset; `runs/` scored by the same
-`eval/` plane; MLflow; the error loop and gate; a demo deploy. The explorer
-gains Runs and Trace pages and nothing else moves.
+The loop (v1 = whatever it promotes over v0), on the scaffolding §8 lays
+down: optimiser reads failed trials from MLflow traces, proposes one edit to
+one of three surfaces (`agents/v0/system.md`, `agents/curator/system.md`, a
+dataset's `pitfalls.md`), runs the challenger, gates with McNemar at 54 × 5,
+promotes by moving `agents/champion`. Its own plan (s02). Then the migration
+of the benchmark Postgres into nmp-central-ai when the platform's M3 exists
+(`pg_dump -n dataagentbench | psql <central>`), and a demo deploy.
+
+## 8 · The agent build — decisions, layout, contract
+
+Decided in the s01 review (all queued by the reviewer):
+
+| Decision | Choice | Why |
+|---|---|---|
+| Dataset known upfront, one agent | the dataset is a required input (as upstream `--dataset`); one `system.md` for all 12, parameterised by a per-dataset pack | no team on the leaderboard triages; 13/15 documented rows are one agent |
+| D7 · where the facts go | in the **system prompt**: `system.md` + `<ds>/summary.md` + `pitfalls.md` + upstream description (+ hints when `--hints`); the user message is the question alone | same cache prefix, fingerprint stays `sha256(system.md + agent.yaml + helper.py)`, `context_sha` pins the pack; Camber's precedent |
+| The pack | `dab context build` (code: schema, profile, samples, measured joins) then `dab context curate` (Sonnet 5, once per dataset, never sees a question) writes `summary.md` + `pitfalls.md` | the knowledge base must be legitimate under the rubric and reviewable as a diff |
+| D1 · delivery | summary + pitfalls injected; depth on demand via `read_context` / `search_context` | every trial starts oriented; the full pack stays out of the prompt |
+| D6 · data | all 12 datasets re-hosted into one Postgres schema `dataagentbench`, tables `<dataset>_<table>`, Mongo as typed columns + `doc jsonb`; table families (stockmarket's 2 753 tickers) also get a union table `*_all` | one dialect, one read-only role (`dab_agent`, 60 s statement timeout); the leaderboard's top rows all re-host |
+| Postgres location | this project's compose on :5433 for now; migrate to nmp-central-ai after its M3 | stated deviation from the platform's rule zero; same image, same schema shape, one-command move |
+| D3 · Python | docker `--network none`, one container per run, a fresh process per call; data arrives as parquet on `/work` via `query_db(save_as=)` | rubric-grade isolation; no credential inside the box |
+| D5 · observability | central MLflow only, experiment `dataagentbench/evals`, platform tags, fail-fast `/health` preflight; one run + one trace per trial built from the message stream (tags: run_id, dataset, query, trial, passed, reason, agent, fingerprint, context_sha) | the loop reads failures from `mlflow.search_traces`; the registry entry is `infra/registry.P6.yaml` |
+| D4 · billing | the subscription through the Agent SDK's `claude` child | as the siblings; a rate-limited trial is unscored and `--resume` finishes it |
+| D0 · smoke | the median-difficulty query per dataset (`data/splits/smoke.json`) | a first Pass@1 preview rather than a harness check |
+| D2 · versions | v0 measured and installed as champion (`agents/champion`); v1 is what the loop promotes | this build ships the loop's scaffolding, not a hand-written v1 |
+| Model | Haiku 4.5 at effort medium for eval runs; Sonnet 5 for the curator | the dollar profile; measured against the Max 5× window, a 54 × 5 Haiku run is ≈ 83 % of one window |
+
+Layout added by this build:
+
+```
+agents/v0/            system.md (behaviour) · agent.yaml (frozen budgets) · helper.py (empty surface)
+agents/curator/       system.md · agent.yaml — runs once per dataset, never inside an eval
+agents/champion       one line naming the champion version
+data/context/<ds>/    committed pack: tables.json · schema.md · profile.json · samples/ · joins.md/.json ·
+                      description.txt · hints.txt · summary.md · pitfalls.md · curation.json
+data/splits/          smoke.json (12 ids); `all` is the index
+infra/                docker-compose.yml (pgvector/pg16, :5433) · roles.sql · sandbox.Dockerfile · registry.P6.yaml
+runs/<id>/            gitignored: run.json · results.jsonl · traces/<ds>_<n>_t<k>.json · agent/ (incl.
+                      system.<dataset>.md, the composed prompts) · context/<ds>/ copies
+workspace/<run>/      gitignored: the sandbox's /work, one folder per trial
+src/dab_bench/
+  data/stores.py · download.py · load.py · pg.py      the store map, HF download, the three load paths, roles
+  context/build.py · curate.py                        the generated half; the curator session
+  agent/llm.py · versions.py · prompt.py · tools.py · sandbox.py · session.py
+  eval/splits.py · score.py · runner.py               splits; TrialResult + summary arithmetic; `dab eval`
+  tracking/mlflow_log.py · tracing.py                 the run record on MLflow; one trace per trial
+frontend/src/pages/Runs.tsx · Run.tsx · TracePage.tsx
+```
+
+The result row (`results.jsonl`) carries `query_id · dataset · trial · answer ·
+passed · reason · n_turns · duration_ms · cost_usd · input_tokens ·
+cache_read_tokens · cache_creation_tokens · output_tokens · tool_calls · error ·
+terminal_reason · timed_out · rate_limited · trace_file · mlflow_trace_id`.
+`run.json` carries the agent, its fingerprint, the combined `context_sha`, model,
+effort, split, trials, hints, `challenger_of`, the summary (micro, macro,
+per dataset, per query, tokens, cost) and `mlflow_run_id`.

@@ -128,6 +128,7 @@ def _result_from(query: Query, trial: int, s: Solve, verdict: dict[str, Any]) ->
         error=s.error,
         terminal_reason=s.terminal_reason,
         timed_out=s.timed_out or bool(verdict.get("timed_out")),
+        rate_limited=s.rate_limited,
         session_id=s.session_id,
     )
 
@@ -146,7 +147,16 @@ async def run_eval(
     track: bool = True,
     challenger_of: str | None = None,
     judge_timeout_s: int = 30,
+    resume: str | None = None,
 ) -> tuple[RunMeta, list[TrialResult]]:
+    """`resume`: re-run only the trials of an existing run folder that were rate-limited or
+    errored, into the same folder, keeping every finished trial and its trace."""
+    if resume:
+        prior_meta, prior = load_run(resume)
+        agent, split, trials = prior_meta.agent, prior_meta.split, prior_meta.trials
+        model, effort, hints = prior_meta.model, prior_meta.effort, prior_meta.hints
+        challenger_of = prior_meta.challenger_of
+        note = note or prior_meta.note
     version = load_version(agent)
     cfg = version.config
     model_id = resolve_model(model or cfg.model)
@@ -159,9 +169,16 @@ async def run_eval(
     datasets = sorted({q.dataset for q in queries})
     contexts: dict[str, DatasetContext] = {d: load_context(d) for d in datasets}
     context_sha = _combined_sha(contexts)
-    run_id = new_run_id(version, model_id, split, use_hints)
+    run_id = resume or new_run_id(version, model_id, split, use_hints)
     run_dir = RUNS_DIR / run_id
     (run_dir / "traces").mkdir(parents=True, exist_ok=True)
+    keep: dict[tuple[str, int], TrialResult] = {}
+    if resume:
+        keep = {
+            (r.query_id, r.trial): r
+            for r in prior
+            if not r.rate_limited and not (r.error and r.passed is None)
+        }
     upstream_commit = "unknown"
     if SOURCE_PATH.exists():
         upstream_commit = str(json.loads(SOURCE_PATH.read_text()).get("commit", "unknown"))
@@ -178,7 +195,7 @@ async def run_eval(
         workers=workers,
         hints=use_hints,
         dry_run=dry_run,
-        started_at=datetime.now(UTC).isoformat(),
+        started_at=prior_meta.started_at if resume else datetime.now(UTC).isoformat(),
         max_turns=cfg.max_turns,
         code_sha=settings().code_sha,
         upstream_commit=upstream_commit,
@@ -207,8 +224,11 @@ async def run_eval(
         f"workers={workers} · hints={use_hints}" + (" · DRY RUN" if dry_run else "")
     )
     sem = asyncio.Semaphore(max(1, workers))
-    results: dict[tuple[str, int], TrialResult] = {}
+    results: dict[tuple[str, int], TrialResult] = dict(keep)
     order = [(q, t) for q in queries for t in range(1, trials + 1)]
+    todo = [(q, t) for q, t in order if (q.id, t) not in keep]
+    if resume:
+        console.print(f"resuming {run_id}: {len(keep)} trials kept, {len(todo)} to run")
     started_run = time.time()
 
     async def one(query: Query, trial: int) -> None:
@@ -256,6 +276,9 @@ async def run_eval(
                 except Exception as e:  # noqa: BLE001 - a trace never fails a trial
                     console.print(f"[yellow]trace not logged: {type(e).__name__}: {e}[/]")
             results[(query.id, trial)] = r
+            if r.rate_limited:
+                r.passed = None
+                r.reason = "rate limited (not scored); re-run with --resume"
             mark = {True: "[green]pass[/]", False: "[red]FAIL[/]", None: "[dim]—[/]"}[r.passed]
             console.print(
                 f"  {query.id:<20} t{trial} {mark}  {r.answer[:70]!r}"
@@ -270,7 +293,7 @@ async def run_eval(
             )
 
     try:
-        await asyncio.gather(*(one(q, t) for q, t in order))
+        await asyncio.gather(*(one(q, t) for q, t in todo))
     finally:
         judge.close()
         if sandbox is not None:
@@ -333,7 +356,7 @@ def _print_summary(s: Summary, seconds: float) -> None:
     ds = " · ".join(f"{k} {v['passed']}/{v['n']}" for k, v in sorted(s.per_dataset.items()))
     console.print(
         f"[bold]{s.passed}/{s.scored} pass[/] (micro {s.pass_rate_micro:.0%}, macro {s.pass_rate_macro:.0%})  "
-        f"errors={s.errors} timeouts={s.timeouts}  ${s.cost_usd:.2f}  {seconds / 60:.0f} min\n  {ds}"
+        f"errors={s.errors} timeouts={s.timeouts} rate_limited={s.rate_limited}  ${s.cost_usd:.2f}  {seconds / 60:.0f} min\n  {ds}"
     )
 
 

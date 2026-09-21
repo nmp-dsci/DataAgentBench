@@ -1,0 +1,22 @@
+# The entry this project adds to nmp-central-ai/registry/projects.yaml (platform rule 5).
+# `make check ARGS="--only P6"` in nmp-central-ai re-logs a committed dry-run folder — no model call.
+  - id: P6
+    name: dataagentbench
+    path: ../DataAgentBench
+    status: migrated
+    mlflow:
+      client: python
+      experiments: [dataagentbench/evals]
+      verify: both
+      smoke: |
+        uv run python -c "
+        from dab_bench.config import RUNS_DIR
+        from dab_bench.eval.runner import load_run
+        from dab_bench.tracking.mlflow_log import log_run
+        rid = sorted(p.name for p in RUNS_DIR.iterdir() if (p / 'run.json').exists())[0]
+        m, r = load_run(rid); print('run_id', log_run(RUNS_DIR / rid, m, r))
+        "
+    notes: >-
+      Runs (kind=eval) and per-trial traces (tags run_id/dataset/query/trial/passed/reason/
+      agent/fingerprint/context_sha) in one experiment; curator sessions are kind=curate.
+      The benchmark data is project-local Postgres (:5433) until the platform's M3 — plan s01 §8.

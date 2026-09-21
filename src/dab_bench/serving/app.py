@@ -1,11 +1,15 @@
 """The API behind the explorer, and the explorer itself when a build is present.
 
-Every route serves the committed index under `data/index/` and `data/answers/`.
-Nothing here reads the upstream clone, calls a model, or writes.
+Every route serves committed files — the index under `data/index/`, the
+answers under `data/answers/`, the context pack under `data/context/` — plus
+this machine's run folders under `runs/`. Nothing here reads the upstream
+clone, calls a model, or writes; MLflow is linked, never read.
 """
 
 from __future__ import annotations
 
+import json
+from dataclasses import asdict
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
@@ -13,7 +17,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from dab_bench import __version__
-from dab_bench.config import FRONTEND_DIST, settings
+from dab_bench.config import CONTEXT_DIR, FRONTEND_DIST, RUNS_DIR, settings
 from dab_bench.data.index import Index, load, stats
 
 EXAMPLES_PER_FILE = 3
@@ -101,8 +105,109 @@ def create_app(index: Index | None = None) -> FastAPI:
             raise HTTPException(404, "not rescored yet; run `make rescore`")
         return {k: v for k, v in ix.trials.items() if k != "per_query"}
 
+    # ── runs: our own evals, read from runs/<id>/ on disk (never from MLflow) ─────
+
+    @app.get("/api/runs")
+    def runs() -> list[dict[str, Any]]:
+        from dab_bench.eval.runner import list_runs
+
+        return [_run_summary(asdict(m)) for m in reversed(list_runs())]
+
+    @app.get("/api/runs/{run_id}")
+    def run_detail(run_id: str) -> dict[str, Any]:
+        from dab_bench.eval.runner import load_run
+
+        if not (RUNS_DIR / run_id / "run.json").exists():
+            raise HTTPException(404, f"no run {run_id}")
+        meta, results = load_run(run_id)
+        d = asdict(meta) | _run_summary(asdict(meta))
+        d["results"] = [r.as_dict() for r in results]
+        for r in d["results"]:
+            r["mlflow_trace_url"] = _mlflow_trace_url(r.get("mlflow_trace_id"))
+        return d
+
+    @app.get("/api/runs/{run_id}/traces/{key}")
+    def run_trace(run_id: str, key: str) -> dict[str, Any]:
+        p = RUNS_DIR / run_id / "traces" / f"{key}.json"
+        if not p.exists():
+            raise HTTPException(404, f"no trace {key} in {run_id}")
+        return json.loads(p.read_text())  # type: ignore[no-any-return]
+
+    @app.get("/api/context/{key}")
+    def context_pack(key: str) -> dict[str, Any]:
+        d = CONTEXT_DIR / key
+        if not d.is_dir():
+            raise HTTPException(404, f"no context pack for {key}")
+        files = {}
+        for name in (
+            "summary.md",
+            "pitfalls.md",
+            "schema.md",
+            "joins.md",
+            "description.txt",
+            "hints.txt",
+        ):
+            if (d / name).exists():
+                files[name] = (d / name).read_text()
+        cur = (
+            json.loads((d / "curation.json").read_text())
+            if (d / "curation.json").exists()
+            else None
+        )
+        return {"dataset": key, "files": files, "curation": cur}
+
     _mount_frontend(app)
     return app
+
+
+def _mlflow_run_url(run_id: str | None) -> str | None:
+    if not run_id:
+        return None
+    return f"{settings().mlflow_tracking_uri.rstrip('/')}/#/experiments/search?runId={run_id}"
+
+
+def _mlflow_trace_url(trace_id: str | None) -> str | None:
+    if not trace_id:
+        return None
+    return f"{settings().mlflow_tracking_uri.rstrip('/')}/#/traces/{trace_id}"
+
+
+def _run_summary(d: dict[str, Any]) -> dict[str, Any]:
+    s = d.get("summary") or {}
+    return {
+        k: d.get(k)
+        for k in (
+            "run_id",
+            "agent",
+            "fingerprint",
+            "context_sha",
+            "model",
+            "effort",
+            "split",
+            "n_queries",
+            "trials",
+            "hints",
+            "dry_run",
+            "started_at",
+            "finished_at",
+            "note",
+            "kind",
+            "challenger_of",
+            "mlflow_run_id",
+        )
+    } | {
+        "passed": s.get("passed"),
+        "scored": s.get("scored"),
+        "n": s.get("n"),
+        "pass_rate_macro": s.get("pass_rate_macro"),
+        "pass_rate_micro": s.get("pass_rate_micro"),
+        "cost_usd": s.get("cost_usd"),
+        "duration_ms": s.get("duration_ms"),
+        "errors": s.get("errors"),
+        "timeouts": s.get("timeouts"),
+        "per_dataset": s.get("per_dataset"),
+        "mlflow_url": _mlflow_run_url(d.get("mlflow_run_id")),
+    }
 
 
 # ── shaping ───────────────────────────────────────────────────────────────

@@ -4,9 +4,10 @@ An explorer over the [DAB](https://github.com/ucbepic/DataAgentBench)
 benchmark (DataAgentBench, UC Berkeley EPIC + Hasura PromptQL,
 [arXiv 2603.20576](https://arxiv.org/abs/2603.20576)): its datasets,
 questions, gold answers, validators and the published trials, ingested from
-the upstream repo into a committed index and served as a small app. Nothing
-here calls a model; the agent, the evals and the loop are later builds on this
-skeleton.
+the upstream repo into a committed index and served as a small app — and, since
+the agent build (plan `.lavish/s01_agent-blueprint.html`), one Claude Agent SDK
+analyst that answers the 54 questions over the same data re-hosted in Postgres,
+judged by the same validators, with every run and trace on the central MLflow.
 
 ## 1 · What it shows — 54 questions, every one with gold, and who has beaten them
 
@@ -67,6 +68,32 @@ make rescore                     # → data/index/trials.json (about 3 minutes)
 make stats
 ```
 
+## 3b · Run the agent
+
+```bash
+make db-up                       # this project's Postgres 16 on :5433 (docker) + schema and roles
+make data                        # download the 12 datasets (8.4 GB, sha256-verified) and load them: 2 811 tables
+make context                     # the generated half of the context pack (no model)
+make curate                      # the curator agent writes summary.md + pitfalls.md per dataset (≈ $1.40 once)
+make sandbox                     # the execute_python image (python:3.12-slim, no network)
+make platform-up                 # nmp-central-ai's MLflow at :5000 — runs and traces go there, never a local store
+make eval SPLIT=smoke            # v0 on one median-difficulty query per dataset (12 trials, ≈ $1.3)
+make eval SPLIT=all TRIALS=1     # all 54 once
+uv run dab runs list · uv run dab runs profile <run> · uv run dab eval --resume <run>
+```
+
+Eval runs bill the Claude Max subscription through the Agent SDK's `claude`
+child (`require_live()` refuses a per-token key). A run that hits the
+subscription's 5-hour window records those trials as *rate limited, not scored*
+and `--resume` finishes them after the reset.
+
+| smoke, v0 (`20260921T042451Z_v0_smoke_haiku`) | |
+|---|---|
+| scored | **6 / 8 pass** (macro 0.75), 4 of 12 rate-limited before the window reset |
+| per trial, p50 | 11 turns · 22.7k fresh input · 89k cache-read · 5.8k output · $0.09 · 60 s |
+| passed | bookreview/2, crmarenapro/6, stockindex/1, github_repos/4, music_brainz_20k/1, yelp/2 |
+| failed | googlelocal/4 (ordered list), stockmarket/3 (code table) |
+
 ## 4 · The pages
 
 - **Overview** — the numbers above with their denominators, the datasets
@@ -82,6 +109,10 @@ make stats
   9 levenshtein, 0 read the CSV) and which queries use each.
 - **Leaderboard** — the site's 40 entries, the nine with committed answers
   marked, and the stratified tables with our rescore beside them.
+- **Runs / Run / Trace** — our own evals from `runs/`: per-dataset pass rates
+  with denominators, every trial with its tokens and cost, and the full trace
+  (composed system prompt, every turn, every tool exchange), each linked to
+  its MLflow run and trace.
 
 ## 5 · Attribution
 
@@ -91,5 +122,6 @@ Everything under `data/index/` and `data/answers/` is derived from
 the copy exists so the explorer runs from a bare clone and is removed on
 request. This project's own code is MIT.
 
-Design brief: `DESIGN.md`. Decisions and layout: `AGENTS.md`. The plan this
-build was approved against: `.lavish/s00_dab-explorer-init-plan.html`.
+Design brief: `DESIGN.md`. Decisions and layout: `AGENTS.md`. The plans the
+builds were approved against: `.lavish/s00_dab-explorer-init-plan.html`
+(explorer) and `.lavish/s01_agent-blueprint.html` (agent).

@@ -102,6 +102,7 @@ def log_run(run_dir: Path, meta: RunMeta, results: list[TrialResult]) -> str:
             "duration_s": float(s.get("duration_ms") or 0) / 1000,
             "errors": float(s.get("errors") or 0),
             "timeouts": float(s.get("timeouts") or 0),
+            "rate_limited": float(s.get("rate_limited") or 0),
             "turns_total": float(sum(r.n_turns for r in results)),
             "input_tokens": float(sum(r.input_tokens for r in results)),
             "cache_read_tokens": float(sum(r.cache_read_tokens for r in results)),

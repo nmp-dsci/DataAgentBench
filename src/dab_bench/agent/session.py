@@ -56,6 +56,7 @@ class Solve:
     error: str | None = None
     terminal_reason: str | None = None
     timed_out: bool = False
+    rate_limited: bool = False
     session_id: str | None = None
     model: str = ""
     effort: str = EFFORT
@@ -84,6 +85,14 @@ def _block_to_dict(b: Any) -> dict[str, Any]:
             "is_error": b.is_error,
         }
     return {"type": type(b).__name__, "repr": repr(b)[:2000]}
+
+
+_RATE_LIMIT = ("hit your session limit", "hit your limit", "rate_limit", "usage limit")
+
+
+def _rate_limited(text: str, error: str | None, reason: str | None) -> bool:
+    blob = f"{text}\n{error or ''}".lower()
+    return reason == "api_error" and any(m in blob for m in _RATE_LIMIT) or "rate_limit" in blob
 
 
 def trial_key(query: Query, trial: int) -> str:
@@ -192,6 +201,12 @@ async def solve(
     except Exception as e:  # noqa: BLE001 - recorded on the row, the run continues
         s.error = f"{type(e).__name__}: {e}"[:500]
     s.duration_ms = int((time.time() - started) * 1000)
+    if _rate_limited(final_text, s.error, s.terminal_reason):
+        # the subscription window closed mid-trial: not an answer, not a fail — a retry
+        s.error = "rate_limited: " + (final_text or s.error or "")[:120]
+        s.terminal_reason = "rate_limited"
+        s.rate_limited = True
+        final_text = ""
     s.final_text = final_text
     s.answer = state.answer if state.answer is not None else final_text.strip()
     s.tool_calls = state.calls
