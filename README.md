@@ -89,10 +89,23 @@ and `--resume` finishes them after the reset.
 
 | smoke, v0 (`20260921T042451Z_v0_smoke_haiku`) | |
 |---|---|
-| scored | **6 / 8 pass** (macro 0.75), 4 of 12 rate-limited before the window reset |
-| per trial, p50 | 11 turns · 22.7k fresh input · 89k cache-read · 5.8k output · $0.09 · 60 s |
-| passed | bookreview/2, crmarenapro/6, stockindex/1, github_repos/4, music_brainz_20k/1, yelp/2 |
-| failed | googlelocal/4 (ordered list), stockmarket/3 (code table) |
+| scored | **7 / 12 pass** (macro 0.58; the field's average on this set is ≈ 0.33); 4 trials were rate-limited by the subscription window mid-run and finished with `--resume` |
+| cost | **$2.17** for 12 trials; p50 $0.09, one outlier (deps_dev_v1/1: 22 turns, 637 s, $1.02) |
+| per trial, p50 | 11 turns · 23k fresh input · 89k cache-read · 5.8k output · 60 s |
+| passed | bookreview/2, crmarenapro/6, stockindex/1, github_repos/4, music_brainz_20k/1, yelp/2, pancancer_atlas/3 |
+| failed | agnews/1, googlelocal/4, stockmarket/3, patents/2, deps_dev_v1/1 |
+
+| v0 wide, all 54 once (`20260921T064521Z_v0_all_haiku`) | |
+|---|---|
+| scored | **27 / 54 pass**, macro **0.44** (mean over datasets; micro 0.50) — Haiku 4.5, effort medium, no hints, one trial per query, 38 min at 4 workers |
+| for scale | the published ReAct baselines with hints: Opus 4.6 0.555, Gemini-3-Pro 0.466, GPT-5.2 0.299 (5–50 trials each, §2) |
+| cost | **$8.96**; p50 $0.07 per trial, p90 $0.73 (four trials hit the 900 s timeout: agnews/1, /3, /4 and deps_dev_v1/1) |
+| per dataset | bookreview 3/3 · crmarenapro 9/13 · yelp 4/7 · stockmarket 3/5 · stockindex 2/3 · pancancer_atlas 2/3 · github_repos 2/4 · googlelocal 1/4 · music_brainz_20k 1/3 · agnews 0/4 · deps_dev_v1 0/2 · patents 0/3 |
+| never passed by anyone upstream either | agnews/3, pancancer_atlas/1, patents/1 |
+
+Both runs are on the central MLflow (`dataagentbench/evals`) with one trace per
+trial, and in the explorer under **Runs**. The next step in the plan — v0 at
+54 × 5 (≈ $45, most of one Max 5× window) — waits for review.
 
 ## 4 · The pages
 
