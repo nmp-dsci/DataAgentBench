@@ -8,6 +8,7 @@ clone, calls a model, or writes; MLflow is linked, never read.
 
 from __future__ import annotations
 
+import functools
 import json
 from dataclasses import asdict
 from typing import Any
@@ -108,10 +109,11 @@ def create_app(index: Index | None = None) -> FastAPI:
     # ── runs: our own evals, read from runs/<id>/ on disk (never from MLflow) ─────
 
     @app.get("/api/runs")
-    def runs() -> list[dict[str, Any]]:
-        from dab_bench.eval.runner import list_runs
-
-        return [_run_summary(asdict(m)) for m in reversed(list_runs())]
+    def runs() -> dict[str, Any]:
+        """Every run folder with its role (champion, challenger, superseded, smoke, dry) and
+        its per-trial profile. The champion is derived: the newest scored full-split run of
+        the agent `agents/champion` names that is not itself a challenger."""
+        return _board()
 
     @app.get("/api/runs/{run_id}")
     def run_detail(run_id: str) -> dict[str, Any]:
@@ -119,19 +121,39 @@ def create_app(index: Index | None = None) -> FastAPI:
 
         if not (RUNS_DIR / run_id / "run.json").exists():
             raise HTTPException(404, f"no run {run_id}")
+        board = _board()
+        row = next((r for r in board["runs"] if r["run_id"] == run_id), None)
         meta, results = load_run(run_id)
-        d = asdict(meta) | _run_summary(asdict(meta))
+        d = asdict(meta) | (row or _run_summary(asdict(meta)))
         d["results"] = [r.as_dict() for r in results]
         for r in d["results"]:
             r["mlflow_trace_url"] = _mlflow_trace_url(r.get("mlflow_trace_id"))
+        champ = board["champion_run_id"]
+        d["versus"] = (
+            next((r for r in board["runs"] if r["run_id"] == champ), None)
+            if champ and champ != run_id
+            else None
+        )
         return d
 
     @app.get("/api/runs/{run_id}/traces/{key}")
     def run_trace(run_id: str, key: str) -> dict[str, Any]:
+        from dab_bench.eval.runner import load_run
+
         p = RUNS_DIR / run_id / "traces" / f"{key}.json"
         if not p.exists():
             raise HTTPException(404, f"no trace {key} in {run_id}")
-        return json.loads(p.read_text())  # type: ignore[no-any-return]
+        t: dict[str, Any] = json.loads(p.read_text())
+        # the verdict and the MLflow link live on the result row, not in the trace file
+        _, results = load_run(run_id)
+        row = next((r for r in results if r.trace_file == f"traces/{key}.json"), None)
+        t["passed"] = row.passed if row else None
+        t["reason"] = row.reason if row else ""
+        t["mlflow_trace_id"] = row.mlflow_trace_id if row else None
+        t["mlflow_trace_url"] = _mlflow_trace_url(row.mlflow_trace_id) if row else None
+        t["mlflow_embeddable"] = _mlflow_embeddable()
+        t["spans"] = _spans(t)
+        return t
 
     @app.get("/api/context/{key}")
     def context_pack(key: str) -> dict[str, Any]:
@@ -164,6 +186,21 @@ def _mlflow_run_url(run_id: str | None) -> str | None:
     if not run_id:
         return None
     return f"{settings().mlflow_tracking_uri.rstrip('/')}/#/experiments/search?runId={run_id}"
+
+
+@functools.lru_cache(maxsize=1)
+def _mlflow_embeddable() -> bool:
+    """Whether the central MLflow UI can be framed by the explorer: its server sends
+    `X-Frame-Options: SAMEORIGIN` unless started with MLFLOW_SERVER_X_FRAME_OPTIONS=NONE.
+    One HEAD request, cached for the life of the process; unreachable means no."""
+    import urllib.request
+
+    try:
+        req = urllib.request.Request(settings().mlflow_tracking_uri, method="HEAD")
+        with urllib.request.urlopen(req, timeout=2) as r:  # noqa: S310 - configured tracking URI
+            return r.headers.get("X-Frame-Options", "").upper() in ("", "NONE")
+    except Exception:
+        return False
 
 
 def _mlflow_trace_url(trace_id: str | None) -> str | None:
@@ -208,6 +245,101 @@ def _run_summary(d: dict[str, Any]) -> dict[str, Any]:
         "per_dataset": s.get("per_dataset"),
         "mlflow_url": _mlflow_run_url(d.get("mlflow_run_id")),
     }
+
+
+def _board() -> dict[str, Any]:
+    """The runs list with roles. Read from disk on every call: five folders, tiny files."""
+    from dab_bench.agent.versions import champion_name
+    from dab_bench.eval.runner import list_runs, load_run
+    from dab_bench.eval.score import profile
+
+    champion = champion_name()
+    rows = []
+    for m in reversed(list_runs()):
+        _, results = load_run(m.run_id)
+        rows.append(_run_summary(asdict(m)) | {"profile": profile(results)})
+    full = [r for r in rows if r["split"] == "all" and not r["dry_run"] and (r["scored"] or 0) > 0]
+    champ = next(
+        (r for r in full if r["agent"] == champion and not r["challenger_of"]), None
+    )  # rows are newest first
+    for r in rows:
+        if r["dry_run"]:
+            r["role"] = "dry"
+        elif r["split"] != "all":
+            r["role"] = "smoke"
+        elif champ and r["run_id"] == champ["run_id"]:
+            r["role"] = "champion"
+        elif r["agent"] == champion and not r["challenger_of"]:
+            r["role"] = "superseded"
+        else:
+            r["role"] = "challenger"
+    return {
+        "champion": champion,
+        "champion_run_id": champ["run_id"] if champ else None,
+        "runs": rows,
+    }
+
+
+def _spans(t: dict[str, Any]) -> list[dict[str, Any]]:
+    """The trial as the span tree `tracking/tracing.py` logs to MLflow, from the same stream:
+    one `turn` span per assistant message, one tool span per call, timed by the recorded
+    offsets. The explorer draws this; MLflow is never read back."""
+    spans: list[dict[str, Any]] = []
+    pending: dict[str, int] = {}
+    last_t = 0.0
+    turn_no = 0
+    for entry in t.get("trace") or []:
+        role = entry.get("role")
+        tt = float(entry.get("t") or last_t)
+        content = entry.get("content") or []
+        if role == "assistant" and isinstance(content, list):
+            turn_no += 1
+            texts = [b.get("text", "") for b in content if b.get("type") == "text"]
+            thinking = sum(
+                len(b.get("thinking", "")) for b in content if b.get("type") == "thinking"
+            )
+            uses = [b for b in content if b.get("type") == "tool_use"]
+            spans.append(
+                {
+                    "kind": "turn",
+                    "name": f"turn {turn_no}",
+                    "start": last_t,
+                    "end": tt,
+                    "status": "OK",
+                    "text": "\n".join(texts),
+                    "thinking_chars": thinking,
+                    "tool_calls": [u.get("name") for u in uses],
+                }
+            )
+            for u in uses:
+                pending[str(u.get("id"))] = len(spans)
+                spans.append(
+                    {
+                        "kind": "tool",
+                        "name": str(u.get("name") or "").replace("mcp__dab__", ""),
+                        "start": tt,
+                        "end": None,
+                        "status": "OK",
+                        "input": u.get("input") or {},
+                        "output": "",
+                    }
+                )
+            last_t = tt
+        elif role == "tool" and isinstance(content, list):
+            for b in content:
+                if b.get("type") != "tool_result":
+                    continue
+                i = pending.pop(str(b.get("tool_use_id")), None)
+                if i is None:
+                    continue
+                spans[i]["end"] = tt
+                spans[i]["output"] = str(b.get("content") or "")
+                spans[i]["status"] = "ERROR" if b.get("is_error") else "OK"
+            last_t = tt
+    for i in pending.values():
+        spans[i]["end"] = last_t
+        spans[i]["status"] = "ERROR"
+    return spans
 
 
 # ── shaping ───────────────────────────────────────────────────────────────

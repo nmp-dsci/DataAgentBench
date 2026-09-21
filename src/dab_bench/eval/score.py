@@ -133,3 +133,80 @@ def read_results(path: Path) -> list[TrialResult]:
         if line.strip():
             out.append(TrialResult(**json.loads(line)))
     return out
+
+
+# ── the production profile: what a run costs per trial, with its tail ─────────
+
+PROFILE_METRICS: tuple[tuple[str, str], ...] = (
+    ("turns", "turns per trial"),
+    ("tool_calls", "tool calls per trial"),
+    ("wall_s", "wall seconds per trial"),
+    ("fresh_in", "fresh input tokens (uncached + cache writes)"),
+    ("cache_read", "cache-read tokens"),
+    ("output", "output tokens"),
+    ("total", "total tokens (all input + output)"),
+    ("cost_usd", "cost per trial (Agent SDK cost_usd)"),
+)
+
+
+def percentile(values: list[float], p: float) -> float:
+    """Nearest-rank on the sorted values (the same rule `dab runs profile` prints)."""
+    if not values:
+        return 0.0
+    v = sorted(values)
+    return v[min(len(v) - 1, round(p * (len(v) - 1)))]
+
+
+def _series(r: TrialResult) -> dict[str, float]:
+    fresh = float(r.input_tokens + r.cache_creation_tokens)
+    return {
+        "turns": float(r.n_turns),
+        "tool_calls": float(r.tool_calls),
+        "wall_s": r.duration_ms / 1000.0,
+        "fresh_in": fresh,
+        "cache_read": float(r.cache_read_tokens),
+        "output": float(r.output_tokens),
+        "total": fresh + r.cache_read_tokens + r.output_tokens,
+        "cost_usd": r.cost_usd or 0.0,
+    }
+
+
+def profile(results: list[TrialResult]) -> dict[str, Any]:
+    """Per-trial distributions (mean, p50, p95, max, sum) over every trial that ran, plus the
+    ratios a reader wants at a glance. Rate-limited rows never ran, so they are excluded."""
+    ran = [r for r in results if not r.rate_limited]
+    cols: dict[str, list[float]] = {k: [] for k, _ in PROFILE_METRICS}
+    for r in ran:
+        for k, v in _series(r).items():
+            cols[k].append(v)
+    metrics = {
+        k: {
+            "mean": sum(v) / len(v) if v else 0.0,
+            "p50": percentile(v, 0.5),
+            "p95": percentile(v, 0.95),
+            "max": max(v) if v else 0.0,
+            "sum": sum(v),
+        }
+        for k, v in cols.items()
+    }
+    passed = sum(1 for r in ran if r.passed)
+    scored = sum(1 for r in ran if r.passed is not None)
+    cost = metrics["cost_usd"]["sum"]
+    all_in = metrics["fresh_in"]["sum"] + metrics["cache_read"]["sum"]
+    return {
+        "n": len(ran),
+        "metrics": metrics,
+        "cache_hit_rate": metrics["cache_read"]["sum"] / all_in if all_in else None,
+        "cost_per_pass": cost / passed if passed else None,
+        "cost_per_trial": cost / len(ran) if ran else None,
+        "tokens_per_pass": metrics["total"]["sum"] / passed if passed else None,
+        "timeout_rate": sum(1 for r in ran if r.timed_out) / len(ran) if ran else None,
+        "error_rate": sum(1 for r in ran if r.error) / len(ran) if ran else None,
+        "fail_rate": (scored - passed) / scored if scored else None,
+        # a failed trial that also hit max turns / timeout: the agent ran out, it did not answer wrong
+        "exhausted": sum(
+            1
+            for r in ran
+            if r.passed is False and (r.timed_out or r.terminal_reason == "max_turns")
+        ),
+    }

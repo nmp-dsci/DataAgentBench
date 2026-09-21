@@ -149,3 +149,32 @@ tr.warnrow td{background:color-mix(in oklab,var(--amber) 8%,transparent)}
 tr.dim td{color:var(--muted)}
 pre.wrap-any{white-space:pre-wrap;word-break:break-word}
 td.answer{min-width:18rem;max-width:28rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.chip.role{text-transform:uppercase;letter-spacing:var(--track-label)}
+.dia .ax.mark{stroke:var(--ink);stroke-width:2}
+.dia .pt rect{transition:opacity var(--dur) var(--ease)}
+.dia .pt:hover rect{opacity:.7}
+
+/* the span waterfall: name | timeline | duration, one row per span, tools indented under their turn */
+.wf{margin-top:var(--s4);background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.wf-row{display:grid;grid-template-columns:minmax(9rem,14rem) minmax(0,1fr) 4.5rem;gap:var(--s3);align-items:center;width:100%;padding:var(--s1) var(--s4);min-height:28px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--ink-2);font:inherit;text-align:left;cursor:pointer}
+.wf>div:last-child .wf-row{border-bottom:0}
+.wf-detail{background:var(--band);border-bottom:1px solid var(--line);padding:var(--s3) var(--s4) var(--s4) calc(var(--s4) + var(--s3));overflow-x:auto}
+.wf-detail.err{box-shadow:inset 3px 0 0 var(--amber)}
+.wf-detail pre{font-size:var(--t-1);line-height:1.5;max-height:24rem;overflow:auto;margin-top:var(--s1)}
+.wf-detail .label{margin-top:var(--s2)}
+.wf-row:hover{background:var(--band)}
+.wf-row.on{background:var(--accent-soft)}
+.wf-row.wf-head{cursor:default;min-height:32px;background:var(--band)}
+.wf-row.wf-head:hover{background:var(--band)}
+.wf-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--t-1)}
+.wf-row.wf-tool .wf-name{padding-left:var(--s3);color:var(--muted)}
+.wf-track{position:relative;display:block;height:14px;min-width:0}
+.wf-track i{position:absolute;top:2px;height:10px;border-radius:2px;background:var(--line-3);min-width:2px}
+.wf-row.wf-turn .wf-track i{background:var(--accent)}
+.wf-row.wf-tool .wf-track i{background:var(--ink-2);opacity:.55}
+.wf-row.err .wf-track i{background:var(--amber);opacity:1}
+.wf-tick{position:absolute;top:-4px;transform:translateX(-50%);white-space:nowrap}
+.wf-tick:first-child{transform:none}
+.wf-tick:last-child{transform:translateX(-100%)}
+.wf-dur{text-align:right;font-size:var(--t-1);white-space:nowrap}
+iframe.mlflow{display:block;width:100%;height:720px;margin-top:var(--s4);border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}

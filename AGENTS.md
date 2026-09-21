@@ -158,10 +158,20 @@ src/dab_bench/
   data/stores.py · download.py · load.py · pg.py      the store map, HF download, the three load paths, roles
   context/build.py · curate.py                        the generated half; the curator session
   agent/llm.py · versions.py · prompt.py · tools.py · sandbox.py · session.py
-  eval/splits.py · score.py · runner.py               splits; TrialResult + summary arithmetic; `dab eval`
+  eval/splits.py · score.py · runner.py               splits; TrialResult, summary + `profile()` (p50/p95); `dab eval`
   tracking/mlflow_log.py · tracing.py                 the run record on MLflow; one trace per trial
-frontend/src/pages/Runs.tsx · Run.tsx · TracePage.tsx
+  serving/app.py                                      `/api/runs` = the board (roles derived, profile per run); `/traces/<key>` adds the span tree
+frontend/src/pages/Runs.tsx · Run.tsx · TracePage.tsx · lib/runs.tsx   the board, one run vs the champion, the span waterfall
 ```
+
+**Roles are derived, never declared.** The champion is the newest scored
+full-split run of the agent `agents/champion` names that has no
+`challenger_of`; every other full-split run is a challenger (older champion-agent
+runs: superseded); smoke runs never hold the title. The explorer's span waterfall
+is rebuilt from `traces/<key>.json` with the same rules as `tracking/tracing.py`,
+so it matches the MLflow trace without reading MLflow. Embedding the MLflow trace
+view needs the central server started with `MLFLOW_SERVER_X_FRAME_OPTIONS=NONE`;
+the explorer probes the header once and shows the toggle only then.
 
 The result row (`results.jsonl`) carries `query_id · dataset · trial · answer ·
 passed · reason · n_turns · duration_ms · cost_usd · input_tokens ·

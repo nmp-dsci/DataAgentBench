@@ -283,47 +283,28 @@ def runs_list() -> None:
 
 @runs_app.command("profile")
 def runs_profile(run_id: str) -> None:
-    """Token and turn profile of a run: p50/p90 turns, the four token counts, cost per trial."""
-    import statistics
-
+    """Token and turn profile of a run: mean / p50 / p95 / max per trial, the same numbers the explorer shows."""
     from dab_bench.eval.runner import load_run
+    from dab_bench.eval.score import PROFILE_METRICS, profile
 
     meta, results = load_run(run_id)
     if not results:
         console.print("no results")
         raise typer.Exit(1)
-
-    def pct(values: list[float], p: float) -> float:
-        v = sorted(values)
-        return v[min(len(v) - 1, int(round(p * (len(v) - 1))))]
-
-    turns = [float(r.n_turns) for r in results]
-    fresh = [float(r.input_tokens + r.cache_creation_tokens) for r in results]
-    reads = [float(r.cache_read_tokens) for r in results]
-    outs = [float(r.output_tokens) for r in results]
-    costs = [r.cost_usd or 0.0 for r in results]
+    p = profile(results)
     t = Table(box=None)
-    for c in ("metric", "p50", "p90", "mean", "total"):
+    for c in ("metric", "mean", "p50", "p95", "max", "total"):
         t.add_column(c)
-    for name, vals in (
-        ("turns", turns),
-        ("fresh input tokens", fresh),
-        ("cache read tokens", reads),
-        ("output tokens", outs),
-        ("cost usd", costs),
-    ):
-        t.add_row(
-            name,
-            f"{pct(vals, 0.5):,.2f}" if name == "cost usd" else f"{pct(vals, 0.5):,.0f}",
-            f"{pct(vals, 0.9):,.2f}" if name == "cost usd" else f"{pct(vals, 0.9):,.0f}",
-            f"{statistics.mean(vals):,.3f}"
-            if name == "cost usd"
-            else f"{statistics.mean(vals):,.0f}",
-            f"{sum(vals):,.2f}" if name == "cost usd" else f"{sum(vals):,.0f}",
-        )
+    for key, label in PROFILE_METRICS:
+        m = p["metrics"][key]
+        f = "{:,.3f}" if key == "cost_usd" else "{:,.0f}"
+        t.add_row(label, *(f.format(m[k]) for k in ("mean", "p50", "p95", "max", "sum")))
     console.print(t)
+    hit = p["cache_hit_rate"]
     console.print(
-        f"{len(results)} trials · {meta.model} @ {meta.effort} · fingerprint {meta.fingerprint} · context {meta.context_sha}"
+        f"{p['n']} trials ran · cache hit {hit:.0%} · cost per pass "
+        f"{p['cost_per_pass'] if p['cost_per_pass'] is None else f'${p["cost_per_pass"]:.2f}'} · "
+        f"{meta.model} @ {meta.effort} · fingerprint {meta.fingerprint} · context {meta.context_sha}"
     )
 
 
