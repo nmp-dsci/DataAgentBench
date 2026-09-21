@@ -145,6 +145,17 @@ def log_trial_trace(
         trace_id=trace_id,
         outputs={"answer": _cut(result.answer), "passed": result.passed, "reason": result.reason},
         attributes={
+            # the standard key the Traces tab reads for its Tokens column (what autologgers set)
+            "mlflow.chat.tokenUsage": {
+                "input_tokens": result.input_tokens
+                + result.cache_read_tokens
+                + result.cache_creation_tokens,
+                "output_tokens": result.output_tokens,
+                "total_tokens": result.input_tokens
+                + result.cache_read_tokens
+                + result.cache_creation_tokens
+                + result.output_tokens,
+            },
             "n_turns": result.n_turns,
             "tool_calls": result.tool_calls,
             "input_tokens": result.input_tokens,

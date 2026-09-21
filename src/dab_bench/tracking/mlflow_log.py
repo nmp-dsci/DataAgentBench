@@ -122,11 +122,16 @@ def log_run(run_dir: Path, meta: RunMeta, results: list[TrialResult]) -> str:
                 if rate.get("rate") is not None:
                     metrics[f"ds_{ds}_pass_rate"] = float(rate["rate"])
         mlflow.log_metrics(metrics)
+        per_trial: dict[str, float] = {}
         for r in results:
+            key = f"q_{r.query_id.replace('/', '_')}_t{r.trial}"
             if r.passed is not None:
-                mlflow.log_metric(
-                    f"q_{r.query_id.replace('/', '_')}_t{r.trial}", 1.0 if r.passed else 0.0
-                )
+                per_trial[key] = 1.0 if r.passed else 0.0
+            per_trial[f"tokens_{key}"] = float(
+                r.input_tokens + r.cache_read_tokens + r.cache_creation_tokens + r.output_tokens
+            )
+            per_trial[f"cost_{key}"] = float(r.cost_usd or 0.0)
+        mlflow.log_metrics(per_trial)
         for name in ("run.json", "results.jsonl"):
             if (run_dir / name).exists():
                 mlflow.log_artifact(str(run_dir / name))
