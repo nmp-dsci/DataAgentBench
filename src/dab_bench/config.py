@@ -15,8 +15,19 @@ DATA_DIR = ROOT / "data"
 UPSTREAM_DIR = DATA_DIR / "upstream"
 INDEX_DIR = DATA_DIR / "index"
 ANSWERS_DIR = DATA_DIR / "answers"
-CONTEXT_DIR = DATA_DIR / "context"
+CONTEXT_DIR = DATA_DIR / "context"  # the context pack: committed text, one folder per dataset
+SPLITS_DIR = DATA_DIR / "splits"
+AGENTS_DIR = ROOT / "agents"
+RUNS_DIR = ROOT / "runs"
+WORKSPACE_DIR = ROOT / "workspace"
+INFRA_DIR = ROOT / "infra"
 FRONTEND_DIST = ROOT / "frontend" / "dist"
+
+# The one schema this project owns on the (for now project-local, later central)
+# Postgres, and the naming rule for every table in it: `<dataset>_<table>`.
+PG_SCHEMA = "dataagentbench"
+HF_DATA_REPO = "ruiyingm/DataAgentBench-data"
+MLFLOW_EXPERIMENT = "dataagentbench/evals"
 
 UPSTREAM_REPO = "https://github.com/ucbepic/DataAgentBench.git"
 UPSTREAM_PAPER = "https://arxiv.org/abs/2603.20576"
@@ -34,15 +45,36 @@ ATTRIBUTION_PATH = INDEX_DIR / "ATTRIBUTION.md"
 
 
 class Settings(BaseModel):
-    """Runtime settings, read once from the environment."""
+    """Runtime settings, read once from the environment.
+
+    Boots keyless: the explorer, the ingest and the scorer never reach a model or a
+    database. `database_url` is the owner connection for `dab data load`;
+    `agent_database_url` is what the agent's `query_db` connects as (read-only role).
+    """
 
     upstream_commit: str | None = None
     code_sha: str = "unknown"
+    database_url: str = "postgresql://dab_owner:dab_owner@localhost:5433/nmp"
+    agent_database_url: str = "postgresql://dab_agent:dab_agent@localhost:5433/nmp"
+    pg_superuser_url: str = "postgresql://nmp:nmp@localhost:5433/nmp"
+    mlflow_tracking_uri: str = "http://localhost:5000"
+    billing: str = "subscription"
 
     @classmethod
     def from_env(cls) -> Settings:
-        commit = os.environ.get("DAB_UPSTREAM_COMMIT", "").strip() or None
-        return cls(upstream_commit=commit, code_sha=os.environ.get("DAB_CODE_SHA", "unknown"))
+        env = os.environ.get
+        commit = env("DAB_UPSTREAM_COMMIT", "").strip() or None
+        return cls(
+            upstream_commit=commit,
+            code_sha=env("DAB_CODE_SHA", "unknown"),
+            database_url=env("DATABASE_URL", cls.model_fields["database_url"].default),
+            agent_database_url=env(
+                "AGENT_DATABASE_URL", cls.model_fields["agent_database_url"].default
+            ),
+            pg_superuser_url=env("PG_SUPERUSER_URL", cls.model_fields["pg_superuser_url"].default),
+            mlflow_tracking_uri=env("MLFLOW_TRACKING_URI", "http://localhost:5000"),
+            billing=env("BILLING", "subscription").strip().lower(),
+        )
 
 
 def settings() -> Settings:

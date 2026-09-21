@@ -23,6 +23,22 @@ rescore: ## judge every committed answer with its validate.py → data/index/tri
 stats: ## the numbers the README quotes, from the index
 	uv run dab stats
 
+# ---- the agent build (plan s01) --------------------------------------------
+db-up: ## start this project's Postgres (infra/docker-compose.yml, :5433) and apply roles.sql
+	docker compose -f infra/docker-compose.yml up -d --wait
+	uv run dab data init
+
+db-down: ## stop this project's Postgres (data kept in volume dab-pgdata)
+	docker compose -f infra/docker-compose.yml down
+
+platform-up: ## start nmp-central-ai's stack (MLflow at :5000) — rule zero: never our own copy
+	$(MAKE) -C ../nmp-central-ai up
+
+data: ## download the 12 datasets' database files (8.4 GB, sha256-verified) and load them into Postgres
+	uv run dab data download
+	uv run dab data load
+	uv run dab data check
+
 dev: ## run the API on :$(PORT) (frontend: cd frontend && npm run dev → :5173)
 	uv run dab serve --port $(PORT) --reload
 
@@ -39,4 +55,4 @@ lint: ## ruff + mypy (+ frontend typecheck and design lint when node_modules exi
 fmt: ## ruff format + fix
 	uv run ruff format src tests && uv run ruff check --fix src tests
 
-.PHONY: help setup upstream ingest rescore stats dev build test lint fmt
+.PHONY: help setup upstream ingest rescore stats dev build test lint fmt db-up db-down platform-up data

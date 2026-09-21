@@ -1,0 +1,18 @@
+{
+  "name": "smoke",
+  "rule": "D0 B (plan s01): the median-difficulty query per dataset by published pass rate over all 9 answer files (trials.json per_query.rate; upper median where the count is even)",
+  "queries": [
+    "stockindex/1",
+    "bookreview/2",
+    "crmarenapro/6",
+    "pancancer_atlas/3",
+    "github_repos/4",
+    "stockmarket/3",
+    "googlelocal/4",
+    "music_brainz_20k/1",
+    "agnews/1",
+    "yelp/2",
+    "deps_dev_v1/1",
+    "patents/2"
+  ]
+}

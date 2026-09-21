@@ -1,0 +1,35 @@
+# DataAgentBench — the benchmark's 12 datasets re-hosted in one Postgres schema.
+#
+#   make db-up      start it (volume dab-pgdata; ~9 GB after `make data`)
+#   make db-down    stop it (data kept); `docker volume rm dab-pgdata` to wipe
+#
+# Same image and database name as nmp-central-ai's stack, on :5433 so the two
+# coexist. This is a stated, temporary deviation from the platform's rule zero
+# (no project-local Postgres): the platform's M3 (per-project schemas) is not
+# built yet, and `pg_dump -n dataagentbench | psql <central>` moves everything
+# when it is (plan s01 §8, milestone M8).
+name: dab
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: nmp
+      POSTGRES_PASSWORD: nmp
+      POSTGRES_DB: nmp
+    command: >
+      postgres -c shared_buffers=512MB -c work_mem=64MB -c maintenance_work_mem=512MB
+      -c max_wal_size=4GB -c checkpoint_timeout=15min
+    ports:
+      - "${DAB_PG_PORT:-5433}:5432"
+    volumes:
+      - dab-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nmp -d nmp"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+volumes:
+  dab-pgdata:

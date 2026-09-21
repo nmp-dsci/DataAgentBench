@@ -13,6 +13,14 @@ dependencies = [
   "rich>=13.9",
   "pyyaml>=6.0",
   "python-dotenv>=1.0",
+  "psycopg[binary]>=3.2",
+  "duckdb>=1.1",
+  "pymongo>=4.10",
+  "huggingface-hub>=0.30",
+  "pyarrow>=17",
+  "pandas>=2.2",
+  "claude-agent-sdk>=0.2.152",
+  "mlflow>=3.12,<4",
 ]
 
 [project.scripts]

@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>s01 · DataAgentBench — agent blueprint: one agent, a context pack, v0 then v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Design source (2): the project family's own system — DESIGN.md ("Field Guide"),
+   a port of nmp-dsci.github.io/assets/css/tokens.css, as used by DABStep-loop and
+   tau2-loop. Tokens verbatim. */
+:root{
+  --bg:#F7F6F2; --panel:#FFFFFF; --band:#EFEEE8;
+  --ink:#1A1D1B; --ink-2:#3B403D; --muted:#4A514D; --faint:#5C635E;
+  --line:#DCDAD2; --line-2:#C7C5BC; --line-3:#8A8880;
+  --accent:#0A6552; --accent-ink:#FFFFFF; --accent-soft:#DFEFE8;
+  --amber:#8A5006; --amber-soft:#F6E6CF;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --t-2:0.8rem; --t-1:0.875rem; --t0:1rem; --t1:1.125rem; --t2:1.406rem; --t3:1.758rem; --t4:2.197rem;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --r:10px; --r-sm:6px;
+  --shadow:0 1px 2px rgb(20 25 22 / .05), 0 12px 28px -18px rgb(20 25 22 / .22);
+  --dur:300ms; --ease:cubic-bezier(.2,.7,.2,1); --focus:var(--accent);
+  --w:1140px; --measure:68ch; --track-label:.08em;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121614; --panel:#191E1B; --band:#161A18;
+    --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+    --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+    --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+    --amber:#D99A4E; --amber-soft:#3A2A14;
+    --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121614; --panel:#191E1B; --band:#161A18;
+  --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+  --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+  --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+  --amber:#D99A4E; --amber-soft:#3A2A14;
+  --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+}
+@media (prefers-reduced-motion: reduce){ :root{ --dur:0.01ms; } }
+*,*::before,*::after{box-sizing:border-box}
+:where(.grid,.flex,.kpi,.slide,.cards,.mock-body,.mock-cols)>*{min-width:0}
+:where(p,h1,h2,h3,h4,li,dd,figcaption,td,th,.chip,.label){overflow-wrap:anywhere}
+:where(img,svg,video,iframe){max-width:100%;height:auto}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink-2);font-family:var(--sans);font-size:var(--t0);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{color:var(--ink);margin:0;line-height:1.15;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+h1{font-size:var(--t4);font-family:var(--serif);font-weight:400} h1 em{font-style:italic;font-weight:400;color:var(--accent)}
+h2{font-size:var(--t3)} h3{font-size:var(--t1)} h4{font-size:var(--t0)}
+p{margin:0 0 var(--s4);text-wrap:pretty}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:.2em} a:hover{text-decoration-thickness:2px}
+strong,b{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:max(var(--t-2),.86em);background:var(--band);padding:.08em .32em;border-radius:var(--r-sm);color:var(--ink-2)}
+.wrap{max-width:var(--w);margin-inline:auto;padding-inline:var(--s5)}
+.label{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0}
+.lead{font-family:var(--serif);font-size:var(--t1);line-height:1.5;color:var(--ink-2);max-width:72ch}
+.small{font-size:var(--t-1);color:var(--muted)}
+.top{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:var(--w);margin-inline:auto;padding:var(--s3) var(--s5);display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.top b{font-family:var(--mono);font-size:var(--t-1);color:var(--ink);white-space:nowrap}
+.top nav{display:flex;gap:var(--s4);margin-left:auto;flex-wrap:wrap;font-size:var(--t-1);font-weight:500}
+.top nav a{color:var(--ink-2);text-decoration:none;padding:var(--s1) 0} .top nav a:hover{color:var(--accent)}
+header.hero{padding:var(--s7) 0 var(--s5)}
+.chips{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s4) 0 0}
+.chip{font-family:var(--mono);font-size:var(--t-2);padding:.3em .6em;border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--ink-2);background:var(--panel)}
+.chip.ok{border-color:var(--accent);color:var(--accent)} .chip.warn{border-color:var(--amber);color:var(--amber)}
+section.blk{padding-top:var(--s8)} section.blk:last-of-type{padding-bottom:var(--s9)}
+section.band-sec{background:var(--band);margin-top:var(--s8);padding:var(--s7) 0}
+section.band-sec + section.blk{padding-top:var(--s7)}
+.hd{margin-bottom:var(--s5);max-width:80ch} .hd .label{margin-bottom:var(--s2)} .hd h2{margin-bottom:var(--s3)}
+.panel{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5)}
+.grid{display:grid;gap:var(--s4)} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.g3,.g2{grid-template-columns:minmax(0,1fr)}}
+.card h3{margin-bottom:var(--s2)} .card p{margin-bottom:var(--s2);font-size:var(--t-1)} .card p:last-child{margin:0}
+.card.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r);box-shadow:var(--shadow);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:var(--t-1)}
+caption{text-align:left;padding:var(--s4) var(--s5) var(--s2);color:var(--muted);font-size:var(--t-1);caption-side:top}
+th,td{text-align:left;padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}
+thead th{font-family:var(--mono);font-size:var(--t-2);font-weight:500;color:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase;border-bottom:1px solid var(--line-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.sub{font-weight:600;color:var(--ink);white-space:nowrap}
+td.num{font-family:var(--mono);font-size:var(--t-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+td .path{display:block;font-family:var(--mono);font-size:var(--t-2);color:var(--faint);font-weight:400;margin-top:2px}
+tr.pro td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+tr.dim td{color:var(--muted)}
+.v-ok{color:var(--accent);font-weight:600} .v-no{color:var(--muted)} .v-warn{color:var(--amber);font-weight:600}
+.kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4)}
+@media(max-width:900px){.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi .k{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s4)}
+.kpi .k b{display:block;font-family:var(--mono);font-size:var(--t3);color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.1}
+.kpi .k span{display:block;font-size:var(--t-2);color:var(--muted);margin-top:var(--s2);line-height:1.4}
+blockquote{margin:0;padding:var(--s3) var(--s4);border-left:2px solid var(--accent);background:var(--band);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:var(--t-1)}
+blockquote.warn{border-left-color:var(--amber)}
+.fig{margin:var(--s5) 0 0}
+.fig-title{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0 0 var(--s3);text-wrap:balance}
+.dia-frame{background:var(--panel);border-radius:var(--r);padding:var(--s4);box-shadow:var(--shadow)}
+.fig figcaption{font-family:var(--sans);font-size:var(--t-1);color:var(--muted);line-height:1.5;margin-top:var(--s3)}
+.fig figcaption b{color:var(--ink);font-weight:600}
+.dia{display:block;width:100%;height:auto;color:var(--ink-2);overflow:visible}
+.dia .nd{fill:var(--bg);stroke:currentColor;stroke-width:1;vector-effect:non-scaling-stroke}
+.dia .nd.hi{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.4}
+.dia .nd.ext{fill:none;stroke:var(--line-3);stroke-dasharray:4 3}
+.dia .rg{fill:none;stroke:var(--line-2);stroke-dasharray:5 4}
+.dia .tx{font-family:var(--mono);font-size:11.5px;fill:currentColor}
+.dia .tx.k{fill:var(--ink);font-weight:500;font-family:var(--sans);font-size:12.5px}
+.dia .tx.s{font-size:10.5px;fill:var(--faint)}
+.dia .cap{font-family:var(--mono);font-size:10.5px;fill:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase}
+.dia .ed{stroke:currentColor;stroke-width:1.25;vector-effect:non-scaling-stroke;fill:none;marker-end:url(#arr)}
+.dia .ed.hi{stroke:var(--accent);stroke-width:1.6}
+.dia .ed.dash{stroke:var(--line-3);stroke-dasharray:4 3}
+.dia .bar{fill:var(--line-2)} .dia .bar.hi{fill:var(--accent)} .dia .bar.pro{fill:var(--amber)}
+.dia .ax{stroke:var(--line-2);stroke-width:1}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:var(--s3)}
+.steps li{position:relative;padding-left:2.75rem;font-size:var(--t-1)}
+.steps li::before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:0;top:2px;font-family:var(--mono);color:var(--accent);font-weight:500}
+form.q{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5);display:grid;gap:var(--s3);margin-top:var(--s4)}
+form.q h3{margin:0} form.q .why{font-size:var(--t-1);color:var(--muted);margin:0}
+form.q label{display:grid;grid-template-columns:1.2rem minmax(0,1fr);gap:var(--s2);align-items:start;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;min-height:24px}
+form.q label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+form.q input[type=radio],form.q input[type=checkbox]{margin:3px 0 0;accent-color:var(--accent);width:16px;height:16px}
+form.q textarea{width:100%;font:inherit;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);color:var(--ink-2);min-height:3.2rem;resize:vertical}
+form.q .row{display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap}
+.btn{font:500 var(--t-1) var(--sans);background:var(--accent);color:var(--accent-ink);border:0;border-radius:var(--r-sm);padding:.55em 1em;cursor:pointer;min-height:24px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.08)} .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.queued{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);min-height:1.2em}
+.rec{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);margin-left:.4em}
+.done{font-family:var(--mono);font-size:var(--t-2);color:var(--accent-ink);background:var(--accent);padding:.2em .5em;border-radius:var(--r-sm);letter-spacing:var(--track-label);text-transform:uppercase}
+.tag{font-family:var(--mono);font-size:var(--t-2);padding:.15em .45em;border-radius:var(--r-sm);border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.tag.ok{border-color:var(--accent);color:var(--accent)} .tag.warn{border-color:var(--amber);color:var(--amber)}
+ul.tight{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.tight li{margin-bottom:var(--s1)}
+ul.qa{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.qa li{margin-bottom:var(--s2)}
+.tree,pre.md{font-family:var(--mono);font-size:var(--t-2);line-height:1.65;white-space:pre;overflow-x:auto;margin:0;background:var(--band);border-radius:var(--r);padding:var(--s4)}
+.insight{font-size:var(--t-1);color:var(--muted);margin:var(--s3) 0 0;max-width:var(--measure)}
+footer{border-top:1px solid var(--line);padding:var(--s5) 0;font-size:var(--t-2);color:var(--faint);font-family:var(--mono)}
+/* UI mocks of the explorer, rendered in the app's own tokens */
+.mock{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;font-size:var(--t-1)}
+.mock-top{display:flex;gap:var(--s4);align-items:center;padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.mock-top b{font-family:var(--mono);font-size:var(--t-2);color:var(--ink)}
+.mock-top nav{display:flex;gap:var(--s3);flex-wrap:wrap;font-size:var(--t-2);color:var(--muted)}
+.mock-top nav span.on{color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:.25em}
+.mock-body{padding:var(--s4)}
+.mock h4{font-size:var(--t1);margin-bottom:var(--s2)}
+.mock .filters{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s3) 0}
+.mock .filters span{font-family:var(--mono);font-size:var(--t-2);padding:.25em .55em;border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--ink-2)}
+.mock .filters span.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.mock table{min-width:0;font-size:var(--t-2)}
+.mock th,.mock td{padding:var(--s2) var(--s3)}
+.mock-cols{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:var(--s4)}
+@media (max-width:900px){.mock-cols{grid-template-columns:minmax(0,1fr)}}
+.mock .kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--s1) var(--s3);font-size:var(--t-2)}
+.mock .kv dt{font-family:var(--mono);color:var(--faint);text-transform:uppercase;letter-spacing:var(--track-label);margin:0}
+.mock .kv dd{margin:0;color:var(--ink-2)}
+.mock pre{font-family:var(--mono);font-size:var(--t-2);line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;margin:var(--s2) 0 0;background:var(--band);border-radius:var(--r-sm);padding:var(--s3)}
+.mock .mini{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s2)}
+@media (max-width:700px){.mock .mini{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.mock .mini div{background:var(--band);border-radius:var(--r-sm);padding:var(--s3)}
+.mock .mini b{display:block;font-family:var(--mono);font-size:var(--t2);color:var(--ink);line-height:1.1}
+.mock .mini span{display:block;font-size:var(--t-2);color:var(--muted);margin-top:var(--s1);line-height:1.35}
+.ms{display:grid;grid-template-columns:5.5rem minmax(0,1fr);gap:var(--s3);align-items:start;padding:var(--s3) 0;border-bottom:1px solid var(--line)}
+.ms:last-child{border-bottom:0}
+.ms b.id{font-family:var(--mono);color:var(--accent);font-weight:500;font-size:var(--t-1)}
+.ms .body{font-size:var(--t-1)} .ms .body b{display:block;margin-bottom:2px}
+.calc{display:grid;gap:var(--s4)}
+.calc-in{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--s3)}
+.calc-in label{display:grid;gap:var(--s1);font-family:var(--mono);font-size:var(--t-2);color:var(--faint);text-transform:uppercase;letter-spacing:var(--track-label)}
+.calc-in input[type=number]{font:500 var(--t0) var(--mono);padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);width:100%;min-width:0}
+.calc-in label.chk{grid-template-columns:auto minmax(0,1fr);align-items:center;align-self:end;text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:var(--t-1);color:var(--ink-2)}
+.calc-out{min-width:0}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in"><b>s01 · DataAgentBench · agent blueprint</b>
+<nav><a href="#goal">Goal</a><a href="#ref">Reference</a><a href="#field">Field</a><a href="#questions">Two questions</a><a href="#arch">Architecture</a><a href="#context">Context pack</a><a href="#agent">Agent</a><a href="#infra">Infra</a><a href="#harness">Harness</a><a href="#obs">Observability</a><a href="#tokens">Tokens</a><a href="#repo">Repo</a><a href="#ms">Milestones</a><a href="#risks">Risks</a><a href="#decide">Decide</a></nav></div></div>
+
+<header class="hero"><div class="wrap">
+  <p class="label">plan · research + design · branch agent-build-v0 · 2026-09-21 · design source: DESIGN.md (Field Guide), shared with DABStep-loop and tau2-loop</p>
+  <h1>One agent, told its dataset, reading a <em>context pack</em> we build once — the shape every team above 0.80 on the leaderboard converged on</h1>
+  <p class="lead">This is the blueprint for the build that answers the 54 questions. It rests on three pieces of research done this session: the benchmark's own reference agent (<code>run_agent.py</code>, <code>common_scaffold/</code>), the 40 leaderboard rows and their submission PRs, and the agent conventions of DABStep-loop and tau2-loop. The two questions you asked — <b>is the dataset known upfront?</b> and <b>one agent or twelve?</b> — both have evidence-backed answers, and the design follows from them.</p>
+  <div class="chips">
+    <span class="chip ok">verified: the dataset is a required CLI argument upstream (<code>run_agent.py:26</code>) — no triage exists in the benchmark or on the leaderboard</span>
+    <span class="chip ok">verified: 13 of the 15 documented leaderboard rows use one agent parameterised per dataset; the one 12-agent team (Camber, #3) won on per-dataset context, not on separate agents</span>
+    <span class="chip ok">verified: the reference scaffold has no schema tool — columns come only from a 25–80 line <code>db_description.txt</code></span>
+    <span class="chip ok">verified from our index: plain ReAct scores 0.02 on patents and 0.20 on agnews; teams with an LLM-extraction tool score 1.00 on patents</span>
+    <span class="chip warn">not found: no Hasura/PromptQL technical write-up; <code>wiki4_pp2_n5</code> is inferred from file names only</span>
+    <span class="chip ok">decided in review: Haiku 4.5 at effort medium for every run; token profile in §11 before the first call</span>
+    <span class="chip ok">decided in review: the smoke is one question from every dataset (12 trials), then all 54 × 1, then 54 × 5 — the scope widens as confidence builds, not one shot</span>
+    <span class="chip ok">decided in review: observability is MLflow on nmp-central-ai — one URI, the sibling logging contract, per-trial traces; the run folder stays the record</span>
+    <span class="chip ok">decided in review: Postgres in this project's compose for now, migrated to nmp-central-ai after its M3 — central shape from day one: schema <code>dataagentbench</code>
+<span class="chip ok">decided D7: dataset facts go in the system prompt (system.md + summary.md + description/hints); the user message is the question alone</span>
+<span class="chip ok">decided: an agent curates the pack — code generates schema/profile/samples/joins, a curator session per dataset writes summary.md + pitfalls.md, never seeing a query</span>
+<span class="chip ok">decided D1: the curated summary + pitfalls are injected (into the system prompt, D7); depth via read_context / search_context</span>
+<span class="chip ok">decided D2 (A): v0 first, installed as champion; the addendum runs as the first challenger through compare/promote at 54 × 5; further iterations are the loop build — this build ships its scaffolding (trace tags, prompt registry, compare, promote)</span>
+<span class="chip ok">decided D6 (A): all 12 datasets' stores re-hosted as <code>&lt;dataset&gt;_&lt;table&gt;</code> (Mongo as jsonb) plus the app state — one Postgres dialect for the agent</span>
+<span class="chip ok">decided D4 (A): billed to the Claude Max 5× subscription through the Agent SDK's <code>claude</code> child, like DABStep-loop and tau2-loop; <code>require_live()</code> refuses a per-token key</span>
+<span class="chip ok">decided D0 (B): the smoke is the median-difficulty query per dataset (≈ 4/12 expected at the field average)</span>
+<span class="chip ok">decided D3 (A): docker sandbox per run, network none; data arrives as parquet on a per-trial <code>/work</code> volume written by <code>query_db(save_as=…)</code></span>
+    <span class="chip warn">proposed, not built: everything below the line in §5 is a design, not code</span>
+  </div>
+</div></header>
+
+<section class="blk" id="goal"><div class="wrap">
+  <div class="hd"><p class="label">01 · goal</p>
+  <h2>1 · Goal — one question from every dataset first, measured and compared, then all 54, then five trials each</h2>
+  <p>Done for <b>the smoke</b> means <code>make data &amp;&amp; make context &amp;&amp; make eval AGENT=v0 SPLIT=smoke</code> runs one Claude Agent SDK agent (Haiku 4.5, effort medium) on one question from each of the 12 datasets, the benchmark's own validators judge each answer, the run opens in the explorer beside the published rows for those 12 queries, and <code>dab runs profile</code> prints the measured tokens per turn. Then the same agent on all 54 × 1, then 54 × 5, which installs v0 as the champion (§11); v1 is what the loop promotes over it in the next build. The build is a sequence of compared runs, not one shot; the loop is the build after it.</p></div>
+  <div class="kpi">
+    <div class="k"><b>0.555</b><span>macro Pass@1 of the upstream scaffold with Claude Opus 4.6, 270 trials — the floor we must beat with v0 (our rescore, <code>trials.json</code>)</span></div>
+    <div class="k"><b>0.785</b><span>best general-purpose row (Spacedock, GPT-5.5, PR #63) — what a good agent scores <b>without</b> a DAB-specific prompt</span></div>
+    <div class="k"><b>0.80 – 0.95</b><span>all 12 "tuned prompt" rows; top is Permute EQ 0.9467 (PR #95) — the band the loop (v1) aims at</span></div>
+    <div class="k"><b>≈ 0.50</b><span>ceiling on agnews, deps_dev_v1 and github_repos across the whole top 10 — gold-ambiguity walls (issues #101, #107), not capability</span></div>
+  </div>
+  <p class="insight">Two numbers to hold onto: the gap from 0.56 to 0.79 is <b>harness quality</b> (schema access, sandbox, answer contract) on a general prompt; the gap from 0.79 to 0.90+ is <b>benchmark-informed context</b> (per-dataset profiling, literal-reading conventions, verification). v0 closes the first gap and ships the curated pack; the second gap is the loop's to close, one measured challenger at a time, on the scaffolding this build lays down. Haiku 4.5 has no leaderboard row, so the comparisons are within our own runs and against the per-dataset published numbers.</p>
+</div></section>
+
+<section class="blk" id="ref"><div class="wrap">
+  <div class="hd"><p class="label">02 · the reference agent</p>
+  <h2>2 · Reference — the benchmark hands the agent its dataset, four tools and a text description; nothing else</h2>
+  <p>Everything below is read from <code>data/upstream/</code> at commit <code>0290945</code>. The reference scaffold is what produced the five <code>react_*</code> baseline files and the Opus 4.6 row we rescored; it is the floor, and its gaps are where the leaderboard teams found their points.</p></div>
+  <div class="grid g2">
+    <div class="panel card">
+      <h3>How a trial starts</h3>
+      <p><code>run_agent.py --dataset crmarenapro --query_id 3 --llm claude-opus-4-6 --iterations 100 --use_hints</code>. The dataset picks <code>query_&lt;DS&gt;/</code>; <code>db_description.txt</code> (and with the flag, <code>db_description_withhint.txt</code>) is read once and pasted into the user prompt; <code>db_config.yaml</code> is handed to the tools. The agent never sees a file path, only logical names like <code>books_database</code>.</p>
+      <p><b>The dataset is known upfront by design.</b> The user prompt is literally <code>QUERY: … DATABASE DESCRIPTION: …</code>. The paper: "database descriptions and hints are dataset-level and remain unchanged across queries within the same dataset."</p>
+    </div>
+    <div class="panel card">
+      <h3>What the agent cannot do</h3>
+      <p><b>No schema tool.</b> <code>list_db</code> returns table names; column names exist only in the description text. <b>Mongo <code>find</code> only</b>, default <code>limit=5</code>, no aggregation pipeline. <b>No row cap</b> on SQL — a big result is dumped to a JSON file and the model sees the first 10 000 chars. <b>Postgres and Mongo are loaded from dump on every trial</b> (<code>createdb</code> + <code>psql -f</code>, <code>mongorestore</code>) and dropped after.</p>
+      <p>The system prompt's rule 1 is "Always use tool calls. Do not output plain text" — and a plain-text turn is silently taken as the final answer (<code>DataAgent.py:310</code>).</p>
+    </div>
+  </div>
+  <div class="tw" style="margin-top:var(--s4)"><table>
+    <caption>The four reference tools, verbatim descriptions (<code>common_scaffold/tools/*.py</code>). Ours in §7 keep these names where the semantics match.</caption>
+    <thead><tr><th>Tool</th><th>Description upstream</th><th>Gap the leaderboard filled</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">list_db(db_name)</td><td class="wrap">"Return the tables or collections in a specific database as a list of strings."</td><td class="wrap">No columns, types, row counts or samples. LabRat's <code>describe_table</code>/<code>sample_rows</code>/<code>column_stats</code>, Permute's evidence layer, Scout's pre-analysis block all exist to fill this.</td></tr>
+      <tr><td class="sub">query_db(db_name, query)</td><td class="wrap">"Execute a query (SQL or MongoDB query) on a specific database and return the result as a list of records." Mongo takes a JSON with <code>collection</code>, optional <code>filter</code>, <code>projection</code>, <code>limit</code>.</td><td class="wrap">Pagination and a row cap; Mongo aggregation; SQL error-category repair hints (LabRat); a results ledger instead of a 10 000-char cut.</td></tr>
+      <tr><td class="sub">execute_python(code)</td><td class="wrap">"Execute a Python snippet. All previous tool results are available as variables. You must print the final result following the required PRINT FORMAT." Docker <code>python:3.12-slim</code> + pandas + pyarrow, network off, 600 s.</td><td class="wrap">Kept by everyone; the network-off sandbox is a rubric expectation (two submissions had trials disqualified for fetching AG News labels, PR #76).</td></tr>
+      <tr><td class="sub">return_answer(answer)</td><td class="wrap">"Return the final answer string and stop the task."</td><td class="wrap">An <b>answer contract</b> (Alkera's <code>FINAL ANSWER:</code>, Stela's analysis contract) so the validator sees the value and not the audit trail — Permute's full-text score was 0.87 vs 0.91 on the answer section only.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="grid g2" style="margin-top:var(--s4)">
+    <blockquote><b>Why agents fail, from the paper's annotated failures:</b> FM4 wrong implementation 45 %, FM2 wrong plan 40 %, FM3 wrong data selection 15 %. "Agents find the right data; they mis-plan or mis-implement the computation." More iterations did not help; SQL-first aggregation and ~20 % of calls spent on exploration did.</blockquote>
+    <blockquote class="warn"><b>What the hints file is:</b> 2–22 lines per dataset that encode the task's tricks — corruption patterns (crmarenapro <code>#</code>-prefixed ids), cross-store join keys (yelp <code>businessid_1</code>↔<code>businessref_1</code>), domain formulas (stockindex volatility, pancancer log10(x+1)), and the patents EMA rule. Using it is "Hints ✓" on the leaderboard; all but three rows do. Camber (#3) was audited as never reading it and still scored 0.879 — its per-dataset prompts encoded the same facts by hand.</blockquote>
+  </div>
+</div></section>
+
+<section class="band-sec" id="field"><div class="wrap">
+  <div class="hd"><p class="label">03 · the field</p>
+  <h2>3 · Field — from 0.56 to 0.95 in six additions, each one visible in a submission PR</h2>
+  <p>The leaderboard has 40 rows (site updated 2026-09-15; our <code>leaderboard.json</code> carries all of them). Each row's maintainer note plus its PR body says what the agent is. Ordered by score, the additions stack.</p></div>
+  <div class="tw"><table>
+    <caption>What each tier added. Pass@1 is macro over the 12 datasets, 5 trials × 54 unless noted. "GP" = general-purpose prompt; "BI" = benchmark-informed ("tuned prompt ✓").</caption>
+    <thead><tr><th>Pass@1</th><th>Row</th><th>Group</th><th>Shape</th><th>The addition that moved it</th></tr></thead>
+    <tbody>
+      <tr class="dim"><td class="num">0.555</td><td class="sub">Claude Opus 4.6 ReAct <span class="path">PR #22</span></td><td>GP</td><td class="wrap">Upstream scaffold, hints, 100 iterations</td><td class="wrap">The floor: four tools, no schema tool, text description only.</td></tr>
+      <tr><td class="num">0.756</td><td class="sub">Phoenix-CLI (Opus 5) <span class="path">PR #94</span></td><td>GP</td><td class="wrap">Plain <code>claude --print</code>, generic analyst prompt, one data-access helper reading <code>db_config.yaml</code>, web off</td><td class="wrap"><b>A real coding harness</b> (Bash 3 493 calls, Read 93) with live introspection. +0.20 from tooling alone.</td></tr>
+      <tr><td class="num">0.785</td><td class="sub">Spacedock (GPT-5.5) <span class="path">PR #63 · best GP</span></td><td>GP</td><td class="wrap">Orchestrator → workers through model → analyze → verify stages; verify re-derives every answer</td><td class="wrap"><b>A verify stage</b> that recomputes the answer independently.</td></tr>
+      <tr><td class="num">0.841</td><td class="sub">Alkera (Fable 5) <span class="path">PR #70 · METHODS.md</span></td><td>BI</td><td class="wrap">Single agent + one benchmark-agnostic "data-engineering best practices" addendum</td><td class="wrap"><b>An answer contract and literal-reading rules</b>: <code>FINAL ANSWER:</code>, "above" strict / "at least" inclusive, EMA seeding convention.</td></tr>
+      <tr><td class="num">0.862</td><td class="sub">Sentinel (Fable 5) <span class="path">PR #73</span></td><td>BI</td><td class="wrap">Single ReAct + sandboxed Python REPL + deterministic <code>verify_step</code></td><td class="wrap"><b>Assertions</b> (row count, uniqueness, non-null, dtype, range) the agent must pass before answering.</td></tr>
+      <tr><td class="num">0.879</td><td class="sub">Camber (Opus 5) <span class="path">PR #92</span></td><td>BI</td><td class="wrap">12 per-dataset Jupyter-kernel agents, hand-written per-dataset system prompts</td><td class="wrap"><b>Per-dataset schema profile + pitfalls</b> in the prompt. The split into 12 agents is incidental — the value is the context.</td></tr>
+      <tr><td class="num">0.906</td><td class="sub">Scout / OceanBase (GLM-5.2) <span class="path">PR #96</span></td><td>BI</td><td class="wrap">Main agent + planner subagents; LLM <code>extract_fields</code>/<code>classify_aggregate</code> tools; runtime pre-analysis block</td><td class="wrap"><b>Measured join overlaps and question→column bindings</b> generated per query, plus LLM extraction tools for text columns.</td></tr>
+      <tr class="pro"><td class="num">0.947</td><td class="sub">Permute EQ (Opus 5) <span class="path">PR #95 · #88</span></td><td>BI</td><td class="wrap">Pre-built learned evidence layer per query, fresh executor with only <code>duckdb_query</code> + <code>calculator</code></td><td class="wrap"><b>The evidence layer is built ahead of time</b> and handed over as a queryable table; the executor is tiny. Also 5 prompt variants, some query-specific.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="grid g3" style="margin-top:var(--s5)">
+    <div class="panel card"><h3>Everyone good solves these</h3><p>bookreview, music_brainz_20k, stockindex ≈ 1.00; yelp, googlelocal, stockmarket ≥ 0.90 across the top 10. Plain ReAct (Gemini-3-Pro) gets 0.89 / 0.51 / 0.85 and 0.24 / 0.57 / 0.61 on the same six — the harness gap.</p></div>
+    <div class="panel card"><h3>Patents went from 0 to 1.00</h3><p>Every paper baseline scored 0/50 on all three patents queries (regex over CPC text, never recovered). Teams with an LLM extraction tool or the EMA convention in the prompt score 1.00. This one dataset is +0.08 macro on its own.</p></div>
+    <div class="panel card"><h3>Four queries are walls</h3><p>agnews q2–4 need category labels the rubric forbids fetching (issue #101); pancancer q1's gold uses ICD-O-3 codes (0/270 in every public run, #107). Top-10 ceilings: agnews 0.40–0.55, deps_dev_v1 0.50, github_repos 0.50, pancancer 0.67. We record these, we do not tune to them.</p></div>
+  </div>
+  <blockquote style="margin-top:var(--s5)"><b>Why not just imitate the leader?</b> We imitate the stack, not the last step. Everything from 0.56 to 0.91 is a general mechanism and v0/v1 carries all of it: live introspection (Phoenix), an independent verify (Spacedock), the answer contract and literal-reading rules (Alkera), assertions before answering (Sentinel), a per-dataset profile with pitfalls (Camber), measured join overlaps and LLM extraction for text columns (Scout). Permute EQ's extra +0.04 comes from a <b>per-query</b> evidence table built ahead of time and five prompt variants, some query-specific — that is the work of answering the 54 questions offline and handing the executor the result. It does not generalise to a 55th question, it is what the rubric's "tuned prompt" flag exists to mark, and it is where a reviewer reads test-set tuning. The generalisable half of Permute's idea — precomputed evidence <em>per dataset</em>, queried through one tiny tool — is exactly the context pack plus <code>joins.md</code> in §6, and the small executor with one <code>query_db</code> is why D6 picks one dialect. Target: Scout's shape (≈ 0.90) on Haiku, generically; the gap to 0.95 is deliberately left on the table until the smoke and the 54 × 1 pass say where v1's addendum should go.</blockquote>
+</div></section>
+
+<section class="blk" id="questions"><div class="wrap">
+  <div class="hd"><p class="label">04 · your two questions</p>
+  <h2>4 · Two questions — the dataset is given, and it is one agent with twelve context packs</h2></div>
+  <div class="grid g2">
+    <div class="panel card pro">
+      <h3>Q1 · Does the agent triage which dataset it is in?</h3>
+      <p><b>No — and it should not.</b> The benchmark states the dataset per query (<code>--dataset</code> is required; the rubric's legitimate prompt inputs are exactly the query text, <code>db_description.txt</code> and the hints file). No leaderboard row triages. A triage step would be a self-imposed problem the score never rewards and the walls never forgive.</p>
+      <p>What your instinct was pointing at is real, though: the agent needs a <b>knowledge base it reads</b> before it writes SQL, because the description text is 25–80 lines and has no types, no samples, no row counts. That knowledge base is the context pack in §6, keyed by dataset, built once, no model involved.</p>
+    </div>
+    <div class="panel card pro">
+      <h3>Q2 · One system prompt or one agent per dataset?</h3>
+      <p><b>One agent, one system prompt, parameterised by dataset.</b> Every team with a note except Camber does this; Camber's twelve agents differ only in a hand-written per-dataset prompt section — i.e. context, which we generate instead of hand-writing. One agent is also what the loop needs later: one <code>system.md</code> to optimise, one fingerprint per version, one McNemar comparison.</p>
+      <p>The split that matters is <b>behaviour vs facts</b>: <code>system.md</code> carries how to work (explore, plan, SQL-first, verify, answer contract); the user prompt carries the query and the dataset's context. DABStep-loop already makes exactly this split (<code>agent/prompt.py:build_task_prompt</code>).</p>
+      <p><b>So "the dataset is explicit" does not mean a system prompt per dataset.</b> The dataset name selects which context pack is injected; what stays byte-identical across all 54 queries and 12 datasets is <code>system.md</code>, the behaviour file — that is what the fingerprint hashes and what the optimiser later edits.</p>
+      <p><b>Where the pack is injected is a separate, smaller choice — and putting it in the system prompt is the better one.</b> The system message the model sees is then <code>system.md</code> + <code>&lt;dataset&gt;/summary.md</code> + the upstream description and hints, and the user message is the question alone, exactly as the benchmark poses it. Nothing is lost: prompt caching keys on the prefix, and the prefix (behaviour + pack) is the same for every trial of a dataset either way; the fingerprint stays <code>sha256(system.md)</code> with the pack's own hash logged beside it as <code>context_sha</code>; Camber's twelve system prompts are the leaderboard precedent that facts in the system slot work. Two things change: facts in the system slot are read as standing instructions rather than as part of the question, which is what we want for "ids carry a '#' prefix"; and the twelve composed system prompts are written into the run folder as <code>agent/system.&lt;dataset&gt;.md</code> so a trace reader sees the exact bytes. D7 below records the choice.</p>
+    </div>
+  </div>
+  <figure class="fig">
+    <p class="fig-title">Fig 0 · what the model receives for two trials on two datasets — same system message, different user message</p>
+    <div class="grid g2">
+      <div class="mock"><div class="mock-top"><b>trial · crmarenapro/3</b><nav><span>agents/v0</span></nav></div><div class="mock-body">
+        <pre>SYSTEM  ← agents/v0/system.md, identical for every trial
+You are a data analyst answering one question over
+several databases … ORIENT · PLAN · COMPUTE · VERIFY ·
+ANSWER … ## Conventions for this benchmark …
+
+        ← + data/context/crmarenapro/summary.md (D7 A)
+# Dataset: crmarenapro
+6 stores → tables crmarenapro_accounts (12 400 rows),
+crmarenapro_opportunities (48 210), crmarenapro_cases …
+joins: accounts.id ↔ opportunities.account_id (99.8 %
+after trim of '#') …
+DESCRIPTION / HINTS (verbatim): ids may carry a '#' …
+Tools: describe_table · sample_rows · query_db · …
+
+USER    ← the question, as the benchmark poses it
+Which sales reps closed the most opportunities in
+Q3 2024, excluding …</pre>
+      </div></div>
+      <div class="mock"><div class="mock-top"><b>trial · yelp/2</b><nav><span>agents/v0</span></nav></div><div class="mock-body">
+        <pre>SYSTEM  ← agents/v0/system.md, identical for every trial
+You are a data analyst answering one question over
+several databases … ORIENT · PLAN · COMPUTE · VERIFY ·
+ANSWER … ## Conventions for this benchmark …
+
+        ← + data/context/yelp/summary.md (D7 A)
+# Dataset: yelp
+2 stores → tables yelp_business (150 346 rows, jsonb),
+yelp_reviews (6 990 280) …
+joins: business.businessid_1 ↔ reviews.businessref_1
+(100 % after lower-case) …
+DESCRIPTION / HINTS (verbatim): businessid_1 and
+businessref_1 are the same key …
+Tools: describe_table · sample_rows · query_db · …
+
+USER    ← the question, as the benchmark poses it
+Among restaurants in Philadelphia with at least 50
+reviews, which …</pre>
+      </div></div>
+    </div>
+    <figcaption><b>One file to version, twelve packs to generate, twelve composed system prompts to log.</b> If a dataset ever needs its own behaviour rather than its own facts, that is a line in the context pack's summary, not a second system prompt — the loop can only optimise one surface, and the leaderboard's per-dataset team (Camber) put exactly this kind of text in its prompts by hand.</figcaption>
+  </figure>
+  <form class="q" data-lavish-question="D7-pack-slot" onsubmit="event.preventDefault();const f=new FormData(event.currentTarget);const c=f.get('d7');const n=(f.get('notes')||'').trim();if(!c)return;window.lavish.queuePrompt('Decision D7 (where the pack is injected): '+c+(n?' — notes: '+n:''),{tag:'decision',text:'D7: '+c,element:event.currentTarget,data:{question:'D7-pack-slot',answer:c,notes:n}});event.currentTarget.querySelector('.queued').textContent='queued: '+c;">
+    <h3>D7 · Which slot carries the dataset's facts? <span class="rec">decided: A</span></h3>
+    <p class="why">Same bytes, same cache prefix, same fingerprint either way; the difference is what the model treats as standing instruction and how clean the user message is. Independent of D1 (how much of the pack is injected).</p>
+    <label><input type="radio" name="d7" value="A: system prompt = system.md + <dataset>/summary.md + upstream description and hints; user message = the question only; composed prompts logged per dataset as agent/system.<dataset>.md; fingerprint stays sha256(system.md), context_sha logged beside it"> <span><b>A · facts in the system prompt, question alone in the user message</b> <span class="rec">recommended</span> — your suggestion; Camber's precedent; the user turn is the benchmark's query verbatim.</span></label>
+    <label><input type="radio" name="d7" value="B: system prompt = system.md only; user message = query + description + hints + summary.md (DABStep-loop's build_task_prompt shape)"> <span><b>B · facts in the user message</b> — the sibling shape; one system string for all 12 datasets, at the cost of a long user turn the model may read as part of the question.</span></label>
+    <textarea name="notes" placeholder="Ordering inside the system prompt, whether hints go in the system slot for v0 too…"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D7</button><span class="queued"></span></div>
+  </form>
+</div></section>
+
+<section class="blk" id="arch"><div class="wrap">
+  <div class="hd"><p class="label">05 · architecture</p>
+  <h2>5 · Architecture — data loaded once, context built once, one session per trial, the validators we already have</h2>
+  <p>Four figures. Fig 1 is the pipeline (four layers: the first two run with no model and are cached; the third is the agent; the fourth is what this repo already does plus the run folder the explorer opens). Fig 1b is the <b>system architecture</b> — which process talks to which service, and where the boundaries between this repo, nmp-central-ai and the outside sit. Fig 2 is the six moves inside a session, and Fig 2b is the <b>agent architecture</b> — what is fixed, what is generated per dataset, and every side effect the model can cause.</p></div>
+  <figure class="fig">
+    <p class="fig-title">Fig 1 · the agent build, end to end</p>
+    <div class="dia-frame">
+    <svg class="dia" viewBox="0 0 980 420" role="img" aria-labelledby="f1t"><title id="f1t">Four layers: data services, context pack, harness with one agent session per trial, and scoring into a run folder the explorer reads</title>
+      <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+      <!-- layer captions -->
+      <text class="cap" x="20" y="24">L0 · data, once</text>
+      <text class="cap" x="270" y="24">L1 · context pack, once: code, then a curator agent</text>
+      <text class="cap" x="520" y="24">L2 · harness: one session per (query, trial)</text>
+      <text class="cap" x="800" y="24">L3 · score &amp; show</text>
+      <!-- L0 -->
+      <g id="l0"><title>Layer 0: 8.4 GB of databases downloaded once and loaded into nmp-central-ai's Postgres under schema dataagentbench</title>
+      <rect class="nd ext" x="20" y="40" width="220" height="360" rx="8"/>
+      <rect class="nd" x="36" y="56" width="188" height="56" rx="6"/><text class="tx k" x="48" y="79">download.sh · 8.4 GB</text><text class="tx s" x="48" y="98">12 datasets · sha256 manifest</text>
+      <rect class="nd" x="36" y="130" width="188" height="56" rx="6"/><text class="tx k" x="48" y="153">central postgres 16</text><text class="tx s" x="48" y="172">schema dataagentbench · role dab_agent</text>
+      <rect class="nd" x="36" y="204" width="188" height="56" rx="6"/><text class="tx k" x="48" y="227">&lt;dataset&gt;_&lt;table&gt;</text><text class="tx s" x="48" y="246">re-hosted once (D6 A); mongo → jsonb</text>
+      <rect class="nd" x="36" y="278" width="188" height="56" rx="6"/><text class="tx k" x="48" y="301">dab_* · agent_*</text><text class="tx s" x="48" y="320">index, runs, results, traces</text>
+      <rect class="nd" x="36" y="352" width="188" height="36" rx="6"/><text class="tx k" x="48" y="375">python sandbox · net off</text>
+      </g>
+      <!-- L1 -->
+      <g id="l1"><title>Layer 1: context builder profiles every store into data/context/&lt;dataset&gt;/</title>
+      <rect class="nd ext" x="270" y="40" width="220" height="360" rx="8"/>
+      <rect class="nd hi" x="286" y="56" width="188" height="72" rx="6"/><text class="tx k" x="298" y="79">build · then curate</text><text class="tx s" x="298" y="98">code: introspect · count · joins</text><text class="tx s" x="298" y="114">agent: summary.md · pitfalls.md</text>
+      <rect class="nd" x="286" y="150" width="188" height="150" rx="6"/><text class="tx k" x="298" y="173">data/context/&lt;ds&gt;/</text>
+      <text class="tx" x="298" y="196">schema.md</text><text class="tx" x="298" y="214">profile.json</text><text class="tx" x="298" y="232">samples/&lt;table&gt;.md</text><text class="tx" x="298" y="250">joins.md</text><text class="tx" x="298" y="268">description.txt · hints.txt</text><text class="tx s" x="298" y="288">verbatim from upstream</text>
+      <rect class="nd" x="286" y="322" width="188" height="56" rx="6"/><text class="tx k" x="298" y="345">explorer · /datasets/:key</text><text class="tx s" x="298" y="364">shows the pack it will read</text>
+      </g>
+      <!-- L2 -->
+      <g id="l2"><title>Layer 2: the harness starts one Agent SDK session per query and trial</title>
+      <rect class="nd ext" x="520" y="40" width="250" height="360" rx="8"/>
+      <rect class="nd" x="536" y="56" width="218" height="52" rx="6"/><text class="tx k" x="548" y="79">dab eval --agent v0 --trials 5</text><text class="tx s" x="548" y="98">54 × 5 = 270 sessions · semaphore</text>
+      <rect class="nd hi" x="536" y="126" width="218" height="200" rx="6"/>
+      <text class="tx k" x="548" y="149">one Agent SDK session</text>
+      <text class="tx" x="548" y="172">system.md  · behaviour</text>
+      <text class="tx" x="548" y="190">+ pack summary (D7 A) · user: query</text>
+      <text class="tx s" x="548" y="214">tools</text>
+      <text class="tx" x="548" y="232">describe_table · sample_rows</text>
+      <text class="tx" x="548" y="250">query_db (sql | mongo)</text>
+      <text class="tx" x="548" y="268">execute_python · sandbox</text>
+      <text class="tx" x="548" y="286">llm_extract · read_context</text>
+      <text class="tx" x="548" y="304">verify · return_answer</text>
+      <rect class="nd" x="536" y="344" width="218" height="40" rx="6"/><text class="tx k" x="548" y="368">answer string + trace</text>
+      </g>
+      <!-- L3 -->
+      <g id="l3"><title>Layer 3: the committed validators judge each answer; the run folder feeds the explorer</title>
+      <rect class="nd ext" x="800" y="40" width="160" height="360" rx="8"/>
+      <rect class="nd" x="816" y="56" width="128" height="72" rx="6"/><text class="tx k" x="828" y="79">validate.py × 54</text><text class="tx s" x="828" y="98">already in the index</text><text class="tx s" x="828" y="114">eval/validators.judge</text>
+      <rect class="nd" x="816" y="150" width="128" height="110" rx="6"/><text class="tx k" x="828" y="173">runs/&lt;id&gt;/</text><text class="tx" x="828" y="196">run.json</text><text class="tx" x="828" y="214">results.jsonl</text><text class="tx" x="828" y="232">traces/*.json</text><text class="tx" x="828" y="250">agent/ (copy)</text>
+      <rect class="nd" x="816" y="282" width="128" height="56" rx="6"/><text class="tx k" x="828" y="305">explorer · /runs</text><text class="tx s" x="828" y="324">pass/n per dataset</text>
+      </g>
+      <!-- edges -->
+      <path class="ed" d="M224 158 H286"/><path class="ed" d="M224 232 H286"/><path class="ed" d="M224 306 H270 V128 H286" style="marker-end:none"/>
+      <path class="ed hi" d="M474 225 H536"/>
+      <path class="ed dash" d="M474 92 H520 V70" style="marker-end:none"/><path class="ed dash" d="M130 388 H536" style="marker-end:none"/>
+      <path class="ed hi" d="M754 364 H816 V128" style="marker-end:none"/><path class="ed hi" d="M754 364 H816 V150"/>
+      <path class="ed" d="M880 260 V282"/>
+    </svg></div>
+    <figcaption><b>Data and context are cached; only L2 spends tokens.</b> The reference scaffold reloads Postgres and Mongo from dump on every trial; we load once into the central Postgres and the agent connects as a read-only role. The validators in L3 are the same 54 files the explorer already rescored 14 480 answers with, so a v0 run is judged exactly as the leaderboard rows were.</figcaption>
+  </figure>
+  <figure class="fig">
+    <p class="fig-title">Fig 1b · system architecture — three boxes: this repo, nmp-central-ai's stack, the outside</p>
+    <div class="dia-frame">
+    <svg class="dia" viewBox="0 0 980 470" role="img" aria-labelledby="f1bt"><title id="f1bt">System architecture: the repo's CLI, harness, Agent SDK child, tool server, sandbox, context pack, run folder, validators, tracking and explorer on the developer machine; Postgres, MLflow and MinIO in nmp-central-ai's compose stack; Hugging Face, the Anthropic API, productivity-tracker and the upstream repo outside</title>
+      <text class="cap" x="20" y="24">A · this repo · developer machine</text>
+      <text class="cap" x="440" y="24">B · nmp-central-ai · one compose stack, many apps</text>
+      <text class="cap" x="740" y="24">C · outside</text>
+      <!-- A -->
+      <g><title>Region A: everything in the DataAgentBench repo, run on the developer machine</title>
+      <rect class="nd ext" x="20" y="40" width="390" height="410" rx="8"/>
+      <rect class="nd" x="36" y="56" width="354" height="40" rx="6"/><text class="tx k" x="48" y="81">dab CLI · data · context · eval · runs · audit</text>
+      <rect class="nd" x="36" y="114" width="170" height="64" rx="6"/><text class="tx k" x="48" y="137">harness · dab eval</text><text class="tx s" x="48" y="156">one session per trial</text><text class="tx s" x="48" y="171">Semaphore(4) · results.jsonl</text>
+      <rect class="nd hi" x="226" y="114" width="170" height="64" rx="6"/><text class="tx k" x="238" y="137">Agent SDK → claude child</text><text class="tx s" x="238" y="156">claude-haiku-4-5 · medium</text><text class="tx s" x="238" y="171">system.md + user message</text>
+      <rect class="nd" x="36" y="196" width="170" height="64" rx="6"/><text class="tx k" x="48" y="219">data/context/&lt;ds&gt;/</text><text class="tx s" x="48" y="238">schema · profile · samples</text><text class="tx s" x="48" y="253">joins · summary · pitfalls (curated)</text>
+      <rect class="nd hi" x="226" y="196" width="170" height="64" rx="6"/><text class="tx k" x="238" y="219">tool server · in-process MCP</text><text class="tx s" x="238" y="238">query_db · execute_python</text><text class="tx s" x="238" y="253">llm_extract · verify · answer</text>
+      <rect class="nd" x="36" y="278" width="170" height="52" rx="6"/><text class="tx k" x="48" y="301">validators × 54</text><text class="tx s" x="48" y="320">eval/validators.judge · index</text>
+      <rect class="nd" x="226" y="278" width="170" height="52" rx="6"/><text class="tx k" x="238" y="301">runs/&lt;id&gt;/</text><text class="tx s" x="238" y="320">run.json · results.jsonl · traces/</text>
+      <rect class="nd hi" x="36" y="348" width="170" height="52" rx="6"/><text class="tx k" x="48" y="371">postgres 16 · :5433 · compose</text><text class="tx s" x="48" y="390">schema dataagentbench · dab_agent</text>
+      <rect class="nd" x="226" y="348" width="170" height="52" rx="6"/><text class="tx k" x="238" y="371">tracking/</text><text class="tx s" x="238" y="390">mlflow_log.py · tracing.py</text>
+      <rect class="nd" x="36" y="414" width="354" height="26" rx="6"/><text class="tx" x="48" y="431">sandbox docker net-off · explorer API :8091 / UI :5173 · reads data/index + runs/</text>
+      </g>
+      <!-- B -->
+      <g><title>Region B: nmp-central-ai's docker compose stack shared by every project</title>
+      <rect class="nd ext" x="440" y="40" width="270" height="410" rx="8"/>
+      <rect class="nd ext" x="456" y="56" width="238" height="130" rx="6"/><text class="tx k" x="468" y="79">Postgres 16 · db nmp · :5432</text><text class="tx" x="468" y="101">schema dataagentbench — after M8</text><text class="tx s" x="468" y="118">same tables, same roles.sql</text><text class="tx s" x="468" y="136">pg_dump -n dataagentbench | psql</text><text class="tx s" x="468" y="154">needs platform M3 (per-project schemas)</text><text class="tx s" x="468" y="174">other schemas: other projects</text>
+      <rect class="nd" x="456" y="206" width="238" height="90" rx="6"/><text class="tx k" x="468" y="229">MLflow 3.16</text><text class="tx" x="468" y="251">experiment dataagentbench/evals</text><text class="tx s" x="468" y="268">runs · traces (trial → turn → tool)</text><text class="tx s" x="468" y="286">siblings: dabstep-loop · tau2-loop</text>
+      <rect class="nd" x="456" y="316" width="238" height="50" rx="6"/><text class="tx k" x="468" y="339">MinIO</text><text class="tx s" x="468" y="356">artifacts · run folder export</text>
+      <rect class="nd ext" x="456" y="386" width="238" height="50" rx="6"/><text class="tx s" x="468" y="405">live: localhost:5000 · :5432 · network nmp-central</text><text class="tx s" x="468" y="422">make platform-up · Postgres deviation until M8</text>
+      </g>
+      <!-- C -->
+      <g><title>Region C: services outside both — the data source, the model API, the bill, the upstream repo</title>
+      <rect class="nd ext" x="740" y="40" width="220" height="410" rx="8"/>
+      <rect class="nd" x="756" y="56" width="188" height="60" rx="6"/><text class="tx k" x="768" y="79">Hugging Face</text><text class="tx s" x="768" y="97">ruiyingm/DataAgentBench-data</text><text class="tx s" x="768" y="110">8.4 GB dumps · once</text>
+      <rect class="nd hi" x="756" y="140" width="188" height="60" rx="6"/><text class="tx k" x="768" y="163">Anthropic API</text><text class="tx s" x="768" y="181">Haiku 4.5 via the claude CLI</text><text class="tx s" x="768" y="194">subscription · 5-hour window</text>
+      <rect class="nd" x="756" y="224" width="188" height="60" rx="6"/><text class="tx k" x="768" y="247">productivity-tracker</text><text class="tx s" x="768" y="265">the bill · same prices.yaml</text><text class="tx s" x="768" y="278">reads ~/.claude transcripts</text>
+      <rect class="nd" x="756" y="308" width="188" height="60" rx="6"/><text class="tx k" x="768" y="331">upstream repo</text><text class="tx s" x="768" y="349">make upstream → data/index</text><text class="tx s" x="768" y="362">54 validators · committed</text>
+      </g>
+      <!-- edges -->
+      <path class="ed" d="M121 96 V114"/>
+      <path class="ed" d="M206 146 H226"/>
+      <path class="ed hi" d="M396 130 V34 H850 V140"/>
+      <path class="ed hi" d="M311 178 V196"/><text class="tx s" x="318" y="191">tool calls</text>
+      <path class="ed" d="M121 196 V178"/><text class="tx s" x="128" y="191">summary → system prompt</text>
+      <path class="ed" d="M226 236 H206"/>
+      <path class="ed hi" d="M226 244 H216 V374 H206"/><text class="tx s" x="128" y="342">SQL · dab_agent</text><path class="ed dash" d="M206 374 H420 V150 H456" style="marker-end:none"/><text class="tx s" x="404" y="222">M8 migrate</text>
+            <path class="ed" d="M311 260 V268 H121 V278"/><path class="ed" d="M311 268 V278"/>
+      <path class="ed" d="M206 304 H226"/>
+      <path class="ed" d="M311 330 V348"/>
+      <path class="ed" d="M396 374 H420 V250 H456"/><text class="tx s" x="404" y="368">log</text>
+      <path class="ed" d="M756 86 H700 V34 H121 V56"/><text class="tx s" x="700" y="50">download → dab data load · dab_owner</text>
+    </svg></div>
+    <figcaption><b>Everything that spends money is on the top row; everything shared lives in box B.</b> The model is reached only through the Agent SDK's <code>claude</code> child (the subscription, so the tracker sees it); the data is reached only as <code>dab_agent</code>, from the tool server and from the sandbox, which otherwise has no network. For now the benchmark Postgres is in box A, in this project's compose on <code>:5433</code>, already in the central shape; the dashed path is M8, the one-command migration into box B once the platform's M3 exists (a stated deviation from rule zero, §8). MLflow is in B from the first run. The sandbox has no network at all; data reaches it as parquet on <code>/work</code>.</figcaption>
+  </figure>
+  <figure class="fig">
+    <p class="fig-title">Fig 2 · inside one session — the six moves the prompt asks for</p>
+    <div class="dia-frame">
+    <svg class="dia" viewBox="0 0 980 170" role="img" aria-labelledby="f2t"><title id="f2t">Six steps inside a trial: assemble, orient, plan, compute, verify, answer, with verify looping back to plan</title>
+      <g id="s1"><title>Assemble: query, description, hints and pack summary into the user prompt</title><rect class="nd" x="16" y="40" width="140" height="70" rx="6"/><text class="tx k" x="28" y="64">1 · assemble</text><text class="tx s" x="28" y="84">query + pack summary</text><text class="tx s" x="28" y="100">system.md fixed</text></g>
+      <g id="s2"><title>Orient: read_context, describe_table, sample_rows before any SQL</title><rect class="nd" x="180" y="40" width="140" height="70" rx="6"/><text class="tx k" x="192" y="64">2 · orient</text><text class="tx s" x="192" y="84">describe · sample</text><text class="tx s" x="192" y="100">~20 % of calls</text></g>
+      <g id="s3"><title>Plan: state population, metric, denominator and answer shape before computing</title><rect class="nd hi" x="344" y="40" width="140" height="70" rx="6"/><text class="tx k" x="356" y="64">3 · plan</text><text class="tx s" x="356" y="84">population · metric</text><text class="tx s" x="356" y="100">denominator · shape</text></g>
+      <g id="s4"><title>Compute: SQL first, python only for what SQL cannot do, llm_extract for text</title><rect class="nd" x="508" y="40" width="140" height="70" rx="6"/><text class="tx k" x="520" y="64">4 · compute</text><text class="tx s" x="520" y="84">SQL-first · python</text><text class="tx s" x="520" y="100">llm_extract for text</text></g>
+      <g id="s5"><title>Verify: assertions on the result; re-derive; on failure return to plan</title><rect class="nd hi" x="672" y="40" width="140" height="70" rx="6"/><text class="tx k" x="684" y="64">5 · verify</text><text class="tx s" x="684" y="84">assert rows · nulls</text><text class="tx s" x="684" y="100">re-derive once</text></g>
+      <g id="s6"><title>Answer: return_answer with the value only, in the contract's shape</title><rect class="nd" x="836" y="40" width="128" height="70" rx="6"/><text class="tx k" x="848" y="64">6 · answer</text><text class="tx s" x="848" y="84">value only</text><text class="tx s" x="848" y="100">contract shape</text></g>
+      <path class="ed" d="M156 75 H180"/><path class="ed" d="M320 75 H344"/><path class="ed" d="M484 75 H508"/><path class="ed" d="M648 75 H672"/><path class="ed" d="M812 75 H836"/>
+      <path class="ed dash" d="M742 110 V140 H414 V110"/><text class="tx s" x="500" y="156">verify failed → re-plan (max 2)</text>
+    </svg></div>
+    <figcaption><b>Steps 3 and 5 are where the paper says 85 % of failures live</b> (FM2 wrong plan + FM4 wrong implementation). Step 3 is a written plan the trace keeps; step 5 is Sentinel's assertions plus Spacedock's re-derive. Neither exists in the reference scaffold.</figcaption>
+  </figure>
+  <figure class="fig">
+    <p class="fig-title">Fig 2b · AI agent architecture — what is fixed, what is generated, what the model can touch</p>
+    <div class="dia-frame">
+    <svg class="dia" viewBox="0 0 980 450" role="img" aria-labelledby="f2bt"><title id="f2bt">AI agent architecture: a fixed system prompt and a generated user message enter one Agent SDK session; the model loops through orient, plan, compute, verify, answer using five tool groups that reach the context pack, Postgres as a read-only role, the sandbox and a Haiku sub-call; the session ends in an answer string and a trace</title>
+      <text class="cap" x="20" y="24">prompt · assembled by the harness</text>
+      <text class="cap" x="260" y="24">one Agent SDK session · Haiku 4.5 · effort medium</text>
+      <text class="cap" x="600" y="24">tool belt</text>
+      <text class="cap" x="800" y="24">what each tool reaches</text>
+      <!-- inputs -->
+      <g><title>Inputs: the system prompt composed from the fixed behaviour file and the generated dataset facts; the user message is the question alone</title>
+      <rect class="nd hi" x="20" y="40" width="200" height="86" rx="6"/><text class="tx k" x="32" y="63">system prompt · part 1</text><text class="tx" x="32" y="82">agents/vN/system.md · behaviour</text><text class="tx s" x="32" y="97">identical for all 12 datasets</text><text class="tx s" x="32" y="112">fingerprint sha256 on every row</text>
+      <rect class="nd" x="20" y="146" width="200" height="120" rx="6"/><text class="tx k" x="32" y="169">system prompt · part 2 (D7 A)</text><text class="tx" x="32" y="191"># Dataset: &lt;ds&gt; · summary.md</text><text class="tx" x="32" y="208">DESCRIPTION · HINTS verbatim</text><text class="tx s" x="32" y="225">~2 k tokens · generated · context_sha</text><text class="tx k" x="32" y="247">user message</text><text class="tx s" x="32" y="262">the question, verbatim</text>
+      <rect class="nd ext" x="20" y="290" width="200" height="90" rx="6"/><text class="tx k" x="32" y="313">data/context/&lt;ds&gt;/</text><text class="tx s" x="32" y="332">schema.md · profile.json</text><text class="tx s" x="32" y="347">samples/&lt;table&gt;.md · joins.md</text><text class="tx s" x="32" y="365">code builds facts · an agent curates</text>
+      </g>
+      <!-- session -->
+      <g><title>The session: the model loop, the six moves it is asked for, and the ways it ends</title>
+      <rect class="nd ext" x="260" y="40" width="300" height="350" rx="8"/>
+      <rect class="nd hi" x="276" y="56" width="268" height="70" rx="6"/><text class="tx k" x="288" y="79">model turn</text><text class="tx s" x="288" y="98">reads the plan so far · picks one tool or answers</text><text class="tx s" x="288" y="114">cached prefix: system.md + summary (0.1×)</text>
+      <rect class="nd" x="276" y="146" width="268" height="100" rx="6"/><text class="tx k" x="288" y="169">the six moves (Fig 2)</text><text class="tx" x="288" y="191">orient → plan → compute</text><text class="tx" x="288" y="208">→ verify → answer</text><text class="tx s" x="288" y="226">plan is written into the trace</text><text class="tx s" x="288" y="240">verify failed → re-plan, max 2</text>
+      <rect class="nd" x="276" y="266" width="268" height="108" rx="6"/><text class="tx k" x="288" y="289">how it ends · guards</text><text class="tx" x="288" y="311">return_answer(value) → done</text><text class="tx" x="288" y="328">plain text turn → taken as answer</text><text class="tx" x="288" y="345">max_turns 60 · timeout 900 s → error</text><text class="tx s" x="288" y="364">tool result cut at 10 000 chars</text>
+      </g>
+      <!-- tools -->
+      <g><title>Tool belt: five groups exposed by the harness's in-process MCP server</title>
+      <rect class="nd" x="600" y="40" width="170" height="70" rx="6"/><text class="tx k" x="612" y="63">orient</text><text class="tx s" x="612" y="81">list_db · describe_table</text><text class="tx s" x="612" y="96">sample_rows · read_context</text>
+      <rect class="nd hi" x="600" y="130" width="170" height="50" rx="6"/><text class="tx k" x="612" y="153">query_db(sql)</text><text class="tx s" x="612" y="171">one dialect · limit + cut</text>
+      <rect class="nd" x="600" y="200" width="170" height="50" rx="6"/><text class="tx k" x="612" y="223">execute_python(code)</text><text class="tx s" x="612" y="241">pandas · duckdb · psycopg</text>
+      <rect class="nd" x="600" y="270" width="170" height="50" rx="6"/><text class="tx k" x="612" y="293">llm_extract(rows, ask)</text><text class="tx s" x="612" y="311">text → labels, batched</text>
+      <rect class="nd" x="600" y="340" width="170" height="50" rx="6"/><text class="tx k" x="612" y="363">verify · return_answer</text><text class="tx s" x="612" y="381">assert, re-derive · end</text>
+      </g>
+      <!-- resources -->
+      <g><title>What each tool reaches: pack files and information_schema, Postgres as dab_agent, the sandbox, a Haiku sub-call, the harness</title>
+      <rect class="nd ext" x="800" y="40" width="160" height="70" rx="6"/><text class="tx s" x="812" y="63">pack files on disk</text><text class="tx s" x="812" y="81">+ information_schema</text><text class="tx s" x="812" y="96">no model, no bytes moved</text>
+      <rect class="nd hi" x="800" y="130" width="160" height="50" rx="6"/><text class="tx s" x="812" y="153">central Postgres</text><text class="tx s" x="812" y="171">dab_agent · read-only · 60 s</text>
+      <rect class="nd" x="800" y="200" width="160" height="50" rx="6"/><text class="tx s" x="812" y="223">docker sandbox</text><text class="tx s" x="812" y="241">net off · Postgres route only</text>
+      <rect class="nd" x="800" y="270" width="160" height="50" rx="6"/><text class="tx s" x="812" y="293">Haiku 4.5 sub-call</text><text class="tx s" x="812" y="311">counted in the trial's tokens</text>
+      <rect class="nd" x="800" y="340" width="160" height="50" rx="6"/><text class="tx s" x="812" y="363">harness</text><text class="tx s" x="812" y="381">closes the session</text>
+      </g>
+      <!-- outputs -->
+      <rect class="nd" x="276" y="406" width="128" height="36" rx="6"/><text class="tx k" x="288" y="429">answer string</text>
+      <rect class="nd" x="420" y="406" width="124" height="36" rx="6"/><text class="tx k" x="432" y="429">trace + usage</text>
+      <text class="tx s" x="560" y="429">→ validators × 54 → results.jsonl → MLflow</text>
+      <!-- edges -->
+      <path class="ed hi" d="M220 83 H260"/><path class="ed hi" d="M220 206 H260"/>
+      <path class="ed" d="M120 290 V266"/><text class="tx s" x="128" y="282">summary.md</text>
+      <path class="ed" d="M544 75 H600"/><path class="ed hi" d="M544 155 H600"/><path class="ed" d="M544 225 H600"/><path class="ed" d="M544 295 H600"/><path class="ed" d="M544 365 H600"/>
+      <path class="ed" d="M770 75 H800"/><path class="ed hi" d="M770 155 H800"/><path class="ed" d="M770 225 H800"/><path class="ed" d="M770 295 H800"/><path class="ed" d="M770 365 H800"/>
+      <path class="ed" d="M340 390 V406"/><path class="ed" d="M482 390 V406"/>
+      <path class="ed dash" d="M220 335 H236 V75 H260" style="marker-end:none"/><text class="tx s" x="226" y="380">read_context</text>
+    </svg></div>
+    <figcaption><b>Two files are hand-written (<code>system.md</code>, the tool server); everything the model knows about a dataset is generated.</b> The left column is the prompt the harness assembles (Fig 0 shows two of them side by side); the middle is the loop and its exits, which are the reference scaffold's rules plus the six moves; the right two columns are every side effect the model can cause, and each one lands on a read-only role, a network-off container, a file on disk, or a second Haiku call that is billed to the same trial. A v0→v1 change touches only the left column and the system file — never the belt.</figcaption>
+  </figure>
+</div></section>
+
+<section class="band-sec" id="context"><div class="wrap">
+  <div class="hd"><p class="label">06 · context pack</p>
+  <h2>6 · Context pack — code generates the facts from the live databases, an agent curates them; one folder per dataset, built once</h2>
+  <p>This is the "file system that gives it knowledge". <code>dab context build</code> opens every store in <code>db_config.yaml</code>, introspects it, and writes <code>data/context/&lt;dataset&gt;/</code>. It is deterministic and committed to git (small: text only), so a run's context is versioned with the code. The upstream description and hints go in verbatim, unedited — that keeps us inside the rubric's "legitimate prompt inputs" and lets the hint file stay a swappable input (v0 without, v1 with).</p>
+  <p><b>Two passes: code generates, an agent curates.</b> <code>dab context build</code> is plain code — <code>information_schema</code>, counts, samples, join-overlap measurement — cheap, deterministic, rebuilt after any upstream bump. Then <code>dab context curate</code> runs one <b>curator agent</b> session per dataset (Sonnet 5, effort medium, once; ≈ $1.5 for all 12, traced in MLflow as <code>kind=curate</code>). It reads the generated files plus the upstream description and hints, and writes the two files a model is better at than a template: <b><code>summary.md</code></b> — the ~60-line digest that becomes part 2 of the system prompt (D7): which tables matter, the keys and their normalisation, the literal code values, the text columns that will need extraction — and <b><code>pitfalls.md</code></b> — the traps in the data, which is what Camber wrote by hand for each of its 12 prompts and Scout generated at run time. Three rules make this legitimate and reproducible: the curator <em>never sees a query</em> (its inputs are data, description and hints — the rubric's own legitimate inputs); its output is committed, so every change is a reviewable diff and <code>context_sha</code> pins which curation a run used; and re-curating is a deliberate bump like re-ingesting, not something a run does. The curator's own prompt, <code>agents/curator/system.md</code>, is the one surface that decides what "curated" means, and it is the third file the loop edits. The line that keeps this honest: a pitfall may describe the <em>data</em> ("ids carry a '#' prefix", "reviews.date is text, not date") and never a <em>question</em>; anything that names a query's answer shape or filter is test-set tuning and is rejected at review, the same rule that separates a general v1 addendum from Permute EQ's per-query evidence (§3). Everything else in the pack — schema, profile, samples, joins — stays generated, so the pack can be rebuilt after an upstream bump without losing the learned part.</p>
+  <p><b>One loop, and MLflow traces are its input.</b> The M7 loop is DABStep-loop's shape: evaluate the champion → read the failed trials → propose one edit → evaluate the candidate → McNemar gate → promote or discard. Two things change here. First, a candidate is a version of the three surfaces — <code>system.md</code>, the curator's <code>system.md</code> (re-run to regenerate the twelve <code>summary.md</code>/<code>pitfalls.md</code>), and direct edits to a dataset's <code>pitfalls.md</code> — rendered into twelve composed system prompts at the start of every run, so a curation edit is scored exactly like a behaviour edit: same run, same gate. Second, the optimiser reads failures from the central MLflow rather than from disk: <code>mlflow.search_traces(experiment="dataagentbench/evals", filter="tags.run_id = '…' and tags.passed = '0'")</code> returns every failed trial with its <code>plan</code> turn, every tool span's SQL and error, the verify result and the validator's reason — which is why §10 puts <code>dataset · query · trial · passed · reason · agent · fingerprint · context_sha</code> on every trace as tags, not only on the run. The three surfaces are also registered as MLflow <b>prompts</b> (<code>dataagentbench.system</code>, <code>dataagentbench.curator</code>, <code>dataagentbench.pitfalls.&lt;dataset&gt;</code>; the central server has the DB-backed store the registry needs, and ConvFinQA already uses it), so every run's tags name the prompt versions it ran with and the champion lineage is readable in one place. The run folder is still the record; the registry and the traces are the index the loop queries.</p></div>
+  <div class="grid g2">
+    <div class="panel card">
+      <h3>What is in the pack</h3>
+      <ul class="tight">
+        <li><b>schema.md</b> — per store: tables, columns with types, primary/foreign keys where declared, row counts. The thing the reference agent never had.</li>
+        <li><b>profile.json</b> — per column: null rate, distinct count, min/max for numerics and dates, top-10 values for low-cardinality text (the values the SQL must match literally).</li>
+        <li><b>samples/&lt;table&gt;.md</b> — 5 rows per table, wide text truncated at 200 chars.</li>
+        <li><b>joins.md</b> — measured overlap for every candidate key pair across stores (yelp <code>businessid_1</code>↔<code>businessref_1</code>: how many match after trim/case-fold). Scout's "measured join overlaps".</li>
+        <li><b>description.txt · hints.txt</b> — upstream files, byte-identical.</li>
+        <li><b>summary.md</b> — <em>curated</em>: the curator agent's ~60-line digest of the above; becomes part 2 of the system prompt (D7). The rest is read on demand.</li>
+        <li><b>pitfalls.md</b> — <em>curated</em>: the traps in the data (id prefixes, text-typed dates, duplicate entities, code tables); data facts only, never a question.</li>
+      </ul>
+    </div>
+    <div class="panel card">
+      <h3>How the agent gets it</h3>
+      <p>Two channels. The <b>summary</b> and <b>pitfalls</b> are appended to the system prompt under <code># Dataset: &lt;ds&gt;</code> (D7) so every trial starts oriented. The <b>full pack</b> is exposed through a <code>read_context(path)</code> tool (and <code>search_context(term)</code>) so the agent pulls depth only where it needs it — LabRat's Cartographer pattern. Both are files on disk the explorer shows on the dataset page, so you can read exactly what the agent will read.</p>
+      <p>Per-query pre-analysis (Scout's question→column bindings, Permute's evidence layer) is a <b>v2 idea</b>, deferred: it puts a model in the path of a specific question and blurs the general-purpose / benchmark-informed line we want to measure first. The curator is different in kind — it runs once per dataset and never sees a question.</p>
+    </div>
+  </div>
+  <div class="tw" style="margin-top:var(--s5)"><table>
+    <caption>The 12 datasets as the agent meets them. Bytes and engines from <code>datasets.json</code>; ReAct pass rate is Gemini-3-Pro over 50 trials × queries (our rescore); ceilings from the top-10 PR tables.</caption>
+    <thead><tr><th>Dataset</th><th class="num">Queries</th><th>Stores</th><th class="num">Bytes</th><th class="num">ReAct</th><th class="num">Top-10 ceiling</th><th>What the hints encode → capability the pack or a tool must supply</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">patents</td><td class="num">3</td><td>postgres + sqlite</td><td class="num">5.56 GB</td><td class="num">0.02</td><td class="num">1.00</td><td class="wrap">EMA counting rule; CPC areas from text → <b>EMA convention in prompt, <code>llm_extract</code> tool</b>. Largest store; load once.</td></tr>
+      <tr><td class="sub">deps_dev_v1</td><td class="num">2</td><td>duckdb + sqlite</td><td class="num">0.55 GB</td><td class="num">0.16</td><td class="num">0.50</td><td class="wrap">Join on System/Name/Version across stores → <b>joins.md</b>. q1 was a 95-way tie until #86 fixed the validator.</td></tr>
+      <tr><td class="sub">agnews</td><td class="num">4</td><td>mongo + sqlite</td><td class="num">0.04 GB</td><td class="num">0.20</td><td class="num">0.40–0.55</td><td class="wrap">Four categories inferred from title/description → <b><code>llm_classify</code></b>. q2–4 are walls (#101). Mongo needs aggregation, not <code>find</code>.</td></tr>
+      <tr><td class="sub">yelp</td><td class="num">7</td><td>mongo + duckdb</td><td class="num">&lt;0.01 GB</td><td class="num">0.24</td><td class="num">≥0.90</td><td class="wrap"><code>businessid_1</code>↔<code>businessref_1</code> join, weighting (#97) → <b>joins.md, profile.json</b>. PromptQL's +0.40 here was pure context.</td></tr>
+      <tr><td class="sub">github_repos</td><td class="num">4</td><td>duckdb + sqlite</td><td class="num">0.93 GB</td><td class="num">0.36</td><td class="num">0.50</td><td class="wrap">README text: copyright lines, language detection → <b><code>llm_extract</code></b>; q2 wording contradiction fixed in #87.</td></tr>
+      <tr><td class="sub">music_brainz_20k</td><td class="num">3</td><td>duckdb + sqlite</td><td class="num">&lt;0.01 GB</td><td class="num">0.51</td><td class="num">≈1.00</td><td class="wrap">Duplicate tracks → entity resolution rule in hints; <b>profile.json distinct counts</b> expose it.</td></tr>
+      <tr><td class="sub">pancancer_atlas</td><td class="num">3</td><td>postgres + duckdb</td><td class="num">0.30 GB</td><td class="num">0.56</td><td class="num">0.67</td><td class="wrap">log10(x+1), χ² formula, <code>Patient_description</code>↔<code>ParticipantBarcode</code> → <b>hints + joins.md</b>. q1 is a wall (#107).</td></tr>
+      <tr><td class="sub">googlelocal</td><td class="num">4</td><td>postgres + sqlite</td><td class="num">&lt;0.01 GB</td><td class="num">0.57</td><td class="num">≥0.90</td><td class="wrap"><code>gmap_id</code> join; ordered list answers → <b>answer contract</b> (q1 validator requires order).</td></tr>
+      <tr><td class="sub">stockmarket</td><td class="num">5</td><td>duckdb + sqlite</td><td class="num">0.97 GB</td><td class="num">0.61</td><td class="num">≥0.90</td><td class="wrap">22 hint lines of exchange / financial-status code tables → <b>profile.json top values</b> make the codes visible.</td></tr>
+      <tr><td class="sub">crmarenapro</td><td class="num">13</td><td>sqlite×3, duckdb×2, postgres</td><td class="num">0.03 GB</td><td class="num">0.63</td><td class="num">≈0.90</td><td class="wrap">Six stores; <code>#</code>-prefixed ids, trailing whitespace → <b>joins.md after normalisation</b>. q8/q13 gold contradicts wording (#102, #105).</td></tr>
+      <tr><td class="sub">stockindex</td><td class="num">3</td><td>duckdb + sqlite</td><td class="num">&lt;0.01 GB</td><td class="num">0.85</td><td class="num">≈1.00</td><td class="wrap">Up/down-day rule, volatility formula, region inference → hints suffice.</td></tr>
+      <tr><td class="sub">bookreview</td><td class="num">3</td><td>postgres + sqlite</td><td class="num">&lt;0.01 GB</td><td class="num">0.89</td><td class="num">≈1.00</td><td class="wrap">Straight cross-store join → schema.md suffices.</td></tr>
+    </tbody>
+  </table></div>
+
+  <form class="q" data-lavish-question="D1-context-delivery" onsubmit="event.preventDefault();const f=new FormData(event.currentTarget);const c=f.get('d1');const n=(f.get('notes')||'').trim();if(!c)return;window.lavish.queuePrompt('Decision D1 (context delivery): '+c+(n?' — notes: '+n:''),{tag:'decision',text:'D1: '+c,element:event.currentTarget,data:{question:'D1-context-delivery',answer:c,notes:n}});event.currentTarget.querySelector('.queued').textContent='queued: '+c;">
+    <h3>D1 · How does the agent receive the context pack? <span class="rec">decided: A</span></h3>
+    <p class="why">Trades prompt size against orientation quality. The summary is ~60 lines ≈ 1 500 tokens per trial; the full pack for crmarenapro is ~600 lines.</p>
+    <label><input type="radio" name="d1" value="A: summary in the system prompt (D7) + read_context/search_context tools for depth"> <span><b>A · summary injected, depth on demand</b> <span class="rec">recommended</span> — starts every trial oriented; the agent reads schema.md / joins.md only when the question needs them. Matches LabRat and Alkera.</span></label>
+    <label><input type="radio" name="d1" value="B: files only — the agent must read_context before it can see any schema"> <span><b>B · files only</b> — purest "file system" design, cheapest prompt, but every trial spends its first 2–4 calls re-orienting and the trace shows whether it bothered.</span></label>
+    <label><input type="radio" name="d1" value="C: inject the whole pack into the user prompt, no context tools"> <span><b>C · everything injected</b> — simplest harness, no tools; 5–15 k tokens per trial and long-context drift on the six-store datasets.</span></label>
+    <textarea name="notes" placeholder="Anything to add (e.g. cap the summary at N lines, include samples inline)…"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D1</button><span class="queued"></span></div>
+  </form>
+</div></section>
+
+<section class="blk" id="agent"><div class="wrap">
+  <div class="hd"><p class="label">07 · the agent</p>
+  <h2>7 · Agent — v0 is a general-purpose analyst with the right tools and the curated pack; v1 is whatever the loop promotes, and this build ships the loop's scaffolding</h2>
+  <p><b>Decided in review:</b> this build ships <code>agents/v0/</code> and measures it. There is no hand-written v1. <b>v1 is the output of the evaluation loop</b> — optimise on the failed trials read from MLflow traces, run the challenger as an experiment, promote it to champion when the gate passes — and that loop is the next build (s02). What this build owes it is the <b>scaffolding</b>: every trial traced with the tags the optimiser filters on (§10), the three prompt surfaces in the central prompt registry (§6), a <code>challenger_of</code> field on every run, <code>dab compare &lt;champion&gt; &lt;challenger&gt;</code> with fixed/broken lists and the McNemar gate, and <code>dab promote</code> that moves the <code>champion</code> pointer and tags the MLflow run. The addendum below is kept as an illustration of what a first challenger will look like — the loop writes it from traces, we do not.</p></div>
+  <div class="grid g2">
+    <div class="panel card">
+      <h3>agents/v0/system.md — behaviour only</h3>
+      <pre class="md">You are a data analyst answering one question over
+several databases. You have a DATABASE CONTEXT and
+tools; the stores are read-only and there is no
+network.
+
+Work in this order and keep it visible:
+1. ORIENT — read the context; describe and sample
+   any table you will touch before querying it.
+2. PLAN — write the population, the metric, the
+   denominator and the answer shape in one short
+   block before computing.
+3. COMPUTE — aggregate in SQL. Use python only for
+   what SQL cannot do. Use llm_extract for free
+   text; never regex over prose.
+4. VERIFY — run verify() on the result: row counts,
+   nulls, uniqueness, plausible range. Re-derive
+   the number a second way once. If they differ,
+   go back to PLAN.
+5. ANSWER — call return_answer with the value only,
+   in the shape the question asks for. No prose,
+   no audit trail, no units unless asked.
+
+Never guess a column name; never answer without a
+query that produced the value.</pre>
+      <p class="small">~200 tokens. <code>agent.yaml</code> freezes model, max_turns 60, tools, effort, timeout 900 s. <code>helper.py</code> exists from v0 (empty) so the optimiser has its surface later.</p>
+    </div>
+    <div class="panel card">
+      <h3>What a first challenger will look like — the DAB addendum, written by the loop, not by hand</h3>
+      <pre class="md">## Conventions for this benchmark
+- "above / more than" is strict; "at least" is
+  inclusive; "between A and B" is inclusive both ends.
+- Exponential moving average: seed with the first
+  value, span as stated, computed per group in order.
+- Percentages: state the exact denominator in PLAN;
+  return a number, not "about".
+- Lists: return every item, in the order asked, comma
+  separated; names exactly as stored.
+- Cross-store joins: check joins.md for the measured
+  key and its normalisation (trim, case, "#" prefix).
+- Text columns (category, technology area, licence,
+  copyright): classify with llm_extract, not regex.
+- Read the HINTS as rules of the task, not advice.</pre>
+      <p class="small">Every line is a generalisation of a failure class the field reports (Alkera METHODS.md, Sentinel #73, patents 0→1.00). No query-specific text, no gold values — the rubric's line. This is what makes the row "tuned prompt ✓".</p>
+    </div>
+  </div>
+  <div class="tw" style="margin-top:var(--s5)"><table>
+    <caption>The tool belt. Names match upstream where the semantics match; each new tool exists because a named leaderboard row needed it.</caption>
+    <thead><tr><th>Tool</th><th>Signature</th><th>Does</th><th>Because</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">list_db</td><td class="num">()</td><td class="wrap">The dataset's tables in <code>dataagentbench</code> with row counts (under B/C: logical stores with engine and table count).</td><td class="wrap">Upstream, kept.</td></tr>
+      <tr><td class="sub">describe_table</td><td class="num">(db, table)</td><td class="wrap">Columns, types, row count, null rate, 5 sample values per column.</td><td class="wrap">Reference has none; LabRat/Scout/Permute all add it.</td></tr>
+      <tr><td class="sub">sample_rows</td><td class="num">(db, table, n≤20, where?)</td><td class="wrap">Rows as a markdown table, wide text truncated.</td><td class="wrap">Cheap orientation; "~20 % of calls on exploration" correlates with score.</td></tr>
+      <tr><td class="sub">query_db</td><td class="num">(sql, page=0)</td><td class="wrap">Postgres SQL as <code>dab_agent</code> over <code>dataagentbench.&lt;dataset&gt;_&lt;table&gt;</code> (D6 A; under B/C it keeps upstream's <code>(db, query)</code> form with Mongo <code>find</code> <b>or an aggregation pipeline</b>). Hard cap 200 rows per page, total row count always returned; results also land in the sandbox as <code>r_&lt;n&gt;</code> DataFrames.</td><td class="wrap">Upstream's 10 000-char cut and Mongo <code>find</code>-only are two named failure sources.</td></tr>
+      <tr><td class="sub">execute_python</td><td class="num">(code)</td><td class="wrap">Persistent kernel in a network-off container; pandas, numpy, duckdb; prior results as variables; 300 s.</td><td class="wrap">Upstream, kept; rubric expects the sandbox.</td></tr>
+      <tr><td class="sub">llm_extract</td><td class="num">(rows, instruction, schema)</td><td class="wrap">A small-model call (Haiku 4.5) over up to 500 text rows returning typed fields; cached by hash.</td><td class="wrap">Patents 0.02 → 1.00; agnews categories; github copyright lines. Scout's <code>extract_fields</code>, LabRat's <code>llm_extract</code>.</td></tr>
+      <tr><td class="sub">read_context / search_context</td><td class="num">(path) / (term)</td><td class="wrap">Read a pack file; grep the pack.</td><td class="wrap">D1 option A. LabRat's <code>search_reference_docs</code>.</td></tr>
+      <tr><td class="sub">verify</td><td class="num">(result_ref, checks)</td><td class="wrap">Deterministic assertions: rows ≥/≤, no nulls in, unique on, range of. Returns pass/fail per check.</td><td class="wrap">Sentinel's <code>verify_step</code>; the prompt requires it before answering.</td></tr>
+      <tr><td class="sub">return_answer</td><td class="num">(answer)</td><td class="wrap">Ends the session; the string is what the validator sees.</td><td class="wrap">Upstream, kept.</td></tr>
+    </tbody>
+  </table></div>
+
+  <form class="q" data-lavish-question="D2-versions" onsubmit="event.preventDefault();const f=new FormData(event.currentTarget);const c=f.get('d2');const n=(f.get('notes')||'').trim();if(!c)return;window.lavish.queuePrompt('Decision D2 (agent versions): '+c+(n?' — notes: '+n:''),{tag:'decision',text:'D2: '+c,element:event.currentTarget,data:{question:'D2-versions',answer:c,notes:n}});event.currentTarget.querySelector('.queued').textContent='queued: '+c;">
+    <h3>D2 · Versions <span class="rec">decided: A — v0 first, then one scored challenger through compare/promote</span></h3>
+    <p class="why">Two inputs arrived: the note "v1 is the evaluation loop; this build lays the scaffolding" and the form's A "v0 first, then v1 with the addendum at 54 × 5". Merged reading: v0 is measured and installed as champion; then the addendum runs as the <b>first challenger</b> through the new <code>compare</code>/<code>promote</code> path at 54 × 5 (≈ $35) — a hand-seeded first iteration of the loop, whose later iterations are the next build. That makes M5's spend real rather than optional. Queue B or C only to change this.</p>
+    <label><input type="radio" name="d2" value="A: run v0 general-purpose first (smoke, 54 × 1, 54 × 5), then v1 with the addendum at 54 × 5"> <span><b>A · v0 then v1</b> <span class="rec">recommended</span> — two rows in our own leaderboard, same harness, one-file diff; the addendum's worth is a number.</span></label>
+    <label><input type="radio" name="d2" value="B: go straight to v1 benchmark-informed, skip the v0 measurement"> <span><b>B · straight to v1</b> — saves one run; loses the baseline and the general-purpose row.</span></label>
+    <label><input type="radio" name="d2" value="C: v0 only for this build; the addendum is the first optimiser cycle in the next build"> <span><b>C · v0 only</b> — cleanest handoff to the loop build, but this build ends below 0.80.</span></label>
+    <textarea name="notes" placeholder="Model for the runs, trial counts, anything on the addendum…"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D2</button><span class="queued"></span></div>
+  </form>
+</div></section>
+
+<section class="band-sec" id="infra"><div class="wrap">
+  <div class="hd"><p class="label">08 · data store &amp; sandbox</p>
+  <h2>8 · Data — Postgres in this project's own compose for now, already in the central shape (schema <code>dataagentbench</code>, tables <code>&lt;dataset&gt;_&lt;resource&gt;</code>), migrated to nmp-central-ai when its M3 lands</h2>
+  <p><b>Decided in review: keep the database in this project for now and migrate later.</b> <code>infra/docker-compose.yml</code> runs the same image the platform uses (<code>pgvector/pgvector:pg16</code>) on <code>localhost:5433</code> (central's own Postgres holds <code>:5432</code>), database <code>nmp</code>, and everything inside it is already in the central shape: one schema named after the project, every table <code>&lt;dataset&gt;_&lt;resource&gt;</code>, the same two roles. This is a stated deviation from PLATFORM.md's rule zero, taken because the platform's <b>M3 · "per-project schemas on the same Postgres"</b> is not built yet and 8.4 GB of benchmark data should not be the first thing to land in a shared volume without that plan. Migration is one command when M3 exists — <code>pg_dump -n dataagentbench | psql &lt;central&gt;</code>, then <code>DATABASE_URL</code> changes — because the schema, the table names and <code>roles.sql</code> are identical on both sides; M8 records it. MLflow stays central throughout (§10). The dumps make this cheap: the five Postgres datasets ship as plain <code>pg_dump</code> files whose DDL is <code>CREATE TABLE public.books_info</code>, <code>COPY public.books_info … FROM stdin</code> (verified on <code>books_info.sql</code>, 649 kB, and <code>business_description.sql</code>, 38 kB, fetched from Hugging Face this session), so <code>dab data load</code> streams them through one rewrite — <code>public.books_info → dataagentbench.bookreview_books_info</code> — into <code>psql</code>. SQLite and DuckDB files go in through DuckDB's <code>postgres</code> extension (<code>ATTACH</code> the file, <code>CREATE TABLE pg.dataagentbench.&lt;ds&gt;_&lt;t&gt; AS SELECT *</code>); Mongo dumps are parsed with <code>bson</code> into a <code>jsonb</code> column plus generated columns for the fields the hints name.</p></div>
+  <div class="grid g3">
+    <div class="panel card">
+      <h3>What lands in the schema</h3>
+      <p><b>Benchmark stores</b> (D6): <code>bookreview_books_info</code>, <code>crmarenapro_accounts</code> … <code>patents_patent_publication</code>, <code>agnews_articles</code> (jsonb), one table per upstream table across the 12 datasets; if two stores in one dataset share a table name the load fails loudly and the rule becomes <code>&lt;dataset&gt;_&lt;store&gt;_&lt;table&gt;</code> for that dataset.</p>
+      <p><b>App state</b>: <code>dab_datasets · dab_queries · dab_validators · dab_published_answers · dab_published_verdicts</code> (the index, written by <code>dab ingest</code> alongside the committed JSON) and <code>agent_runs · agent_results · agent_traces</code> (every run, trial, and trace span). <code>agent_results</code> is the record for runs; <code>runs/&lt;id&gt;/</code> becomes an export (<code>dab runs export</code>) used for MLflow artifacts and the CI gate — a deliberate departure from the siblings' "run folder is the record", because the record is now shared.</p>
+    </div>
+    <div class="panel card">
+      <h3>Two roles, one schema</h3>
+      <p><code>dab_owner</code> loads and writes; <code>dab_agent</code> is what the agent's tools connect as: <code>GRANT USAGE ON SCHEMA dataagentbench</code>, <code>SELECT</code> on the benchmark tables only, <code>search_path = dataagentbench</code>, <code>statement_timeout = 60s</code>, no privilege on any other schema. On a shared database this is the line between "one of many apps" and "an agent that can read everyone's data"; <code>tests/test_roles.py</code> proves <code>dab_agent</code> cannot see another schema or write its own.</p>
+      <p><code>make db-up</code> starts this project's Postgres (<code>infra/docker-compose.yml</code>, volume <code>dab-pgdata</code>, git-ignored); <code>infra/roles.sql</code> creates the schema and the two roles and is idempotent, so it runs unchanged against central later. The app reads one <code>DATABASE_URL</code> (<code>postgresql://dab_agent:…@localhost:5433/nmp</code> now; central's URI after M8). <code>make platform-up</code> still starts nmp-central-ai's stack, which MLflow needs from the first run.</p>
+    </div>
+    <div class="panel card">
+      <h3>Sandbox and leak audit</h3>
+      <p><code>execute_python</code> runs in a <code>python:3.12-slim</code> container with <code>--network none</code> — no route to anything, Postgres included. Data reaches it through a per-trial <code>/work</code> volume: <code>query_db(sql, save_as="x.parquet")</code> writes results there and the code reads them with pandas or duckdb, so Python never holds a database credential and the read-only role is the only way in. One container per run, a fresh kernel per trial (D3). After every run <code>dab audit &lt;run&gt;</code> greps traces for URLs, <code>ground_truth</code>, <code>validate.py</code>, <code>docs/data</code>, other runs' ids and any schema name other than <code>dataagentbench</code>, and fails the run if one appears.</p>
+      <p class="small">Re-hosting the stores is leaderboard precedent — Permute Core runs "DuckDB over Parquet-normalised stores" (PR #85, 0.84) — but it is a change from the rubric's sanctioned files; a submission would say so in its PR as Permute did.</p>
+    </div>
+  </div>
+  <div class="tw" style="margin-top:var(--s5)"><table>
+    <caption>What the three readings of "schema = project, tables = dataset_resource" mean for the agent and the load. Bytes from <code>datasets.json</code>; load times are DuckDB→Postgres COPY estimates at ~10 MB/s.</caption>
+    <thead><tr><th>Reading</th><th>Benchmark stores</th><th>App state</th><th>The agent's SQL</th><th>Load</th><th>Cost of being wrong</th></tr></thead>
+    <tbody>
+      <tr class="pro"><td class="sub">A · everything, one engine</td><td class="wrap">All 12 datasets' tables re-hosted as <code>&lt;dataset&gt;_&lt;table&gt;</code>; Mongo as jsonb; no SQLite, DuckDB or Mongo at run time.</td><td class="wrap">In the schema.</td><td class="wrap">One dialect (Postgres), one <code>query_db(sql)</code>; the context pack lists physical names; Mongo questions become SQL over jsonb (the paper names <code>find</code>-only Mongo as a failure source).</td><td class="wrap">8.4 GB once, all 12 before the smoke; patents 5.6 GB ≈ 10–15 min of it.</td><td class="wrap">The agent never sees the benchmark's engine diversity; a future submission must declare the re-host.</td></tr>
+      <tr><td class="sub">B · Postgres-native only</td><td class="wrap">The 5 Postgres datasets (bookreview, googlelocal, pancancer_atlas, patents, crmarenapro's <code>support</code>) as <code>&lt;dataset&gt;_&lt;table&gt;</code>; SQLite/DuckDB files and Mongo stay as upstream ships them.</td><td class="wrap">In the schema.</td><td class="wrap">Three dialects plus Mongo, as the reference tools; <code>query_db(db, query)</code> keeps upstream semantics.</td><td class="wrap">Postgres part only, all 5 before the smoke; Mongo 8 still needed in compose.</td><td class="wrap">Keeps parity with the rubric; keeps the engine sprawl the leaderboard teams removed.</td></tr>
+      <tr><td class="sub">C · app state only</td><td class="wrap">Untouched: own compose Postgres 17 + Mongo 8, dumps loaded as upstream does.</td><td class="wrap">In the schema.</td><td class="wrap">As B.</td><td class="wrap">As upstream.</td><td class="wrap">Two databases for one app, and the benchmark stores never reach the central shape; not taken.</td></tr>
+    </tbody>
+  </table></div>
+
+  <form class="q" data-lavish-question="D6-central-postgres" onsubmit="event.preventDefault();const f=new FormData(event.currentTarget);const c=f.get('d6');const n=(f.get('notes')||'').trim();if(!c)return;window.lavish.queuePrompt('Decision D6 (central Postgres): '+c+(n?' — notes: '+n:''),{tag:'decision',text:'D6: '+c,element:event.currentTarget,data:{question:'D6-central-postgres',answer:c,notes:n}});event.currentTarget.querySelector('.queued').textContent='queued: '+c;">
+    <h3>D6 · What goes into <code>dataagentbench</code>? <span class="rec">decided: A, in this project's Postgres first, central after M3</span></h3>
+    <p class="why">Decided in review: the Postgres lives in this project's compose for now and migrates to central when its M3 exists. The readings still decide what is re-hosted into the schema; A is assumed unless you queue otherwise.</p>
+    <label><input type="radio" name="d6" value="A: everything — all 12 datasets' stores re-hosted as <dataset>_<table> (Mongo as jsonb) plus the app state; one Postgres dialect for the agent"> <span><b>A · everything, one engine</b> <span class="rec">recommended</span> — one database, one dialect, one read-only role; the load is a one-off and band 1 is 33 MB.</span></label>
+    <label><input type="radio" name="d6" value="B: the 5 Postgres-native datasets as <dataset>_<table> plus the app state; SQLite/DuckDB/Mongo stay as upstream ships them"> <span><b>B · Postgres-native datasets + app state</b> — rubric parity; the agent keeps four engines and Mongo stays in compose.</span></label>
+    <label><input type="radio" name="d6" value="C: app state only (dab_* index and agent_* runs/results/traces); benchmark stores stay in this project's own compose"> <span><b>C · app state only</b> — bookkeeping only; the benchmark stores never take the central shape.</span></label>
+    <textarea name="notes" placeholder="Schema name if not dataagentbench; role names; whether the context pack should also be a table…"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D6</button><span class="queued"></span></div>
+  </form>
+
+  <form class="q" data-lavish-question="D3-execution" onsubmit="event.preventDefault();const f=new FormData(event.currentTarget);const c=f.get('d3');const n=(f.get('notes')||'').trim();if(!c)return;window.lavish.queuePrompt('Decision D3 (python execution): '+c+(n?' — notes: '+n:''),{tag:'decision',text:'D3: '+c,element:event.currentTarget,data:{question:'D3-execution',answer:c,notes:n}});event.currentTarget.querySelector('.queued').textContent='queued: '+c;">
+    <h3>D3 · Where does the agent's Python run? <span class="rec">decided: A</span></h3>
+    <p class="why">DABStep-loop runs an in-process MCP <code>execute_python</code> with no container. DAB's rubric and every serious row use a network-off sandbox; with a shared database the sandbox is also what keeps the agent on the <code>dab_agent</code> role.</p>
+    <label><input type="radio" name="d3" value="A: docker container per run, network none; data arrives on a per-trial /work volume written by query_db(save_as=...) (rubric-grade)"> <span><b>A · Docker sandbox</b> <span class="rec">recommended</span> — rubric-grade isolation; Docker is already required for compose.</span></label>
+    <label><input type="radio" name="d3" value="B: in-process MCP executor like DABStep-loop, no container (faster to build, not rubric-grade)"> <span><b>B · in-process, like DABStep-loop</b> — reuses <code>python_executor.py</code> nearly verbatim; no isolation, so a submission would need the sandbox added later.</span></label>
+    <textarea name="notes" placeholder="Timeouts, packages to preinstall…"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D3</button><span class="queued"></span></div>
+  </form>
+</div></section>
+
+<section class="blk" id="harness"><div class="wrap">
+  <div class="hd"><p class="label">09 · harness, runs, explorer</p>
+  <h2>9 · Harness — the DABStep-loop run layout, verbatim, judged by the validators this repo already runs</h2>
+  <p>Nothing new is invented here. <code>dab eval</code> is <code>dabstep eval</code> with the task source swapped: one <code>asyncio.Semaphore(workers)</code>, one Agent SDK session per (query, trial), <code>results.jsonl</code> rewritten after every task so a killed run keeps its finished trials, traces per trial, a copy of <code>agents/vN/</code> in the run folder, and the version fingerprint (sha256 of <code>system.md</code> + <code>helper.py</code> + <code>agent.yaml</code>) on every row. Each trial also opens an MLflow trace and each run logs to the central experiment (§10); neither can fail the run.</p></div>
+  <div class="grid g2">
+    <div class="panel card">
+      <h3>A result row</h3>
+      <pre class="md">{"query": "patents/2", "trial": 2,
+ "answer": "H01L, G06F, H04L",
+ "passed": true, "reason": "",
+ "timed_out": false,
+ "n_turns": 23, "n_tool_calls": 19,
+ "tool_errors": 1, "duration_ms": 184300,
+ "input_tokens": 248900, "cache_read_tokens": 226400,
+ "cache_creation_tokens": 21800, "output_tokens": 6100,
+ "cost_usd": 0.081, "terminal_reason": "return_answer",
+ "verify_passed": true, "plan_present": true,
+ "agent": "v0", "fingerprint": "a3f9…", "model": "haiku", "challenger_of": null,
+ "effort": "medium"}</pre>
+      <p class="small">Judged by <code>eval/validators.judge()</code> — the same call, timeout and worker pool the rescore of the 14 480 published answers used. A run's macro Pass@1 is computed by <code>eval/rescore.summarise()</code> unchanged, so our number and the site's are the same arithmetic.</p>
+    </div>
+    <div class="panel card">
+      <h3>Explorer pages added</h3>
+      <ul class="tight">
+        <li><b>/runs</b> — every run folder: agent, model, trials, macro Pass@1 as <code>passed/n</code>, cost, date; the nine published files appear as rows too, so v0 sits next to Opus 4.6 ReAct.</li>
+        <li><b>/runs/:id</b> — per-dataset bars with denominators, per-query pass/n, failed queries first, link to each trace.</li>
+        <li><b>/runs/:id/traces/:query/:trial</b> — the trace as blocks (plan, tool calls, verify, answer), validator reason beside the answer.</li>
+        <li><b>/datasets/:key</b> gains a "Context pack" panel showing schema.md, joins.md and the summary the agent is given.</li>
+        <li><b>/compare</b> — two runs, McNemar on discordant queries, fixed/broken lists (port of DABStep-loop <code>eval/compare.py</code>).</li>
+      </ul>
+      <p class="small">CLAUDE.md's rules hold: the pages read <code>runs/</code> and <code>data/context/</code> through the API; nothing hard-coded.</p>
+    </div>
+  </div>
+</div></section>
+
+<section class="band-sec" id="obs"><div class="wrap">
+  <div class="hd"><p class="label">10 · observability</p>
+  <h2>10 · Observability — MLflow on nmp-central-ai is the index across projects; the run folder stays the record; the tracker stays the bill</h2>
+  <p><b>Yes — the central server, and it is live.</b> Since this morning <code>nmp-central-ai</code> is a repo with a running stack (<code>docker compose</code> project <code>nmp-central</code>: MLflow 3.16.1 at <code>http://localhost:5000</code> backed by Postgres + MinIO; <code>/health</code> answers <code>OK</code>; experiments 1–6 already hold convfinqa, dabstep-loop, tau2-loop, yt-agent-v1 and data-qa/evals). Its <code>PLATFORM.md</code> is the contract this section now follows verbatim: <em>rule zero — never start your own MLflow, Postgres, MinIO or gateway inside a project</em> (honoured for MLflow; the benchmark Postgres is a stated, temporary deviation until M8 — §8); one env var <code>MLFLOW_TRACKING_URI</code> (default <code>http://localhost:5000</code>, <code>http://mlflow:5000</code> from a compose stack on the external network <code>nmp-central</code>); new experiments named <code>&lt;project&gt;/&lt;purpose&gt;</code>; required run tags <code>project · git_sha · env · billing</code>; ids never hard-coded; a registry entry in <code>registry/projects.yaml</code> with a zero-cost smoke that <code>make check</code> verifies. So this build is onboarded, not pointed: registry entry <b>P6 dataagentbench</b>, experiment <b><code>dataagentbench/evals</code></b>, and the DABStep-loop logging contract (already migrated to the same server) plus per-trial traces.</p></div>
+  <div class="grid g3">
+    <div class="panel card">
+      <h3>Runs — the sibling contract, verbatim, plus split fields</h3>
+      <p>One MLflow run per eval run, <code>run_name = run_id</code> (the folder name), in experiment <b><code>dataagentbench/evals</code></b> — the platform's <code>&lt;project&gt;/&lt;purpose&gt;</code> rule for new experiments (the migrated siblings keep their flat names). <code>tracking/mlflow_log.py</code> is DABStep-loop's post-migration file with the task source swapped; it reads <code>MLFLOW_TRACKING_URI</code> and nothing else.</p>
+      <p><b>Tags</b> the platform's required four <code>project=dataagentbench · git_sha · env=local|aws · billing=subscription</code> plus the sibling set <code>agent · fingerprint · context_sha · model · effort · upstream_commit · kind=eval</code>. <b>Params</b> <code>agent · model · effort · split · trials · workers · n_queries · fingerprint · max_turns</code>. <b>Metrics</b> <code>pass_rate_macro · pass_rate_micro · passed · n · cost_usd · duration_s · errors · timeouts · turns_total · input_tokens · cache_read_tokens · cache_creation_tokens · output_tokens</code>, per dataset <code>ds_&lt;key&gt;_pass_rate</code>, per trial <code>q_&lt;dataset&gt;_&lt;n&gt;_t&lt;k&gt;</code> = 1/0. <b>Artifacts</b> <code>run.json · results.jsonl · agent/ · traces/ · context/&lt;ds&gt;/summary.md</code>.</p>
+    </div>
+    <div class="panel card">
+      <h3>Traces — one MLflow trace per trial, built from the SDK stream</h3>
+      <p>This is the part the loops do not have. <code>mlflow.anthropic.autolog()</code> captures nothing here because the model call happens inside the <code>claude</code> CLI child the Agent SDK spawns, so the harness builds spans by hand from the message stream, the way ConvFinQA-agent does with <code>mlflow.start_span</code> (<code>tracking/tracing.py:151</code>).</p>
+      <p>Root span <code>trial</code> (inputs: query text, dataset; outputs: answer, passed, reason) with tags <code>run_id · dataset · query · trial · passed · reason · agent · fingerprint · context_sha · prompt versions</code> — the fields the optimiser filters on (§6). Child <code>turn</code> per assistant message with <code>input/cache_read/cache_creation/output</code> tokens from its <code>usage</code>. Child <code>tool</code> per call: name, inputs, outputs truncated at 2 000 chars, duration, error. The trace id goes into the result row, so the explorer's trace page and MLflow's Traces tab show the same trial.</p>
+    </div>
+    <div class="panel card">
+      <h3>Three ledgers, one arithmetic</h3>
+      <ul class="tight">
+        <li><b>Run folder</b> — the record. <code>mlflow_run_id</code> is written back into <code>run.json</code> after logging; every reader (compare, explorer, CI gate) loads from disk.</li>
+        <li><b>MLflow</b> — the index and the traces UI, on the central server. "MLflow is the index, never the record": a logging error mid-run is caught and printed, the run folder stays complete, and <code>dab runs log &lt;run&gt;</code> re-logs it; a server that is down at start is a preflight failure, per the platform's rule 1.</li>
+        <li><b>productivity-tracker</b> — the bill, from the same transcripts, at the same prices.</li>
+      </ul>
+      <p>The run page shows the three numbers for tokens and cost side by side, links to the MLflow run and trace, and flags any disagreement above 2 %. <code>make snapshot</code> commits <code>search_runs</code> output for CI and the demo, as the siblings do.</p>
+    </div>
+  </div>
+  <div class="tw" style="margin-top:var(--s5)"><table>
+    <caption>Where each question is answered. The platform asks for fail-fast, not silent: <code>dab eval</code> preflights <code>&lt;uri&gt;/health</code> and, if the stack is down, stops and names <code>make platform-up</code> (which runs <code>make -C ../nmp-central-ai up</code>). The only silent path is an explicit <code>--no-mlflow</code> for offline tests.</caption>
+    <thead><tr><th>You want to know</th><th>Look in</th><th>Because</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">Did the challenger beat the champion, and on which queries?</td><td class="wrap">Explorer <code>/compare</code> (from disk); MLflow run comparison on <code>pass_rate_macro</code> and the <code>q_*</code> metrics.</td><td class="wrap">Both read the same <code>results.jsonl</code>; the explorer adds the McNemar p-value and the validator reason.</td></tr>
+      <tr><td class="sub">Why did crmarenapro/8 fail on trial 3?</td><td class="wrap">Explorer trace page or the MLflow trace: the <code>plan</code> turn, every <code>tool</code> span with its SQL and error, the <code>verify</code> result.</td><td class="wrap">Spans are built from the SDK stream the harness already stores in <code>traces/</code>.</td></tr>
+      <tr><td class="sub">What did the smoke cost, and what did it cost the window?</td><td class="wrap">MLflow <code>cost_usd</code> and token metrics per run; productivity-tracker for the day's total across projects.</td><td class="wrap">Same prices (§11); a mismatch above 2 % is a bug in one of them.</td></tr>
+      <tr><td class="sub">How does DataAgentBench compare with DABStep-loop and tau2-loop this month?</td><td class="wrap">The central MLflow, one experiment per project, same metric names.</td><td class="wrap">This is the reason the key names are the sibling contract, not new ones.</td></tr>
+    </tbody>
+  </table></div>
+
+  <form class="q" data-lavish-question="D5-observability" onsubmit="event.preventDefault();const f=new FormData(event.currentTarget);const c=f.get('d5');const n=(f.get('notes')||'').trim();if(!c)return;window.lavish.queuePrompt('Decision D5 (observability): '+c+(n?' — notes: '+n:''),{tag:'decision',text:'D5: '+c,element:event.currentTarget,data:{question:'D5-observability',answer:c,notes:n}});event.currentTarget.querySelector('.queued').textContent='queued: '+c;">
+    <h3>D5 · How is this project registered on the central platform?</h3>
+    <p class="why">"Which server" is no longer a choice — PLATFORM.md rule zero settles it, and the server is up. What is left is the registry entry: how many experiments, and what the zero-cost smoke logs.</p>
+    <label><input type="radio" name="d5" value="A: one experiment dataagentbench/evals for runs and traces; registry entry P6 with a smoke that re-logs a committed dry-run folder (no model call); this build opens the registry PR in nmp-central-ai"> <span><b>A · one experiment, runs + traces together</b> <span class="rec">recommended</span> — the shape data-qa/evals uses; one place to compare v0 and v1 and open the trace of a failed trial; the smoke re-logs the M2 dry-run folder, so <code>make check ARGS="--only P6"</code> passes before any token is spent.</span></label>
+    <label><input type="radio" name="d5" value="B: two experiments, dataagentbench/evals for runs and dataagentbench/traces for per-trial traces; registry entry P6 lists both"> <span><b>B · runs and traces in separate experiments</b> — keeps the run list clean of 270-trace runs; costs one more id to carry and two tabs to open per failure.</span></label>
+    <label><input type="radio" name="d5" value="C: register later — log to dataagentbench/evals now but leave registry/projects.yaml and make check to a follow-up in nmp-central-ai"> <span><b>C · log now, register later</b> — no PR in the sibling repo from this build; the experiment exists but the platform's map does not know it, which its rule 5 says not to do.</span></label>
+    <textarea name="notes" placeholder="Experiment name if not dataagentbench/evals; whether to back-fill the 9 published files as one run each; the billing tag value…"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D5</button><span class="queued"></span></div>
+  </form>
+</div></section>
+
+<section class="blk" id="tokens"><div class="wrap">
+  <div class="hd"><p class="label">11 · token profile</p>
+  <h2>11 · Tokens — a trial's cost is quadratic in turns, and turns are the only number we do not yet know</h2>
+  <p>Every turn re-reads the whole conversation, so input tokens grow as <code>T·P + h·T(T−1)/2</code>: <code>P</code> the fixed prefix (system prompt + query + context summary + tool schemas), <code>h</code> what one turn adds (the model's output plus the tool result), <code>T</code> the turns. The model below is calibrated on DABStep-loop's measured Haiku 4.5 runs (<code>runs/20260915T080017Z_v2_dev_haiku_lean</code>: prefix 2.7k, median 5.5 turns, 29.5k input, 2.7k output, $0.035 per question) and then pushed to DAB's longer trials. Same effort (<b>medium</b>) and same turns for all three models, so the bands differ only by price.</p></div>
+  <div class="kpi">
+    <div class="k"><b>P ≈ 3 000</b><span>prefix tokens per call: system.md ~300 + query ~80 + context summary ~1 500 + 9 tool schemas ~1 100 (DABStep measured 2.7k with 1 tool)</span></div>
+    <div class="k"><b>h ≈ 1 000</b><span>added per turn: ~300 output (plan text + tool call) + ~700 tool result (a 200-row page, a describe, a verify)</span></div>
+    <div class="k"><b>T ≈ 20 median</b><span>turns per DAB trial, from Phoenix-CLI's 3 493 Bash calls / 270 trials ≈ 13 tool calls plus orient/plan/verify turns; p90 ≈ 40; cap 60</span></div>
+    <div class="k"><b>0.1× / 1.25×</b><span>cache read / cache write price vs input; the Agent SDK caches the prefix and history automatically, so ~90 % of input is read at 0.1×</span></div>
+  </div>
+  <div class="tw" style="margin-top:var(--s5)"><table>
+    <caption>One trial by turns, three models, effort medium, prompt cache hitting. Prices per MTok are productivity-tracker's <code>src/pt/enrich/prices.yaml</code> (version 2026-09-16): Haiku 4.5 $1 in / $5 out · Sonnet 5 $2 / $10 · Opus 5 $5 / $25, cache read 0.10×, cache write 1.25× — so our derived cost and the tracker's agree by construction; both are checked against the SDK's reported <code>cost_usd</code> on the first smoke run.</caption>
+    <thead><tr><th class="num">Turns T</th><th class="num">Input tokens (all calls)</th><th class="num">of which cache read</th><th class="num">Output</th><th class="num">Haiku 4.5</th><th class="num">Sonnet 5</th><th class="num">Opus 5</th><th class="num">Haiku, cache missed</th></tr></thead>
+    <tbody>
+      <tr><td class="num">10</td><td class="num">75k</td><td class="num">63k</td><td class="num">3k</td><td class="num">$0.04</td><td class="num">$0.07</td><td class="num">$0.18</td><td class="num">$0.09</td></tr>
+      <tr class="pro"><td class="num">20 · median</td><td class="num">250k</td><td class="num">228k</td><td class="num">6k</td><td class="num">$0.08</td><td class="num">$0.16</td><td class="num">$0.40</td><td class="num">$0.28</td></tr>
+      <tr><td class="num">30</td><td class="num">525k</td><td class="num">493k</td><td class="num">9k</td><td class="num">$0.13</td><td class="num">$0.27</td><td class="num">$0.67</td><td class="num">$0.57</td></tr>
+      <tr><td class="num">40 · p90</td><td class="num">900k</td><td class="num">858k</td><td class="num">12k</td><td class="num">$0.20</td><td class="num">$0.40</td><td class="num">$0.99</td><td class="num">$0.96</td></tr>
+      <tr><td class="num">60 · cap</td><td class="num">1.95M</td><td class="num">1.89M</td><td class="num">18k</td><td class="num">$0.36</td><td class="num">$0.71</td><td class="num">$1.78</td><td class="num">$2.04</td></tr>
+    </tbody>
+  </table></div>
+  <p class="insight">Doubling turns from 20 to 40 costs 2.5× on cache and 3.4× without it; the cap at 60 is the single biggest lever on the bill, and the reference scaffold's 100 iterations is why Kimi-K2 cost $1 304 for 2 700 trials. A blended trial (70 % at 20, 25 % at 40, 5 % at 60) is <b>$0.13 Haiku · $0.25 Sonnet · $0.62 Opus</b>; those are the per-trial rates in the step table.</p>
+
+  <div class="tw" style="margin-top:var(--s5)"><table>
+    <caption>Expansion by depth, not by dataset: every run touches all 12 datasets, so the full 8.4 GB is loaded once before the smoke. Each step is its own run and its own compare; the next starts only after the previous step's measured token profile replaces the estimate above.</caption>
+    <thead><tr><th>Step</th><th>Queries × trials</th><th class="num">Trials</th><th class="num">Tokens</th><th class="num">Haiku 4.5</th><th class="num">Sonnet 5</th><th class="num">Opus 5</th><th>What it proves</th></tr></thead>
+    <tbody>
+      <tr class="pro"><td class="sub">1 · smoke</td><td class="wrap">one question per dataset (D0) × 1</td><td class="num">12</td><td class="num">≈ 6M</td><td class="num">$1.6</td><td class="num">$3</td><td class="num">$7</td><td class="wrap">Every engine, store and validator style once; the harness end to end; the first measured <code>P</code>, <code>h</code>, turns.</td></tr>
+      <tr><td class="sub">2 · v0 wide</td><td class="wrap">all 54 × 1</td><td class="num">54</td><td class="num">≈ 27M</td><td class="num">$7</td><td class="num">$14</td><td class="num">$34</td><td class="wrap">A first macro Pass@1 with n=1 per query; the failed list that shapes the v1 addendum.</td></tr>
+      <tr><td class="sub">3 · v0 scored</td><td class="wrap">all 54 × 5</td><td class="num">270</td><td class="num">≈ 134M</td><td class="num">$35</td><td class="num">$67</td><td class="num">$167</td><td class="wrap">The general-purpose row, same arithmetic as the site.</td></tr>
+      <tr><td class="sub">4 · one challenger</td><td class="wrap">all 54 × 5</td><td class="num">270</td><td class="num">≈ 134M</td><td class="num">$35</td><td class="num">$67</td><td class="num">$167</td><td class="wrap">What every loop iteration costs later; in this build, optionally spent once on v0 + hints to prove <code>compare</code>/<code>promote</code>.</td></tr>
+      <tr><td class="sub">all four</td><td class="wrap"></td><td class="num">606</td><td class="num">≈ 300M</td><td class="num"><b>$79</b></td><td class="num"><b>$151</b></td><td class="num"><b>$375</b></td><td class="wrap">The whole build on one model.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="grid g2" style="margin-top:var(--s5)">
+    <div class="panel card">
+      <h3>What the Max 5× window holds — measured from your own 14 limit hits</h3>
+      <p>Anthropic does not publish the window in tokens, and productivity-tracker derives USD rather than observing the limit. But the transcripts under <code>~/.claude/projects</code> record every <code>429 rate_limit</code> with <code>rateLimitType: five_hour</code> and its <code>resetsAt</code>, so the window's start is <code>resetsAt − 5 h</code> and its size is everything sent between that and the first rejection. <b>Fourteen windows hit the limit between 2026-09-02 and 2026-09-21</b> (1 616 rejected requests). Priced at the tracker's rates, the spend at the moment of the hit was <b>$41 – $182 derived, median $108</b> — a 4× spread, which says the limit is not dollar-denominated.</p>
+      <p>The spread sorts by model: the two <b>Haiku-dominated</b> windows (2026-09-15 12:00 and 17:00 UTC, 60–80 % Haiku by spend) hit at <b>$44 and $41</b>; mixed Opus/Sonnet/Fable windows at $70–$122; the <b>Opus-heavy</b> ones at $159–$182. A weighted-token fit over the 14 hits (best coefficient of variation 0.25, against 0.43 for derived dollars) puts Haiku's weight <em>equal to Opus's</em>, output ≈ 5× input, cache reads ≈ 0.1× — i.e. the plan counts Haiku tokens as if they were Opus tokens, so cheap-per-dollar work is not cheap-per-window. The table therefore divides each column by the window size observed for that model family: <b>Haiku $42 · Sonnet $108 · Opus $170</b>. Those are your measured numbers, not a plan sheet; <code>dab runs profile</code> re-fits them from the smoke.</p>
+    </div>
+    <div class="panel card">
+      <h3>The runs will appear in the tracker on their own</h3>
+      <p>With <code>BILLING=subscription</code> the Agent SDK spawns the Claude CLI, which writes a JSONL transcript under <code>~/.claude/projects/</code> for <code>cwd=ROOT</code>, so productivity-tracker attributes every trial to project <code>DataAgentBench</code> with the four token counts and the same derived cost — the same numbers <code>results.jsonl</code> records from the SDK's <code>ResultMessage</code>. Two ledgers, one arithmetic; <code>dab runs profile</code> prints both so they can be checked against each other after the smoke.</p>
+      <p class="small">One line for the tracker: it already has every <code>five_hour</code> rejection in the transcripts it reads; a "window hits" view (spend and tokens by model between <code>resetsAt − 5 h</code> and the first 429) would turn the table above into a live gauge and tighten the three divisors as more hits land.</p>
+      <div class="tw" style="margin-top:var(--s3)"><table>
+        <caption>The 14 windows that hit the Max 5× limit, priced at prices.yaml rates from window start to the first rejection. Dominant family by spend.</caption>
+        <thead><tr><th>Window start (UTC)</th><th class="num">Hit after</th><th class="num">Derived $</th><th>Dominant</th><th class="num">Cache write</th><th class="num">Cache read</th><th class="num">Output</th></tr></thead>
+        <tbody>
+          <tr><td class="sub">09-02 21:40</td><td class="num">3 h 19</td><td class="num">169</td><td>Fable</td><td class="num">7.7M</td><td class="num">215M</td><td class="num">1.1M</td></tr>
+          <tr><td class="sub">09-04 08:20</td><td class="num">4 h 59</td><td class="num">108</td><td>Opus</td><td class="num">6.9M</td><td class="num">75M</td><td class="num">0.9M</td></tr>
+          <tr><td class="sub">09-05 02:40</td><td class="num">0 h 49</td><td class="num">87</td><td>Fable</td><td class="num">4.6M</td><td class="num">84M</td><td class="num">0.5M</td></tr>
+          <tr><td class="sub">09-05 07:40</td><td class="num">1 h 15</td><td class="num">108</td><td>Opus + Sonnet</td><td class="num">7.8M</td><td class="num">195M</td><td class="num">1.7M</td></tr>
+          <tr><td class="sub">09-07 05:00</td><td class="num">1 h 00</td><td class="num">70</td><td>Haiku + mix</td><td class="num">9.1M</td><td class="num">70M</td><td class="num">5.5M</td></tr>
+          <tr><td class="sub">09-07 17:10</td><td class="num">0 h 42</td><td class="num">50</td><td>Haiku + Opus</td><td class="num">7.7M</td><td class="num">42M</td><td class="num">4.1M</td></tr>
+          <tr><td class="sub">09-14 02:50</td><td class="num">4 h 19</td><td class="num">159</td><td>Opus</td><td class="num">7.6M</td><td class="num">245M</td><td class="num">2.4M</td></tr>
+          <tr><td class="sub">09-14 07:50</td><td class="num">3 h 46</td><td class="num">182</td><td>Opus</td><td class="num">8.9M</td><td class="num">284M</td><td class="num">2.6M</td></tr>
+          <tr><td class="sub">09-15 01:40</td><td class="num">2 h 01</td><td class="num">117</td><td>Opus</td><td class="num">8.8M</td><td class="num">250M</td><td class="num">3.0M</td></tr>
+          <tr><td class="sub">09-15 07:00</td><td class="num">1 h 43</td><td class="num">72</td><td>Haiku + Opus</td><td class="num">11.9M</td><td class="num">138M</td><td class="num">3.4M</td></tr>
+          <tr class="pro"><td class="sub">09-15 12:00</td><td class="num">1 h 21</td><td class="num">44</td><td>Haiku</td><td class="num">14.0M</td><td class="num">21M</td><td class="num">2.2M</td></tr>
+          <tr class="pro"><td class="sub">09-15 17:00</td><td class="num">1 h 46</td><td class="num">41</td><td>Haiku</td><td class="num">13.2M</td><td class="num">19M</td><td class="num">3.0M</td></tr>
+          <tr><td class="sub">09-19 06:40</td><td class="num">4 h 43</td><td class="num">116</td><td>Fable</td><td class="num">3.7M</td><td class="num">123M</td><td class="num">1.3M</td></tr>
+          <tr><td class="sub">09-20 20:30</td><td class="num">4 h 57</td><td class="num">122</td><td>Fable</td><td class="num">5.1M</td><td class="num">100M</td><td class="num">1.0M</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+  <div class="tw" style="margin-top:var(--s4)"><table>
+    <caption>Each step as a share of the Claude Max 5× 5-hour window, using the window size observed for each model family at your own limit hits (Haiku $42 · Sonnet $108 · Opus $170 derived). Wall clock assumes 4 workers and ~3 min per trial (Phoenix-CLI's 184 s example; DABStep-loop's Haiku median is under 1 min). Nothing else on the subscription during the run.</caption>
+    <thead><tr><th>Run</th><th class="num">Trials</th><th class="num">Wall clock, 4 workers</th><th class="num">Haiku 4.5 $ · % of Max 5× window</th><th class="num">Sonnet 5 $ · % of window</th><th class="num">Opus 5 $ · % of window</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">one blended trial</td><td class="num">1</td><td class="num">≈ 3 min</td><td class="num">$0.13 · 0.3 %</td><td class="num">$0.25 · 0.2 %</td><td class="num">$0.62 · 0.4 %</td></tr>
+      <tr class="pro"><td class="sub">1 · smoke, one question per dataset</td><td class="num">12</td><td class="num">≈ 9 min</td><td class="num">$1.6 · 4 %</td><td class="num">$3 · 3 %</td><td class="num">$7 · 4 %</td></tr>
+      <tr><td class="sub">2 · v0 wide, 54 × 1</td><td class="num">54</td><td class="num">≈ 40 min</td><td class="num">$7 · 17 %</td><td class="num">$14 · 13 %</td><td class="num">$34 · 20 %</td></tr>
+      <tr><td class="sub">3 · v0 scored, 54 × 5</td><td class="num">270</td><td class="num">≈ 3 h 25</td><td class="num">$35 · 83 %</td><td class="num">$67 · 62 %</td><td class="num">$167 · 98 %</td></tr>
+      <tr><td class="sub">3 + 4 · champion and one challenger</td><td class="num">540</td><td class="num">≈ 6 h 50 → 2 windows</td><td class="num">$70 · 167 % → 2 windows</td><td class="num">$135 · 125 % → 2 windows</td><td class="num">$335 · 197 % → 2 windows</td></tr>
+      <tr><td class="sub">all four steps</td><td class="num">606</td><td class="num">≈ 7 h 40 → 2 windows</td><td class="num">$79 · 188 % → 2 windows</td><td class="num">$151 · 140 % → 2 windows</td><td class="num">$375 · 221 % → 3 windows</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tw" style="margin-top:var(--s4)"><table>
+    <caption>How many loop iterations fit in one Max 5× window (nothing else running), by challenger size. A "full" iteration is one challenger at 54 × 5 — the only size the McNemar gate accepts; the smaller sizes are screens that pick which candidate earns a full run. Windows per model as above.</caption>
+    <thead><tr><th>Iteration size</th><th class="num">Trials</th><th class="num">Wall clock</th><th class="num">Haiku · per window</th><th class="num">Sonnet · per window</th><th class="num">Opus · per window</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr class="pro"><td class="sub">full challenger · 54 × 5</td><td class="num">270</td><td class="num">≈ 3 h 25</td><td class="num">$35 · <b>1</b> (83 %)</td><td class="num">$67 · <b>1</b> (62 %)</td><td class="num">$167 · <b>1</b> (98 %)</td><td class="wrap">The gate. One per window on every model; ≈ 4 per day if you start each at a reset and nothing else runs.</td></tr>
+      <tr><td class="sub">reduced · 54 × 3</td><td class="num">162</td><td class="num">≈ 2 h</td><td class="num">$21 · <b>2</b> (50 %)</td><td class="num">$40 · <b>2</b> (37 %)</td><td class="num">$100 · <b>1</b> (59 %)</td><td class="wrap">A cheaper gate with a wider confidence interval; fine for discarding, not for promoting.</td></tr>
+      <tr><td class="sub">failed-only · ≈ 25 × 5</td><td class="num">≈ 125</td><td class="num">≈ 1 h 35</td><td class="num">$16 · <b>2</b> (39 %)</td><td class="num">$31 · <b>3</b> (29 %)</td><td class="num">$78 · <b>2</b> (46 %)</td><td class="wrap">Re-run only the champion's failed queries: shows what a candidate fixes, blind to what it breaks. Screen, then full.</td></tr>
+      <tr><td class="sub">screen · 54 × 1</td><td class="num">54</td><td class="num">≈ 40 min</td><td class="num">$7 · <b>5</b> (17 %)</td><td class="num">$14 · <b>7</b> (13 %)</td><td class="num">$34 · <b>5</b> (20 %)</td><td class="wrap">Rank several candidates in one window; promote none from it.</td></tr>
+    </tbody>
+  </table></div>
+  <p class="insight">So the loop's cadence on this subscription is <b>one promoted challenger per window, about four a day</b>, on any model; the way to go faster is not a cheaper model but a screen — five 54 × 1 candidates in one window, then the best one at 54 × 5 in the next. That ratio (5 screened : 1 gated) is the setting the loop build inherits from this table.</p>
+  <p class="insight">Measured against your own limit hits, Haiku is cheap in dollars but not in window: a scored 54 × 5 run on Haiku is ≈ 83 % of a Max 5× window, the same run on Sonnet ≈ 62 % and on Opus ≈ 98 % — the plan weights Haiku tokens like Opus tokens, so the dollar advantage does not carry into the limit. Three consequences: the smoke and the 54 × 1 pass fit comfortably beside interactive work (≤ 20 % of a window on any model); every 54 × 5 run should own a window — start it at a reset and leave the desk; and Sonnet, not Haiku, is the model that fits most trials into one window if the pass rate ever says Haiku is the bottleneck. Haiku first still stands, for the dollar profile and for measuring the fit; the model choice per step is a one-line change in <code>agent.yaml</code>.</p>
+
+  <figure class="fig">
+    <p class="fig-title">Fig 3 · the profile, live — move the inputs and the bill follows</p>
+    <div class="dia-frame">
+      <div class="calc">
+        <div class="calc-in">
+          <label>prefix P <input type="number" id="cP" value="3000" min="500" max="20000" step="100"></label>
+          <label>per-turn h <input type="number" id="cH" value="1000" min="100" max="5000" step="50"></label>
+          <label>output / turn <input type="number" id="cO" value="300" min="50" max="2000" step="50"></label>
+          <label>turns T <input type="number" id="cT" value="20" min="1" max="120" step="1"></label>
+          <label>queries <input type="number" id="cQ" value="12" min="1" max="54" step="1"></label>
+          <label>trials each <input type="number" id="cK" value="1" min="1" max="50" step="1"></label>
+          <label class="chk"><input type="checkbox" id="cC" checked> prompt cache hits</label>
+        </div>
+        <table class="calc-out"><thead><tr><th>Model</th><th class="num">input / trial</th><th class="num">output / trial</th><th class="num">$ / trial</th><th class="num">$ for queries × trials</th><th class="num">% of Max 5× window (Haiku $42 · Sonnet $108 · Opus $170)</th></tr></thead><tbody id="cRows"></tbody></table>
+        <p class="small" id="cNote"></p>
+      </div>
+    </div>
+    <figcaption><b>The estimate is a placeholder until M3 measures it.</b> Every result row records <code>input_tokens</code>, <code>cache_read_tokens</code>, <code>cache_creation_tokens</code>, <code>output_tokens</code>, <code>n_turns</code> and the SDK's <code>cost_usd</code>; <code>dab runs profile &lt;run&gt;</code> prints p50/p90 turns and tokens and the fitted <code>P</code> and <code>h</code>, and the step table is re-issued from those before step 2.</figcaption>
+  </figure>
+  <script>
+  (function(){
+    const price={haiku:{n:'Haiku 4.5',i:1,o:5,w:42},sonnet:{n:'Sonnet 5',i:2,o:10,w:108},opus:{n:'Opus 5',i:5,o:25,w:170}};
+    const $=id=>document.getElementById(id);
+    function fmt(n){return n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFixed(0)+'k':String(n)}
+    function run(){
+      const P=+$('cP').value,h=+$('cH').value,o=+$('cO').value,T=+$('cT').value,Q=+$('cQ').value,K=+$('cK').value,C=$('cC').checked;
+      const I=T*P+h*T*(T-1)/2, fresh=P+(T-1)*h, read=Math.max(I-fresh,0), out=T*o;
+      let rows='';
+      for(const k of ['haiku','sonnet','opus']){const p=price[k];
+        const cin=C?(fresh*1.25*p.i+read*0.1*p.i):(I*p.i);
+        const usd=(cin+out*p.o)/1e6;
+        rows+=`<tr><td class="sub">${p.n}</td><td class="num">${fmt(I)}</td><td class="num">${fmt(out)}</td><td class="num">$${usd.toFixed(3)}</td><td class="num">$${(usd*Q*K).toFixed(2)}</td><td class="num">${(usd*Q*K/p.w*100).toFixed(1)} %</td></tr>`;}
+      $('cRows').innerHTML=rows;
+      $('cNote').textContent=`${Q} queries × ${K} trials = ${Q*K} trials · ${fmt(I*Q*K)} input tokens in total, ${fmt(read)} of each trial's ${fmt(I)} served from cache${C?'':' (cache off: every token at full price)'}.`;
+    }
+    for(const id of ['cP','cH','cO','cT','cQ','cK','cC']) $(id).addEventListener('input',run);
+    run();
+  })();
+  </script>
+
+  <div class="tw" style="margin-top:var(--s5)"><table>
+    <caption>The smoke split, <b>option B (decided)</b>: the median-difficulty query per dataset by published pass rate over all 9 answer files (upper median where the count is even). At the field's average rates this set passes ≈ 4 of 12 — a first Pass@1 preview rather than a harness check; two are &lt; 10 % for everyone (dimmed). Committed as <code>data/splits/smoke.json</code>.</caption>
+    <thead><tr><th>Dataset</th><th>Query</th><th class="num">Published pass</th><th class="num">Gemini-3-Pro ReAct</th><th>Validator</th><th>Question</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">stockindex</td><td class="num">stockindex/1</td><td class="num">211/270</td><td class="num">49/50</td><td>substring</td><td class="wrap">Which stock index in the Asia region has exhibited the highest average intraday volatility since 202…</td></tr>
+      <tr><td class="sub">bookreview</td><td class="num">bookreview/2</td><td class="num">167/270</td><td class="num">49/50</td><td>regex</td><td class="wrap">Which English-language books in the &#x27;Literature &amp; Fiction&#x27; category have a perfect average rating of…</td></tr>
+      <tr><td class="sub">crmarenapro</td><td class="num">crmarenapro/6</td><td class="num">147/270</td><td class="num">50/50</td><td>regex</td><td class="wrap">Is the product setup in this quotation, including elements like quantity and price, against company …</td></tr>
+      <tr><td class="sub">pancancer_atlas</td><td class="num">pancancer_atlas/3</td><td class="num">112/220</td><td class="num">35/50</td><td>regex</td><td class="wrap">Calculate the chi-square statistic to assess the association between histological types and the pres…</td></tr>
+      <tr><td class="sub">github_repos</td><td class="num">github_repos/4</td><td class="num">108/270</td><td class="num">22/50</td><td>levenshtein</td><td class="wrap">List the repository names for the top five GitHub repositories whose main language is not Python, or…</td></tr>
+      <tr><td class="sub">stockmarket</td><td class="num">stockmarket/3</td><td class="num">100/270</td><td class="num">37/50</td><td>levenshtein</td><td class="wrap">List all company names on the NASDAQ-listed Market that were financially troubled (delinquent, defic…</td></tr>
+      <tr><td class="sub">googlelocal</td><td class="num">googlelocal/4</td><td class="num">85/270</td><td class="num">33/50</td><td>regex</td><td class="wrap">Which 3 businesses received the highest number of reviews with ratings of 4.5 or higher during 2019?…</td></tr>
+      <tr><td class="sub">music_brainz_20k</td><td class="num">music_brainz_20k/1</td><td class="num">46/270</td><td class="num">12/50</td><td>regex</td><td class="wrap">How much revenue in USD did Apple Music make from Beyoncé&#x27;s song &#x27;Get Me Bodied&#x27; in Canada?</td></tr>
+      <tr><td class="sub">agnews</td><td class="num">agnews/1</td><td class="num">35/270</td><td class="num">15/50</td><td>substring</td><td class="wrap">What is the title of the sports article whose description has the greatest number of characters?</td></tr>
+      <tr><td class="sub">yelp</td><td class="num">yelp/2</td><td class="num">34/270</td><td class="num">1/50</td><td>regex</td><td class="wrap">Which U.S. state has the highest number of reviews, and what is the average rating of businesses in …</td></tr>
+      <tr class="dim"><td class="sub">deps_dev_v1</td><td class="num">deps_dev_v1/1</td><td class="num">18/270</td><td class="num">14/50</td><td>regex</td><td class="wrap">Considering only the latest release versions for each distinct NPM package, which packages are the t…</td></tr>
+      <tr class="dim"><td class="sub">patents</td><td class="num">patents/2</td><td class="num">1/270</td><td class="num">0/50</td><td>levenshtein</td><td class="wrap">Find the CPC technology areas in Germany with the highest exponential moving average of patent filin…</td></tr>
+    </tbody>
+  </table></div>
+
+  <form class="q" data-lavish-question="D0-smoke-split" onsubmit="event.preventDefault();const f=new FormData(event.currentTarget);const c=f.get('d0');const n=(f.get('notes')||'').trim();if(!c)return;window.lavish.queuePrompt('Decision D0 (smoke split): '+c+(n?' — notes: '+n:''),{tag:'decision',text:'D0: '+c,element:event.currentTarget,data:{question:'D0-smoke-split',answer:c,notes:n}});event.currentTarget.querySelector('.queued').textContent='queued: '+c;">
+    <h3>D0 · Which question from each dataset is the smoke? <span class="rec">decided: B</span></h3>
+    <p class="why">One trial each, all 12 datasets, Haiku 4.5; committed as <code>data/splits/smoke.json</code> so every smoke run is the same 12 and comparable over time.</p>
+    <label><input type="radio" name="d0" value="A: the easiest per dataset by published pass rate (the 12 in the table above)"> <span><b>A · easiest per dataset</b> <span class="rec">recommended</span> — tests the harness, not the walls; 10 of 12 are passable by a plain ReAct agent today.</span></label>
+    <label><input type="radio" name="d0" value="B: the median-difficulty query per dataset by published pass rate"> <span><b>B · median per dataset</b> — a truer first Pass@1 preview, at the price of a noisier harness signal (several are &lt; 20 % for everyone).</span></label>
+    <label><input type="radio" name="d0" value="C: my own list of 12 (in the notes)"> <span><b>C · your list</b> — name the 12 in the notes.</span></label>
+    <textarea name="notes" placeholder="Swap any of the 12, or list your own…"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D0</button><span class="queued"></span></div>
+  </form>
+</div></section>
+
+<section class="blk" id="repo"><div class="wrap">
+  <div class="hd"><p class="label">12 · repo &amp; billing</p>
+  <h2>12 · Repo — the agent lands beside the explorer; the loop later lands beside the agent</h2></div>
+  <div class="grid g2">
+    <pre class="tree">DataAgentBench/
+├── agents/
+│   ├── v0/  system.md · helper.py · agent.yaml
+│   ├── champion   → v0   (pointer file; dab promote moves it)
+│   └── curator/  system.md · agent.yaml   runs once per dataset, never sees a query
+├── data/
+│   ├── index/      (this build, unchanged)
+│   ├── answers/    (this build, unchanged)
+│   ├── context/    NEW · committed · 12 folders
+│   └── upstream/   git-ignored · +8.4 GB after make data
+├── infra/
+│   ├── docker-compose.yml   this project's pgvector/pg16 on :5433 (volume git-ignored) — until M8
+│   ├── roles.sql            schema dataagentbench · dab_owner · dab_agent (read-only); identical on central
+│   ├── sandbox.Dockerfile   python:3.12-slim + pandas + duckdb, --network none, /work volume
+│   └── registry.P6.yaml     the entry this build adds to nmp-central-ai/registry/projects.yaml
+├── runs/           git-ignored · one folder per run
+├── src/dab_bench/
+│   ├── data/       aliases · upstream · ingest · index
+│   │   └── load.py           NEW · dumps → dataagentbench.&lt;dataset&gt;_&lt;table&gt;, once
+│   ├── context/    NEW · build.py · profile.py · joins.py
+│   ├── agent/      NEW · session.py · prompt.py · versions.py
+│   │   ├── llm.py            models, billing, subscription_env
+│   │   └── tools/  db.py · python.py · extract.py · context.py · verify.py
+│   ├── eval/       validators · rescore · + runner.py · compare.py
+│   ├── tracking/   NEW · mlflow_log.py · tracing.py · snapshot.py
+│   └── serving/    app.py · + runs.py · context.py
+└── frontend/src/pages/  + Runs · Run · Trace · Compare</pre>
+    <div>
+      <div class="panel card">
+        <h3>Model and billing</h3>
+        <p>As the siblings: <code>agent/llm.py</code> is the one place a model is named (<code>haiku</code>/<code>sonnet</code>/<code>opus</code> → Haiku 4.5 / Sonnet 5 / Opus 5) and <code>EFFORT = "medium"</code> is the one place an effort is; <code>agent.yaml</code> pins <code>model: haiku, effort: medium, max_turns: 60</code> for every version so runs differ only by the prompt. <code>BILLING=subscription</code> by default via the Claude CLI, with <code>subscription_env()</code> blanking <code>ANTHROPIC_API_KEY</code> in the SDK child so a run started inside Claude Code cannot bill against it. <code>llm_extract</code> uses Haiku 4.5 through the same path. <code>.env.example</code> gains <code>MLFLOW_TRACKING_URI</code> (D5) and <code>MLFLOW_DISABLE_AGENT_HINT=1</code>, as the siblings.</p>
+        <p>CLAUDE.md's "this build calls no model" rule is retired by this plan; the replacement rule is "a model is named in one file and every run records it".</p>
+      </div>
+      <div class="panel card" style="margin-top:var(--s4)">
+        <h3>Budget, from §11 and the field</h3>
+        <ul class="tight">
+          <li>Haiku 4.5, effort medium, blended $0.13 per trial: <b>smoke 12 × 1 ≈ $1.6 · v0 wide 54 × 1 ≈ $7 · 54 × 5 ≈ $35</b> per agent version; all four steps ≈ $79.</li>
+          <li>The same turns on Sonnet 5 ≈ 2×, on Opus 5 ≈ 5× (§11 table) — a later decision once Haiku's measured profile and pass rate are in.</li>
+          <li>Field reference: DataTrail $3.58 for 270 trials; upstream GPT-5-mini $67 for 2 700; Kimi-K2 $1 304 for 2 700 at 100 iterations.</li>
+          <li>Context build: $0 (no model). <code>llm_extract</code> on Haiku: cents per dataset, cached by hash.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <form class="q" data-lavish-question="D4-billing" onsubmit="event.preventDefault();const f=new FormData(event.currentTarget);const c=f.get('d4');const n=(f.get('notes')||'').trim();if(!c)return;window.lavish.queuePrompt('Decision D4 (billing): '+c+(n?' — notes: '+n:''),{tag:'decision',text:'D4: '+c,element:event.currentTarget,data:{question:'D4-billing',answer:c,notes:n}});event.currentTarget.querySelector('.queued').textContent='queued: '+c;">
+    <h3>D4 · Billing <span class="rec">decided: A — subscription via the Agent SDK, like the siblings</span> — model is decided <span class="done">Haiku 4.5 · effort medium</span></h3>
+    <p class="why">The SDK reports <code>cost_usd</code> and the four token counts on subscription too, so the profile is measured either way; the choice is only whose bill it lands on.</p>
+    <label><input type="radio" name="d4" value="A: subscription billing via the Claude CLI, as DABStep-loop (subscription_env blanks the API key)"> <span><b>A · subscription</b> <span class="rec">recommended</span> — zero API bill; the ported <code>require_live()</code> refuses to start if a key would make it per-token.</span></label>
+    <label><input type="radio" name="d4" value="B: API key with a hard USD cap per run (run aborts when the summed cost_usd crosses it)"> <span><b>B · API key with a cap</b> — exact metered cost; the cap is a config field checked after every trial.</span></label>
+    <textarea name="notes" placeholder="Cap amount, anything else…"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D4</button><span class="queued"></span></div>
+  </form>
+</div></section>
+
+<section class="band-sec" id="ms"><div class="wrap">
+  <div class="hd"><p class="label">13 · milestones</p>
+  <h2>13 · Milestones — seven steps; the first three need no model, the next three widen the run, each accepted by a number with its denominator</h2></div>
+  <div class="panel">
+    <div class="ms"><b class="id">M0</b><div class="body"><b>All 12 datasets loaded into <code>dataagentbench</code>, roles proven</b><code>make data</code> downloads the full 8.4 GB (~30 min; patents 5.6 GB of it); <code>make db-up</code> starts this project's Postgres and <code>infra/roles.sql</code> creates schema and roles; <code>dab data load</code> writes <code>&lt;dataset&gt;_&lt;table&gt;</code> for every store (~15 min, idempotent) and <code>dab data check</code> prints a row count per table against the source file, 12/12. <code>tests/test_roles.py</code> proves <code>dab_agent</code> is read-only and schema-scoped. Accepted when the check passes twice (second run is a no-op). Spend: $0.</div></div>
+    <div class="ms"><b class="id">M1</b><div class="body"><b>Context pack built and visible</b><code>make context</code> writes <code>data/context/&lt;ds&gt;/</code> for every loaded dataset; tests assert every table in <code>db_config.yaml</code> appears in <code>schema.md</code> and every hinted join key appears in <code>joins.md</code> with a measured overlap; then <code>make curate</code> runs the curator once per dataset and writes <code>summary.md</code> + <code>pitfalls.md</code>, traced as <code>kind=curate</code>; a test asserts no query text appears in either file. The explorer's dataset page shows the pack, curated files marked. Committed. Spend: ≈ $1.5 (Sonnet 5, 12 sessions).</div></div>
+    <div class="ms"><b class="id">M2</b><div class="body"><b>Harness dry-run and the token profiler</b><code>dab eval --agent v0 --split smoke --dry-run</code> runs 12 stub sessions, writes a run folder, scores it with the real validators, the explorer opens it at <code>/runs/:id</code>; <code>dab runs profile</code> prints p50/p90 turns, the four token counts and the fitted <code>P</code>/<code>h</code> from any run; <code>tracking/mlflow_log.py</code> logs the dry run to <code>dataagentbench/evals</code> on the central server with the platform's required tags and the sibling key names, <code>tracking/tracing.py</code> emits one trace per stub trial, and the registry PR in nmp-central-ai (entry P6, smoke = re-log this dry-run folder) makes <code>make check ARGS="--only P6"</code> pass. Accepted when <code>tests/test_runner.py</code> round-trips a run folder and <code>summarise()</code> matches <code>trials.json</code> arithmetic on a fixture. Spend: $0.</div></div>
+    <div class="ms"><b class="id">M3</b><div class="body"><b>Smoke, then v0 wide</b>Two queries on Haiku 4.5 (crmarenapro/1, stockmarket/1) until the traces show orient → plan → verify → answer; then <code>make eval AGENT=v0 SPLIT=smoke</code> (12 trials ≈ $1.6, one question per dataset, D0), <code>dab runs profile</code> replaces the §11 estimate with measured numbers; then <code>make eval AGENT=v0 SPLIT=all TRIALS=1</code> (54 trials ≈ $7). Accepted when the smoke run page shows 12 rows beside their published pass rates with every engine and validator style exercised, <code>dab audit</code> is clean, the measured profile is in the plan, and the 54 × 1 run lists its failed queries. Spend: ≈ $9.</div></div>
+    <div class="ms"><b class="id">M4</b><div class="body"><b>v0 scored</b><code>make eval AGENT=v0 SPLIT=all TRIALS=5</code> (270 trials ≈ $35); macro Pass@1 with the four walls labelled; the run page sits beside the nine published rows. Accepted when the run exists, its profile is within 1.5× of the smoke's, and macro Pass@1 is reported — no target, this is the baseline. Spend: ≈ $35.</div></div>
+    <div class="ms"><b class="id">M5</b><div class="body"><b>Champion / challenger scaffolding</b><code>agents/champion</code> pointer = v0; every run carries <code>challenger_of</code>; <code>dab compare &lt;a&gt; &lt;b&gt;</code> prints fixed/broken lists and the McNemar p-value over 54 queries from two run folders and links both MLflow runs; <code>dab promote &lt;run&gt;</code> moves the pointer, tags the MLflow run <code>champion=true</code> and registers the prompt versions; <code>/compare</code> in the explorer. Proven on real data with the benchmark's own one-flag challenger — v0 with hints on (<code>--hints</code>, the reference's <code>--use_hints</code>) at 54 × 5 — or, per D2 A, the DAB addendum as the first hand-seeded challenger — at 54 × 5 through <code>compare</code> and, if the gate passes, <code>promote</code>. Accepted when <code>compare</code> on two runs is reproducible from disk and from MLflow alike. Spend: ≈ $35.</div></div>
+    <div class="body"><b>Runs in the explorer, docs, PR</b><code>/runs</code>, <code>/runs/:id</code>, trace view, compare, the token profile on every run page, links to the MLflow run and trace, <code>make snapshot</code> committed; README gains an "Our runs" table beside the reproduction table; AGENTS.md and CLAUDE.md updated (model rule, run layout, split rule, context rule); <code>/no-mistakes</code> on <code>agent-build-v0</code>. Pages ship incrementally from M3 so each step is reviewed in the app, not in JSON. Accepted when CI is green and the PR shows the runs.</div></div>
+    <div class="ms"><b class="id">M7</b><div class="body"><b>v1 — the loop (next build, s02)</b>Read the champion's failed traces from MLflow, propose one edit to one surface, run the challenger as an experiment, gate, promote: that produces v1. It starts from M5's <code>compare</code>/<code>promote</code>, M2's trace tags and the prompt registry, with v0 as the first champion. Its editable surfaces are three files — <code>system.md</code>, the curator's <code>system.md</code>, per-dataset <code>pitfalls.md</code> (data facts only) — versioned in the central MLflow prompt registry, and its failure reader is <code>mlflow.search_traces</code> on <code>dataagentbench/evals</code>, not the run folder (§6). M2 lays the tags and the prompt registration so M7 needs no new instrumentation.</div></div>
+    <div class="ms"><b class="id">M8</b><div class="body"><b>Migrate the database to nmp-central-ai (when its M3 exists)</b><code>pg_dump -n dataagentbench | psql &lt;central&gt;</code>, <code>roles.sql</code> re-run there unchanged, <code>DATABASE_URL</code> switched, <code>dab data check</code> 12/12 against the new host, this project's compose file and volume removed. Accepted when a smoke run passes against central and rule zero holds again. Spend: $0.</div></div>
+  </div>
+</div></section>
+
+<section class="blk" id="risks"><div class="wrap">
+  <div class="hd"><p class="label">14 · risks</p>
+  <h2>14 · Risks — each has a mechanism, not a hope</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>Risk</th><th>Evidence</th><th>Mechanism</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">Long results blow the context</td><td class="wrap">Upstream cuts at 10 000 chars; the paper names it a failure source.</td><td class="wrap"><code>query_db</code> pages at 200 rows and always returns the total; the full frame lands in the sandbox as <code>r_&lt;n&gt;</code>, never in the prompt.</td></tr>
+      <tr><td class="sub">The answer string carries an audit trail the validator trips on</td><td class="wrap">Permute: 0.8713 full text vs 0.9133 answer-only; three validators pass any text containing the gold token (#93).</td><td class="wrap">Answer contract in the prompt; <code>return_answer</code> is the only scored string; a test that a plain-text final turn is <b>not</b> accepted as the answer (unlike upstream).</td></tr>
+      <tr><td class="sub">Plain-text turn ends the session silently</td><td class="wrap"><code>DataAgent.py:310</code> treats content without a tool call as the final answer.</td><td class="wrap">The SDK session continues until <code>return_answer</code> or <code>max_turns</code>; a text-only turn is nudged once ("call a tool or return_answer").</td></tr>
+      <tr><td class="sub">Accidental leakage disqualifies the run</td><td class="wrap">Two submissions had trials struck for fetching labels (PR #76); rubric §2.</td><td class="wrap">Network-off sandbox; <code>dab audit</code> fails a run that mentions a URL, <code>ground_truth</code>, <code>validate.py</code>, <code>docs/data</code>, or another run's path.</td></tr>
+      <tr><td class="sub">Patents' 5.4 GB load into the shared Postgres</td><td class="wrap">Upstream reloads per trial; that is 270 loads. A shared server also holds other apps' data.</td><td class="wrap">Load once before the smoke, idempotent; row counts checked against the source; <code>dab_agent</code> cannot read outside <code>dataagentbench</code> (<code>tests/test_roles.py</code>).</td></tr>
+      <tr><td class="sub">A re-hosted store differs from the file</td><td class="wrap">Type coercion on SQLite→Postgres (SQLite is dynamically typed); Mongo documents flattened.</td><td class="wrap"><code>dab data check</code> compares row counts and a per-column null/distinct profile between the source file and the table; a mismatch fails the load.</td></tr>
+      <tr><td class="sub">Mongo questions need aggregation</td><td class="wrap">Upstream tool supports <code>find</code> only, default <code>limit=5</code>; agnews and yelp are the two Mongo datasets and the two biggest PromptQL gains.</td><td class="wrap">Under D6 A they are jsonb tables with generated columns for the hinted fields, so it is SQL; under B/C <code>query_db</code> accepts a pipeline. Either way schema.md lists the fields and counts.</td></tr>
+      <tr><td class="sub">Tuning to the walls</td><td class="wrap">agnews q2–4, pancancer q1 are unpassable by the rules (#101, #107).</td><td class="wrap">They stay in the 54, are labelled "known wall" on the run page from a committed <code>data/index/walls.json</code> with the issue link, and no prompt text targets them.</td></tr>
+      <tr><td class="sub">A trial runs long and the bill is quadratic</td><td class="wrap">§11: 60 turns cost 4.5× 20 turns on cache, 7× without; upstream allows 100.</td><td class="wrap"><code>max_turns: 60</code> in <code>agent.yaml</code>; a nudge at turn 40 ("answer with what you have or state what is missing"); <code>dab runs profile</code> flags any trial above p90 on the run page.</td></tr>
+      <tr><td class="sub">The central stack is down, or moves to AWS (M2)</td><td class="wrap">It is one compose stack on this machine; the platform's M2 puts the same shape on AWS behind <code>MLFLOW_TRACKING_URI_AWS</code>.</td><td class="wrap">One env var, one experiment name, logging that never fails a run, <code>dab runs log &lt;run&gt;</code> to back-fill any run folder into whichever server exists; the run folder is the record either way.</td></tr>
+      <tr><td class="sub">Billing inside a Claude Code session</td><td class="wrap">DABStep-loop's <code>require_live()</code> exists because it happened.</td><td class="wrap">Same <code>subscription_env()</code> and <code>require_live()</code>, ported.</td></tr>
+      <tr><td class="sub">Validator changes upstream after our run</td><td class="wrap">deps_dev_v1 already differs (2026-08-18 revision).</td><td class="wrap">Each run records the upstream commit from <code>source.json</code>; <code>tests/test_trials.py</code>'s <code>TOLERATED</code> rule stands.</td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<section class="blk" id="decide"><div class="wrap">
+  <div class="hd"><p class="label">15 · decide</p>
+  <h2>15 · Decide — seven decisions above, one approval here</h2>
+  <p>D0–D6 each queue on their own. This form sets the scope. Everything else in the page is the proposal as I would build it.</p></div>
+  <form class="q" data-lavish-question="approve" onsubmit="event.preventDefault();const f=new FormData(event.currentTarget);const c=f.get('scope');const n=(f.get('notes')||'').trim();if(!c)return;window.lavish.queuePrompt('Approve agent build: '+c+(n?' — notes: '+n:''),{tag:'approve',text:'Scope: '+c,element:event.currentTarget,data:{question:'approve',answer:c,notes:n}});event.currentTarget.querySelector('.queued').textContent='queued: '+c;">
+    <h3>Approve the build scope</h3>
+    <label><input type="radio" name="scope" value="M0–M3: data, context pack, harness, smoke (12 × 1) and v0 wide (54 × 1) — then stop for review before any 5-trial run"> <span><b>M0–M3 · through the smoke and v0 wide</b> <span class="rec">recommended</span> — every dataset touched once, the measured profile, a 54-query failed list; you review before ≈ $35 runs.</span></label>
+    <label><input type="radio" name="scope" value="M0–M2: data, context pack, harness dry-run, profiler; no model calls yet"> <span><b>M0–M2</b> — everything that needs no model; review the context pack in the explorer before any run.</span></label>
+    <label><input type="radio" name="scope" value="M0–M5: through v0 scored at 54 × 5 plus the champion/challenger scaffolding, optionally proven with the hints challenger"> <span><b>M0–M5</b> — v0 scored, compare/promote built and proven with the first challenger, ≈ $79 on Haiku.</span></label>
+    <label><input type="radio" name="scope" value="M0–M6: everything including explorer pages, docs and the PR, without stopping"> <span><b>M0–M6</b> — the whole build unattended.</span></label>
+    <textarea name="notes" placeholder="Changes to the plan before I start…"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue approval</button><span class="queued"></span></div>
+  </form>
+</div></section>
+
+<footer><div class="wrap">s01 · DataAgentBench agent blueprint · sources: data/upstream @ 0290945 (run_agent.py, common_scaffold/, SUBMISSION_RUBRIC.md, failure_analysis/), arXiv 2603.20576 (html v1), leaderboard PRs #22 #63 #70 #73 #84 #92 #94 #95 #96 #103 #104, issues #86 #87 #93 #97 #101 #107, ../DABStep-loop and ../tau2-loop · our index: data/index/{datasets,trials,leaderboard}.json</div></footer>
+</body>
+</html>

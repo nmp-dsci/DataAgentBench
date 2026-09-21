@@ -17,9 +17,14 @@ __pycache__/
 # are what the app, CI and tests read.
 data/upstream/
 
-# Database files, if a later build downloads them (never committed; 8.35 GB
-# for the 54 queries alone).
-data/context/
+# Database files live under data/upstream/ (downloaded by `dab data download`,
+# 8.4 GB) and in the Postgres volume; never committed. data/context/ is the
+# committed context pack: text only (schema, profile, samples, joins, curated
+# summary and pitfalls).
+
+# Eval runs and the sandbox workspace: one folder per run, never committed.
+runs/
+workspace/
 
 # Per-row rescore verdicts are large; the per-query summary in
 # data/index/trials.json is the committed record.
