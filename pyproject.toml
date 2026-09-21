@@ -57,6 +57,10 @@ strict = true
 packages = ["dab_bench"]
 mypy_path = "src"
 
+[[tool.mypy.overrides]]
+module = ["pyarrow", "pyarrow.*", "bson", "bson.*", "duckdb", "mlflow", "mlflow.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q -p no:warnings"

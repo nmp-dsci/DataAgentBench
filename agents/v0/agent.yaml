@@ -1,0 +1,17 @@
+# v0 — the general-purpose analyst. Frozen across a comparison: only system.md and helper.py move.
+model: haiku
+effort: medium
+max_turns: 60
+timeout_s: 900
+exec_timeout_s: 600
+hints: false          # `dab eval --hints` is the benchmark's own switch (--use_hints upstream)
+tools:
+  - mcp__dab__list_db
+  - mcp__dab__describe_table
+  - mcp__dab__sample_rows
+  - mcp__dab__query_db
+  - mcp__dab__execute_python
+  - mcp__dab__llm_extract
+  - mcp__dab__read_context
+  - mcp__dab__search_context
+  - mcp__dab__return_answer
