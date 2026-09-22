@@ -18,7 +18,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from dab_bench import __version__
-from dab_bench.config import CONTEXT_DIR, FRONTEND_DIST, RUNS_DIR, settings
+from dab_bench.config import CONTEXT_DIR, FRONTEND_DIST, MLFLOW_EXPERIMENT, RUNS_DIR, settings
 from dab_bench.data.index import Index, load, stats
 
 EXAMPLES_PER_FILE = 3
@@ -203,10 +203,34 @@ def _mlflow_embeddable() -> bool:
         return False
 
 
+@functools.lru_cache(maxsize=1)
+def _mlflow_experiment_id() -> str | None:
+    """The experiment's id, which the MLflow 3 UI needs in a trace link
+    (`#/experiments/<id>/traces?traceId=…`; `#/traces/<id>` is a 404).
+    One metadata call, cached per process; None when tracking is unreachable."""
+    import urllib.parse
+    import urllib.request
+
+    url = (
+        settings().mlflow_tracking_uri.rstrip("/")
+        + "/api/2.0/mlflow/experiments/get-by-name?"
+        + urllib.parse.urlencode({"experiment_name": MLFLOW_EXPERIMENT})
+    )
+    try:
+        with urllib.request.urlopen(url, timeout=2) as r:  # noqa: S310 - configured tracking URI
+            return str(json.load(r)["experiment"]["experiment_id"])
+    except Exception:
+        return None
+
+
 def _mlflow_trace_url(trace_id: str | None) -> str | None:
     if not trace_id:
         return None
-    return f"{settings().mlflow_tracking_uri.rstrip('/')}/#/traces/{trace_id}"
+    base = settings().mlflow_tracking_uri.rstrip("/")
+    exp = _mlflow_experiment_id()
+    if exp is None:
+        return f"{base}/#/experiments/search?searchFilter=tags.run_id&traceId={trace_id}"
+    return f"{base}/#/experiments/{exp}/traces?traceId={trace_id}"
 
 
 def _run_summary(d: dict[str, Any]) -> dict[str, Any]:
