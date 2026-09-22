@@ -283,12 +283,17 @@ export function Replay({ spans, onlyTools, filterTool, onRerun }: { spans: Span[
               <tr key={i} className={s.status === 'ERROR' ? 'warnrow' : s.kind === 'turn' ? 'dim' : ''}>
                 <td className="num">{s.start.toFixed(1)}s</td>
                 <td className="num">{turn}</td>
-                <td className="mono small wrap-any replay-cell">
-                  <button type="button" className="linkbtn mono" onClick={() => setOpen(isOpen ? null : i)} title="expand">
-                    {isOpen ? sent : sent.slice(0, 140) + (sent.length > 140 ? '…' : '')}
-                  </button>
+                <td className="mono small replay-cell">
+                  <pre className="cell">{isOpen ? sent : sent.slice(0, 140) + (sent.length > 140 ? '…' : '')}</pre>
+                  {(sent.length > 140 || recv.length > 140) && (
+                    <button type="button" className="linkbtn small" onClick={() => setOpen(isOpen ? null : i)}>
+                      {isOpen ? 'less' : 'more'}
+                    </button>
+                  )}
                 </td>
-                <td className="mono small wrap-any replay-cell">{isOpen ? recv : recv.slice(0, 140) + (recv.length > 140 ? '…' : '')}</td>
+                <td className="mono small replay-cell">
+                  <pre className="cell">{isOpen ? recv : recv.slice(0, 140) + (recv.length > 140 ? '…' : '')}</pre>
+                </td>
                 <td className="num">{s.kind === 'tool' ? fmtInt((s.output ?? '').length) : fmtInt((s.text ?? '').length)}</td>
                 <td className="num">{(s.end - s.start) < 1 ? `${Math.round((s.end - s.start) * 1000)}ms` : `${(s.end - s.start).toFixed(1)}s`}</td>
                 <td className="num">
@@ -303,9 +308,14 @@ export function Replay({ spans, onlyTools, filterTool, onRerun }: { spans: Span[
                 </td>
                 <td>
                   {s.kind === 'tool' && (
-                    <button type="button" className="tog" onClick={() => onRerun(s, i)}>
-                      re-run with changes
-                    </button>
+                    <span className="rowacts">
+                      <button type="button" className="tog" onClick={() => onRerun(s, i)}>
+                        re-run with changes
+                      </button>
+                      <button type="button" className="tog" onClick={() => void navigator.clipboard.writeText(mainInput(s.input))} title="copy the call's main input (sql / code / …) to the clipboard">
+                        copy input
+                      </button>
+                    </span>
                   )}
                   {s.status === 'ERROR' && <span className="tag warn"> error</span>}
                 </td>
