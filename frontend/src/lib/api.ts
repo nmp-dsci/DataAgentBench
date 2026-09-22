@@ -234,7 +234,8 @@ export type TrialRow = {
 };
 export type RunDetail = RunSummary & { max_turns: number; workers: number; code_sha: string; upstream_commit: string; query_ids: string[]; results: TrialRow[]; versus: RunSummary | null };
 /** One span of the tree tracking/tracing.py logs to MLflow, rebuilt server-side from the same stream. */
-export type Span = { kind: 'turn' | 'tool'; name: string; start: number; end: number; status: 'OK' | 'ERROR'; text?: string; thinking_chars?: number; tool_calls?: string[]; input?: Record<string, unknown>; output?: string };
+export type SpanTokens = { input: number; cache_read: number; cache_creation: number; output: number; total: number; billed: boolean; message_id: string };
+export type Span = { kind: 'turn' | 'tool'; name: string; start: number; end: number; status: 'OK' | 'ERROR'; text?: string; thinking_chars?: number; tool_calls?: string[]; input?: Record<string, unknown>; output?: string; tokens: SpanTokens | null };
 export type TraceBlock = { type: string; text?: string; thinking?: string; name?: string; input?: Record<string, unknown>; content?: string; is_error?: boolean; tool_use_id?: string; id?: string };
 export type TraceEntry = { role: 'system' | 'user' | 'assistant' | 'tool'; content: string | TraceBlock[]; t?: number };
 export type ToolCall = { tool: string; input: Record<string, unknown>; output: string; chars: number; elapsed_s: number; error: boolean };

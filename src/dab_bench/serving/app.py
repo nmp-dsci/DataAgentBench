@@ -488,6 +488,7 @@ def _spans(t: dict[str, Any]) -> list[dict[str, Any]]:
     offsets. The explorer draws this; MLflow is never read back."""
     spans: list[dict[str, Any]] = []
     pending: dict[str, int] = {}
+    billed: set[str] = set()
     last_t = 0.0
     turn_no = 0
     for entry in t.get("trace") or []:
@@ -501,6 +502,21 @@ def _spans(t: dict[str, Any]) -> list[dict[str, Any]]:
                 len(b.get("thinking", "")) for b in content if b.get("type") == "thinking"
             )
             uses = [b for b in content if b.get("type") == "tool_use"]
+            # tokens: the API message's usage, billed on the first entry of that message only
+            usage = entry.get("usage")
+            mid = str(entry.get("message_id") or f"turn-{turn_no}")
+            tokens = None
+            if usage:
+                tokens = {
+                    **usage,
+                    "total": usage["input"]
+                    + usage["cache_read"]
+                    + usage["cache_creation"]
+                    + usage["output"],
+                    "billed": mid not in billed,
+                    "message_id": mid,
+                }
+                billed.add(mid)
             spans.append(
                 {
                     "kind": "turn",
@@ -511,6 +527,7 @@ def _spans(t: dict[str, Any]) -> list[dict[str, Any]]:
                     "text": "\n".join(texts),
                     "thinking_chars": thinking,
                     "tool_calls": [u.get("name") for u in uses],
+                    "tokens": tokens,
                 }
             )
             for u in uses:
@@ -524,6 +541,8 @@ def _spans(t: dict[str, Any]) -> list[dict[str, Any]]:
                         "status": "OK",
                         "input": u.get("input") or {},
                         "output": "",
+                        # the message that issued the call; never billed on the tool row
+                        "tokens": {**tokens, "billed": False} if tokens else None,
                     }
                 )
             last_t = tt

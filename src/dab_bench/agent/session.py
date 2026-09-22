@@ -90,6 +90,18 @@ def _block_to_dict(b: Any) -> dict[str, Any]:
 _RATE_LIMIT = ("hit your session limit", "hit your limit", "rate_limit", "usage limit")
 
 
+def usage_dict(u: dict[str, Any] | None) -> dict[str, int] | None:
+    """The four counts a message bills, from the API's usage block."""
+    if not u:
+        return None
+    return {
+        "input": int(u.get("input_tokens", 0) or 0),
+        "cache_read": int(u.get("cache_read_input_tokens", 0) or 0),
+        "cache_creation": int(u.get("cache_creation_input_tokens", 0) or 0),
+        "output": int(u.get("output_tokens", 0) or 0),
+    }
+
+
 def _rate_limited(text: str, error: str | None, reason: str | None) -> bool:
     blob = f"{text}\n{error or ''}".lower()
     return reason == "api_error" and any(m in blob for m in _RATE_LIMIT) or "rate_limit" in blob
@@ -167,6 +179,10 @@ async def solve(
                             "role": "assistant",
                             "content": blocks,
                             "t": round(time.time() - started, 3),
+                            # one API message arrives as several entries (one per block) that
+                            # repeat the same usage; message_id lets a reader bill it once
+                            "message_id": msg.message_id,
+                            "usage": usage_dict(msg.usage),
                         }
                     )
                     texts = [b["text"] for b in blocks if b["type"] == "text" and b["text"].strip()]
@@ -219,3 +235,46 @@ async def solve(
 
 def save_trace(path: Path, s: Solve) -> None:
     path.write_text(json.dumps(s.as_dict(), ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+def backfill_usage(run_dir: Path) -> tuple[int, int]:
+    """Write `message_id` and `usage` onto the assistant entries of every trace under
+    `run_dir/traces/` from the SDK session transcript, matching assistant lines in order.
+    Returns (updated, skipped); a trace already carrying usage counts as skipped."""
+    from dab_bench.config import ROOT
+
+    key = str(ROOT).replace("/", "-")
+    proj = Path.home() / ".claude" / "projects" / key
+    updated = skipped = 0
+    for tp in sorted((run_dir / "traces").glob("*.json")):
+        t = json.loads(tp.read_text())
+        entries = [e for e in t.get("trace") or [] if e.get("role") == "assistant"]
+        sid = t.get("session_id")
+        src = proj / f"{sid}.jsonl" if sid else None
+        if not entries or entries[0].get("usage") or src is None or not src.exists():
+            skipped += 1
+            continue
+        lines = []
+        for line in src.read_text().splitlines():
+            if not line.strip():
+                continue
+            d = json.loads(line)
+            if d.get("type") == "assistant":
+                lines.append(d.get("message") or {})
+        # a timed-out trial's trace is a prefix of the transcript (the child kept going);
+        # line up on block types so a mismatch is caught, not guessed
+        lines = lines[: len(entries)]
+        same_shape = len(lines) == len(entries) and all(
+            [b.get("type") for b in (e.get("content") or [])]
+            == [b.get("type") for b in (m.get("content") or [])]
+            for e, m in zip(entries, lines, strict=True)
+        )
+        if not same_shape:
+            skipped += 1
+            continue
+        for e, m in zip(entries, lines, strict=True):
+            e["message_id"] = m.get("id")
+            e["usage"] = usage_dict(m.get("usage"))
+        tp.write_text(json.dumps(t, ensure_ascii=False))
+        updated += 1
+    return updated, skipped

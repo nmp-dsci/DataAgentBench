@@ -345,6 +345,18 @@ def runs_profile(run_id: str) -> None:
     )
 
 
+@runs_app.command("backfill-usage")
+def runs_backfill_usage(run_id: str) -> None:
+    """Add per-message token usage to a run's trace files from the Agent SDK's own session
+    transcripts (~/.claude/projects/<cwd>/<session_id>.jsonl), for runs made before the
+    harness recorded it. Skips a trace whose transcript is missing or does not line up."""
+    from dab_bench.agent.session import backfill_usage
+    from dab_bench.config import RUNS_DIR
+
+    done, skipped = backfill_usage(RUNS_DIR / run_id)
+    console.print(f"{done} traces updated, {skipped} skipped")
+
+
 @runs_app.command("log")
 def runs_log(run_id: str) -> None:
     """Re-log a run folder to the central MLflow (after an outage, or for a run made with --no-mlflow)."""

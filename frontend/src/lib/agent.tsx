@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { type Span, fmtInt, fmtUsd, queryPath } from './api';
+import { type Span, type SpanTokens, fmtInt, fmtTok, fmtUsd, queryPath } from './api';
 
 // ── shapes served by /api/agents* and /api/agent/tools ────────────────────────
 export type AgentRow = { name: string; fingerprint: string; model: string; effort: string | null; max_turns: number; timeout_s: number; exec_timeout_s: number; hints: boolean; tools: string[] };
@@ -251,9 +251,17 @@ export function Replay({ spans, onlyTools, filterTool, onRerun }: { spans: Span[
     return { s, i, turn };
   });
   const shown = rows.filter(({ s }) => (onlyTools ? s.kind === 'tool' : true) && (filterTool ? s.kind === 'tool' && s.name === filterTool : true));
+  const billed = spans.filter((s) => s.tokens?.billed).map((s) => s.tokens as SpanTokens);
+  const sum = (k: keyof SpanTokens) => billed.reduce((a, t) => a + (t[k] as number), 0);
+  const hasTokens = spans.some((s) => s.tokens);
   return (
     <div className="tw">
       <table>
+        <caption>
+          {hasTokens
+            ? `billed tokens: ${fmtInt(sum('total'))} over ${billed.length} API messages — ${fmtInt(sum('input') + sum('cache_creation'))} fresh input, ${fmtInt(sum('cache_read'))} cache read, ${fmtInt(sum('output'))} output. A message that emits several blocks is billed once, on its first row; a tool row shows the message that issued the call.`
+            : 'no per-message usage in this trace (recorded from 22 Sep 2026 on; `dab runs backfill-usage <run>` fills older runs from the SDK session transcript when one exists)'}
+        </caption>
         <thead>
           <tr>
             <th className="num">t</th>
@@ -262,6 +270,7 @@ export function Replay({ spans, onlyTools, filterTool, onRerun }: { spans: Span[
             <th>received</th>
             <th className="num">chars</th>
             <th className="num">elapsed</th>
+            <th className="num">billed tokens</th>
             <th></th>
           </tr>
         </thead>
@@ -282,6 +291,16 @@ export function Replay({ spans, onlyTools, filterTool, onRerun }: { spans: Span[
                 <td className="mono small wrap-any replay-cell">{isOpen ? recv : recv.slice(0, 140) + (recv.length > 140 ? '…' : '')}</td>
                 <td className="num">{s.kind === 'tool' ? fmtInt((s.output ?? '').length) : fmtInt((s.text ?? '').length)}</td>
                 <td className="num">{(s.end - s.start) < 1 ? `${Math.round((s.end - s.start) * 1000)}ms` : `${(s.end - s.start).toFixed(1)}s`}</td>
+                <td className="num">
+                  {s.tokens ? (
+                    <span className={s.tokens.billed ? '' : 'muted'} title={`${s.tokens.input} input · ${s.tokens.cache_creation} cache write · ${s.tokens.cache_read} cache read · ${s.tokens.output} output${s.tokens.billed ? '' : ' — billed on an earlier row of the same message'}`}>
+                      {s.tokens.billed ? fmtTok(s.tokens.total) : `(${fmtTok(s.tokens.total)})`}
+                      <span className="path">{fmtTok(s.tokens.input + s.tokens.cache_creation)} in · {fmtTok(s.tokens.cache_read)} cached · {fmtTok(s.tokens.output)} out</span>
+                    </span>
+                  ) : (
+                    <span className="muted">—</span>
+                  )}
+                </td>
                 <td>
                   {s.kind === 'tool' && (
                     <button type="button" className="tog" onClick={() => onRerun(s, i)}>
