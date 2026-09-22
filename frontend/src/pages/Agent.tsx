@@ -204,7 +204,7 @@ export function Agent() {
             <>
               <h3>Postgres · role dab_agent</h3>
               <p className="small">
-                All 12 datasets in one schema <code>dataagentbench</code>, tables <code>&lt;dataset&gt;_&lt;table&gt;</code>. The agent's role is read-only (<code>default_transaction_read_only</code>), <code>statement_timeout</code> 60 s, search_path set. Project-local docker on :5433 for now (plan s01 §8).
+                All 12 datasets in one schema <code>dataagentbench</code>, tables <code>&lt;dataset&gt;_&lt;table&gt;</code>. The agent's role is read-only (<code>default_transaction_read_only</code>), <code>statement_timeout</code> 60 s, search_path set. Database <code>dab</code> on the central nmp-central-ai Postgres (:5432) since 22 Sep 2026 (platform D13).
               </p>
               <p className="small">
                 <Link to={`/datasets/${dataset}`}>{dataset}'s stores and tables</Link> · <code>list_db</code> shows what the agent sees.
