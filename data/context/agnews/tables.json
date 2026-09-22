@@ -1,0 +1,72 @@
+[
+ {
+  "store": "articles_database",
+  "source_table": "articles",
+  "table": "agnews_articles",
+  "rows": 127600,
+  "columns": [
+   {
+    "name": "article_id",
+    "type": "bigint"
+   },
+   {
+    "name": "title",
+    "type": "text"
+   },
+   {
+    "name": "description",
+    "type": "text"
+   },
+   {
+    "name": "doc",
+    "type": "jsonb"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "metadata_database",
+  "source_table": "article_metadata",
+  "table": "agnews_article_metadata",
+  "rows": 127600,
+  "columns": [
+   {
+    "name": "article_id",
+    "type": "bigint"
+   },
+   {
+    "name": "author_id",
+    "type": "bigint"
+   },
+   {
+    "name": "region",
+    "type": "character varying"
+   },
+   {
+    "name": "publication_date",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "metadata_database",
+  "source_table": "authors",
+  "table": "agnews_authors",
+  "rows": 994,
+  "columns": [
+   {
+    "name": "author_id",
+    "type": "bigint"
+   },
+   {
+    "name": "name",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ }
+]

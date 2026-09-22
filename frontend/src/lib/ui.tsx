@@ -37,3 +37,15 @@ export function QLink({ id }: { id: string }) {
 export function Loading({ error }: { error: string | null }) {
   return <p className="empty">{error ? `Could not load: ${error}` : 'Loading…'}</p>;
 }
+
+/** The gold answer beside a question, wherever a question is shown: the first line (cut) and how many more, the full text on hover. */
+export function Gold({ preview, lines, full }: { preview: string; lines: number; full?: string }) {
+  const first = preview.split('\n')[0] ?? '';
+  const head = first.length > 60 ? `${first.slice(0, 60)}…` : first;
+  return (
+    <span className="gold-cell mono" title={full ?? preview}>
+      {head}
+      {lines > 1 && <span className="path">+{lines - 1} more line{lines === 2 ? '' : 's'}</span>}
+    </span>
+  );
+}

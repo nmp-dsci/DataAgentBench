@@ -1,0 +1,5 @@
+HINTS:
+- The "business_id" field in the business collection corresponds to the "business_ref" fields in both the review table and the tip table. The values differ only by their prefixes: "business_id" uses the prefix `businessid_`, while "business_ref" uses the prefix `businessref_`. For example, `businessid_1` in the business collection corresponds to `businessref_1` in the review and tip tables.
+- The datasets contain five tables/collections in total. Carefully identify which tables or collections and which fields contain the information required to answer the query.
+- The business collection's "description" field includes location information if needed.
+- The business collection's "attributes" field includes services information if needed.

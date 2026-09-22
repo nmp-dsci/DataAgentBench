@@ -157,3 +157,148 @@ export const STYLE_LABEL: Record<string, string> = {
   substring: 'substring / list',
   levenshtein: 'levenshtein',
 };
+
+// ── our runs (runs/<id>/ on disk, served by /api/runs) ────────────────────────
+export type DatasetRate = { passed: number; n: number; rate: number | null; queries: number };
+export type RunSummary = {
+  run_id: string;
+  agent: string;
+  fingerprint: string;
+  context_sha: string;
+  model: string;
+  effort: string;
+  split: string;
+  n_queries: number;
+  trials: number;
+  hints: boolean;
+  dry_run: boolean;
+  started_at: string;
+  finished_at: string | null;
+  note: string;
+  kind: string;
+  challenger_of: string | null;
+  mlflow_run_id: string | null;
+  mlflow_url: string | null;
+  passed: number | null;
+  scored: number | null;
+  n: number | null;
+  pass_rate_macro: number | null;
+  pass_rate_micro: number | null;
+  cost_usd: number | null;
+  duration_ms: number | null;
+  errors: number | null;
+  timeouts: number | null;
+  per_dataset: Record<string, DatasetRate> | null;
+  role: RunRole;
+  profile: Profile;
+};
+export type RunRole = 'champion' | 'challenger' | 'superseded' | 'smoke' | 'dry';
+export type Board = { champion: string; champion_run_id: string | null; runs: RunSummary[] };
+export type Stat = { mean: number; p50: number; p95: number; max: number; sum: number };
+export type ProfileKey = 'turns' | 'tool_calls' | 'wall_s' | 'fresh_in' | 'cache_read' | 'output' | 'total' | 'cost_usd';
+export type Profile = {
+  n: number;
+  metrics: Record<ProfileKey, Stat>;
+  cache_hit_rate: number | null;
+  cost_per_pass: number | null;
+  cost_per_trial: number | null;
+  tokens_per_pass: number | null;
+  timeout_rate: number | null;
+  error_rate: number | null;
+  fail_rate: number | null;
+  exhausted: number;
+};
+export type TrialRow = {
+  query_id: string;
+  dataset: string;
+  trial: number;
+  question: string;
+  answer: string;
+  passed: boolean | null;
+  reason: string;
+  n_turns: number;
+  duration_ms: number;
+  cost_usd: number | null;
+  input_tokens: number;
+  cache_read_tokens: number;
+  cache_creation_tokens: number;
+  output_tokens: number;
+  tool_calls: number;
+  error: string | null;
+  terminal_reason: string | null;
+  timed_out: boolean;
+  rate_limited?: boolean;
+  trace_file: string | null;
+  mlflow_trace_id: string | null;
+  mlflow_trace_url: string | null;
+  gold: GoldRef | null;
+};
+export type GoldRef = { preview: string; lines: number; text: string };
+export type RunDetail = RunSummary & { max_turns: number; workers: number; code_sha: string; upstream_commit: string; query_ids: string[]; results: TrialRow[]; versus: RunSummary | null };
+/** One span of the tree tracking/tracing.py logs to MLflow, rebuilt server-side from the same stream. */
+export type SpanTokens = { input: number; cache_read: number; cache_creation: number; output: number; total: number; billed: boolean; message_id: string };
+export type Span = { kind: 'turn' | 'tool'; name: string; start: number; end: number; status: 'OK' | 'ERROR'; text?: string; thinking_chars?: number; tool_calls?: string[]; input?: Record<string, unknown>; output?: string; tokens: SpanTokens | null };
+export type TraceBlock = { type: string; text?: string; thinking?: string; name?: string; input?: Record<string, unknown>; content?: string; is_error?: boolean; tool_use_id?: string; id?: string };
+export type TraceEntry = { role: 'system' | 'user' | 'assistant' | 'tool'; content: string | TraceBlock[]; t?: number };
+export type ToolCall = { tool: string; input: Record<string, unknown>; output: string; chars: number; elapsed_s: number; error: boolean };
+export type Trace = {
+  query_id: string;
+  dataset: string;
+  trial: number;
+  answer: string;
+  final_text: string;
+  trace: TraceEntry[];
+  tool_calls: ToolCall[];
+  n_turns: number;
+  duration_ms: number;
+  cost_usd: number | null;
+  input_tokens: number;
+  cache_read_tokens: number;
+  cache_creation_tokens: number;
+  output_tokens: number;
+  error: string | null;
+  model: string;
+  effort: string;
+  context_sha: string;
+  system_prompt_chars: number;
+  passed: boolean | null;
+  reason: string;
+  mlflow_trace_id: string | null;
+  mlflow_trace_url: string | null;
+  mlflow_embeddable: boolean;
+  gold: GoldRef | null;
+  spans: Span[];
+};
+export type ContextPack = { dataset: string; files: Record<string, string>; curation: { model: string; cost_usd: number | null; input_tokens: number; output_tokens: number; duration_ms: number } | null };
+
+export function fmtUsd(x: number | null | undefined, digits = 2): string {
+  return x == null ? '—' : `$${x.toFixed(digits)}`;
+}
+export function fmtDur(ms: number | null | undefined): string {
+  if (ms == null) return '—';
+  const s = Math.round(ms / 1000);
+  if (s < 90) return `${s}s`;
+  const m = Math.round(s / 60);
+  return m < 90 ? `${m} min` : `${(m / 60).toFixed(1)} h`;
+}
+/** Tokens read like the SDK prints them: 12.5k, 1.2M. */
+export function fmtTok(n: number | null | undefined): string {
+  if (n == null) return '—';
+  if (n >= 1e6) return `${(n / 1e6).toFixed(2)}M`;
+  if (n >= 1e4) return `${(n / 1e3).toFixed(0)}k`;
+  if (n >= 1e3) return `${(n / 1e3).toFixed(1)}k`;
+  return String(Math.round(n));
+}
+export function fmtSec(s: number | null | undefined): string {
+  return s == null ? '—' : fmtDur(s * 1000);
+}
+export const ROLE_LABEL: Record<RunRole, string> = {
+  champion: 'champion',
+  challenger: 'challenger',
+  superseded: 'superseded',
+  smoke: 'smoke',
+  dry: 'dry run',
+};
+export function traceKey(r: { dataset: string; query_id: string; trial: number }): string {
+  return `${r.dataset}_${r.query_id.split('/')[1]}_t${r.trial}`;
+}

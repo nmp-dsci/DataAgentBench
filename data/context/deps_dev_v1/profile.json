@@ -1,0 +1,281 @@
+{
+ "deps_dev_v1_packageinfo": {
+  "System": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1,
+   "top": [
+    [
+     "NPM",
+     201240
+    ]
+   ],
+   "sampled": true
+  },
+  "Name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 10201,
+   "sampled": true
+  },
+  "Version": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 18325,
+   "sampled": true
+  },
+  "Licenses": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 51,
+   "sampled": true
+  },
+  "Links": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 90363,
+   "sampled": true
+  },
+  "Advisories": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "top": [
+    [
+     "[]",
+     201414
+    ],
+    [
+     "[   {     \"Source\": \"OSV\",     \"SourceID\": \"GHSA-252h-2cmq-pmr6\"   } ]",
+     10
+    ]
+   ],
+   "sampled": true
+  },
+  "VersionInfo": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 2880,
+   "sampled": true
+  },
+  "Hashes": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 87828,
+   "sampled": true
+  },
+  "DependenciesProcessed": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "min": "0",
+   "max": "1",
+   "sampled": true
+  },
+  "DependencyError": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "min": "0",
+   "max": "1",
+   "sampled": true
+  },
+  "UpstreamPublishedAt": {
+   "type": "double precision",
+   "null_rate": 0.0183,
+   "distinct": 100356,
+   "min": "1430493994000000.0",
+   "max": "1700494988000000.0",
+   "sampled": true
+  },
+  "Registries": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1,
+   "top": [
+    [
+     "[]",
+     200382
+    ]
+   ],
+   "sampled": true
+  },
+  "SLSAProvenance": {
+   "type": "double precision",
+   "null_rate": 1.0,
+   "distinct": 0,
+   "sampled": true
+  },
+  "UpstreamIdentifiers": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1,
+   "top": [
+    [
+     "[]",
+     198890
+    ]
+   ],
+   "sampled": true
+  },
+  "Purl": {
+   "type": "double precision",
+   "null_rate": 1.0,
+   "distinct": 0,
+   "sampled": true
+  }
+ },
+ "deps_dev_v1_project_info": {
+  "Project_Information": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 770
+  },
+  "Licenses": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 11,
+   "top": [
+    [
+     "[   \"MIT\" ]",
+     520
+    ],
+    [
+     "[]",
+     123
+    ],
+    [
+     "[   \"non-standard\" ]",
+     58
+    ],
+    [
+     "[   \"Apache-2.0\" ]",
+     32
+    ],
+    [
+     "[   \"ISC\" ]",
+     14
+    ],
+    [
+     "[   \"BSD-3-Clause\" ]",
+     10
+    ],
+    [
+     "[   \"GPL-3.0\" ]",
+     6
+    ],
+    [
+     "[   \"AGPL-3.0\" ]",
+     3
+    ],
+    [
+     "[   \"GPL-2.0\" ]",
+     2
+    ],
+    [
+     "[   \"EPL-2.0\" ]",
+     1
+    ]
+   ]
+  },
+  "Description": {
+   "type": "character varying",
+   "null_rate": 0.1429,
+   "distinct": 651
+  },
+  "Homepage": {
+   "type": "character varying",
+   "null_rate": 0.7688,
+   "distinct": 173
+  },
+  "OSSFuzz": {
+   "type": "double precision",
+   "null_rate": 1.0,
+   "distinct": 0
+  }
+ },
+ "deps_dev_v1_project_packageversion": {
+  "System": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1,
+   "top": [
+    [
+     "NPM",
+     199609
+    ]
+   ],
+   "sampled": true
+  },
+  "Name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 12448,
+   "sampled": true
+  },
+  "Version": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 23761,
+   "sampled": true
+  },
+  "ProjectType": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 3,
+   "top": [
+    [
+     "GITHUB",
+     198500
+    ],
+    [
+     "GITLAB",
+     1060
+    ],
+    [
+     "BITBUCKET",
+     997
+    ]
+   ],
+   "sampled": true
+  },
+  "ProjectName": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 6861,
+   "sampled": true
+  },
+  "RelationProvenance": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "top": [
+    [
+     "UNVERIFIED_METADATA",
+     196120
+    ],
+    [
+     "SLSA_ATTESTATION",
+     18
+    ]
+   ],
+   "sampled": true
+  },
+  "RelationType": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "top": [
+    [
+     "ISSUE_TRACKER_TYPE",
+     103352
+    ],
+    [
+     "SOURCE_REPO_TYPE",
+     95383
+    ]
+   ],
+   "sampled": true
+  }
+ }
+}

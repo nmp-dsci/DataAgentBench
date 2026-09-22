@@ -1,0 +1,6 @@
+HINTS: 
+- ~25% of ID-like fields may include a leading # (e.g., #001Wt00000PFj4zIAD).
+- ~20% of text fields may contain trailing whitespace (e.g., "Company Name ").
+- Corruption may appear in: Id, AccountId, ContactId, Name, FirstName, LastName, Email, Subject, Status.
+- Corruption handling is needed for reliable joins
+- Domain-specific CRM knowledge is required

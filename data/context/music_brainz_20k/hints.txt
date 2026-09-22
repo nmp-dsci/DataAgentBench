@@ -1,0 +1,4 @@
+HINTS:
+- The `tracks` table may contain duplicate entries. Different `track_id`s can represent the same real-world track. To answer queries correctly, you need to perform **entity resolution** by comparing track attributes such as `title`, `artist`, `album`, `year`, etc. Note that duplicates may not match exactly (e.g., different year formats or minor attribute variations), so you must reason about the meaning of these attributes rather than relying on exact string equality for entity resolution.
+- The `sales` table records sales in five countries: USA, UK, Canada, Germany, and France.
+- Sales occur across five platforms or stores: iTunes, Spotify, Apple Music, Amazon Music, and Google Play.

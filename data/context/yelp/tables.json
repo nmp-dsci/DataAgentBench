@@ -1,0 +1,192 @@
+[
+ {
+  "store": "businessinfo_database",
+  "source_table": "business",
+  "table": "yelp_business",
+  "rows": 100,
+  "columns": [
+   {
+    "name": "_id",
+    "type": "text"
+   },
+   {
+    "name": "business_id",
+    "type": "text"
+   },
+   {
+    "name": "name",
+    "type": "text"
+   },
+   {
+    "name": "review_count",
+    "type": "bigint"
+   },
+   {
+    "name": "is_open",
+    "type": "bigint"
+   },
+   {
+    "name": "attributes",
+    "type": "jsonb"
+   },
+   {
+    "name": "hours",
+    "type": "jsonb"
+   },
+   {
+    "name": "description",
+    "type": "text"
+   },
+   {
+    "name": "doc",
+    "type": "jsonb"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "businessinfo_database",
+  "source_table": "checkin",
+  "table": "yelp_checkin",
+  "rows": 90,
+  "columns": [
+   {
+    "name": "_id",
+    "type": "text"
+   },
+   {
+    "name": "business_id",
+    "type": "text"
+   },
+   {
+    "name": "date",
+    "type": "text"
+   },
+   {
+    "name": "doc",
+    "type": "jsonb"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "user_database",
+  "source_table": "review",
+  "table": "yelp_review",
+  "rows": 2000,
+  "columns": [
+   {
+    "name": "review_id",
+    "type": "character varying"
+   },
+   {
+    "name": "user_id",
+    "type": "character varying"
+   },
+   {
+    "name": "business_ref",
+    "type": "character varying"
+   },
+   {
+    "name": "rating",
+    "type": "bigint"
+   },
+   {
+    "name": "useful",
+    "type": "bigint"
+   },
+   {
+    "name": "funny",
+    "type": "bigint"
+   },
+   {
+    "name": "cool",
+    "type": "bigint"
+   },
+   {
+    "name": "text",
+    "type": "character varying"
+   },
+   {
+    "name": "date",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "user_database",
+  "source_table": "tip",
+  "table": "yelp_tip",
+  "rows": 784,
+  "columns": [
+   {
+    "name": "user_id",
+    "type": "character varying"
+   },
+   {
+    "name": "business_ref",
+    "type": "character varying"
+   },
+   {
+    "name": "text",
+    "type": "character varying"
+   },
+   {
+    "name": "date",
+    "type": "character varying"
+   },
+   {
+    "name": "compliment_count",
+    "type": "bigint"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ },
+ {
+  "store": "user_database",
+  "source_table": "user",
+  "table": "yelp_user",
+  "rows": 1999,
+  "columns": [
+   {
+    "name": "user_id",
+    "type": "character varying"
+   },
+   {
+    "name": "name",
+    "type": "character varying"
+   },
+   {
+    "name": "review_count",
+    "type": "bigint"
+   },
+   {
+    "name": "yelping_since",
+    "type": "character varying"
+   },
+   {
+    "name": "useful",
+    "type": "bigint"
+   },
+   {
+    "name": "funny",
+    "type": "bigint"
+   },
+   {
+    "name": "cool",
+    "type": "bigint"
+   },
+   {
+    "name": "elite",
+    "type": "character varying"
+   }
+  ],
+  "primary_key": [],
+  "foreign_keys": []
+ }
+]

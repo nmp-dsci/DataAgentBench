@@ -1,0 +1,9 @@
+# crmarenapro_pricebookentry (50 rows) · first 5
+
+| Id | Pricebook2Id | Product2Id | UnitPrice |
+|---|---|---|---|
+| 01uWt0000027P3lIAE | #01sWt000000imiTIAQ | 01tWt000006hV57IAE | 499.99 |
+| 01uWt0000027P3mIAE | 01sWt000000imiTIAQ | 01tWt000006hVhpIAE | 489.99 |
+| 01uWt0000027P5NIAU | 01sWt000000imiTIAQ | #01tWt000006hV58IAE | 599.99 |
+| #01uWt0000027P6zIAE | 01sWt000000imiTIAQ | 01tWt000006hTUkIAM | 399.99 |
+| #01uWt0000027P8bIAE | #01sWt000000imiTIAQ | 01tWt000006hV6jIAE | 349.99 |

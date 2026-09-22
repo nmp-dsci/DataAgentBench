@@ -1,0 +1,21 @@
+[
+ {
+  "a": "bookreview_books_info.\"title\"",
+  "b": "bookreview_review.\"title\"",
+  "raw": {
+   "distinct_a": 200,
+   "matched": 7,
+   "share": 0.035
+  },
+  "normalised": {
+   "distinct_a": 200,
+   "matched": 8,
+   "share": 0.04
+  },
+  "digits": {
+   "distinct_a": 33,
+   "matched": 9,
+   "share": 0.2727
+  }
+ }
+]

@@ -1,0 +1,3 @@
+HINTS:
+- Determining an article’s category requires understanding the meaning of its title and description.
+- All articles belong to one of four categories: World, Sports, Business, or Science/Technology.

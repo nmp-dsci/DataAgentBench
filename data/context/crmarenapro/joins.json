@@ -1,0 +1,2852 @@
+[
+ {
+  "a": "crmarenapro_event.\"WhatId\"",
+  "b": "crmarenapro_task.\"WhatId\"",
+  "raw": {
+   "distinct_a": 31,
+   "matched": 30,
+   "share": 0.9677
+  },
+  "normalised": {
+   "distinct_a": 23,
+   "matched": 23,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 12,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"OwnerId\"",
+  "b": "crmarenapro_task.\"OwnerId\"",
+  "raw": {
+   "distinct_a": 45,
+   "matched": 45,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 39,
+   "matched": 39,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 7,
+   "matched": 7,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"OwnerId\"",
+  "b": "crmarenapro_order.\"OwnerId\"",
+  "raw": {
+   "distinct_a": 45,
+   "matched": 32,
+   "share": 0.7111
+  },
+  "normalised": {
+   "distinct_a": 39,
+   "matched": 34,
+   "share": 0.8718
+  },
+  "digits": {
+   "distinct_a": 7,
+   "matched": 7,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"OwnerId\"",
+  "b": "crmarenapro_lead.\"OwnerId\"",
+  "raw": {
+   "distinct_a": 45,
+   "matched": 43,
+   "share": 0.9556
+  },
+  "normalised": {
+   "distinct_a": 39,
+   "matched": 39,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 7,
+   "matched": 7,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"OwnerId\"",
+  "b": "crmarenapro_opportunity.\"OwnerId\"",
+  "raw": {
+   "distinct_a": 45,
+   "matched": 43,
+   "share": 0.9556
+  },
+  "normalised": {
+   "distinct_a": 39,
+   "matched": 39,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 7,
+   "matched": 7,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"OwnerId\"",
+  "b": "crmarenapro_case.\"ownerid\"",
+  "raw": {
+   "distinct_a": 45,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 39,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 7,
+   "matched": 6,
+   "share": 0.8571
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"OwnerId\"",
+  "b": "crmarenapro_livechattranscript.\"ownerid\"",
+  "raw": {
+   "distinct_a": 45,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 39,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 7,
+   "matched": 5,
+   "share": 0.7143
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"OwnerId\"",
+  "b": "crmarenapro_order.\"OwnerId\"",
+  "raw": {
+   "distinct_a": 180,
+   "matched": 101,
+   "share": 0.5611
+  },
+  "normalised": {
+   "distinct_a": 90,
+   "matched": 78,
+   "share": 0.8667
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 11,
+   "share": 0.9167
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"OwnerId\"",
+  "b": "crmarenapro_lead.\"OwnerId\"",
+  "raw": {
+   "distinct_a": 180,
+   "matched": 174,
+   "share": 0.9667
+  },
+  "normalised": {
+   "distinct_a": 90,
+   "matched": 90,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 12,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"OwnerId\"",
+  "b": "crmarenapro_opportunity.\"OwnerId\"",
+  "raw": {
+   "distinct_a": 180,
+   "matched": 170,
+   "share": 0.9444
+  },
+  "normalised": {
+   "distinct_a": 90,
+   "matched": 90,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 12,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"OwnerId\"",
+  "b": "crmarenapro_case.\"ownerid\"",
+  "raw": {
+   "distinct_a": 180,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 90,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 9,
+   "share": 0.75
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"OwnerId\"",
+  "b": "crmarenapro_livechattranscript.\"ownerid\"",
+  "raw": {
+   "distinct_a": 180,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 90,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 8,
+   "share": 0.6667
+  }
+ },
+ {
+  "a": "crmarenapro_account.\"Id\"",
+  "b": "crmarenapro_contact.\"AccountId\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 98,
+   "share": 0.9703
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 101,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 15,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_account.\"Id\"",
+  "b": "crmarenapro_order.\"AccountId\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 57,
+   "share": 0.5644
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 72,
+   "share": 0.7129
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 13,
+   "share": 0.8667
+  }
+ },
+ {
+  "a": "crmarenapro_account.\"Id\"",
+  "b": "crmarenapro_contract.\"AccountId\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 46,
+   "share": 0.4554
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 72,
+   "share": 0.7129
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 13,
+   "share": 0.8667
+  }
+ },
+ {
+  "a": "crmarenapro_account.\"Id\"",
+  "b": "crmarenapro_opportunity.\"AccountId\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 99,
+   "share": 0.9802
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 101,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 15,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_account.\"Id\"",
+  "b": "crmarenapro_quote.\"AccountId\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 97,
+   "share": 0.9604
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 101,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 15,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_account.\"Id\"",
+  "b": "crmarenapro_case.\"accountid\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 43,
+   "share": 0.4257
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 54,
+   "share": 0.5347
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 11,
+   "share": 0.7333
+  }
+ },
+ {
+  "a": "crmarenapro_account.\"Id\"",
+  "b": "crmarenapro_livechattranscript.\"accountid\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 24,
+   "share": 0.2376
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 43,
+   "share": 0.4257
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 10,
+   "share": 0.6667
+  }
+ },
+ {
+  "a": "crmarenapro_account.\"Name\"",
+  "b": "crmarenapro_pricebook2.\"Name\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_account.\"Name\"",
+  "b": "crmarenapro_product2.\"Name\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_account.\"Name\"",
+  "b": "crmarenapro_productcategory.\"Name\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_account.\"Name\"",
+  "b": "crmarenapro_opportunity.\"Name\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_account.\"Name\"",
+  "b": "crmarenapro_quote.\"Name\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_account.\"Name\"",
+  "b": "crmarenapro_issue__c.\"name\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_account.\"Name\"",
+  "b": "crmarenapro_territory2.\"Name\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_contact.\"Id\"",
+  "b": "crmarenapro_opportunity.\"ContactId\"",
+  "raw": {
+   "distinct_a": 886,
+   "matched": 473,
+   "share": 0.5339
+  },
+  "normalised": {
+   "distinct_a": 886,
+   "matched": 631,
+   "share": 0.7122
+  },
+  "digits": {
+   "distinct_a": 33,
+   "matched": 32,
+   "share": 0.9697
+  }
+ },
+ {
+  "a": "crmarenapro_contact.\"Id\"",
+  "b": "crmarenapro_quote.\"ContactId\"",
+  "raw": {
+   "distinct_a": 886,
+   "matched": 342,
+   "share": 0.386
+  },
+  "normalised": {
+   "distinct_a": 886,
+   "matched": 461,
+   "share": 0.5203
+  },
+  "digits": {
+   "distinct_a": 33,
+   "matched": 30,
+   "share": 0.9091
+  }
+ },
+ {
+  "a": "crmarenapro_contact.\"Id\"",
+  "b": "crmarenapro_case.\"contactid\"",
+  "raw": {
+   "distinct_a": 886,
+   "matched": 62,
+   "share": 0.07
+  },
+  "normalised": {
+   "distinct_a": 886,
+   "matched": 72,
+   "share": 0.0813
+  },
+  "digits": {
+   "distinct_a": 33,
+   "matched": 16,
+   "share": 0.4848
+  }
+ },
+ {
+  "a": "crmarenapro_contact.\"Id\"",
+  "b": "crmarenapro_livechattranscript.\"contactid\"",
+  "raw": {
+   "distinct_a": 886,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 886,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 33,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_contact.\"FirstName\"",
+  "b": "crmarenapro_user.\"FirstName\"",
+  "raw": {
+   "distinct_a": 508,
+   "matched": 86,
+   "share": 0.1693
+  },
+  "normalised": {
+   "distinct_a": 402,
+   "matched": 96,
+   "share": 0.2388
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_contact.\"FirstName\"",
+  "b": "crmarenapro_lead.\"FirstName\"",
+  "raw": {
+   "distinct_a": 508,
+   "matched": 352,
+   "share": 0.6929
+  },
+  "normalised": {
+   "distinct_a": 402,
+   "matched": 402,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_contact.\"LastName\"",
+  "b": "crmarenapro_user.\"LastName\"",
+  "raw": {
+   "distinct_a": 593,
+   "matched": 89,
+   "share": 0.1501
+  },
+  "normalised": {
+   "distinct_a": 483,
+   "matched": 104,
+   "share": 0.2153
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_contact.\"LastName\"",
+  "b": "crmarenapro_lead.\"LastName\"",
+  "raw": {
+   "distinct_a": 593,
+   "matched": 406,
+   "share": 0.6847
+  },
+  "normalised": {
+   "distinct_a": 483,
+   "matched": 483,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_contact.\"AccountId\"",
+  "b": "crmarenapro_order.\"AccountId\"",
+  "raw": {
+   "distinct_a": 188,
+   "matched": 94,
+   "share": 0.5
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 72,
+   "share": 0.7129
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 13,
+   "share": 0.8667
+  }
+ },
+ {
+  "a": "crmarenapro_contact.\"AccountId\"",
+  "b": "crmarenapro_contract.\"AccountId\"",
+  "raw": {
+   "distinct_a": 188,
+   "matched": 87,
+   "share": 0.4628
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 72,
+   "share": 0.7129
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 13,
+   "share": 0.8667
+  }
+ },
+ {
+  "a": "crmarenapro_contact.\"AccountId\"",
+  "b": "crmarenapro_opportunity.\"AccountId\"",
+  "raw": {
+   "distinct_a": 188,
+   "matched": 184,
+   "share": 0.9787
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 101,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 15,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_contact.\"AccountId\"",
+  "b": "crmarenapro_quote.\"AccountId\"",
+  "raw": {
+   "distinct_a": 188,
+   "matched": 173,
+   "share": 0.9202
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 101,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 15,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_contact.\"AccountId\"",
+  "b": "crmarenapro_case.\"accountid\"",
+  "raw": {
+   "distinct_a": 188,
+   "matched": 75,
+   "share": 0.3989
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 54,
+   "share": 0.5347
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 11,
+   "share": 0.7333
+  }
+ },
+ {
+  "a": "crmarenapro_contact.\"AccountId\"",
+  "b": "crmarenapro_livechattranscript.\"accountid\"",
+  "raw": {
+   "distinct_a": 188,
+   "matched": 46,
+   "share": 0.2447
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 43,
+   "share": 0.4257
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 10,
+   "share": 0.6667
+  }
+ },
+ {
+  "a": "crmarenapro_user.\"Id\"",
+  "b": "crmarenapro_userterritory2association.\"UserId\"",
+  "raw": {
+   "distinct_a": 212,
+   "matched": 72,
+   "share": 0.3396
+  },
+  "normalised": {
+   "distinct_a": 212,
+   "matched": 90,
+   "share": 0.4245
+  },
+  "digits": {
+   "distinct_a": 19,
+   "matched": 12,
+   "share": 0.6316
+  }
+ },
+ {
+  "a": "crmarenapro_user.\"FirstName\"",
+  "b": "crmarenapro_lead.\"FirstName\"",
+  "raw": {
+   "distinct_a": 172,
+   "matched": 98,
+   "share": 0.5698
+  },
+  "normalised": {
+   "distinct_a": 160,
+   "matched": 104,
+   "share": 0.65
+  },
+  "digits": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_user.\"LastName\"",
+  "b": "crmarenapro_lead.\"LastName\"",
+  "raw": {
+   "distinct_a": 180,
+   "matched": 106,
+   "share": 0.5889
+  },
+  "normalised": {
+   "distinct_a": 167,
+   "matched": 110,
+   "share": 0.6587
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_order.\"Id\"",
+  "b": "crmarenapro_orderitem.\"OrderId\"",
+  "raw": {
+   "distinct_a": 163,
+   "matched": 152,
+   "share": 0.9325
+  },
+  "normalised": {
+   "distinct_a": 163,
+   "matched": 163,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 17,
+   "matched": 17,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_order.\"AccountId\"",
+  "b": "crmarenapro_contract.\"AccountId\"",
+  "raw": {
+   "distinct_a": 99,
+   "matched": 72,
+   "share": 0.7273
+  },
+  "normalised": {
+   "distinct_a": 72,
+   "matched": 72,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 13,
+   "matched": 13,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_order.\"AccountId\"",
+  "b": "crmarenapro_opportunity.\"AccountId\"",
+  "raw": {
+   "distinct_a": 99,
+   "matched": 98,
+   "share": 0.9899
+  },
+  "normalised": {
+   "distinct_a": 72,
+   "matched": 72,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 13,
+   "matched": 13,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_order.\"AccountId\"",
+  "b": "crmarenapro_quote.\"AccountId\"",
+  "raw": {
+   "distinct_a": 99,
+   "matched": 97,
+   "share": 0.9798
+  },
+  "normalised": {
+   "distinct_a": 72,
+   "matched": 72,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 13,
+   "matched": 13,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_order.\"AccountId\"",
+  "b": "crmarenapro_case.\"accountid\"",
+  "raw": {
+   "distinct_a": 99,
+   "matched": 63,
+   "share": 0.6364
+  },
+  "normalised": {
+   "distinct_a": 72,
+   "matched": 54,
+   "share": 0.75
+  },
+  "digits": {
+   "distinct_a": 13,
+   "matched": 11,
+   "share": 0.8462
+  }
+ },
+ {
+  "a": "crmarenapro_order.\"AccountId\"",
+  "b": "crmarenapro_livechattranscript.\"accountid\"",
+  "raw": {
+   "distinct_a": 99,
+   "matched": 36,
+   "share": 0.3636
+  },
+  "normalised": {
+   "distinct_a": 72,
+   "matched": 43,
+   "share": 0.5972
+  },
+  "digits": {
+   "distinct_a": 13,
+   "matched": 10,
+   "share": 0.7692
+  }
+ },
+ {
+  "a": "crmarenapro_order.\"Pricebook2Id\"",
+  "b": "crmarenapro_pricebook2.\"Id\"",
+  "raw": {
+   "distinct_a": 2,
+   "matched": 1,
+   "share": 0.5
+  },
+  "normalised": {
+   "distinct_a": 1,
+   "matched": 1,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 1,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_order.\"Pricebook2Id\"",
+  "b": "crmarenapro_pricebookentry.\"Pricebook2Id\"",
+  "raw": {
+   "distinct_a": 2,
+   "matched": 2,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 1,
+   "matched": 1,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 1,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_order.\"OwnerId\"",
+  "b": "crmarenapro_lead.\"OwnerId\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 99,
+   "share": 0.9802
+  },
+  "normalised": {
+   "distinct_a": 78,
+   "matched": 78,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 11,
+   "matched": 11,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_order.\"OwnerId\"",
+  "b": "crmarenapro_opportunity.\"OwnerId\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 97,
+   "share": 0.9604
+  },
+  "normalised": {
+   "distinct_a": 78,
+   "matched": 78,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 11,
+   "matched": 11,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_order.\"OwnerId\"",
+  "b": "crmarenapro_case.\"ownerid\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 78,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 11,
+   "matched": 9,
+   "share": 0.8182
+  }
+ },
+ {
+  "a": "crmarenapro_order.\"OwnerId\"",
+  "b": "crmarenapro_livechattranscript.\"ownerid\"",
+  "raw": {
+   "distinct_a": 101,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 78,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 11,
+   "matched": 8,
+   "share": 0.7273
+  }
+ },
+ {
+  "a": "crmarenapro_orderitem.\"Product2Id\"",
+  "b": "crmarenapro_pricebookentry.\"Product2Id\"",
+  "raw": {
+   "distinct_a": 71,
+   "matched": 34,
+   "share": 0.4789
+  },
+  "normalised": {
+   "distinct_a": 39,
+   "matched": 39,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 10,
+   "matched": 10,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_orderitem.\"Product2Id\"",
+  "b": "crmarenapro_product2.\"Id\"",
+  "raw": {
+   "distinct_a": 71,
+   "matched": 37,
+   "share": 0.5211
+  },
+  "normalised": {
+   "distinct_a": 39,
+   "matched": 39,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 10,
+   "matched": 10,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_orderitem.\"Product2Id\"",
+  "b": "crmarenapro_opportunitylineitem.\"Product2Id\"",
+  "raw": {
+   "distinct_a": 71,
+   "matched": 71,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 39,
+   "matched": 39,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 10,
+   "matched": 10,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_orderitem.\"Product2Id\"",
+  "b": "crmarenapro_quotelineitem.\"Product2Id\"",
+  "raw": {
+   "distinct_a": 71,
+   "matched": 71,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 39,
+   "matched": 39,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 10,
+   "matched": 10,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_orderitem.\"PriceBookEntryId\"",
+  "b": "crmarenapro_pricebookentry.\"Id\"",
+  "raw": {
+   "distinct_a": 39,
+   "matched": 27,
+   "share": 0.6923
+  },
+  "normalised": {
+   "distinct_a": 39,
+   "matched": 39,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 10,
+   "matched": 10,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_orderitem.\"PriceBookEntryId\"",
+  "b": "crmarenapro_opportunitylineitem.\"PricebookEntryId\"",
+  "raw": {
+   "distinct_a": 39,
+   "matched": 39,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 39,
+   "matched": 39,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 10,
+   "matched": 10,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_orderitem.\"PriceBookEntryId\"",
+  "b": "crmarenapro_quotelineitem.\"PricebookEntryId\"",
+  "raw": {
+   "distinct_a": 39,
+   "matched": 39,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 39,
+   "matched": 39,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 10,
+   "matched": 10,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_pricebook2.\"Id\"",
+  "b": "crmarenapro_pricebookentry.\"Pricebook2Id\"",
+  "raw": {
+   "distinct_a": 2,
+   "matched": 1,
+   "share": 0.5
+  },
+  "normalised": {
+   "distinct_a": 2,
+   "matched": 1,
+   "share": 0.5
+  },
+  "digits": {
+   "distinct_a": 2,
+   "matched": 1,
+   "share": 0.5
+  }
+ },
+ {
+  "a": "crmarenapro_pricebook2.\"Name\"",
+  "b": "crmarenapro_product2.\"Name\"",
+  "raw": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_pricebook2.\"Name\"",
+  "b": "crmarenapro_productcategory.\"Name\"",
+  "raw": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_pricebook2.\"Name\"",
+  "b": "crmarenapro_opportunity.\"Name\"",
+  "raw": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_pricebook2.\"Name\"",
+  "b": "crmarenapro_quote.\"Name\"",
+  "raw": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_pricebook2.\"Name\"",
+  "b": "crmarenapro_issue__c.\"name\"",
+  "raw": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_pricebook2.\"Name\"",
+  "b": "crmarenapro_territory2.\"Name\"",
+  "raw": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_pricebookentry.\"Id\"",
+  "b": "crmarenapro_opportunitylineitem.\"PricebookEntryId\"",
+  "raw": {
+   "distinct_a": 50,
+   "matched": 32,
+   "share": 0.64
+  },
+  "normalised": {
+   "distinct_a": 50,
+   "matched": 46,
+   "share": 0.92
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 12,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_pricebookentry.\"Id\"",
+  "b": "crmarenapro_quotelineitem.\"PricebookEntryId\"",
+  "raw": {
+   "distinct_a": 50,
+   "matched": 31,
+   "share": 0.62
+  },
+  "normalised": {
+   "distinct_a": 50,
+   "matched": 44,
+   "share": 0.88
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 11,
+   "share": 0.9167
+  }
+ },
+ {
+  "a": "crmarenapro_pricebookentry.\"Product2Id\"",
+  "b": "crmarenapro_product2.\"Id\"",
+  "raw": {
+   "distinct_a": 50,
+   "matched": 30,
+   "share": 0.6
+  },
+  "normalised": {
+   "distinct_a": 50,
+   "matched": 50,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 12,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_pricebookentry.\"Product2Id\"",
+  "b": "crmarenapro_opportunitylineitem.\"Product2Id\"",
+  "raw": {
+   "distinct_a": 50,
+   "matched": 45,
+   "share": 0.9
+  },
+  "normalised": {
+   "distinct_a": 50,
+   "matched": 46,
+   "share": 0.92
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 10,
+   "share": 0.8333
+  }
+ },
+ {
+  "a": "crmarenapro_pricebookentry.\"Product2Id\"",
+  "b": "crmarenapro_quotelineitem.\"Product2Id\"",
+  "raw": {
+   "distinct_a": 50,
+   "matched": 42,
+   "share": 0.84
+  },
+  "normalised": {
+   "distinct_a": 50,
+   "matched": 44,
+   "share": 0.88
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 10,
+   "share": 0.8333
+  }
+ },
+ {
+  "a": "crmarenapro_product2.\"Id\"",
+  "b": "crmarenapro_opportunitylineitem.\"Product2Id\"",
+  "raw": {
+   "distinct_a": 51,
+   "matched": 44,
+   "share": 0.8627
+  },
+  "normalised": {
+   "distinct_a": 51,
+   "matched": 46,
+   "share": 0.902
+  },
+  "digits": {
+   "distinct_a": 13,
+   "matched": 10,
+   "share": 0.7692
+  }
+ },
+ {
+  "a": "crmarenapro_product2.\"Id\"",
+  "b": "crmarenapro_quotelineitem.\"Product2Id\"",
+  "raw": {
+   "distinct_a": 51,
+   "matched": 44,
+   "share": 0.8627
+  },
+  "normalised": {
+   "distinct_a": 51,
+   "matched": 44,
+   "share": 0.8627
+  },
+  "digits": {
+   "distinct_a": 13,
+   "matched": 10,
+   "share": 0.7692
+  }
+ },
+ {
+  "a": "crmarenapro_product2.\"Name\"",
+  "b": "crmarenapro_productcategory.\"Name\"",
+  "raw": {
+   "distinct_a": 51,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 51,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_product2.\"Name\"",
+  "b": "crmarenapro_opportunity.\"Name\"",
+  "raw": {
+   "distinct_a": 51,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 51,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_product2.\"Name\"",
+  "b": "crmarenapro_quote.\"Name\"",
+  "raw": {
+   "distinct_a": 51,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 51,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_product2.\"Name\"",
+  "b": "crmarenapro_issue__c.\"name\"",
+  "raw": {
+   "distinct_a": 51,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 51,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_product2.\"Name\"",
+  "b": "crmarenapro_territory2.\"Name\"",
+  "raw": {
+   "distinct_a": 51,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 51,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_productcategory.\"Id\"",
+  "b": "crmarenapro_productcategoryproduct.\"ProductCategoryId\"",
+  "raw": {
+   "distinct_a": 10,
+   "matched": 10,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 10,
+   "matched": 10,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 3,
+   "matched": 3,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_productcategory.\"Name\"",
+  "b": "crmarenapro_opportunity.\"Name\"",
+  "raw": {
+   "distinct_a": 10,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 10,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_productcategory.\"Name\"",
+  "b": "crmarenapro_quote.\"Name\"",
+  "raw": {
+   "distinct_a": 10,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 10,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_productcategory.\"Name\"",
+  "b": "crmarenapro_issue__c.\"name\"",
+  "raw": {
+   "distinct_a": 10,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 10,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_productcategory.\"Name\"",
+  "b": "crmarenapro_territory2.\"Name\"",
+  "raw": {
+   "distinct_a": 10,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 10,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_contract.\"AccountId\"",
+  "b": "crmarenapro_opportunity.\"AccountId\"",
+  "raw": {
+   "distinct_a": 91,
+   "matched": 90,
+   "share": 0.989
+  },
+  "normalised": {
+   "distinct_a": 72,
+   "matched": 72,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 13,
+   "matched": 13,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_contract.\"AccountId\"",
+  "b": "crmarenapro_quote.\"AccountId\"",
+  "raw": {
+   "distinct_a": 91,
+   "matched": 89,
+   "share": 0.978
+  },
+  "normalised": {
+   "distinct_a": 72,
+   "matched": 72,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 13,
+   "matched": 13,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_contract.\"AccountId\"",
+  "b": "crmarenapro_case.\"accountid\"",
+  "raw": {
+   "distinct_a": 91,
+   "matched": 58,
+   "share": 0.6374
+  },
+  "normalised": {
+   "distinct_a": 72,
+   "matched": 54,
+   "share": 0.75
+  },
+  "digits": {
+   "distinct_a": 13,
+   "matched": 11,
+   "share": 0.8462
+  }
+ },
+ {
+  "a": "crmarenapro_contract.\"AccountId\"",
+  "b": "crmarenapro_livechattranscript.\"accountid\"",
+  "raw": {
+   "distinct_a": 91,
+   "matched": 42,
+   "share": 0.4615
+  },
+  "normalised": {
+   "distinct_a": 72,
+   "matched": 43,
+   "share": 0.5972
+  },
+  "digits": {
+   "distinct_a": 13,
+   "matched": 10,
+   "share": 0.7692
+  }
+ },
+ {
+  "a": "crmarenapro_lead.\"OwnerId\"",
+  "b": "crmarenapro_opportunity.\"OwnerId\"",
+  "raw": {
+   "distinct_a": 174,
+   "matched": 167,
+   "share": 0.9598
+  },
+  "normalised": {
+   "distinct_a": 90,
+   "matched": 90,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 12,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_lead.\"OwnerId\"",
+  "b": "crmarenapro_case.\"ownerid\"",
+  "raw": {
+   "distinct_a": 174,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 90,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 9,
+   "share": 0.75
+  }
+ },
+ {
+  "a": "crmarenapro_lead.\"OwnerId\"",
+  "b": "crmarenapro_livechattranscript.\"ownerid\"",
+  "raw": {
+   "distinct_a": 174,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 90,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 8,
+   "share": 0.6667
+  }
+ },
+ {
+  "a": "crmarenapro_opportunity.\"Id\"",
+  "b": "crmarenapro_opportunitylineitem.\"OpportunityId\"",
+  "raw": {
+   "distinct_a": 1170,
+   "matched": 1074,
+   "share": 0.9179
+  },
+  "normalised": {
+   "distinct_a": 1170,
+   "matched": 1170,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 69,
+   "matched": 69,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_opportunity.\"Id\"",
+  "b": "crmarenapro_quote.\"OpportunityId\"",
+  "raw": {
+   "distinct_a": 1170,
+   "matched": 424,
+   "share": 0.3624
+  },
+  "normalised": {
+   "distinct_a": 1170,
+   "matched": 704,
+   "share": 0.6017
+  },
+  "digits": {
+   "distinct_a": 69,
+   "matched": 53,
+   "share": 0.7681
+  }
+ },
+ {
+  "a": "crmarenapro_opportunity.\"AccountId\"",
+  "b": "crmarenapro_quote.\"AccountId\"",
+  "raw": {
+   "distinct_a": 196,
+   "matched": 181,
+   "share": 0.9235
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 101,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 15,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_opportunity.\"AccountId\"",
+  "b": "crmarenapro_case.\"accountid\"",
+  "raw": {
+   "distinct_a": 196,
+   "matched": 77,
+   "share": 0.3929
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 54,
+   "share": 0.5347
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 11,
+   "share": 0.7333
+  }
+ },
+ {
+  "a": "crmarenapro_opportunity.\"AccountId\"",
+  "b": "crmarenapro_livechattranscript.\"accountid\"",
+  "raw": {
+   "distinct_a": 196,
+   "matched": 48,
+   "share": 0.2449
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 43,
+   "share": 0.4257
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 10,
+   "share": 0.6667
+  }
+ },
+ {
+  "a": "crmarenapro_opportunity.\"ContactId\"",
+  "b": "crmarenapro_quote.\"ContactId\"",
+  "raw": {
+   "distinct_a": 806,
+   "matched": 439,
+   "share": 0.5447
+  },
+  "normalised": {
+   "distinct_a": 631,
+   "matched": 461,
+   "share": 0.7306
+  },
+  "digits": {
+   "distinct_a": 32,
+   "matched": 30,
+   "share": 0.9375
+  }
+ },
+ {
+  "a": "crmarenapro_opportunity.\"ContactId\"",
+  "b": "crmarenapro_case.\"contactid\"",
+  "raw": {
+   "distinct_a": 806,
+   "matched": 85,
+   "share": 0.1055
+  },
+  "normalised": {
+   "distinct_a": 631,
+   "matched": 72,
+   "share": 0.1141
+  },
+  "digits": {
+   "distinct_a": 32,
+   "matched": 16,
+   "share": 0.5
+  }
+ },
+ {
+  "a": "crmarenapro_opportunity.\"ContactId\"",
+  "b": "crmarenapro_livechattranscript.\"contactid\"",
+  "raw": {
+   "distinct_a": 806,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 631,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 32,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_opportunity.\"OwnerId\"",
+  "b": "crmarenapro_case.\"ownerid\"",
+  "raw": {
+   "distinct_a": 170,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 90,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 9,
+   "share": 0.75
+  }
+ },
+ {
+  "a": "crmarenapro_opportunity.\"OwnerId\"",
+  "b": "crmarenapro_livechattranscript.\"ownerid\"",
+  "raw": {
+   "distinct_a": 170,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 90,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 8,
+   "share": 0.6667
+  }
+ },
+ {
+  "a": "crmarenapro_opportunity.\"Name\"",
+  "b": "crmarenapro_quote.\"Name\"",
+  "raw": {
+   "distinct_a": 1130,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 1117,
+   "matched": 2,
+   "share": 0.0018
+  },
+  "digits": {
+   "distinct_a": 2,
+   "matched": 1,
+   "share": 0.5
+  }
+ },
+ {
+  "a": "crmarenapro_opportunity.\"Name\"",
+  "b": "crmarenapro_issue__c.\"name\"",
+  "raw": {
+   "distinct_a": 1130,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 1117,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_opportunity.\"Name\"",
+  "b": "crmarenapro_territory2.\"Name\"",
+  "raw": {
+   "distinct_a": 1130,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 1117,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_opportunitylineitem.\"Id\"",
+  "b": "crmarenapro_quotelineitem.\"OpportunityLineItemId\"",
+  "raw": {
+   "distinct_a": 4926,
+   "matched": 2238,
+   "share": 0.4543
+  },
+  "normalised": {
+   "distinct_a": 4926,
+   "matched": 2966,
+   "share": 0.6021
+  },
+  "digits": {
+   "distinct_a": 98,
+   "matched": 74,
+   "share": 0.7551
+  }
+ },
+ {
+  "a": "crmarenapro_opportunitylineitem.\"OpportunityId\"",
+  "b": "crmarenapro_quote.\"OpportunityId\"",
+  "raw": {
+   "distinct_a": 1975,
+   "matched": 636,
+   "share": 0.322
+  },
+  "normalised": {
+   "distinct_a": 1170,
+   "matched": 704,
+   "share": 0.6017
+  },
+  "digits": {
+   "distinct_a": 69,
+   "matched": 53,
+   "share": 0.7681
+  }
+ },
+ {
+  "a": "crmarenapro_opportunitylineitem.\"Product2Id\"",
+  "b": "crmarenapro_quotelineitem.\"Product2Id\"",
+  "raw": {
+   "distinct_a": 88,
+   "matched": 84,
+   "share": 0.9545
+  },
+  "normalised": {
+   "distinct_a": 46,
+   "matched": 44,
+   "share": 0.9565
+  },
+  "digits": {
+   "distinct_a": 10,
+   "matched": 10,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_opportunitylineitem.\"PricebookEntryId\"",
+  "b": "crmarenapro_quotelineitem.\"PricebookEntryId\"",
+  "raw": {
+   "distinct_a": 46,
+   "matched": 44,
+   "share": 0.9565
+  },
+  "normalised": {
+   "distinct_a": 46,
+   "matched": 44,
+   "share": 0.9565
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 11,
+   "share": 0.9167
+  }
+ },
+ {
+  "a": "crmarenapro_quote.\"Id\"",
+  "b": "crmarenapro_quotelineitem.\"QuoteId\"",
+  "raw": {
+   "distinct_a": 704,
+   "matched": 645,
+   "share": 0.9162
+  },
+  "normalised": {
+   "distinct_a": 704,
+   "matched": 704,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 27,
+   "matched": 27,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_quote.\"AccountId\"",
+  "b": "crmarenapro_case.\"accountid\"",
+  "raw": {
+   "distinct_a": 185,
+   "matched": 74,
+   "share": 0.4
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 54,
+   "share": 0.5347
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 11,
+   "share": 0.7333
+  }
+ },
+ {
+  "a": "crmarenapro_quote.\"AccountId\"",
+  "b": "crmarenapro_livechattranscript.\"accountid\"",
+  "raw": {
+   "distinct_a": 185,
+   "matched": 46,
+   "share": 0.2486
+  },
+  "normalised": {
+   "distinct_a": 101,
+   "matched": 43,
+   "share": 0.4257
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 10,
+   "share": 0.6667
+  }
+ },
+ {
+  "a": "crmarenapro_quote.\"ContactId\"",
+  "b": "crmarenapro_case.\"contactid\"",
+  "raw": {
+   "distinct_a": 550,
+   "matched": 77,
+   "share": 0.14
+  },
+  "normalised": {
+   "distinct_a": 461,
+   "matched": 72,
+   "share": 0.1562
+  },
+  "digits": {
+   "distinct_a": 30,
+   "matched": 16,
+   "share": 0.5333
+  }
+ },
+ {
+  "a": "crmarenapro_quote.\"ContactId\"",
+  "b": "crmarenapro_livechattranscript.\"contactid\"",
+  "raw": {
+   "distinct_a": 550,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 461,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 30,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_quote.\"Name\"",
+  "b": "crmarenapro_issue__c.\"name\"",
+  "raw": {
+   "distinct_a": 698,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 695,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 52,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_quote.\"Name\"",
+  "b": "crmarenapro_territory2.\"Name\"",
+  "raw": {
+   "distinct_a": 698,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 695,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 52,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_case.\"id\"",
+  "b": "crmarenapro_livechattranscript.\"caseid\"",
+  "raw": {
+   "distinct_a": 153,
+   "matched": 38,
+   "share": 0.2484
+  },
+  "normalised": {
+   "distinct_a": 153,
+   "matched": 58,
+   "share": 0.3791
+  },
+  "digits": {
+   "distinct_a": 24,
+   "matched": 15,
+   "share": 0.625
+  }
+ },
+ {
+  "a": "crmarenapro_case.\"contactid\"",
+  "b": "crmarenapro_livechattranscript.\"contactid\"",
+  "raw": {
+   "distinct_a": 104,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 72,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 16,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_case.\"accountid\"",
+  "b": "crmarenapro_livechattranscript.\"accountid\"",
+  "raw": {
+   "distinct_a": 78,
+   "matched": 44,
+   "share": 0.5641
+  },
+  "normalised": {
+   "distinct_a": 54,
+   "matched": 43,
+   "share": 0.7963
+  },
+  "digits": {
+   "distinct_a": 11,
+   "matched": 10,
+   "share": 0.9091
+  }
+ },
+ {
+  "a": "crmarenapro_case.\"ownerid\"",
+  "b": "crmarenapro_livechattranscript.\"ownerid\"",
+  "raw": {
+   "distinct_a": 99,
+   "matched": 38,
+   "share": 0.3838
+  },
+  "normalised": {
+   "distinct_a": 77,
+   "matched": 41,
+   "share": 0.5325
+  },
+  "digits": {
+   "distinct_a": 12,
+   "matched": 10,
+   "share": 0.8333
+  }
+ },
+ {
+  "a": "crmarenapro_issue__c.\"name\"",
+  "b": "crmarenapro_territory2.\"Name\"",
+  "raw": {
+   "distinct_a": 15,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 15,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_territory2.\"Id\"",
+  "b": "crmarenapro_userterritory2association.\"Territory2Id\"",
+  "raw": {
+   "distinct_a": 10,
+   "matched": 10,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 10,
+   "matched": 10,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 2,
+   "matched": 2,
+   "share": 1.0
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"Subject\"",
+  "b": "crmarenapro_task.\"Subject\"",
+  "raw": {
+   "distinct_a": 48,
+   "matched": 20,
+   "share": 0.4167
+  },
+  "normalised": {
+   "distinct_a": 43,
+   "matched": 32,
+   "share": 0.7442
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"Subject\"",
+  "b": "crmarenapro_case.\"subject\"",
+  "raw": {
+   "distinct_a": 48,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 43,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"Subject\"",
+  "b": "crmarenapro_emailmessage.\"subject\"",
+  "raw": {
+   "distinct_a": 48,
+   "matched": 1,
+   "share": 0.0208
+  },
+  "normalised": {
+   "distinct_a": 43,
+   "matched": 3,
+   "share": 0.0698
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"Description\"",
+  "b": "crmarenapro_task.\"Description\"",
+  "raw": {
+   "distinct_a": 54,
+   "matched": 42,
+   "share": 0.7778
+  },
+  "normalised": {
+   "distinct_a": 54,
+   "matched": 42,
+   "share": 0.7778
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"Description\"",
+  "b": "crmarenapro_account.\"Description\"",
+  "raw": {
+   "distinct_a": 54,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 54,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"Description\"",
+  "b": "crmarenapro_pricebook2.\"Description\"",
+  "raw": {
+   "distinct_a": 54,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 54,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"Description\"",
+  "b": "crmarenapro_product2.\"Description\"",
+  "raw": {
+   "distinct_a": 54,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 54,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"Description\"",
+  "b": "crmarenapro_contract.\"Description\"",
+  "raw": {
+   "distinct_a": 54,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 54,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"Description\"",
+  "b": "crmarenapro_opportunity.\"Description\"",
+  "raw": {
+   "distinct_a": 54,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 54,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"Description\"",
+  "b": "crmarenapro_quote.\"Description\"",
+  "raw": {
+   "distinct_a": 54,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 54,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"Description\"",
+  "b": "crmarenapro_case.\"description\"",
+  "raw": {
+   "distinct_a": 54,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 54,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_event.\"Description\"",
+  "b": "crmarenapro_territory2.\"Description\"",
+  "raw": {
+   "distinct_a": 54,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 54,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"Priority\"",
+  "b": "crmarenapro_case.\"priority\"",
+  "raw": {
+   "distinct_a": 3,
+   "matched": 2,
+   "share": 0.6667
+  },
+  "normalised": {
+   "distinct_a": 3,
+   "matched": 2,
+   "share": 0.6667
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"Status\"",
+  "b": "crmarenapro_order.\"Status\"",
+  "raw": {
+   "distinct_a": 15,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 5,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"Status\"",
+  "b": "crmarenapro_contract.\"Status\"",
+  "raw": {
+   "distinct_a": 15,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 5,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"Status\"",
+  "b": "crmarenapro_lead.\"Status\"",
+  "raw": {
+   "distinct_a": 15,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 5,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"Status\"",
+  "b": "crmarenapro_quote.\"Status\"",
+  "raw": {
+   "distinct_a": 15,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 5,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"Status\"",
+  "b": "crmarenapro_case.\"status\"",
+  "raw": {
+   "distinct_a": 15,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 5,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"Subject\"",
+  "b": "crmarenapro_case.\"subject\"",
+  "raw": {
+   "distinct_a": 2467,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 1898,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"Subject\"",
+  "b": "crmarenapro_emailmessage.\"subject\"",
+  "raw": {
+   "distinct_a": 2467,
+   "matched": 18,
+   "share": 0.0073
+  },
+  "normalised": {
+   "distinct_a": 1898,
+   "matched": 30,
+   "share": 0.0158
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"Description\"",
+  "b": "crmarenapro_account.\"Description\"",
+  "raw": {
+   "distinct_a": 4772,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 4772,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"Description\"",
+  "b": "crmarenapro_pricebook2.\"Description\"",
+  "raw": {
+   "distinct_a": 4772,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 4772,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"Description\"",
+  "b": "crmarenapro_product2.\"Description\"",
+  "raw": {
+   "distinct_a": 4772,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 4772,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"Description\"",
+  "b": "crmarenapro_contract.\"Description\"",
+  "raw": {
+   "distinct_a": 4772,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 4772,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"Description\"",
+  "b": "crmarenapro_opportunity.\"Description\"",
+  "raw": {
+   "distinct_a": 4772,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 4772,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"Description\"",
+  "b": "crmarenapro_quote.\"Description\"",
+  "raw": {
+   "distinct_a": 4772,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 4772,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "crmarenapro_task.\"Description\"",
+  "b": "crmarenapro_case.\"description\"",
+  "raw": {
+   "distinct_a": 4772,
+   "matched": 0,
+   "share": 0.0
+  },
+  "normalised": {
+   "distinct_a": 4772,
+   "matched": 0,
+   "share": 0.0
+  },
+  "digits": {
+   "distinct_a": 2,
+   "matched": 0,
+   "share": 0.0
+  }
+ }
+]

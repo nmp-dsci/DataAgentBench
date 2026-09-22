@@ -1,0 +1,78 @@
+[
+ {
+  "a": "deps_dev_v1_packageinfo.\"Name\"",
+  "b": "deps_dev_v1_project_packageversion.\"Name\"",
+  "raw": {
+   "distinct_a": 9957,
+   "matched": 8359,
+   "share": 0.8395
+  },
+  "normalised": {
+   "distinct_a": 9992,
+   "matched": 8503,
+   "share": 0.851
+  },
+  "digits": {
+   "distinct_a": 247,
+   "matched": 225,
+   "share": 0.9109
+  }
+ },
+ {
+  "a": "deps_dev_v1_packageinfo.\"System\"",
+  "b": "deps_dev_v1_project_packageversion.\"System\"",
+  "raw": {
+   "distinct_a": 1,
+   "matched": 1,
+   "share": 1.0
+  },
+  "normalised": {
+   "distinct_a": 1,
+   "matched": 1,
+   "share": 1.0
+  },
+  "digits": {
+   "distinct_a": 1,
+   "matched": 0,
+   "share": 0.0
+  }
+ },
+ {
+  "a": "deps_dev_v1_packageinfo.\"Version\"",
+  "b": "deps_dev_v1_project_packageversion.\"Version\"",
+  "raw": {
+   "distinct_a": 18287,
+   "matched": 14583,
+   "share": 0.7975
+  },
+  "normalised": {
+   "distinct_a": 18473,
+   "matched": 14733,
+   "share": 0.7975
+  },
+  "digits": {
+   "distinct_a": 14573,
+   "matched": 12231,
+   "share": 0.8393
+  }
+ },
+ {
+  "a": "deps_dev_v1_packageinfo.\"Licenses\"",
+  "b": "deps_dev_v1_project_info.\"Licenses\"",
+  "raw": {
+   "distinct_a": 47,
+   "matched": 11,
+   "share": 0.234
+  },
+  "normalised": {
+   "distinct_a": 45,
+   "matched": 11,
+   "share": 0.2444
+  },
+  "digits": {
+   "distinct_a": 15,
+   "matched": 3,
+   "share": 0.2
+  }
+ }
+]

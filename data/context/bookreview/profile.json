@@ -1,0 +1,106 @@
+{
+ "bookreview_books_info": {
+  "title": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 200
+  },
+  "subtitle": {
+   "type": "text",
+   "null_rate": 0.045,
+   "distinct": 165
+  },
+  "author": {
+   "type": "text",
+   "null_rate": 0.255,
+   "distinct": 149
+  },
+  "rating_number": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 106,
+   "min": "1",
+   "max": "6631"
+  },
+  "features": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 183
+  },
+  "description": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 104
+  },
+  "price": {
+   "type": "double precision",
+   "null_rate": 0.05,
+   "distinct": 153,
+   "min": "0.0",
+   "max": "1599.97"
+  },
+  "store": {
+   "type": "text",
+   "null_rate": 0.035,
+   "distinct": 193
+  },
+  "categories": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 97
+  },
+  "details": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 197
+  },
+  "book_id": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 200
+  }
+ },
+ "bookreview_review": {
+  "rating": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 5,
+   "min": "1",
+   "max": "5"
+  },
+  "title": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1459
+  },
+  "text": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1782
+  },
+  "review_time": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1811
+  },
+  "helpful_vote": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 44,
+   "min": "0",
+   "max": "417"
+  },
+  "verified_purchase": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "min": "0",
+   "max": "1"
+  },
+  "purchase_id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 200
+  }
+ }
+}

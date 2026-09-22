@@ -1,0 +1,8 @@
+HINTS:
+- The `cpc` field in the `publicationinfo` table of `publication_database` contains CPC classification codes. The full definitions for these CPC codes are located in the `cpc_definition` table of `CPCDefinition_database`, where each row includes fields such as `symbol` and `titleFull`.
+- The descriptive title for each CPC code can be found in the `titleFull` field of the `cpc_definition` table.
+- Citation information is stored in the `citation` field of the `publicationinfo` table in `publication_database`.
+- Date-related information such as `publication_date`, `filing_date`, and `grant_date` is located in the `publicationinfo` table and is expressed in natural-language format.
+- The `Patents_info` field in the `publicationinfo` table is a natural-language summary that includes information like `application_number`, `publication_number`, `assignee_harmonized`, and `country_code`.
+- When counting patent filings per CPC technology area, use only a patent's primary CPC codes (the entries flagged `first = true` in the `cpc` field) and count each patent once per CPC group, even if the same code is listed multiple times.
+- When computing an exponential moving average of filings per year for a CPC group, include every year from the group's first filing year to its last, counting years without filings as zero. If multiple years share the highest average, take the earliest.

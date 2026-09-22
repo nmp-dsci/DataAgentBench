@@ -1,0 +1,252 @@
+{
+ "yelp_business": {
+  "_id": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 100
+  },
+  "business_id": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 100
+  },
+  "name": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 100
+  },
+  "review_count": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 49,
+   "min": "5",
+   "max": "1742"
+  },
+  "is_open": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "min": "0",
+   "max": "1"
+  },
+  "attributes": {
+   "type": "jsonb",
+   "null_rate": 0.09,
+   "distinct": 82,
+   "json_keys": {
+    "BusinessAcceptsCreditCards": 77,
+    "BusinessParking": 60,
+    "RestaurantsPriceRange2": 56,
+    "BikeParking": 45,
+    "RestaurantsTakeOut": 43,
+    "RestaurantsDelivery": 41,
+    "GoodForKids": 36,
+    "WiFi": 35,
+    "RestaurantsGoodForGroups": 30,
+    "Ambience": 29,
+    "RestaurantsReservations": 29,
+    "Caters": 29,
+    "ByAppointmentOnly": 29,
+    "NoiseLevel": 28,
+    "OutdoorSeating": 28,
+    "Alcohol": 28,
+    "RestaurantsAttire": 27,
+    "HasTV": 27,
+    "GoodForMeal": 20,
+    "WheelchairAccessible": 19,
+    "RestaurantsTableService": 15,
+    "BusinessAcceptsBitcoin": 12,
+    "DogsAllowed": 12,
+    "HappyHour": 9,
+    "Corkage": 5,
+    "DriveThru": 5,
+    "AcceptsInsurance": 4,
+    "BYOB": 4,
+    "CoatCheck": 3,
+    "BestNights": 3,
+    "Music": 3,
+    "GoodForDancing": 2,
+    "Smoking": 2,
+    "BYOBCorkage": 1
+   }
+  },
+  "hours": {
+   "type": "jsonb",
+   "null_rate": 0.17,
+   "distinct": 74,
+   "json_keys": {
+    "Friday": 83,
+    "Thursday": 81,
+    "Wednesday": 81,
+    "Tuesday": 78,
+    "Monday": 77,
+    "Saturday": 74,
+    "Sunday": 54
+   }
+  },
+  "description": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 100
+  },
+  "doc": {
+   "type": "jsonb",
+   "note": "the whole source document; the other columns are its top-level keys"
+  }
+ },
+ "yelp_checkin": {
+  "_id": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 90
+  },
+  "business_id": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 90
+  },
+  "date": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 90
+  },
+  "doc": {
+   "type": "jsonb",
+   "note": "the whole source document; the other columns are its top-level keys"
+  }
+ },
+ "yelp_review": {
+  "review_id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 2000
+  },
+  "user_id": {
+   "type": "character varying",
+   "null_rate": 0.217,
+   "distinct": 1518
+  },
+  "business_ref": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 100
+  },
+  "rating": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 5,
+   "min": "1",
+   "max": "5"
+  },
+  "useful": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 39,
+   "min": "0",
+   "max": "147"
+  },
+  "funny": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 10,
+   "min": "0",
+   "max": "9"
+  },
+  "cool": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 17,
+   "min": "0",
+   "max": "16"
+  },
+  "text": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1998
+  },
+  "date": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 2000
+  }
+ },
+ "yelp_tip": {
+  "user_id": {
+   "type": "character varying",
+   "null_rate": 0.1913,
+   "distinct": 546
+  },
+  "business_ref": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 75
+  },
+  "text": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 781
+  },
+  "date": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 784
+  },
+  "compliment_count": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 2,
+   "min": "0",
+   "max": "1"
+  }
+ },
+ "yelp_user": {
+  "user_id": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1999
+  },
+  "name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1047
+  },
+  "review_count": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 414,
+   "min": "1",
+   "max": "4883"
+  },
+  "yelping_since": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 1998
+  },
+  "useful": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 483,
+   "min": "0",
+   "max": "61899"
+  },
+  "funny": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 304,
+   "min": "0",
+   "max": "31999"
+  },
+  "cool": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 343,
+   "min": "0",
+   "max": "48327"
+  },
+  "elite": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 98
+  }
+ }
+}

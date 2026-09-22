@@ -1,0 +1,9 @@
+# crmarenapro_livechattranscript (58 rows) · first 5
+
+| id | caseid | accountid | ownerid | body | endtime | livechatvisitorid | contactid |
+|---|---|---|---|---|---|---|---|
+| #570Wt000005HGbnIAG | 500Wt00000DDQRsIAP | 001Wt00000PGzM9IAL | 005Wt000003NFKoIAO | [2023-03-08T06:51:22] Jakob Hansen (Customer): Hi there, I&#39;m experiencing a scalability issue with our OptiPower Manager. We can&#39;t seem to handle the increased load as we grow. [2023-03-08T06:… | 2023-03-08T07:07:30.000+0000 | 571Wt000004s2IfIAI | NULL |
+| 570Wt000005HL6oIAG | #500Wt00000DDzKjIAL | 001Wt00000PHVdhIAH | 005Wt000003NJzVIAW | [2020-10-22T03:58:12] Khalid Al-Majid (Customer): Hello, we&#39;re experiencing significant latency with the deployment of CloudLink Designer into our systems, which is affecting our project timelines… | 2020-10-22T04:14:32.000+0000 | 571Wt000004s22YIAQ | NULL |
+| 570Wt000005HL6pIAG | 500Wt00000DDzNxIAL | 001Wt00000PHRTeIAP | 005Wt000003NI2XIAW | [2023-03-16T14:47:29] Farah Khalil (Customer): Hi, we&#39;re experiencing issues integrating DevVision IDE with our other software. Could you help us resolve this? [2023-03-16T14:49:02] Anaya Patel (A… | 2023-03-16T14:58:10.000+0000 | 571Wt000004s249IAA | NULL |
+| 570Wt000005HLuoIAG | 500Wt00000DDzqzIAD | #001Wt00000PGZgHIAX | 005Wt000003NFr4IAG | [2023-01-17T09:30:45] Isaac Njoroge (Customer): Hi, we&#39;re experiencing latency issues while integrating TechPulse solutions in our workflow. This is affecting our productivity. [2023-01-17T09:37:2… | 2023-01-17T09:48:36.000+0000 | 571Wt000004s1uVIAQ | NULL |
+| 570Wt000005HN8cIAG | 500Wt00000DDyuwIAD | 001Wt00000PFt7TIAT | 005Wt000003NJGLIA4 | [2023-10-16T09:17:14] Samuel Okafor (Customer): Hi, I&#39;m experiencing difficulties scaling the SecuManage Pro module to meet our growing demands. Can someone help with this? [2023-10-16T09:25:32] N… | 2023-10-16T09:33:45.000+0000 | 571Wt000004s290IAA | NULL |

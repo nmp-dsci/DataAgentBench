@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { type QuerySummary, type Validators as V, STYLE_LABEL, fmtInt, queryPath, useGet } from '../lib/api';
-import { Loading, Rate } from '../lib/ui';
+import { Gold, Loading, Rate } from '../lib/ui';
 
 const HOW: Record<string, string> = {
   regex: 'strips thousands separators, finds every integer or decimal in the answer, passes if any equals the gold (often with a tolerance)',
@@ -66,7 +66,7 @@ export function Validators() {
                   <tr>
                     <th>Query</th>
                     <th>Question</th>
-                    <th className="num">Gold lines</th>
+                    <th>Gold</th>
                     <th className="num">Validator lines</th>
                     <th>Published pass rate</th>
                   </tr>
@@ -80,7 +80,7 @@ export function Validators() {
                           <Link to={queryPath(id)}>{id}</Link>
                         </td>
                         <td className="q wrap">{q ? (q.question.length > 160 ? `${q.question.slice(0, 160)}…` : q.question) : ''}</td>
-                        <td className="num">{q?.gold_lines ?? '—'}</td>
+                        <td className="pre">{q ? <Gold preview={q.gold_preview} lines={q.gold_lines} /> : '—'}</td>
                         <td className="num">{q?.validator_lines ?? '—'}</td>
                         <td>
                           <Rate passed={q?.trials?.passed} n={q?.trials?.n} />

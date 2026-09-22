@@ -1,0 +1,194 @@
+{
+ "stockindex_index_info": {
+  "Exchange": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 14,
+   "top": [
+    [
+     "Toronto Stock Exchange",
+     1
+    ],
+    [
+     "Tokyo Stock Exchange",
+     1
+    ],
+    [
+     "Korea Exchange",
+     1
+    ],
+    [
+     "Euronext",
+     1
+    ],
+    [
+     "Shenzhen Stock Exchange",
+     1
+    ],
+    [
+     "Johannesburg Stock Exchange",
+     1
+    ],
+    [
+     "Taiwan Stock Exchange",
+     1
+    ],
+    [
+     "National Stock Exchange of India",
+     1
+    ],
+    [
+     "Hong Kong Stock Exchange",
+     1
+    ],
+    [
+     "NASDAQ",
+     1
+    ]
+   ]
+  },
+  "Currency": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 11,
+   "top": [
+    [
+     "CNY",
+     2
+    ],
+    [
+     "EUR",
+     2
+    ],
+    [
+     "USD",
+     2
+    ],
+    [
+     "CHF",
+     1
+    ],
+    [
+     "CAD",
+     1
+    ],
+    [
+     "INR",
+     1
+    ],
+    [
+     "KRW",
+     1
+    ],
+    [
+     "HKD",
+     1
+    ],
+    [
+     "JPY",
+     1
+    ],
+    [
+     "ZAR",
+     1
+    ]
+   ]
+  }
+ },
+ "stockindex_index_trade": {
+  "Index": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 13,
+   "top": [
+    [
+     "NYA",
+     13947
+    ],
+    [
+     "N225",
+     13874
+    ],
+    [
+     "IXIC",
+     12690
+    ],
+    [
+     "GSPTSE",
+     10526
+    ],
+    [
+     "HSI",
+     8492
+    ],
+    [
+     "GDAXI",
+     8438
+    ],
+    [
+     "SSMI",
+     7671
+    ],
+    [
+     "TWII",
+     5869
+    ],
+    [
+     "000001.SS",
+     5791
+    ],
+    [
+     "399001.SZ",
+     5760
+    ]
+   ]
+  },
+  "Date": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 37311
+  },
+  "Open": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 96716,
+   "min": "54.869999",
+   "max": "68775.0625"
+  },
+  "High": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 96830,
+   "min": "54.869999",
+   "max": "69403.75"
+  },
+  "Low": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 96663,
+   "min": "54.869999",
+   "max": "68516.99219"
+  },
+  "Close": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 96764,
+   "min": "54.869999",
+   "max": "68775.0625"
+  },
+  "Adj Close": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 97602,
+   "min": "54.869999",
+   "max": "68775.0625"
+  },
+  "CloseUSD": {
+   "type": "double precision",
+   "null_rate": 0.0,
+   "distinct": 99179,
+   "min": "10.2048999",
+   "max": "18934.3761734"
+  }
+ }
+}

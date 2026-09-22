@@ -1,0 +1,87 @@
+{
+ "agnews_articles": {
+  "article_id": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 127600,
+   "min": "0",
+   "max": "127599"
+  },
+  "title": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 121274
+  },
+  "description": {
+   "type": "text",
+   "null_rate": 0.0,
+   "distinct": 126190
+  },
+  "doc": {
+   "type": "jsonb",
+   "note": "the whole source document; the other columns are its top-level keys"
+  }
+ },
+ "agnews_article_metadata": {
+  "article_id": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 127600,
+   "min": "0",
+   "max": "127599"
+  },
+  "author_id": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 994,
+   "min": "0",
+   "max": "993"
+  },
+  "region": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 5,
+   "top": [
+    [
+     "Asia",
+     25718
+    ],
+    [
+     "North America",
+     25608
+    ],
+    [
+     "Africa",
+     25501
+    ],
+    [
+     "Europe",
+     25432
+    ],
+    [
+     "South America",
+     25341
+    ]
+   ]
+  },
+  "publication_date": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 6802
+  }
+ },
+ "agnews_authors": {
+  "author_id": {
+   "type": "bigint",
+   "null_rate": 0.0,
+   "distinct": 994,
+   "min": "0",
+   "max": "993"
+  },
+  "name": {
+   "type": "character varying",
+   "null_rate": 0.0,
+   "distinct": 994
+  }
+ }
+}

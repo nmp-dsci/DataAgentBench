@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { type DatasetDetail, STYLE_LABEL, fmtBytes, fmtPct, queryPath, useGet } from '../lib/api';
-import { Loading, Rate } from '../lib/ui';
+import { Gold, Loading, Rate } from '../lib/ui';
 
 export function Dataset() {
   const { key } = useParams();
@@ -89,7 +89,7 @@ export function Dataset() {
             <tr>
               <th>Query</th>
               <th>Question</th>
-              <th className="num">Gold lines</th>
+              <th>Gold</th>
               <th>Validator</th>
               <th>Published pass rate</th>
             </tr>
@@ -104,7 +104,9 @@ export function Dataset() {
                   {q.question.length > 220 ? `${q.question.slice(0, 220)}…` : q.question}
                   {q.footnote && <span className="tag warn" style={{ marginLeft: 'var(--s2)' }}>revised</span>}
                 </td>
-                <td className="num">{q.gold_lines}</td>
+                <td className="pre">
+                  <Gold preview={q.gold_preview} lines={q.gold_lines} />
+                </td>
                 <td>{STYLE_LABEL[q.validator_style] ?? q.validator_style}</td>
                 <td>
                   <Rate passed={q.trials?.passed} n={q.trials?.n} />

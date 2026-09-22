@@ -1,0 +1,3 @@
+HINTS:
+- To solve this query, you will need to combine information from both the package and project databases. First, match package records in "packageinfo" from "package_database" with records in "project_packageversion" from "project_database" using the shared attributes "System", "Name", and "Version". Then, take the "ProjectName" from "project_packageversion" and use it to find the corresponding record in "project_info".
+- The "Project_Information" field in "project_info" contains the project name as well as important repository metrics such as GitHub stars count and fork count, along with other descriptive details.
