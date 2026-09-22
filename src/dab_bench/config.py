@@ -54,9 +54,11 @@ class Settings(BaseModel):
 
     upstream_commit: str | None = None
     code_sha: str = "unknown"
-    database_url: str = "postgresql://dab_owner:dab_owner@localhost:5433/nmp"
-    agent_database_url: str = "postgresql://dab_agent:dab_agent@localhost:5433/nmp"
-    pg_superuser_url: str = "postgresql://nmp:nmp@localhost:5433/nmp"
+    # The central Postgres (nmp-central-ai, database `dab`, platform decision D13); the
+    # superuser is the platform's (D16). `make -C ../nmp-central-ai db-urls` prints these.
+    database_url: str = "postgresql://dab_owner:dab_owner@localhost:5432/dab"
+    agent_database_url: str = "postgresql://dab_agent:dab_agent@localhost:5432/dab"
+    pg_superuser_url: str = "postgresql://nmp:nmp@localhost:5432/dab"
     mlflow_tracking_uri: str = "http://localhost:5000"
     billing: str = "subscription"
 

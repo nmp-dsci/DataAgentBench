@@ -1,6 +1,6 @@
 """The agent role can read the benchmark schema and nothing else. Needs the live Postgres.
 
-Skipped unless DAB_TEST_PG=1 (CI has no server); `make db-up && DAB_TEST_PG=1 uv run pytest tests/test_roles.py`.
+Skipped unless DAB_TEST_PG=1 (CI has no server); `make platform-up db-roles && DAB_TEST_PG=1 uv run pytest tests/test_roles.py`.
 """
 
 from __future__ import annotations

@@ -43,7 +43,7 @@ def data_init() -> None:
     if not pg.reachable(None) and not pg.reachable(
         __import__("dab_bench.config").config.settings().pg_superuser_url
     ):
-        console.print("[red]Postgres is not reachable[/] — run `make db-up` first")
+        console.print("[red]central Postgres is not reachable[/] — run `make platform-up` first")
         raise typer.Exit(1)
     pg.init_schema()
     console.print("schema dataagentbench · roles dab_owner, dab_agent ready")
@@ -71,6 +71,43 @@ def data_load(datasets: str | None = None) -> None:
         console.print(f"[red]error[/] {e}")
     if r.errors:
         raise typer.Exit(1)
+
+
+@data_app.command("smoke")
+def data_smoke() -> None:
+    """Zero-model proof the central database serves this project: the agent role can read the
+    benchmark schema and nothing else, the owner can write; exit 1 on any miss."""
+    from dab_bench.config import PG_SCHEMA
+    from dab_bench.data import pg
+
+    with pg.connect_agent() as agent:
+        n = agent.execute(
+            "select count(*) from pg_tables where schemaname = %s", (PG_SCHEMA,)
+        ).fetchone()
+        tables = int(n[0]) if n else 0
+        first = agent.execute(
+            "select tablename from pg_tables where schemaname = %s order by 1 limit 1", (PG_SCHEMA,)
+        ).fetchone()
+        if not first:
+            console.print(f"[red]schema {PG_SCHEMA} has no tables[/] — run `make data`")
+            raise typer.Exit(1)
+        agent.execute(f'select 1 from {PG_SCHEMA}."{first[0]}" limit 1').fetchall()
+        try:
+            agent.execute(f"create table {PG_SCHEMA}.__smoke_should_fail (x int)")
+        except Exception:  # noqa: BLE001 - the refusal is the pass condition
+            pass
+        else:
+            console.print("[red]dab_agent could CREATE TABLE[/] — roles.sql not applied?")
+            raise typer.Exit(1)
+    with pg.connect() as owner:
+        owner.execute(
+            f"create table if not exists {PG_SCHEMA}.__smoke (at timestamptz default now())"
+        )
+        owner.execute(f"insert into {PG_SCHEMA}.__smoke default values")
+        owner.execute(f"drop table {PG_SCHEMA}.__smoke")
+    console.print(
+        f"central database ok · {tables} tables in {PG_SCHEMA} · agent read-only · owner writes"
+    )
 
 
 @data_app.command("check")

@@ -71,12 +71,12 @@ make stats
 ## 3b · Run the agent
 
 ```bash
-make db-up                       # this project's Postgres 16 on :5433 (docker) + schema and roles
+make platform-up                 # nmp-central-ai's stack: Postgres :5432 (database `dab`) and MLflow :5000
+make db-roles                    # schema dataagentbench + roles dab_owner / dab_agent inside database `dab`
 make data                        # download the 12 datasets (8.4 GB, sha256-verified) and load them: 2 811 tables
 make context                     # the generated half of the context pack (no model)
 make curate                      # the curator agent writes summary.md + pitfalls.md per dataset (≈ $1.40 once)
 make sandbox                     # the execute_python image (python:3.12-slim, no network)
-make platform-up                 # nmp-central-ai's MLflow at :5000 — runs and traces go there, never a local store
 make eval SPLIT=smoke            # v0 on one median-difficulty query per dataset (12 trials, ≈ $1.3)
 make eval SPLIT=all TRIALS=1     # all 54 once
 uv run dab runs list · uv run dab runs profile <run> · uv run dab eval --resume <run>

@@ -118,9 +118,9 @@ The loop (v1 = whatever it promotes over v0), on the scaffolding §8 lays
 down: optimiser reads failed trials from MLflow traces, proposes one edit to
 one of three surfaces (`agents/v0/system.md`, `agents/curator/system.md`, a
 dataset's `pitfalls.md`), runs the challenger, gates with McNemar at 54 × 5,
-promotes by moving `agents/champion`. Its own plan (s02). Then the migration
-of the benchmark Postgres into nmp-central-ai when the platform's M3 exists
-(`pg_dump -n dataagentbench | psql <central>`), and a demo deploy.
+promotes by moving `agents/champion`. Its own plan (s02). The benchmark
+Postgres moved into nmp-central-ai on 2026-09-22 (platform M3, below); a demo
+deploy remains.
 
 ## 8 · The agent build — decisions, layout, contract
 
@@ -133,7 +133,7 @@ Decided in the s01 review (all queued by the reviewer):
 | The pack | `dab context build` (code: schema, profile, samples, measured joins) then `dab context curate` (Sonnet 5, once per dataset, never sees a question) writes `summary.md` + `pitfalls.md` | the knowledge base must be legitimate under the rubric and reviewable as a diff |
 | D1 · delivery | summary + pitfalls injected; depth on demand via `read_context` / `search_context` | every trial starts oriented; the full pack stays out of the prompt |
 | D6 · data | all 12 datasets re-hosted into one Postgres schema `dataagentbench`, tables `<dataset>_<table>`, Mongo as typed columns + `doc jsonb`; table families (stockmarket's 2 753 tickers) also get a union table `*_all` | one dialect, one read-only role (`dab_agent`, 60 s statement timeout); the leaderboard's top rows all re-host |
-| Postgres location | this project's compose on :5433 for now; migrate to nmp-central-ai after its M3 | stated deviation from the platform's rule zero; same image, same schema shape, one-command move |
+| Postgres location | database `dab` on nmp-central-ai's central Postgres (:5432, one database per project — platform D13), since 2026-09-22 | rule zero holds; `roles.sql` ran unchanged against the new database; the old compose server (:5433) was dumped, restored, verified table-for-table and deleted (platform D14) |
 | D3 · Python | docker `--network none`, one container per run, a fresh process per call; data arrives as parquet on `/work` via `query_db(save_as=)` | rubric-grade isolation; no credential inside the box |
 | D5 · observability | central MLflow only, experiment `dataagentbench/evals`, platform tags, fail-fast `/health` preflight; one run + one trace per trial built from the message stream (tags: run_id, dataset, query, trial, passed, reason, agent, fingerprint, context_sha) | the loop reads failures from `mlflow.search_traces`; the registry entry is `infra/registry.P6.yaml` |
 | D4 · billing | the subscription through the Agent SDK's `claude` child | as the siblings; a rate-limited trial is unscored and `--resume` finishes it |
@@ -150,7 +150,7 @@ agents/champion       one line naming the champion version
 data/context/<ds>/    committed pack: tables.json · schema.md · profile.json · samples/ · joins.md/.json ·
                       description.txt · hints.txt · summary.md · pitfalls.md · curation.json
 data/splits/          smoke.json (12 ids); `all` is the index
-infra/                docker-compose.yml (pgvector/pg16, :5433) · roles.sql · sandbox.Dockerfile · registry.P6.yaml
+infra/                roles.sql (applied to database `dab` on the central Postgres) · sandbox.Dockerfile
 runs/<id>/            gitignored: run.json · results.jsonl · traces/<ds>_<n>_t<k>.json · agent/ (incl.
                       system.<dataset>.md, the composed prompts) · context/<ds>/ copies
 workspace/<run>/      gitignored: the sandbox's /work, one folder per trial

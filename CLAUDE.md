@@ -8,8 +8,8 @@
 
 - `make setup` · `make upstream` · `make ingest` · `make rescore` · `make stats`
 - `make dev` + `cd frontend && npm run dev` (explorer on :5173, API on :8091)
-- agent build: `make db-up` · `make data` · `make context` · `make curate` ·
-  `make sandbox` · `make platform-up` · `make eval SPLIT=smoke|all TRIALS=n`
+- agent build: `make platform-up` · `make db-roles` · `make data` · `make context` ·
+  `make curate` · `make sandbox` · `make eval SPLIT=smoke|all TRIALS=n`
 - `uv run pytest -q` · `make lint` · `make fmt` (`DAB_TEST_PG=1` adds the live role test)
 
 ## Rules
@@ -27,8 +27,9 @@
 - **The run folder is the record; MLflow is the index.** `runs/<id>/` is what
   the explorer, the profile and a compare read. MLflow (central,
   `dataagentbench/evals`) is linked, never read back. Never start a local
-  MLflow; the platform's rule zero applies. The project-local Postgres on
-  :5433 is a stated, temporary deviation (plan s01 §8, M8).
+  MLflow; the platform's rule zero applies. The benchmark lives in database
+  `dab` on the central Postgres (:5432) since 2026-09-22; `make db-reset` only
+  ever drops this project's schema, never the database (platform D16).
 - **A rate-limited trial is not a fail.** It is `rate_limited`, unscored, and
   `dab eval --resume <run>` finishes it after the window resets.
 - **The index is the contract.** The API and the explorer read only
