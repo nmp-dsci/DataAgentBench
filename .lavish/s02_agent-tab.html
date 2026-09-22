@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>s02 · DataAgentBench — the Agent tab: the system as a graph, a tool playground, trace replay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Design source (2): the project's own system — DESIGN.md ("Field Guide"), tokens verbatim,
+   the same block s00/s01 and frontend/src/tokens.css carry. */
+:root{
+  --bg:#F7F6F2; --panel:#FFFFFF; --band:#EFEEE8;
+  --ink:#1A1D1B; --ink-2:#3B403D; --muted:#4A514D; --faint:#5C635E;
+  --line:#DCDAD2; --line-2:#C7C5BC; --line-3:#8A8880;
+  --accent:#0A6552; --accent-ink:#FFFFFF; --accent-soft:#DFEFE8;
+  --amber:#8A5006; --amber-soft:#F6E6CF;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --t-2:0.8rem; --t-1:0.875rem; --t0:1rem; --t1:1.125rem; --t2:1.406rem; --t3:1.758rem; --t4:2.197rem;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --r:10px; --r-sm:6px;
+  --shadow:0 1px 2px rgb(20 25 22 / .05), 0 12px 28px -18px rgb(20 25 22 / .22);
+  --dur:300ms; --ease:cubic-bezier(.2,.7,.2,1); --focus:var(--accent);
+  --w:1140px; --measure:68ch; --track-label:.08em;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121614; --panel:#191E1B; --band:#161A18;
+    --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+    --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+    --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+    --amber:#D99A4E; --amber-soft:#3A2A14;
+    --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121614; --panel:#191E1B; --band:#161A18;
+  --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+  --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+  --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+  --amber:#D99A4E; --amber-soft:#3A2A14;
+  --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+}
+@media (prefers-reduced-motion: reduce){ :root{ --dur:0.01ms; } }
+*,*::before,*::after{box-sizing:border-box}
+:where(.grid,.flex,.kpi,.cards,.mock-body,.mock-cols,.mock-top)>*{min-width:0}
+:where(p,h1,h2,h3,h4,li,dd,figcaption,td,th,.chip,.label){overflow-wrap:anywhere}
+:where(img,svg,video,iframe){max-width:100%;height:auto}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink-2);font-family:var(--sans);font-size:var(--t0);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{color:var(--ink);margin:0;line-height:1.15;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+h1{font-size:var(--t4);font-family:var(--serif);font-weight:400} h1 em{font-style:italic;font-weight:400;color:var(--accent)}
+h2{font-size:var(--t3)} h3{font-size:var(--t1)} h4{font-size:var(--t0)}
+p{margin:0 0 var(--s4);text-wrap:pretty}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:.2em} a:hover{text-decoration-thickness:2px}
+strong,b{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:max(var(--t-2),.86em);background:var(--band);padding:.08em .32em;border-radius:var(--r-sm);color:var(--ink-2)}
+pre{margin:0;font-family:var(--mono);font-size:var(--t-2);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.wrap{max-width:var(--w);margin-inline:auto;padding-inline:var(--s5)}
+.label{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0}
+.lead{font-family:var(--serif);font-size:var(--t1);line-height:1.5;color:var(--ink-2);max-width:72ch}
+.small{font-size:var(--t-1);color:var(--muted)}
+.top{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:var(--w);margin-inline:auto;padding:var(--s3) var(--s5);display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.top b{font-family:var(--mono);font-size:var(--t-1);color:var(--ink);white-space:nowrap}
+.top nav{display:flex;gap:var(--s4);margin-left:auto;flex-wrap:wrap;font-size:var(--t-1);font-weight:500}
+.top nav a{color:var(--ink-2);text-decoration:none;padding:var(--s1) 0} .top nav a:hover{color:var(--accent)}
+header.hero{padding:var(--s7) 0 var(--s5)}
+.chips{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s4) 0 0}
+.chip{font-family:var(--mono);font-size:var(--t-2);padding:.3em .6em;border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--ink-2);background:var(--panel)}
+.chip.ok{border-color:var(--accent);color:var(--accent)} .chip.warn{border-color:var(--amber);color:var(--amber)}
+section.blk{padding-top:var(--s8)} section.blk:last-of-type{padding-bottom:var(--s9)}
+section.band-sec{background:var(--band);margin-top:var(--s8);padding:var(--s7) 0}
+section.band-sec + section.blk{padding-top:var(--s7)}
+.hd{margin-bottom:var(--s5);max-width:80ch} .hd .label{margin-bottom:var(--s2)} .hd h2{margin-bottom:var(--s3)}
+.panel{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5)}
+.grid{display:grid;gap:var(--s4)} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.g3,.g2{grid-template-columns:minmax(0,1fr)}}
+.card h3{margin-bottom:var(--s2)} .card p{margin-bottom:var(--s2);font-size:var(--t-1)} .card p:last-child{margin:0}
+.card.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r);box-shadow:var(--shadow);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:var(--t-1)}
+caption{text-align:left;padding:var(--s4) var(--s5) var(--s2);color:var(--muted);font-size:var(--t-1);caption-side:top}
+th,td{text-align:left;padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}
+thead th{font-family:var(--mono);font-size:var(--t-2);font-weight:500;color:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase;border-bottom:1px solid var(--line-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.sub{font-weight:600;color:var(--ink);white-space:nowrap}
+td.num{font-family:var(--mono);font-size:var(--t-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+td .path{display:block;font-family:var(--mono);font-size:var(--t-2);color:var(--faint);font-weight:400;margin-top:2px}
+td.mono{font-family:var(--mono);font-size:var(--t-2)}
+tr.pro td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+tr.dim td{color:var(--muted)}
+.v-ok{color:var(--accent);font-weight:600} .v-no{color:var(--muted)} .v-warn{color:var(--amber);font-weight:600}
+blockquote{margin:0;padding:var(--s3) var(--s4);border-left:2px solid var(--accent);background:var(--band);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:var(--t-1)}
+blockquote.warn{border-left-color:var(--amber)}
+.fig{margin:var(--s5) 0 0}
+.fig-title{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0 0 var(--s3);text-wrap:balance}
+.dia-frame{background:var(--panel);border-radius:var(--r);padding:var(--s4);box-shadow:var(--shadow)}
+.fig figcaption{font-family:var(--sans);font-size:var(--t-1);color:var(--muted);line-height:1.5;margin-top:var(--s3)}
+.fig figcaption b{color:var(--ink);font-weight:600}
+.dia{display:block;width:100%;height:auto;color:var(--ink-2);overflow:visible}
+.dia .nd{fill:var(--bg);stroke:currentColor;stroke-width:1;vector-effect:non-scaling-stroke}
+.dia .nd.hi{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.4}
+.dia .nd.ext{fill:none;stroke:var(--line-3);stroke-dasharray:4 3}
+.dia .nd.warn{fill:var(--amber-soft);stroke:var(--amber)}
+.dia .rg{fill:none;stroke:var(--line-2);stroke-dasharray:5 4}
+.dia .tx{font-family:var(--mono);font-size:11.5px;fill:currentColor}
+.dia .tx.k{fill:var(--ink);font-weight:500;font-family:var(--sans);font-size:12.5px}
+.dia .tx.s{font-size:10.5px;fill:var(--faint)}
+.dia .cap{font-family:var(--mono);font-size:10.5px;fill:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase}
+.dia .ed{stroke:currentColor;stroke-width:1.25;vector-effect:non-scaling-stroke;fill:none;marker-end:url(#arr)}
+.dia .ed.hi{stroke:var(--accent);stroke-width:1.6}
+.dia .ed.dash{stroke:var(--line-3);stroke-dasharray:4 3}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:var(--s3)}
+.steps li{position:relative;padding-left:2.75rem;font-size:var(--t-1)}
+.steps li::before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:0;top:2px;font-family:var(--mono);color:var(--accent);font-weight:500}
+form.q{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5);display:grid;gap:var(--s3);margin-top:var(--s4)}
+form.q h3{margin:0} form.q .why{font-size:var(--t-1);color:var(--muted);margin:0}
+form.q label{display:grid;grid-template-columns:1.2rem minmax(0,1fr);gap:var(--s2);align-items:start;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;min-height:24px}
+form.q label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+form.q input[type=radio],form.q input[type=checkbox]{margin:3px 0 0;accent-color:var(--accent);width:16px;height:16px}
+form.q textarea{width:100%;font:inherit;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);color:var(--ink-2);min-height:3.2rem;resize:vertical}
+form.q .row{display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap}
+.btn{font:500 var(--t-1) var(--sans);background:var(--accent);color:var(--accent-ink);border:0;border-radius:var(--r-sm);padding:.55em 1em;cursor:pointer;min-height:24px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.08)} .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.queued{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);min-height:1.2em}
+.rec{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);margin-left:.4em}
+.tag{font-family:var(--mono);font-size:var(--t-2);padding:.15em .45em;border-radius:var(--r-sm);border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.tag.ok{border-color:var(--accent);color:var(--accent)} .tag.warn{border-color:var(--amber);color:var(--amber)} .tag.no{border-color:var(--line-3);color:var(--muted)}
+ul.tight{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.tight li{margin-bottom:var(--s1)}
+ul.qa{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.qa li{margin-bottom:var(--s2)}
+.code{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);margin-top:var(--s3);overflow-x:auto}
+.code .label{margin-bottom:var(--s2)}
+.code.band{background:var(--band)}
+
+/* the mock of the explorer page, in the explorer's own styles */
+.mock{background:var(--bg);border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin-top:var(--s4)}
+.mock-nav{display:flex;gap:var(--s1);align-items:center;padding:var(--s3) var(--s4);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.mock-nav b{font-family:var(--serif);font-weight:500;margin-right:var(--s3);color:var(--ink)} .mock-nav b i{font-style:normal;color:var(--accent)}
+.mock-nav span{font:500 var(--t-1) var(--sans);color:var(--muted);padding:var(--s1) var(--s3);border-radius:var(--r-sm)}
+.mock-nav span.on{color:var(--accent);background:var(--accent-soft)}
+.mock-body{padding:var(--s5) var(--s4)}
+.mock h1{font-size:var(--t3)}
+.mock .lead{font-size:var(--t0)}
+.mock-top{display:flex;gap:var(--s2);flex-wrap:wrap;align-items:center;margin-top:var(--s3)}
+.sel{font:400 var(--t-1) var(--sans);color:var(--ink);background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:var(--s2) var(--s3);min-height:36px;display:inline-flex;align-items:center;gap:var(--s2)}
+.sel::after{content:'▾';color:var(--faint)}
+.sel .path{font-family:var(--mono);font-size:var(--t-2);color:var(--faint)}
+.mock-cols{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.mock-cols{grid-template-columns:minmax(0,1fr)}}
+.mock .panel{padding:var(--s4)}
+.mock .panel h3{font-size:var(--t0);margin-bottom:var(--s2)}
+.mock .kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--s1) var(--s3);font-size:var(--t-1);margin:0}
+.mock .kv dt{font-family:var(--mono);font-size:var(--t-2);color:var(--faint);text-transform:uppercase;letter-spacing:var(--track-label)} .mock .kv dd{margin:0}
+.mock textarea,.mock .ta{display:block;width:100%;font-family:var(--mono);font-size:var(--t-2);line-height:1.5;padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);min-height:4.6rem;resize:vertical;white-space:pre-wrap}
+.mock .row{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap;margin-top:var(--s2)}
+.mock .out{margin-top:var(--s3);background:var(--band);border-radius:var(--r-sm);padding:var(--s3);font-family:var(--mono);font-size:var(--t-2);white-space:pre-wrap}
+.mock .out.err{box-shadow:inset 3px 0 0 var(--amber)}
+.mock table{min-width:0;font-size:var(--t-2)}
+.mock .tw{margin-top:var(--s4)}
+.mock .tog{font:500 var(--t-2) var(--sans);color:var(--ink-2);background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:var(--s1) var(--s2);min-height:24px}
+.mock .tog.on{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.mock .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--s3);margin-top:var(--s3)}
+.mock .kpi{background:var(--panel);border-radius:var(--r);padding:var(--s3) var(--s4);box-shadow:var(--shadow)}
+.mock .kpi .n{font:500 var(--t2)/1.1 var(--mono);color:var(--ink)} .mock .kpi .b{font-size:var(--t-2);color:var(--muted);margin-top:var(--s1)}
+.mock .diff{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s2);margin-top:var(--s2)}
+@media (max-width:700px){.mock .diff{grid-template-columns:minmax(0,1fr)}}
+.mock .diff .out{margin:0}
+.mock .diff .label{margin-bottom:var(--s1)}
+.ms{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--s2) var(--s4);align-items:start}
+.ms .m{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);font-weight:500;white-space:nowrap;padding-top:.2em}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in"><b>s02 · Agent tab</b>
+<nav><a href="#goal">01 goal</a><a href="#tab">02 the tab</a><a href="#graph">03 graph</a><a href="#play">04 playground</a><a href="#replay">05 replay</a><a href="#code">06 code</a><a href="#rules">07 rules</a><a href="#risks">08 risks</a><a href="#decide">09 decide</a><a href="#ms">10 milestones</a></nav></div></div>
+
+<header class="hero"><div class="wrap">
+<p class="label">DataAgentBench · explorer · plan for a new tab · branch agent-build-v0 · 22 Sep 2026</p>
+<h1 style="margin-top:8px">An <em>Agent</em> tab that shows the system as a graph, lets you call any tool by hand, and replays a trial turn by turn</h1>
+<p class="lead" style="margin-top:16px">Today the explorer reads. Runs, Run and Trace pages show what happened; nothing on them lets you touch the agent. This tab adds one route that executes — a tool call, on the read-only role, in the network-off sandbox, never a model unless you flip a switch — and builds three views on it: the system graph, the playground, the replay. Same page, one agent picker, one dataset picker, one trace picker.</p>
+<div class="chips">
+<span class="chip ok">agent picker · default champion (v0)</span>
+<span class="chip ok">graph · 9 tools · 4 backends · click a node</span>
+<span class="chip ok">playground · POST /api/agent/tools/&lt;name&gt;</span>
+<span class="chip ok">replay · pick run → trial → re-run a call with a changed input</span>
+<span class="chip warn">llm_extract · display-only unless DAB_PLAYGROUND_LLM=1</span>
+<span class="chip">cost of the build: $0 — no model call needed to build or test it</span>
+</div>
+</div></header>
+
+<section class="blk" id="goal"><div class="wrap">
+<div class="hd"><p class="label">01 · goal</p><h2>Three questions a visitor should answer on one page — none is answerable today</h2>
+<p>The Runs pages answer "how good, how expensive". They do not answer "what <em>is</em> this thing", "what does <code>query_db</code> actually do", or "why did trial 3 go wrong at turn 14 — what if the SQL had been different". Those are the three panes of the tab, and the current state on each is nothing.</p></div>
+<div class="grid g3">
+<div class="panel card"><h3>What is the system?</h3><p><b>Now:</b> Fig 2b in the s01 plan, a static picture. The explorer has no page for it; the README has prose.</p><p><b>Tab:</b> the graph, generated from <code>agents/&lt;name&gt;/agent.yaml</code> and the tool server's own schemas, so it cannot drift from the code. Click a node for its config, source path and — for a tool — its JSON schema and a "try it" button.</p></div>
+<div class="panel card"><h3>What does a tool do?</h3><p><b>Now:</b> read <code>agent/tools.py</code>.</p><p><b>Tab:</b> a form built from the tool's schema (a textarea for <code>sql</code> / <code>code</code>, fields for the rest), run against the chosen dataset with the same guards a trial has: <code>dab_agent</code> role, 60 s statement timeout, docker <code>--network none</code>, output cut at 10 000 chars.</p></div>
+<div class="panel card"><h3>What happened in a trial?</h3><p><b>Now:</b> the Trace page lists every turn and the waterfall; you can read but not act.</p><p><b>Tab:</b> pick a run and a trial; a table of every turn (sent / received, chars, elapsed, error); on any tool row, "re-run with changes" opens the playground pre-filled and shows the original output beside the new one.</p></div>
+</div>
+</div></section>
+
+<section class="band-sec" id="tab"><div class="wrap">
+<div class="hd"><p class="label">02 · the tab, mocked</p><h2>One page, three pickers, two columns: the graph on the left, the selected node on the right, the replay below</h2>
+<p>Rendered in the explorer's own styles (<code>frontend/src/styles.css</code>). Every string below is a real value from the repo or a run folder on this machine; the mock is static.</p></div>
+
+<div class="mock">
+<div class="mock-nav"><b>DAB <i>explorer</i></b><span>Overview</span><span>Datasets</span><span>Queries</span><span>Validators</span><span>Leaderboard</span><span>Runs</span><span class="on">Agent</span></div>
+<div class="mock-body">
+<p class="label">agent · v0@6851359040b1 · champion · 9 tools · haiku-4-5 @ medium · max 60 turns</p>
+<h1 style="margin-top:6px">v0 is one agent, one system prompt and nine tools: the pack is what it knows, <em>query_db</em> is what it does</h1>
+<div class="mock-top">
+<span class="sel">agent <span class="path">champion → v0 @ 6851359</span></span>
+<span class="sel">dataset <span class="path">crmarenapro · pack 696f2493</span></span>
+<span class="sel">trace <span class="path">20260921T064521Z_v0_all_haiku · crmarenapro/6 t1 · pass</span></span>
+<span class="tog">graph</span><span class="tog on">playground</span><span class="tog">replay</span>
+</div>
+<div class="mock-cols">
+<div class="panel">
+<h3>The system, from agent.yaml and the tool server — every node is clickable; the panel on the right shows the selected one</h3>
+<svg class="dia" viewBox="0 0 640 330" role="img" aria-label="Mock of the agent graph: question to Agent SDK to MCP server to nine tools to backends">
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+<g><rect class="nd" x="8" y="20" width="96" height="40" rx="6"/><text class="tx k" x="56" y="37" text-anchor="middle">question</text><text class="tx s" x="56" y="52" text-anchor="middle">user message</text></g>
+<g><rect class="nd hi" x="128" y="8" width="150" height="64" rx="6"/><text class="tx k" x="203" y="27" text-anchor="middle">Agent SDK</text><text class="tx s" x="203" y="43" text-anchor="middle">claude child · subscription</text><text class="tx s" x="203" y="58" text-anchor="middle">system.md + pack (16.9k chars)</text></g>
+<g><rect class="nd" x="300" y="20" width="100" height="40" rx="6"/><text class="tx k" x="350" y="37" text-anchor="middle">mcp "dab"</text><text class="tx s" x="350" y="52" text-anchor="middle">in-process</text></g>
+<path class="ed" d="M104 40H128"/><path class="ed" d="M278 40H300"/>
+<g>
+<rect class="nd" x="430" y="6" width="100" height="22" rx="4"/><text class="tx" x="480" y="21" text-anchor="middle">list_db</text>
+<rect class="nd" x="430" y="32" width="100" height="22" rx="4"/><text class="tx" x="480" y="47" text-anchor="middle">describe_table</text>
+<rect class="nd" x="430" y="58" width="100" height="22" rx="4"/><text class="tx" x="480" y="73" text-anchor="middle">sample_rows</text>
+<rect class="nd hi" x="430" y="84" width="100" height="22" rx="4"/><text class="tx" x="480" y="99" text-anchor="middle">query_db</text>
+<rect class="nd" x="430" y="110" width="100" height="22" rx="4"/><text class="tx" x="480" y="125" text-anchor="middle">execute_python</text>
+<rect class="nd warn" x="430" y="136" width="100" height="22" rx="4"/><text class="tx" x="480" y="151" text-anchor="middle">llm_extract</text>
+<rect class="nd" x="430" y="162" width="100" height="22" rx="4"/><text class="tx" x="480" y="177" text-anchor="middle">read_context</text>
+<rect class="nd" x="430" y="188" width="100" height="22" rx="4"/><text class="tx" x="480" y="203" text-anchor="middle">search_context</text>
+<rect class="nd" x="430" y="214" width="100" height="22" rx="4"/><text class="tx" x="480" y="229" text-anchor="middle">return_answer</text>
+</g>
+<path class="ed" d="M400 40 L430 40"/>
+<g><rect class="nd" x="560" y="30" width="74" height="34" rx="6"/><text class="tx s" x="597" y="44" text-anchor="middle">Postgres</text><text class="tx s" x="597" y="57" text-anchor="middle">dab_agent</text></g>
+<g><rect class="nd" x="560" y="104" width="74" height="34" rx="6"/><text class="tx s" x="597" y="118" text-anchor="middle">sandbox</text><text class="tx s" x="597" y="131" text-anchor="middle">--network none</text></g>
+<g><rect class="nd ext" x="560" y="142" width="74" height="24" rx="6"/><text class="tx s" x="597" y="158" text-anchor="middle">haiku (model)</text></g>
+<g><rect class="nd" x="560" y="178" width="74" height="34" rx="6"/><text class="tx s" x="597" y="192" text-anchor="middle">pack files</text><text class="tx s" x="597" y="205" text-anchor="middle">data/context/</text></g>
+<path class="ed dash" d="M530 17 L560 40"/><path class="ed dash" d="M530 43 L560 45"/><path class="ed dash" d="M530 69 L560 50"/><path class="ed hi" d="M530 95 L560 55"/>
+<path class="ed" d="M530 121 L560 121"/><path class="ed dash" d="M530 147 L560 154"/><path class="ed dash" d="M530 173 L560 190"/><path class="ed dash" d="M530 199 L560 197"/>
+<g><rect class="nd" x="128" y="120" width="150" height="40" rx="6"/><text class="tx k" x="203" y="137" text-anchor="middle">judge · validate.py</text><text class="tx s" x="203" y="152" text-anchor="middle">pass / fail + reason</text></g>
+<g><rect class="nd" x="128" y="176" width="150" height="40" rx="6"/><text class="tx k" x="203" y="193" text-anchor="middle">runs/&lt;id&gt;/</text><text class="tx s" x="203" y="208" text-anchor="middle">results.jsonl · traces/</text></g>
+<g><rect class="nd ext" x="128" y="232" width="150" height="34" rx="6"/><text class="tx s" x="203" y="253" text-anchor="middle">MLflow · dataagentbench/evals</text></g>
+<path class="ed" d="M430 225 C 380 225, 300 140, 278 140"/><path class="ed" d="M203 160V176"/><path class="ed dash" d="M203 216V232"/>
+<text class="cap" x="8" y="300">this trace: query_db ×6 · execute_python ×3 · return_answer ×1 · 27 turns · 71 s · $0.07</text>
+<text class="cap" x="8" y="318">click a node · accent = selected · amber = calls a model (off in the playground)</text>
+</svg>
+</div>
+<div class="panel">
+<h3>query_db · try it against crmarenapro</h3>
+<dl class="kv"><dt>role</dt><dd><code>dab_agent</code> · read-only · statement_timeout 60 s</dd><dt>schema</dt><dd><code>sql</code> string (required) · <code>limit</code> int ≤ 500 · <code>save_as</code> → /work/&lt;name&gt;.parquet</dd><dt>in this trace</dt><dd>6 calls · 0 errors · 21–107 ms each</dd></dl>
+<p class="label" style="margin-top:12px">sql · pre-filled from turn 3 of crmarenapro/6 t1</p>
+<div class="ta">SELECT * FROM crmarenapro_quote
+WHERE "Id" = '0Q0Wt000001WRAzKAO'</div>
+<div class="row"><span class="sel">limit <span class="path">50</span></span><span class="sel">save_as <span class="path">—</span></span><span class="btn" style="margin-left:auto">Run tool</span></div>
+<div class="out">Id | QuoteNumber | Status | TotalPrice | OpportunityId
+0Q0Wt000001WRAzKAO | 00000024 | Draft | 41780.00 | 006Wt00000…
+(1 row · 38 ms)</div>
+<div class="diff"><div><p class="label">original · turn 3</p><div class="out">(1 row) … identical</div></div><div><p class="label">re-run · now</p><div class="out">(1 row) … identical</div></div></div>
+<p class="small" style="margin:8px 0 0">The result is not written anywhere. Nothing here counts as a trial or lands in MLflow.</p>
+</div>
+</div>
+
+<div class="tw"><table>
+<caption>replay · 20260921T064521Z_v0_all_haiku · crmarenapro/6 t1 · 27 turns, 10 tool calls · showing tool rows only</caption>
+<thead><tr><th>t</th><th>turn</th><th>sent</th><th>received</th><th>chars</th><th>elapsed</th><th></th></tr></thead>
+<tbody>
+<tr><td class="num">4.8s</td><td class="sub">3</td><td class="mono">query_db · SELECT * FROM crmarenapro_quote WHERE "Id" = '0Q0Wt00…</td><td class="mono">1 row · Id, QuoteNumber, Status, TotalPrice …</td><td class="num">412</td><td class="num">37 ms</td><td><span class="tog">re-run with changes</span></td></tr>
+<tr><td class="num">9.1s</td><td class="sub">6</td><td class="mono">query_db · SELECT * FROM crmarenapro_quotelineitem WHERE "QuoteId" = …</td><td class="mono">3 rows · Product2Id, Quantity, UnitPrice, Discount</td><td class="num">1 205</td><td class="num">21 ms</td><td><span class="tog">re-run with changes</span></td></tr>
+<tr><td class="num">18.0s</td><td class="sub">14</td><td class="mono">execute_python · import pandas as pd; df = pd.read_parquet('all_knowledge.parquet') …</td><td class="mono">=== Articles matching 'bundle' === … (2 312 chars)</td><td class="num">2 312</td><td class="num">513 ms</td><td><span class="tog">re-run with changes</span></td></tr>
+<tr class="pro"><td class="num">70.2s</td><td class="sub">24</td><td class="mono">return_answer · ka0Wt0000005kMbIAI</td><td class="mono">recorded</td><td class="num">18</td><td class="num">47 ms</td><td><span class="tag ok">pass</span></td></tr>
+</tbody></table></div>
+</div></div>
+
+<p class="small" style="margin-top:16px">Not mocked: the graph pane with no trace selected (counts disappear, edges stay); the node panel for a non-tool node (Agent SDK → agent.yaml + the composed system prompt for the chosen dataset; Postgres → the role and the dataset's tables; sandbox → the image, the /work path); the "sandbox not built" state on execute_python (a sentence and the <code>make sandbox</code> command, the button disabled).</p>
+</div></section>
+
+<section class="blk" id="graph"><div class="wrap">
+<div class="hd"><p class="label">03 · the graph</p><h2>Generated from the code, not drawn: nodes come from agent.yaml and the tool schemas, counts from the selected trace</h2>
+<p>A hand-laid SVG per DESIGN.md (<code>.dia</code>, tokens, <code>&lt;title&gt;</code> per node), but every node's <em>content</em> is data from <code>/api/agents/&lt;name&gt;</code>: which tools the version allows, their descriptions and schemas, the model and budgets. Change <code>agent.yaml</code> and the graph changes. A trace selection overlays call counts, error counts and time-in-tool per tool node.</p></div>
+<div class="tw"><table>
+<caption>What each node shows on click (the right-hand panel)</caption>
+<thead><tr><th>node</th><th>source of truth</th><th>panel shows</th><th>action</th></tr></thead>
+<tbody>
+<tr><td class="sub">question</td><td class="mono">the selected trace's user message, or the smoke query for the dataset</td><td>the question text; the query's gold shape and validator style (from the index)</td><td>link to /queries/…</td></tr>
+<tr><td class="sub">Agent SDK</td><td class="mono">agents/&lt;name&gt;/agent.yaml · agent/session.py</td><td>model, effort, max_turns, timeout_s, exec_timeout_s, hints; the ClaudeAgentOptions the harness builds; billing = subscription</td><td>—</td></tr>
+<tr><td class="sub">system prompt</td><td class="mono">GET /api/agents/&lt;name&gt;/prompt?dataset=</td><td>the composed prompt (system.md + summary.md + pitfalls.md + description), its length, context_sha; a toggle to show it in full</td><td>link to the pack (/api/context/&lt;ds&gt;)</td></tr>
+<tr><td class="sub">mcp "dab"</td><td class="mono">agent/tools.py · make_tool_server</td><td>"one in-process MCP server per trial; strict_mcp_config; no built-in tools"; the allowed_tools list</td><td>—</td></tr>
+<tr><td class="sub">tool ×9</td><td class="mono">TOOL_SPECS in agent/tools.py (new: schemas lifted to module level)</td><td>description, JSON schema, backend, guard; with a trace: calls, errors, p50 elapsed; the playground form</td><td><b>Run tool</b></td></tr>
+<tr><td class="sub">Postgres</td><td class="mono">config.agent_database_url · infra/roles.sql</td><td>role dab_agent, read-only, search_path, statement_timeout 60 s; the dataset's tables and row counts (from the pack's tables.json)</td><td>—</td></tr>
+<tr><td class="sub">sandbox</td><td class="mono">agent/sandbox.py · infra/sandbox.Dockerfile</td><td>image dab-sandbox:py312, --network none, one container per run, fresh process per call, /work mount; built or not</td><td>—</td></tr>
+<tr><td class="sub">haiku (llm_extract)</td><td class="mono">agent/llm.py</td><td>Haiku 4.5 in batches of 40 rows, ≤ 2 000 rows, writes parquet with a label column; <b>off in the playground</b> (D8)</td><td>disabled unless D8-B</td></tr>
+<tr><td class="sub">judge · run folder · MLflow</td><td class="mono">eval/runner.py · tracking/</td><td>what the trial's answer is judged by, where the row lands, the MLflow trace link</td><td>links to /runs/… and MLflow</td></tr>
+</tbody></table></div>
+</div></section>
+
+<section class="band-sec" id="play"><div class="wrap">
+<div class="hd"><p class="label">04 · the playground</p><h2>One POST route runs one tool with the trial's own guards; seven of nine tools are safe to expose, one echoes, one calls a model</h2>
+<p>The trial code already separates the tool <em>body</em> from the MCP wrapper (<code>run_sql</code>, <code>_describe</code>, <code>_read_context</code>, …). The change is to finish that split: a <code>call_tool(state, name, args)</code> dispatcher that both <code>make_tool_server</code> and the API call, so the playground cannot behave differently from a trial. Same <code>ToolState</code>, same cut, same errors.</p></div>
+<div class="tw"><table>
+<caption>Per tool: what it touches and why it is (or is not) safe to call from a browser</caption>
+<thead><tr><th>tool</th><th>backend</th><th>guard already in place</th><th>playground</th></tr></thead>
+<tbody>
+<tr><td class="sub">list_db · describe_table · sample_rows</td><td>pack files + Postgres (dab_agent)</td><td>read-only role; sample n ≤ 500; result cut 10 000</td><td><span class="tag ok">on</span></td></tr>
+<tr><td class="sub">query_db</td><td>Postgres (dab_agent)</td><td>default_transaction_read_only, statement_timeout 60 s, forbidden-statement regex, limit ≤ 500, save_as ≤ 2 M rows to /work</td><td><span class="tag ok">on</span></td></tr>
+<tr><td class="sub">execute_python</td><td>docker sandbox</td><td>--network none, fresh process, exec_timeout_s 600, cwd = /work/&lt;key&gt;, output cut</td><td><span class="tag ok">on</span> — one container <code>dab-sbx-playground</code> started lazily per explorer process; /work/playground_&lt;dataset&gt; is the key, so a query_db(save_as) here is readable by execute_python here, as in a trial</td></tr>
+<tr><td class="sub">read_context · search_context</td><td>data/context/&lt;ds&gt;/ (committed text)</td><td>path confined to the pack folder</td><td><span class="tag ok">on</span></td></tr>
+<tr><td class="sub">return_answer</td><td>the ToolState</td><td>—</td><td><span class="tag no">echo</span> — records nothing; the panel says "in a trial this ends the run"</td></tr>
+<tr><td class="sub">llm_extract</td><td><b>Haiku via the Agent SDK</b> (bills the subscription)</td><td>require_live(), ≤ 2 000 rows, batches of 40</td><td><span class="tag warn">D8</span> — off by default; behind <code>DAB_PLAYGROUND_LLM=1</code> with a confirm that states the row count</td></tr>
+</tbody></table></div>
+<div class="code band" style="margin-top:24px"><p class="label">the route · src/dab_bench/serving/app.py</p>
+<pre>POST /api/agent/tools/{name}      body: {"agent": "champion", "dataset": "yelp", "input": {"sql": "SELECT …", "limit": 50}}
+  → 200 {"output": "...", "chars": 4120, "elapsed_s": 0.038, "error": false, "cut": false}
+  → 400 unknown tool / tool not in this agent's allowed_tools / input fails the schema
+  → 403 llm_extract without DAB_PLAYGROUND_LLM=1
+  → 503 execute_python when the sandbox image is missing (message: `make sandbox`)
+
+state = ToolState(dataset, ctx=load_context(dataset), trial_key=f"playground_{dataset}", sandbox=_playground_sandbox())
+out, err = call_tool(state, name, input)          # the same function the MCP server calls
+GET  /api/agents                    → {"champion": "v0", "versions": [{name, fingerprint, model, effort, max_turns, tools:[…]}]}
+GET  /api/agents/{name}             → agent.yaml, system.md, helper.py, TOOL_SPECS filtered to allowed_tools
+GET  /api/agents/{name}/prompt?dataset=yelp → the composed system prompt + context_sha</pre></div>
+<blockquote style="margin-top:16px"><b>Nothing the playground does is a trial.</b> It writes no run folder, logs no MLflow trace, and the page says so under the output. The one exception worth naming: <code>query_db(save_as=…)</code> and <code>execute_python</code> write files under <code>workspace/playground_&lt;dataset&gt;/</code> (gitignored, same as every trial's /work).</blockquote>
+</div></section>
+
+<section class="blk" id="replay"><div class="wrap">
+<div class="hd"><p class="label">05 · trace replay</p><h2>The trace page's spans, as a table you can act on: every turn, what was sent and received, and a re-run button on each tool call</h2>
+<p>The data is already served: <code>/api/runs/{id}/traces/{key}</code> returns the span tree (shipped yesterday) with inputs and outputs per tool. The replay is a second rendering of it — rows instead of bars — with three additions.</p></div>
+<ol class="steps">
+<li><b>Pickers.</b> Run (from <code>/api/runs</code>, champion first) → trial (its results rows, verdict shown) → the table. Selecting a trace also sets the dataset picker, so the playground targets the right pack and tables.</li>
+<li><b>Rows.</b> One per span: t, turn number, sent (assistant text or tool name + main input, cut to 120 chars, expandable), received (the tool result or nothing for a text turn), chars, elapsed, status. A "tool rows only" toggle, on by default; "failed only" when the trace has errors.</li>
+<li><b>Re-run with changes.</b> On a tool row: opens the playground pane pre-filled with that call's exact input; the panel shows the original output on the left and the new one on the right, with a first-difference marker (line number where they diverge) — not a full diff, the outputs are text tables and the point is "did the change matter".</li>
+<li><b>Graph overlay.</b> While a trace is selected, tool nodes carry calls / errors / p50 ms and the edge weight follows call count; clicking a tool node filters the replay table to that tool.</li>
+</ol>
+<p class="small" style="margin-top:16px">Not in scope: replaying the <em>model</em> turns. Re-running the agent from turn <em>n</em> would be a trial (a model call on the subscription) and belongs to <code>dab eval</code>, not to the explorer. The replay re-runs tools only.</p>
+</div></section>
+
+<section class="band-sec" id="code"><div class="wrap">
+<div class="hd"><p class="label">06 · code</p><h2>Four backend changes, one page and four components; the tool refactor is the only piece that touches the trial path</h2></div>
+<div class="tw"><table>
+<thead><tr><th>file</th><th>change</th><th>touches a trial?</th></tr></thead>
+<tbody>
+<tr><td class="sub">src/dab_bench/agent/tools.py</td><td>lift the nine <code>@tool(...)</code> schemas to <code>TOOL_SPECS: dict[name, {description, schema, backend}]</code>; add <code>call_tool(state, name, args) -> tuple[str, bool]</code>; <code>make_tool_server</code> registers each spec with a thin wrapper that calls it. Behaviour identical; the existing tests plus a new dispatch test pin it.</td><td><span class="tag warn">yes — same bodies, moved</span></td></tr>
+<tr><td class="sub">src/dab_bench/agent/versions.py</td><td>nothing new; <code>list_versions()</code>, <code>load_version()</code>, <code>champion_name()</code> already exist</td><td>no</td></tr>
+<tr><td class="sub">src/dab_bench/serving/app.py</td><td><code>/api/agents</code>, <code>/api/agents/{name}</code>, <code>/api/agents/{name}/prompt</code>, <code>POST /api/agent/tools/{name}</code>; a lazily started <code>dab-sbx-playground</code> sandbox held on the app; module docstring and the "nothing here writes" sentence updated</td><td>no</td></tr>
+<tr><td class="sub">src/dab_bench/config.py</td><td><code>playground_llm: bool</code> from <code>DAB_PLAYGROUND_LLM</code> (default off)</td><td>no</td></tr>
+<tr><td class="sub">frontend/src/pages/Agent.tsx</td><td>the page: pickers, the three panes, URL state (<code>?agent=&amp;dataset=&amp;run=&amp;trial=&amp;node=</code>) so a view is linkable</td><td>no</td></tr>
+<tr><td class="sub">frontend/src/lib/agent.tsx</td><td><code>AgentGraph</code> (SVG, data-driven), <code>NodePanel</code>, <code>ToolForm</code> (from JSON schema: textarea for sql/code/instruction, number for limit/n, text for the rest, array of strings for labels), <code>Replay</code> (table + re-run), <code>Compare</code> (original vs new)</td><td>no</td></tr>
+<tr><td class="sub">frontend/src/Shell.tsx · main.tsx</td><td>nav entry "Agent", route <code>/agent</code></td><td>no</td></tr>
+<tr><td class="sub">tests/test_tools.py (new) · tests/test_runner.py</td><td>dispatch test through <code>call_tool</code> on the pack-only tools (no DB): <code>read_context</code>, <code>search_context</code>, <code>list_db</code>; the API: <code>/api/agents</code> lists v0 with nine tools, POST on an unknown tool → 400, on llm_extract → 403; <code>DAB_TEST_PG=1</code> adds a live <code>query_db</code> round trip and a forbidden-statement rejection</td><td>no</td></tr>
+<tr><td class="sub">CLAUDE.md · AGENTS.md · README</td><td>the rules in §07; the tab in the layout and the README's explorer section</td><td>no</td></tr>
+</tbody></table></div>
+<div class="code" style="margin-top:24px"><p class="label">the refactor, sketched · agent/tools.py</p>
+<pre>TOOL_SPECS: dict[str, ToolSpec] = {
+    "query_db": ToolSpec(
+        description="Run read-only Postgres SQL against the dataset …",
+        schema={"type": "object", "properties": {"sql": …, "limit": …, "save_as": …}, "required": ["sql"]},
+        backend="postgres",
+    ),
+    …
+}
+
+def call_tool(state: ToolState, name: str, args: dict[str, Any]) -> tuple[str, bool]:
+    """Run one tool body; returns (output, is_error). The MCP server and the playground both call this."""
+    t0 = time.time()
+    try:
+        out = _BODIES[name](state, args)          # run_sql / _describe / … unchanged
+        err = False
+    except Exception as e:
+        out, err = f"{type(e).__name__}: {e}", True
+    state.record(name, args, out, t0, err)
+    return cut(out, RESULT_CUT), err
+
+def make_tool_server(state: ToolState) -> McpSdkServerConfig:
+    tools = []
+    for name, spec in TOOL_SPECS.items():
+        async def _fn(args: dict[str, Any], _n: str = name) -> dict[str, Any]:
+            out, err = call_tool(state, _n, args) if _n != "llm_extract" else await _call_llm_extract(state, args)
+            return {"content": [{"type": "text", "text": out}], **({"is_error": True} if err else {})}
+        tools.append(tool(name, spec.description, spec.schema)(_fn))
+    return create_sdk_mcp_server(name="dab", version="1.0.0", tools=tools)</pre></div>
+</div></section>
+
+<section class="blk" id="rules"><div class="wrap">
+<div class="hd"><p class="label">07 · rules that change</p><h2>Two lines in CLAUDE.md move; the "only three things call a model" rule holds unless D8-B</h2></div>
+<div class="tw"><table>
+<thead><tr><th>rule today</th><th>after</th></tr></thead>
+<tbody>
+<tr><td>"The explorer, the ingest, the rescore and the context build never [call a model]."</td><td>Unchanged under D8-A. Under D8-B: "…the explorer's playground may run <code>llm_extract</code> only when <code>DAB_PLAYGROUND_LLM=1</code>, and says the row count before it does."</td></tr>
+<tr><td>"The API and the explorer read only <code>data/index/</code> and <code>data/answers/</code>." (already relaxed for runs/ and data/context/)</td><td>"…and <code>runs/</code>, <code>data/context/</code>, <code>agents/</code>. The one route that executes is <code>POST /api/agent/tools/&lt;name&gt;</code>: the trial's own tool bodies, the read-only role, the network-off sandbox, no run folder and no MLflow trace."</td></tr>
+<tr><td>(app.py docstring) "Nothing here reads the upstream clone, calls a model, or writes"</td><td>"…or writes, except the playground's /work files under <code>workspace/playground_*</code>."</td></tr>
+</tbody></table></div>
+</div></section>
+
+<section class="band-sec" id="risks"><div class="wrap">
+<div class="hd"><p class="label">08 · risks and failure modes</p><h2>The tool refactor is the risk; everything else is additive</h2></div>
+<div class="grid g2">
+<div class="panel card"><h3>The refactor changes a trial's behaviour</h3><p>Mitigation: bodies move, they are not rewritten; the existing tool tests run; a new test calls every tool through both paths (<code>call_tool</code> and the MCP wrapper) with the same args and asserts identical output on the pack-only tools. A smoke re-run (12 × 1, ≈ $2) after the refactor is cheap insurance and is listed as A4.</p></div>
+<div class="panel card"><h3>The explorer now depends on Docker and Postgres being up</h3><p>Only the playground does. <code>execute_python</code> returns 503 with <code>make sandbox</code> / <code>make db-up</code> in the message; the graph and replay never touch either. The sandbox container starts on the first execute_python call, not at server start, and is removed on shutdown (<code>docker rm -f dab-sbx-playground</code>).</p></div>
+<div class="panel card"><h3>A browser tab can run arbitrary SQL / Python</h3><p>On a local, single-user explorer, with the trial's own guards: the SQL role cannot write and times out at 60 s; Python has no network and a 600 s cap. This is the same surface the agent already has. The route is not exposed beyond localhost by anything in this repo.</p></div>
+<div class="panel card"><h3>Concurrency in the playground</h3><p>FastAPI runs sync handlers in a thread pool; two execute_python calls share one container but are separate processes in separate /work keys per dataset — the same as two trials of one dataset would not be, so a playground call for a dataset uses a single key <code>playground_&lt;dataset&gt;</code> and two concurrent calls on the same dataset may read each other's parquet. Acceptable for one person at one screen; noted in the panel.</p></div>
+</div>
+<h3 style="margin-top:24px">Open questions (answered by the decisions below)</h3>
+<ul class="qa">
+<li>Should the playground ever call a model? (D8)</li>
+<li>Is the playground a pane of the Agent tab or its own tab? (D9)</li>
+<li>Build it all at once or graph first? (D10)</li>
+</ul>
+</div></section>
+
+<section class="blk" id="decide"><div class="wrap">
+<div class="hd"><p class="label">09 · decisions</p><h2>Three decisions, one approval</h2></div>
+
+<form class="q" data-lavish-question="D8-playground-llm" onsubmit="event.preventDefault();const f=new FormData(event.currentTarget);const c=f.get('d8');const n=(f.get('notes')||'').trim();if(!c)return;window.lavish.queuePrompt('Decision D8 (model-calling tools in the playground): '+c+(n?' — notes: '+n:''),{tag:'decision',text:'D8: '+c,element:event.currentTarget,data:{question:'D8-playground-llm',answer:c,notes:n}});event.currentTarget.querySelector('.queued').textContent='queued: '+c;">
+<h3>D8 · llm_extract in the playground</h3>
+<p class="why">It is the only tool that bills the subscription. Everything else is free to call as often as you like.</p>
+<label><input type="radio" name="d8" value="A: display-only — the node and schema show, the Run button is disabled with the reason"> <span><b>A</b> · display-only <span class="rec">recommended</span> — the rule "only three things call a model" stays exactly as written; the tab still explains what llm_extract does and shows its calls in a trace.</span></label>
+<label><input type="radio" name="d8" value="B: on behind DAB_PLAYGROUND_LLM=1 with a confirm that states the row count and the cost estimate"> <span><b>B</b> · behind a switch — useful for testing an extraction instruction by hand before changing system.md; adds a fourth model caller to CLAUDE.md.</span></label>
+<textarea name="notes" placeholder="notes (optional)"></textarea>
+<div class="row"><button class="btn" type="submit">Queue D8</button><span class="queued"></span></div>
+</form>
+
+<form class="q" data-lavish-question="D9-playground-home" onsubmit="event.preventDefault();const f=new FormData(event.currentTarget);const c=f.get('d9');const n=(f.get('notes')||'').trim();if(!c)return;window.lavish.queuePrompt('Decision D9 (where the playground lives): '+c+(n?' — notes: '+n:''),{tag:'decision',text:'D9: '+c,element:event.currentTarget,data:{question:'D9-playground-home',answer:c,notes:n}});event.currentTarget.querySelector('.queued').textContent='queued: '+c;">
+<h3>D9 · where the playground lives</h3>
+<p class="why">The request asked for one tab. The question is whether the tool form is a pane of it or gets a tab of its own.</p>
+<label><input type="radio" name="d9" value="A: a pane of the Agent tab, opened from a tool node or a replay row (as mocked)"> <span><b>A</b> · a pane of the Agent tab <span class="rec">recommended</span> — the form is always in the context of a node and a dataset; one URL state covers all three panes.</span></label>
+<label><input type="radio" name="d9" value="B: its own tab 'Playground' with the graph tab linking to it"> <span><b>B</b> · its own tab — simpler page, but the "re-run with changes" hop crosses tabs and loses the trace context.</span></label>
+<textarea name="notes" placeholder="notes (optional)"></textarea>
+<div class="row"><button class="btn" type="submit">Queue D9</button><span class="queued"></span></div>
+</form>
+
+<form class="q" data-lavish-question="D10-scope" onsubmit="event.preventDefault();const f=new FormData(event.currentTarget);const c=f.get('d10');const n=(f.get('notes')||'').trim();if(!c)return;window.lavish.queuePrompt('Decision D10 (build order): '+c+(n?' — notes: '+n:''),{tag:'decision',text:'D10: '+c,element:event.currentTarget,data:{question:'D10-scope',answer:c,notes:n}});event.currentTarget.querySelector('.queued').textContent='queued: '+c;">
+<h3>D10 · build order</h3>
+<p class="why">A1–A5 below is one commit series on <code>agent-build-v0</code>; no model call is needed to build or test any of it.</p>
+<label><input type="radio" name="d10" value="A: all of A1–A5 in one go, review the tab when it is live"> <span><b>A</b> · all at once <span class="rec">recommended</span> — the three panes share the pickers and the URL state; building them together avoids reworking the page twice.</span></label>
+<label><input type="radio" name="d10" value="B: A1–A2 (API + graph) first, stop for a look, then A3 (playground + replay)"> <span><b>B</b> · graph first — a checkpoint before the executing route exists.</span></label>
+<textarea name="notes" placeholder="notes (optional)"></textarea>
+<div class="row"><button class="btn" type="submit">Queue D10</button><span class="queued"></span></div>
+</form>
+
+<form class="q" data-lavish-question="approve-s02" onsubmit="event.preventDefault();const f=new FormData(event.currentTarget);const c=f.get('ok');const n=(f.get('notes')||'').trim();if(!c)return;window.lavish.queuePrompt('Approval for s02 (Agent tab): '+c+(n?' — notes: '+n:''),{tag:'approval',text:'s02: '+c,element:event.currentTarget,data:{question:'approve-s02',answer:c,notes:n}});event.currentTarget.querySelector('.queued').textContent='queued: '+c;">
+<h3>Approval</h3>
+<p class="why">Queue the decisions above first; this one says whether to start.</p>
+<label><input type="radio" name="ok" value="approved: build A1–A5 as decided above, on agent-build-v0, then show me the tab"> <span><b>Approve</b> — build it as decided, restart the explorer on :8091, report with screenshots.</span></label>
+<label><input type="radio" name="ok" value="revise: see notes"> <span><b>Revise</b> — say what to change in the notes.</span></label>
+<textarea name="notes" placeholder="notes (optional)"></textarea>
+<div class="row"><button class="btn" type="submit">Queue approval</button><span class="queued"></span></div>
+</form>
+</div></section>
+
+<section class="blk" id="ms"><div class="wrap">
+<div class="hd"><p class="label">10 · milestones</p><h2>Five steps, one afternoon, $0 of subscription — the smoke re-run after the refactor is the only spend and it is optional</h2></div>
+<div class="panel"><div class="ms">
+<span class="m">A1 · tools</span><span>Lift the schemas to <code>TOOL_SPECS</code>, add <code>call_tool</code>, re-point <code>make_tool_server</code>. Tests: dispatch on the pack-only tools through both paths; existing suite green.</span>
+<span class="m">A2 · api</span><span><code>/api/agents</code>, <code>/api/agents/{name}</code>, <code>…/prompt</code>, <code>POST /api/agent/tools/{name}</code>; the lazy playground sandbox; config switch. Tests: agents list, 400/403/503 paths, live query_db under <code>DAB_TEST_PG=1</code>.</span>
+<span class="m">A3 · page</span><span><code>Agent.tsx</code> + <code>lib/agent.tsx</code>: pickers with URL state, the graph (data-driven SVG), node panel, tool form, replay table, compare pane; nav entry; design lint clean; checked at 390 / 900 / 1280 px, both themes.</span>
+<span class="m">A4 · check</span><span>Optional: <code>dab eval --split smoke --trials 1</code> (≈ $2, 12 trials) to show the refactor changed nothing in a live trial — compared against the 21 Sep smoke (7/12).</span>
+<span class="m">A5 · docs</span><span>CLAUDE.md rules (§07), AGENTS.md layout + the Agent tab, README explorer section; commit series on <code>agent-build-v0</code>; explorer restarted on :8091.</span>
+</div></div>
+<p class="small" style="margin-top:16px">Source of every number on this page: <code>agents/v0/agent.yaml</code>, <code>src/dab_bench/agent/tools.py</code>, <code>runs/20260921T064521Z_v0_all_haiku/traces/crmarenapro_6_t1.json</code>, <code>runs/…/run.json</code>. The SQL and Python in the mock are the trial's own calls, cut.</p>
+</div></section>
+</body>
+</html>

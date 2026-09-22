@@ -343,168 +343,219 @@ async def _llm_extract(
     )
 
 
-def make_tool_server(state: ToolState) -> McpSdkServerConfig:
-    """The `dab` MCP server for one trial."""
+# ── the tool table: one spec per tool, one body per tool, one dispatcher ─────────
+# `make_tool_server` (a trial) and the explorer's playground both go through `call_tool`,
+# so a tool cannot behave differently in the two places.
 
-    def _done(
-        name: str, inputs: dict[str, Any], out: str, t0: float, error: bool = False
-    ) -> dict[str, Any]:
-        state.record(name, inputs, out, t0, error)
-        return {
-            "content": [{"type": "text", "text": cut(out, RESULT_CUT)}],
-            **({"is_error": True} if error else {}),
-        }
 
-    @tool(
-        "list_db",
-        "The stores and tables of this dataset with row counts and columns (from the context pack).",
-        {},
-    )
-    async def list_db(args: dict[str, Any]) -> dict[str, Any]:
-        t0 = time.time()
-        lines = []
-        for t in state.ctx.tables:
-            cols = ", ".join(str(c.get("name")) for c in t.get("columns") or [])
-            fam = t.get("family")
-            extra = (
-                f" [family of {len(fam['members']):,} tables; union: {fam.get('union_table')}]"
-                if fam
-                else ""
-            )
-            lines.append(
-                f"{t.get('table')} ({int(t.get('rows') or 0):,} rows; store {t.get('store')}){extra}: {cols}"
-            )
-        return _done("list_db", {}, "\n".join(lines), t0)
+@dataclass(frozen=True)
+class ToolSpec:
+    name: str
+    description: str
+    schema: dict[str, Any]
+    backend: str  # "pack" | "postgres" | "sandbox" | "model" | "state"
+    calls_model: bool = False
 
-    @tool(
-        "describe_table",
-        "Columns, types, null rate, distinct count, min/max and top values of one table.",
-        {"table": str},
-    )
-    async def describe_table(args: dict[str, Any]) -> dict[str, Any]:
-        t0 = time.time()
-        table = str(args.get("table", "")).strip().strip('"')
-        try:
-            out = await asyncio.to_thread(_describe, state, table)
-            return _done("describe_table", {"table": table}, out, t0)
-        except Exception as e:  # noqa: BLE001 - the model needs the error text
-            return _done(
-                "describe_table", {"table": table}, f"Error: {type(e).__name__}: {e}", t0, True
-            )
 
-    @tool(
-        "sample_rows",
-        "A few rows of one table (default 5, max 20).",
-        {
-            "type": "object",
-            "properties": {"table": {"type": "string"}, "n": {"type": "integer"}},
-            "required": ["table"],
-        },
-    )
-    async def sample_rows(args: dict[str, Any]) -> dict[str, Any]:
-        t0 = time.time()
-        table = str(args.get("table", "")).strip().strip('"')
-        n = max(1, min(int(args.get("n") or 5), 20))
-        try:
-            out = await asyncio.to_thread(
-                run_sql, state, f'SELECT * FROM {PG_SCHEMA}."{table}"', n, None
-            )
-            return _done("sample_rows", {"table": table, "n": n}, out, t0)
-        except Exception as e:  # noqa: BLE001
-            return _done(
-                "sample_rows", {"table": table, "n": n}, f"Error: {type(e).__name__}: {e}", t0, True
-            )
+def _obj(props: dict[str, Any], required: list[str]) -> dict[str, Any]:
+    return {"type": "object", "properties": props, "required": required}
 
-    @tool(
-        "query_db",
-        "Run read-only Postgres SQL against the dataset (schema dataagentbench is the search_path; tables are "
-        "<dataset>_<table>). Returns up to `limit` rows (default 50, max 500). With `save_as`, writes ALL result rows "
-        "to /work/<save_as>.parquet for execute_python and returns the first rows.",
-        {
-            "type": "object",
-            "properties": {
-                "sql": {"type": "string", "description": "read-only SELECT / WITH query"},
-                "limit": {"type": "integer", "description": "rows to return (default 50, max 500)"},
-                "save_as": {
-                    "type": "string",
-                    "description": "optional: write all result rows to /work/<save_as>.parquet for execute_python",
+
+TOOL_SPECS: dict[str, ToolSpec] = {
+    t.name: t
+    for t in (
+        ToolSpec(
+            "list_db",
+            "The stores and tables of this dataset with row counts and columns (from the context pack).",
+            _obj({}, []),
+            "pack",
+        ),
+        ToolSpec(
+            "describe_table",
+            "Columns, types, null rate, distinct count, min/max and top values of one table.",
+            _obj({"table": {"type": "string"}}, ["table"]),
+            "postgres",
+        ),
+        ToolSpec(
+            "sample_rows",
+            "A few rows of one table (default 5, max 20).",
+            _obj({"table": {"type": "string"}, "n": {"type": "integer"}}, ["table"]),
+            "postgres",
+        ),
+        ToolSpec(
+            "query_db",
+            "Run read-only Postgres SQL against the dataset (schema dataagentbench is the search_path; tables are "
+            "<dataset>_<table>). Returns up to `limit` rows (default 50, max 500). With `save_as`, writes ALL result rows "
+            "to /work/<save_as>.parquet for execute_python and returns the first rows.",
+            _obj(
+                {
+                    "sql": {"type": "string", "description": "read-only SELECT / WITH query"},
+                    "limit": {
+                        "type": "integer",
+                        "description": "rows to return (default 50, max 500)",
+                    },
+                    "save_as": {
+                        "type": "string",
+                        "description": "optional: write all result rows to /work/<save_as>.parquet for execute_python",
+                    },
                 },
-            },
-            "required": ["sql"],
-        },
+                ["sql"],
+            ),
+            "postgres",
+        ),
+        ToolSpec(
+            "execute_python",
+            "Run Python 3.12 in a sandbox with no network (pandas, numpy, pyarrow, duckdb, scipy). The working directory "
+            "is this trial's /work folder, where query_db(save_as=…) parquet files are; each call is a fresh process, so "
+            "print what you need and save intermediate results to files. Output is cut at 10 000 chars.",
+            _obj({"code": {"type": "string"}}, ["code"]),
+            "sandbox",
+        ),
+        ToolSpec(
+            "llm_extract",
+            "Label a text column with a small model. Runs `sql` (≤ 2000 rows), sends `column` in batches with your "
+            "`instruction` (and optional fixed `labels`), and writes the rows plus a `label` column to /work/<save_as>.parquet. "
+            "Use it for categories, entities or facts that live in free text, never for arithmetic.",
+            _obj(
+                {
+                    "sql": {
+                        "type": "string",
+                        "description": "query selecting the rows (≤ 2000) incl. the text column",
+                    },
+                    "column": {"type": "string", "description": "the text column to label"},
+                    "instruction": {
+                        "type": "string",
+                        "description": "what to extract or decide per item",
+                    },
+                    "labels": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "optional fixed label set; omit for free-form values",
+                    },
+                    "save_as": {
+                        "type": "string",
+                        "description": "parquet name under /work (default: extracted)",
+                    },
+                },
+                ["sql", "column", "instruction"],
+            ),
+            "model",
+            calls_model=True,
+        ),
+        ToolSpec(
+            "read_context",
+            "Read a file from the dataset's context pack (schema.md, joins.md, profile.json, samples/<table>.md, pitfalls.md); a directory lists its files.",
+            _obj({"path": {"type": "string"}}, ["path"]),
+            "pack",
+        ),
+        ToolSpec(
+            "search_context",
+            "Grep the context pack for a term (column names, values, words from the description).",
+            _obj({"term": {"type": "string"}}, ["term"]),
+            "pack",
+        ),
+        ToolSpec(
+            "return_answer",
+            "Submit the final answer: the value(s) only, in the shape the question asks for, no explanation. Call it once, then stop.",
+            _obj({"answer": {"type": "string"}}, ["answer"]),
+            "state",
+        ),
     )
-    async def query_db(args: dict[str, Any]) -> dict[str, Any]:
-        t0 = time.time()
-        sql = str(args.get("sql", ""))
-        limit = int(args.get("limit") or DEFAULT_LIMIT)
-        save_as = str(args.get("save_as") or "").strip() or None
-        inputs = {"sql": sql, "limit": limit, "save_as": save_as}
-        try:
-            out = await asyncio.to_thread(run_sql, state, sql, limit, save_as)
-            return _done("query_db", inputs, out, t0, out.startswith("Error"))
-        except Exception as e:  # noqa: BLE001
-            return _done(
-                "query_db",
-                inputs,
-                f"Error: {type(e).__name__}: {str(e).splitlines()[0][:400]}",
-                t0,
-                True,
-            )
+}
 
-    @tool(
-        "execute_python",
-        "Run Python 3.12 in a sandbox with no network (pandas, numpy, pyarrow, duckdb, scipy). The working directory "
-        "is this trial's /work folder, where query_db(save_as=…) parquet files are; each call is a fresh process, so "
-        "print what you need and save intermediate results to files. Output is cut at 10 000 chars.",
-        {"code": str},
-    )
-    async def execute_python(args: dict[str, Any]) -> dict[str, Any]:
-        t0 = time.time()
-        code = str(args.get("code", ""))
-        if state.sandbox is None:
-            return _done(
-                "execute_python",
-                {"code": code},
-                "Error: no sandbox in this run (dry run)",
-                t0,
-                True,
-            )
-        out, _ = await asyncio.to_thread(
-            state.sandbox.run, code, state.trial_key, state.exec_timeout_s
+
+def _list_db(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, Any], str]:
+    lines = []
+    for t in state.ctx.tables:
+        cols = ", ".join(str(c.get("name")) for c in t.get("columns") or [])
+        fam = t.get("family")
+        extra = (
+            f" [family of {len(fam['members']):,} tables; union: {fam.get('union_table')}]"
+            if fam
+            else ""
         )
-        return _done("execute_python", {"code": code}, out, t0, out.startswith("Error"))
+        lines.append(
+            f"{t.get('table')} ({int(t.get('rows') or 0):,} rows; store {t.get('store')}){extra}: {cols}"
+        )
+    return {}, "\n".join(lines)
 
-    @tool(
-        "llm_extract",
-        "Label a text column with a small model. Runs `sql` (≤ 2000 rows), sends `column` in batches with your "
-        "`instruction` (and optional fixed `labels`), and writes the rows plus a `label` column to /work/<save_as>.parquet. "
-        "Use it for categories, entities or facts that live in free text, never for arithmetic.",
-        {
-            "type": "object",
-            "properties": {
-                "sql": {
-                    "type": "string",
-                    "description": "query selecting the rows (≤ 2000) incl. the text column",
-                },
-                "column": {"type": "string", "description": "the text column to label"},
-                "instruction": {
-                    "type": "string",
-                    "description": "what to extract or decide per item",
-                },
-                "labels": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "optional fixed label set; omit for free-form values",
-                },
-                "save_as": {
-                    "type": "string",
-                    "description": "parquet name under /work (default: extracted)",
-                },
-            },
-            "required": ["sql", "column", "instruction"],
-        },
-    )
-    async def llm_extract(args: dict[str, Any]) -> dict[str, Any]:
+
+def _describe_table(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, Any], str]:
+    table = str(args.get("table", "")).strip().strip('"')
+    return {"table": table}, _describe(state, table)
+
+
+def _sample_rows(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, Any], str]:
+    table = str(args.get("table", "")).strip().strip('"')
+    n = max(1, min(int(args.get("n") or 5), 20))
+    return {"table": table, "n": n}, run_sql(state, f'SELECT * FROM {PG_SCHEMA}."{table}"', n, None)
+
+
+def _query_db(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, Any], str]:
+    sql = str(args.get("sql", ""))
+    limit = int(args.get("limit") or DEFAULT_LIMIT)
+    save_as = str(args.get("save_as") or "").strip() or None
+    inputs = {"sql": sql, "limit": limit, "save_as": save_as}
+    try:
+        return inputs, run_sql(state, sql, limit, save_as)
+    except Exception as e:  # noqa: BLE001 - the model needs the first line of the error
+        return inputs, f"Error: {type(e).__name__}: {str(e).splitlines()[0][:400]}"
+
+
+def _execute_python(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, Any], str]:
+    code = str(args.get("code", ""))
+    if state.sandbox is None:
+        return {"code": code}, "Error: no sandbox in this run (dry run)"
+    out, _ = state.sandbox.run(code, state.trial_key, state.exec_timeout_s)
+    return {"code": code}, out
+
+
+def _read_context_tool(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, Any], str]:
+    path = str(args.get("path", "")).strip() or "."
+    return {"path": path}, _read_context(state, path)
+
+
+def _search_context_tool(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, Any], str]:
+    term = str(args.get("term", ""))
+    return {"term": term}, _search_context(state, term)
+
+
+def _return_answer(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, Any], str]:
+    state.answer = str(args.get("answer", "")).strip()
+    return {"answer": state.answer}, "recorded. Do not call any more tools."
+
+
+_BODIES: dict[str, Any] = {
+    "list_db": _list_db,
+    "describe_table": _describe_table,
+    "sample_rows": _sample_rows,
+    "query_db": _query_db,
+    "execute_python": _execute_python,
+    "read_context": _read_context_tool,
+    "search_context": _search_context_tool,
+    "return_answer": _return_answer,
+}
+
+
+def call_tool(state: ToolState, name: str, args: dict[str, Any]) -> tuple[str, bool]:
+    """Run one synchronous tool body against the state; returns (output cut at RESULT_CUT, is_error).
+    Records the call on the state exactly as a trial does. `llm_extract` is async: see `call_tool_async`."""
+    if name not in _BODIES:
+        raise KeyError(name)
+    t0 = time.time()
+    inputs: dict[str, Any] = dict(args)
+    try:
+        inputs, out = _BODIES[name](state, args)
+        err = out.startswith("Error")
+    except Exception as e:  # noqa: BLE001 - the model needs the error text
+        out, err = f"Error: {type(e).__name__}: {e}", True
+    state.record(name, inputs, out, t0, err)
+    return cut(out, RESULT_CUT), err
+
+
+async def call_tool_async(state: ToolState, name: str, args: dict[str, Any]) -> tuple[str, bool]:
+    """`call_tool` for every tool, with the blocking bodies off the event loop."""
+    if name == "llm_extract":
         t0 = time.time()
         inputs = {k: args.get(k) for k in ("sql", "column", "instruction", "labels", "save_as")}
         try:
@@ -516,54 +567,28 @@ def make_tool_server(state: ToolState) -> McpSdkServerConfig:
                 [str(x) for x in (args.get("labels") or [])] or None,
                 str(args.get("save_as") or "extracted"),
             )
-            return _done("llm_extract", inputs, out, t0, out.startswith("Error"))
+            err = out.startswith("Error")
         except Exception as e:  # noqa: BLE001
-            return _done("llm_extract", inputs, f"Error: {type(e).__name__}: {e}", t0, True)
+            out, err = f"Error: {type(e).__name__}: {e}", True
+        state.record("llm_extract", inputs, out, t0, err)
+        return cut(out, RESULT_CUT), err
+    return await asyncio.to_thread(call_tool, state, name, args)
 
-    @tool(
-        "read_context",
-        "Read a file from the dataset's context pack (schema.md, joins.md, profile.json, samples/<table>.md, pitfalls.md); a directory lists its files.",
-        {"path": str},
-    )
-    async def read_context(args: dict[str, Any]) -> dict[str, Any]:
-        t0 = time.time()
-        path = str(args.get("path", "")).strip() or "."
-        return _done("read_context", {"path": path}, _read_context(state, path), t0)
 
-    @tool(
-        "search_context",
-        "Grep the context pack for a term (column names, values, words from the description).",
-        {"term": str},
-    )
-    async def search_context(args: dict[str, Any]) -> dict[str, Any]:
-        t0 = time.time()
-        term = str(args.get("term", ""))
-        return _done("search_context", {"term": term}, _search_context(state, term), t0)
+def make_tool_server(state: ToolState) -> McpSdkServerConfig:
+    """The `dab` MCP server for one trial: every spec, wrapped around `call_tool_async`."""
 
-    @tool(
-        "return_answer",
-        "Submit the final answer: the value(s) only, in the shape the question asks for, no explanation. Call it once, then stop.",
-        {"answer": str},
-    )
-    async def return_answer(args: dict[str, Any]) -> dict[str, Any]:
-        t0 = time.time()
-        state.answer = str(args.get("answer", "")).strip()
-        return _done(
-            "return_answer", {"answer": state.answer}, "recorded. Do not call any more tools.", t0
-        )
+    def _make(spec: ToolSpec) -> Any:
+        async def _fn(args: dict[str, Any]) -> dict[str, Any]:
+            out, err = await call_tool_async(state, spec.name, args)
+            return {
+                "content": [{"type": "text", "text": out}],
+                **({"is_error": True} if err else {}),
+            }
+
+        _fn.__name__ = spec.name
+        return tool(spec.name, spec.description, spec.schema)(_fn)
 
     return create_sdk_mcp_server(
-        name="dab",
-        version="1.0.0",
-        tools=[
-            list_db,
-            describe_table,
-            sample_rows,
-            query_db,
-            execute_python,
-            llm_extract,
-            read_context,
-            search_context,
-            return_answer,
-        ],
+        name="dab", version="1.0.0", tools=[_make(spec) for spec in TOOL_SPECS.values()]
     )
