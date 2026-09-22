@@ -1,9 +1,12 @@
 """The API behind the explorer, and the explorer itself when a build is present.
 
 Every route serves committed files — the index under `data/index/`, the
-answers under `data/answers/`, the context pack under `data/context/` — plus
-this machine's run folders under `runs/`. Nothing here reads the upstream
-clone, calls a model, or writes; MLflow is linked, never read.
+answers under `data/answers/`, the context pack under `data/context/`, the
+agent versions under `agents/` — plus this machine's run folders under `runs/`.
+Nothing here reads the upstream clone or calls a model; MLflow is linked, never
+read. The one route that executes is the playground, `POST /api/agent/tools/<name>`:
+the trial's own tool bodies on the read-only role and the network-off sandbox,
+writing nothing but /work files under `workspace/playground_*`.
 """
 
 from __future__ import annotations
@@ -16,9 +19,17 @@ from typing import Any
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 from dab_bench import __version__
-from dab_bench.config import CONTEXT_DIR, FRONTEND_DIST, MLFLOW_EXPERIMENT, RUNS_DIR, settings
+from dab_bench.config import (
+    CONTEXT_DIR,
+    FRONTEND_DIST,
+    MLFLOW_EXPERIMENT,
+    RUNS_DIR,
+    WORKSPACE_DIR,
+    settings,
+)
 from dab_bench.data.index import Index, load, stats
 
 EXAMPLES_PER_FILE = 3
@@ -178,8 +189,175 @@ def create_app(index: Index | None = None) -> FastAPI:
         )
         return {"dataset": key, "files": files, "curation": cur}
 
+    # ── the agent: versions, the composed prompt, and the playground ─────────────
+
+    @app.get("/api/agents")
+    def agents() -> dict[str, Any]:
+        from dab_bench.agent.versions import champion_name, list_versions, load_version
+
+        out = []
+        for name in list_versions():
+            v = load_version(name)
+            out.append(
+                {
+                    "name": name,
+                    "fingerprint": v.fingerprint,
+                    "model": v.config.model,
+                    "effort": v.config.effort,
+                    "max_turns": v.config.max_turns,
+                    "timeout_s": v.config.timeout_s,
+                    "exec_timeout_s": v.config.exec_timeout_s,
+                    "hints": v.config.hints,
+                    "tools": [t.replace("mcp__dab__", "") for t in v.config.tools],
+                }
+            )
+        return {"champion": champion_name(), "versions": out}
+
+    @app.get("/api/agents/{name}")
+    def agent_detail(name: str) -> dict[str, Any]:
+        from dab_bench.agent.sandbox import image_exists
+        from dab_bench.agent.tools import TOOL_SPECS
+        from dab_bench.agent.versions import champion_name
+
+        v = _version(name)
+        allowed = [t.replace("mcp__dab__", "") for t in v.config.tools]
+        return {
+            "name": v.name,
+            "champion": v.name == champion_name(),
+            "fingerprint": v.fingerprint,
+            "config": asdict(v.config),
+            "files": v.files(),
+            "tools": [
+                {
+                    "name": t.name,
+                    "description": t.description,
+                    "schema": t.schema,
+                    "backend": t.backend,
+                    "calls_model": t.calls_model,
+                    "playground": "off"
+                    if t.calls_model and not s.playground_llm
+                    else "echo"
+                    if t.name == "return_answer"
+                    else "on",
+                }
+                for t in TOOL_SPECS.values()
+                if t.name in allowed
+            ],
+            "sandbox_built": image_exists(),
+            "playground_llm": s.playground_llm,
+            "datasets": sorted(
+                p.name for p in CONTEXT_DIR.iterdir() if (p / "tables.json").exists()
+            )
+            if CONTEXT_DIR.exists()
+            else [],
+        }
+
+    @app.get("/api/agents/{name}/prompt")
+    def agent_prompt(name: str, dataset: str, hints: bool = False) -> dict[str, Any]:
+        from dab_bench.agent.prompt import compose_system_prompt, load_context
+
+        v = _version(name)
+        try:
+            ctx = load_context(dataset)
+        except FileNotFoundError as e:
+            raise HTTPException(404, str(e)) from e
+        prompt = compose_system_prompt(v.system_prompt, ctx, hints=hints)
+        return {
+            "agent": v.name,
+            "dataset": dataset,
+            "context_sha": ctx.context_sha,
+            "chars": len(prompt),
+            "prompt": prompt,
+        }
+
+    @app.post("/api/agent/tools/{name}")
+    def playground(name: str, body: ToolCall) -> dict[str, Any]:
+        """Run one tool by hand with the trial's own guards. Not a trial: no run folder,
+        no MLflow trace; only /work files under workspace/playground_<dataset>."""
+        from dab_bench.agent.prompt import load_context
+        from dab_bench.agent.sandbox import image_exists
+        from dab_bench.agent.tools import TOOL_SPECS, ToolState, call_tool
+
+        v = _version(body.agent)
+        spec = TOOL_SPECS.get(name)
+        if spec is None or f"mcp__dab__{name}" not in v.config.tools:
+            raise HTTPException(400, f"no tool {name!r} on agent {v.name}")
+        if spec.calls_model:
+            if not s.playground_llm:
+                raise HTTPException(
+                    403, "llm_extract calls a model; set DAB_PLAYGROUND_LLM=1 to allow it here"
+                )
+            raise HTTPException(501, "llm_extract in the playground is not wired yet (D8-A)")
+        missing = [k for k in spec.schema.get("required", []) if body.input.get(k) in (None, "")]
+        if missing:
+            raise HTTPException(400, f"missing input: {', '.join(missing)}")
+        try:
+            ctx = load_context(body.dataset)
+        except FileNotFoundError as e:
+            raise HTTPException(404, str(e)) from e
+        sandbox = None
+        if spec.backend == "sandbox":
+            if not image_exists():
+                raise HTTPException(503, "sandbox image missing: run `make sandbox`")
+            sandbox = _playground_sandbox()
+        elif name == "query_db" and body.input.get("save_as"):
+            sandbox = _playground_sandbox() if image_exists() else None
+        state = ToolState(
+            dataset=body.dataset,
+            ctx=ctx,
+            trial_key=f"playground_{body.dataset}",
+            sandbox=sandbox,
+            exec_timeout_s=v.config.exec_timeout_s,
+        )
+        out, err = call_tool(state, name, body.input)
+        call = state.calls[-1]
+        return {
+            "tool": name,
+            "dataset": body.dataset,
+            "input": call["input"],
+            "output": out,
+            "chars": call["chars"],
+            "cut": call["chars"] > len(out),
+            "elapsed_s": call["elapsed_s"],
+            "error": err,
+        }
+
+    @app.on_event("shutdown")
+    def _stop_sandbox() -> None:
+        sb = _PLAYGROUND.get("sandbox")
+        if sb is not None:
+            sb.stop()
+
     _mount_frontend(app)
     return app
+
+
+class ToolCall(BaseModel):
+    agent: str = "champion"
+    dataset: str
+    input: dict[str, Any] = {}
+
+
+_PLAYGROUND: dict[str, Any] = {}
+
+
+def _playground_sandbox() -> Any:
+    """One container for the explorer process, started on first use; /work is
+    workspace/playground/ so a query_db(save_as) here is readable by execute_python here."""
+    from dab_bench.agent.sandbox import Sandbox
+
+    if _PLAYGROUND.get("sandbox") is None:
+        _PLAYGROUND["sandbox"] = Sandbox.start("playground", WORKSPACE_DIR / "playground")
+    return _PLAYGROUND["sandbox"]
+
+
+def _version(name: str) -> Any:
+    from dab_bench.agent.versions import load_version
+
+    try:
+        return load_version(name)
+    except FileNotFoundError as e:
+        raise HTTPException(404, f"no agent version {name!r}") from e
 
 
 def _mlflow_run_url(run_id: str | None) -> str | None:

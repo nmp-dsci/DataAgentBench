@@ -83,3 +83,40 @@ def test_query_db_on_the_read_only_role() -> None:
     assert not err and out.startswith("n\n")
     out, err = call_tool(st, "query_db", {"sql": "delete from yelp_business"})
     assert err and "Error" in out
+
+
+def test_agent_api_lists_versions_and_guards_the_playground() -> None:
+    from fastapi.testclient import TestClient
+
+    from dab_bench.serving import app as serving
+
+    client = TestClient(serving.create_app())
+    board = client.get("/api/agents").json()
+    assert board["champion"] == "v0" and [v["name"] for v in board["versions"]] == ["v0"]
+    detail = client.get("/api/agents/champion").json()
+    assert detail["name"] == "v0" and detail["champion"] is True
+    modes = {t["name"]: t["playground"] for t in detail["tools"]}
+    assert modes["llm_extract"] == "off" and modes["return_answer"] == "echo"
+    assert modes["query_db"] == "on" and len(modes) == 9
+    prompt = client.get("/api/agents/v0/prompt", params={"dataset": "yelp"}).json()
+    assert prompt["chars"] > 5000 and prompt["prompt"].startswith(detail["files"]["system.md"][:40])
+    assert client.get("/api/agents/nope").status_code == 404
+    assert client.get("/api/agents/v0/prompt", params={"dataset": "nope"}).status_code == 404
+    assert client.post("/api/agent/tools/nope", json={"dataset": "yelp"}).status_code == 400
+    assert (
+        client.post("/api/agent/tools/query_db", json={"dataset": "yelp", "input": {}}).status_code
+        == 400
+    )
+    llm = client.post(
+        "/api/agent/tools/llm_extract",
+        json={"dataset": "yelp", "input": {"sql": "s", "column": "c", "instruction": "i"}},
+    )
+    assert llm.status_code == 403
+    r = client.post(
+        "/api/agent/tools/search_context", json={"dataset": "yelp", "input": {"term": "stars"}}
+    ).json()
+    assert r["error"] is False and "stars" in r["output"] and r["elapsed_s"] >= 0
+    echo = client.post(
+        "/api/agent/tools/return_answer", json={"dataset": "yelp", "input": {"answer": "42"}}
+    ).json()
+    assert echo["output"].startswith("recorded")

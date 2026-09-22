@@ -61,6 +61,9 @@ class Settings(BaseModel):
     pg_superuser_url: str = "postgresql://nmp:nmp@localhost:5432/dab"
     mlflow_tracking_uri: str = "http://localhost:5000"
     billing: str = "subscription"
+    # The explorer's playground may run llm_extract (a model call on the subscription)
+    # only when this is set; decision D8-A keeps it off (plan s02 §04).
+    playground_llm: bool = False
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -76,6 +79,7 @@ class Settings(BaseModel):
             pg_superuser_url=env("PG_SUPERUSER_URL", cls.model_fields["pg_superuser_url"].default),
             mlflow_tracking_uri=env("MLFLOW_TRACKING_URI", "http://localhost:5000"),
             billing=env("BILLING", "subscription").strip().lower(),
+            playground_llm=env("DAB_PLAYGROUND_LLM", "").strip() == "1",
         )
 
 
