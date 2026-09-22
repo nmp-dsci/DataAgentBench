@@ -4,6 +4,8 @@ import { type AgentDetail, AgentGraph, type AgentsBoard, type NodeId, type PlayR
 import { type Board, type RunDetail, type Span, type Trace, fmtInt, traceKey, useGet } from '../lib/api';
 import { Loading } from '../lib/ui';
 
+const REMEMBER = 'dab.agent.view';
+
 /** One page: the agent system as a graph, a node panel with the tool playground, and a trial replayed turn by turn. State lives in the URL so a view is linkable. */
 export function Agent() {
   const [sp, setSp] = useSearchParams();
@@ -16,6 +18,19 @@ export function Agent() {
     for (const [k, v] of Object.entries(patch)) v == null || v === '' ? next.delete(k) : next.set(k, v);
     setSp(next, { replace: true });
   };
+
+  // the view lives in the URL; leaving the tab and coming back through the nav (a bare
+  // /agent) restores the last one from this browser tab's session
+  useEffect(() => {
+    try {
+      if ([...sp.keys()].length === 0) {
+        const last = sessionStorage.getItem(REMEMBER);
+        if (last) setSp(new URLSearchParams(last), { replace: true });
+      } else sessionStorage.setItem(REMEMBER, sp.toString());
+    } catch {
+      /* storage unavailable: the URL alone still works */
+    }
+  }, [sp, setSp]);
 
   const { data: board } = useGet<AgentsBoard>('/api/agents');
   const { data: detail, error } = useGet<AgentDetail>(`/api/agents/${agent}`);
