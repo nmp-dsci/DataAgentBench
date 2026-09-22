@@ -18,7 +18,10 @@
   subscription: the eval agent (`dab eval`), the curator (`dab context curate`)
   and `llm_extract` inside a trial. `agent/llm.py` is the one place a model is
   named; `require_live()` refuses to start with a per-token key present.
-  The explorer, the ingest, the rescore and the context *build* never do.
+  The explorer, the ingest, the rescore and the context *build* never do —
+  the Agent tab's playground runs every tool *except* `llm_extract`, which
+  stays display-only (decision D8-A; `DAB_PLAYGROUND_LLM=1` is the only way
+  to change that, and it is not wired).
 - **The pack is the knowledge base, and it is legitimate by construction.**
   `dab context build` is code; the curator never sees a question;
   `tests/test_context.py` asserts no question text lands in `summary.md` or
@@ -33,9 +36,13 @@
 - **A rate-limited trial is not a fail.** It is `rate_limited`, unscored, and
   `dab eval --resume <run>` finishes it after the window resets.
 - **The index is the contract.** The API and the explorer read only
-  `data/index/` and `data/answers/`. Never hand-edit those files; change the
-  ingest and re-run it. Never hard-code a dataset, a query or a number in the
-  frontend.
+  `data/index/`, `data/answers/`, `data/context/`, `agents/` and `runs/`.
+  Never hand-edit those files; change the ingest and re-run it. Never
+  hard-code a dataset, a query or a number in the frontend. The one route
+  that executes is the playground, `POST /api/agent/tools/<name>`: the
+  trial's own tool bodies (`call_tool`), the read-only role, the network-off
+  sandbox; it writes no run folder and no MLflow trace, only /work files
+  under `workspace/playground/`.
 - **Scope is the 54.** `aliases.RELEASED_DATASETS` is the 12 leaderboard
   datasets. The five unreleased datasets upstream are a count in
   `source.json` and nothing more (review decision B). Widening the scope is a

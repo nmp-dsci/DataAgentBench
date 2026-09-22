@@ -162,7 +162,14 @@ src/dab_bench/
   tracking/mlflow_log.py · tracing.py                 the run record on MLflow; one trace per trial
   serving/app.py                                      `/api/runs` = the board (roles derived, profile per run); `/traces/<key>` adds the span tree
 frontend/src/pages/Runs.tsx · Run.tsx · TracePage.tsx · lib/runs.tsx   the board, one run vs the champion, the span waterfall
+frontend/src/pages/Agent.tsx · lib/agent.tsx        the Agent tab: the system graph, the node panel + tool form, the replay
 ```
+
+**One tool table.** `agent/tools.py` holds `TOOL_SPECS` (name, description,
+JSON schema, backend) and one body per tool; `call_tool(state, name, args)` is
+the only way a body runs. The trial's MCP server wraps it; the explorer's
+playground (`POST /api/agent/tools/<name>`) calls it. Adding a tool = one spec
++ one body; the graph, the form and the trace spans follow.
 
 **Roles are derived, never declared.** The champion is the newest scored
 full-split run of the agent `agents/champion` names that has no

@@ -122,10 +122,16 @@ trial, and in the explorer under **Runs**. The next step in the plan — v0 at
   9 levenshtein, 0 read the CSV) and which queries use each.
 - **Leaderboard** — the site's 40 entries, the nine with committed answers
   marked, and the stratified tables with our rescore beside them.
-- **Runs / Run / Trace** — our own evals from `runs/`: per-dataset pass rates
-  with denominators, every trial with its tokens and cost, and the full trace
-  (composed system prompt, every turn, every tool exchange), each linked to
-  its MLflow run and trace.
+- **Runs / Run / Trace** — our own evals from `runs/`: the champion and every
+  challenger measured against it, the per-trial profile (mean / p50 / p95 of
+  turns, tokens, wall, cost), every trial with its tokens and cost, and the
+  full trace as a span waterfall plus the transcript, each linked to (and,
+  for a trace, embedding) its MLflow run and trace.
+- **Agent** — the agent system as a graph generated from `agents/<name>/`
+  and the tool server's own schemas; click a node for its config, a tool for a
+  form that runs it with the trial's guards (read-only role, network-off
+  sandbox, never a model); pick a trace to overlay call counts and replay it
+  turn by turn, re-running any tool call with a changed input.
 
 ## 5 · Attribution
 
@@ -137,4 +143,5 @@ request. This project's own code is MIT.
 
 Design brief: `DESIGN.md`. Decisions and layout: `AGENTS.md`. The plans the
 builds were approved against: `.lavish/s00_dab-explorer-init-plan.html`
-(explorer) and `.lavish/s01_agent-blueprint.html` (agent).
+(explorer), `.lavish/s01_agent-blueprint.html` (agent) and
+`.lavish/s02_agent-tab.html` (the Agent tab).
