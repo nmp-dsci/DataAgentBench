@@ -157,7 +157,7 @@ export function Run() {
           <tbody>
             {shown.map((r: TrialRow) => (
               <tr key={`${r.query_id}-${r.trial}`} className={r.passed === false ? 'warnrow' : r.rate_limited ? 'dim' : ''}>
-                <QueryCell id={r.query_id} question={r.question} />
+                <QueryCell id={r.query_id} question={r.question} gold={r.gold} />
                 <td className="num">{r.trial}</td>
                 <td>
                   {r.passed == null ? <span className="tag">{r.rate_limited ? 'rate limited' : 'not scored'}</span> : r.passed ? <span className="tag ok">pass</span> : <span className="tag warn">{r.timed_out ? 'fail · timed out' : r.terminal_reason === 'max_turns' ? 'fail · max turns' : 'fail'}</span>}

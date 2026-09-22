@@ -139,6 +139,7 @@ def create_app(index: Index | None = None) -> FastAPI:
         d["results"] = [r.as_dict() for r in results]
         for r in d["results"]:
             r["mlflow_trace_url"] = _mlflow_trace_url(r.get("mlflow_trace_id"))
+            r["gold"] = _gold(ix, r["query_id"])
         champ = board["champion_run_id"]
         d["versus"] = (
             next((r for r in board["runs"] if r["run_id"] == champ), None)
@@ -163,6 +164,7 @@ def create_app(index: Index | None = None) -> FastAPI:
         t["mlflow_trace_id"] = row.mlflow_trace_id if row else None
         t["mlflow_trace_url"] = _mlflow_trace_url(row.mlflow_trace_id) if row else None
         t["mlflow_embeddable"] = _mlflow_embeddable()
+        t["gold"] = _gold(ix, t.get("query_id", ""))
         t["spans"] = _spans(t)
         return t
 
@@ -561,6 +563,14 @@ def _spans(t: dict[str, Any]) -> list[dict[str, Any]]:
         spans[i]["end"] = last_t
         spans[i]["status"] = "ERROR"
     return spans
+
+
+def _gold(ix: Index, query_id: str) -> dict[str, Any] | None:
+    """The gold answer of a query, for any row that shows its question."""
+    q = ix.query_by_id.get(query_id)
+    if q is None:
+        return None
+    return {"preview": q["gold_text"][:120], "lines": q["gold_lines"], "text": q["gold_text"]}
 
 
 # ── shaping ───────────────────────────────────────────────────────────────

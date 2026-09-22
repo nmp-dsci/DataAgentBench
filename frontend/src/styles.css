@@ -215,3 +215,6 @@ td.replay-cell{min-width:16rem;max-width:34rem}
 td.replay-cell pre.cell{font-size:var(--t-2);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text;cursor:text;margin:0}
 td.replay-cell .linkbtn{margin-top:var(--s1);font-size:var(--t-2)}
 .rowacts{display:inline-flex;flex-direction:column;gap:var(--s1)}
+.gold-cell{color:var(--ink);font-size:var(--t-2);white-space:pre-wrap;overflow-wrap:anywhere}
+.gold-cell .path{display:inline;margin-left:var(--s2)}
+.answer pre{white-space:pre-wrap}

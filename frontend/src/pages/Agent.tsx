@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { type AgentDetail, AgentGraph, type AgentsBoard, type NodeId, type PlayResult, type PromptResp, Replay, ToolForm, TraceLine, toolCounts } from '../lib/agent';
 import { type Board, type RunDetail, type Span, type Trace, fmtInt, traceKey, useGet } from '../lib/api';
-import { Loading } from '../lib/ui';
+import { Gold, Loading } from '../lib/ui';
 
 const REMEMBER = 'dab.agent.view';
 
@@ -126,6 +126,12 @@ export function Agent() {
         {trace && (
           <span className="count">
             <TraceLine runId={runId} traceKey={key} queryId={trace.query_id} trial={trace.trial} passed={trace.passed} cost={trace.cost_usd} />
+            {trace.gold && (
+              <>
+                {' · gold '}
+                <Gold preview={trace.gold.preview} lines={trace.gold.lines} full={trace.gold.text} />
+              </>
+            )}
           </span>
         )}
       </div>
@@ -160,6 +166,12 @@ export function Agent() {
               <div className="code">
                 <pre>{question ?? '(pick a trace to see its question)'}</pre>
               </div>
+              {trace?.gold && (
+                <div className="code band">
+                  <p className="label">gold · {trace.gold.lines} line{trace.gold.lines === 1 ? '' : 's'}</p>
+                  <pre>{trace.gold.text}</pre>
+                </div>
+              )}
               {trace && (
                 <p className="small">
                   <Link to={`/queries/${trace.query_id}`}>gold, validator and the leaderboard's trials for {trace.query_id}</Link>

@@ -231,7 +231,9 @@ export type TrialRow = {
   trace_file: string | null;
   mlflow_trace_id: string | null;
   mlflow_trace_url: string | null;
+  gold: GoldRef | null;
 };
+export type GoldRef = { preview: string; lines: number; text: string };
 export type RunDetail = RunSummary & { max_turns: number; workers: number; code_sha: string; upstream_commit: string; query_ids: string[]; results: TrialRow[]; versus: RunSummary | null };
 /** One span of the tree tracking/tracing.py logs to MLflow, rebuilt server-side from the same stream. */
 export type SpanTokens = { input: number; cache_read: number; cache_creation: number; output: number; total: number; billed: boolean; message_id: string };
@@ -264,6 +266,7 @@ export type Trace = {
   mlflow_trace_id: string | null;
   mlflow_trace_url: string | null;
   mlflow_embeddable: boolean;
+  gold: GoldRef | null;
   spans: Span[];
 };
 export type ContextPack = { dataset: string; files: Record<string, string>; curation: { model: string; cost_usd: number | null; input_tokens: number; output_tokens: number; duration_ms: number } | null };

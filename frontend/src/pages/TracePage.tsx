@@ -72,10 +72,16 @@ export function TracePage() {
           'Not logged to MLflow (run with --no-mlflow, or tracking was down).'
         )}
       </p>
-      <div className={`answer ${t.passed == null ? '' : t.passed ? 'ok' : 'no'}`}>
-        <p className="label">answer · judged {verdict} by the query's validate.py</p>
-        <pre className="wrap-any">{t.answer || '(none)'}</pre>
-        {t.reason && <p className="reason">{t.reason}</p>}
+      <div className="compare">
+        <div className={`answer ${t.passed == null ? '' : t.passed ? 'ok' : 'no'}`}>
+          <p className="label">answer · judged {verdict} by the query's validate.py</p>
+          <pre className="wrap-any">{t.answer || '(none)'}</pre>
+          {t.reason && <p className="reason">{t.reason}</p>}
+        </div>
+        <div className="answer">
+          <p className="label">gold · {t.gold ? `${t.gold.lines} line${t.gold.lines === 1 ? '' : 's'}` : 'not in the index'}</p>
+          <pre className="wrap-any">{t.gold?.text ?? '—'}</pre>
+        </div>
       </div>
 
       <h2>

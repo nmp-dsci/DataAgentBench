@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { type Profile, type ProfileKey, ROLE_LABEL, type RunRole, type Span, type TrialRow, fmtInt, fmtPct, fmtSec, fmtTok, fmtUsd, queryPath } from './api';
+import { type GoldRef, type Profile, type ProfileKey, ROLE_LABEL, type RunRole, type Span, type TrialRow, fmtInt, fmtPct, fmtSec, fmtTok, fmtUsd, queryPath } from './api';
+import { Gold } from './ui';
 
 /** The role word, never colour alone: champion is the accent (shipped), superseded and dry are muted. */
 export function Role({ role }: { role: RunRole }) {
@@ -223,13 +224,18 @@ export function TrialLink({ runId, r }: { runId: string; r: TrialRow }) {
   );
 }
 
-export function QueryCell({ id, question }: { id: string; question: string }) {
+export function QueryCell({ id, question, gold }: { id: string; question: string; gold?: GoldRef | null }) {
   return (
     <td className="sub">
       <Link to={queryPath(id)} className="mono">
         {id}
       </Link>
       <span className="path wrap-any">{question.slice(0, 90)}</span>
+      {gold && (
+        <span className="path wrap-any">
+          gold: <Gold preview={gold.preview} lines={gold.lines} full={gold.text} />
+        </span>
+      )}
     </td>
   );
 }
