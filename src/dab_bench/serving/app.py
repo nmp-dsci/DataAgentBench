@@ -126,6 +126,24 @@ def create_app(index: Index | None = None) -> FastAPI:
         the agent `agents/champion` names that is not itself a challenger."""
         return _board()
 
+    @app.get("/api/runs/compare")
+    def runs_compare(
+        focus: str, challenger: str | None = None, group: str = "dataset", scope: str = "common"
+    ) -> dict[str, Any]:
+        """Two runs side by side: the summary and the per-group rates, on the queries both
+        scored (`scope=common`, the default) or on each run's own (`scope=all`). Every number
+        comes from `score.summarise` / `score.profile` on the filtered trials, the same
+        arithmetic as the board, so a comparison can never disagree with a run page."""
+        if group not in _GROUPS:
+            raise HTTPException(400, f"group must be one of {sorted(_GROUPS)}")
+        if scope not in ("common", "all"):
+            raise HTTPException(400, "scope must be common or all")
+        ids = [focus] + ([challenger] if challenger else [])
+        for rid in ids:
+            if not (RUNS_DIR / rid / "run.json").exists():
+                raise HTTPException(404, f"no run {rid}")
+        return _compare(ix, ids, group, scope)
+
     @app.get("/api/runs/{run_id}")
     def run_detail(run_id: str) -> dict[str, Any]:
         from dab_bench.eval.runner import load_run
@@ -411,6 +429,84 @@ def _mlflow_trace_url(trace_id: str | None) -> str | None:
     if exp is None:
         return f"{base}/#/experiments/search?searchFilter=tags.run_id&traceId={trace_id}"
     return f"{base}/#/experiments/{exp}/traces?traceId={trace_id}"
+
+
+_GROUPS = {"dataset", "style", "query"}
+
+
+def _group_key(ix: Index, group: str, query_id: str) -> str:
+    if group == "dataset":
+        return query_id.split("/")[0]
+    if group == "style":
+        q = ix.query_by_id.get(query_id)
+        return str(q["validator"]["style"]) if q else "unknown"
+    return query_id
+
+
+def _compare(ix: Index, ids: list[str], group: str, scope: str) -> dict[str, Any]:
+    from dab_bench.eval.runner import load_run
+    from dab_bench.eval.score import profile, summarise
+
+    board = {r["run_id"]: r for r in _board()["runs"]}
+    loaded = {rid: load_run(rid)[1] for rid in ids}
+    scored_q = {
+        rid: {r.query_id for r in res if r.passed is not None} for rid, res in loaded.items()
+    }
+    common = set.intersection(*scored_q.values()) if scored_q else set()
+    keep = (lambda rid, q: q in common) if scope == "common" and len(ids) > 1 else None
+
+    sides: dict[str, Any] = {}
+    groups: dict[str, dict[str, Any]] = {}
+    per_query: dict[str, dict[str, Any]] = {}
+    for rid, res in loaded.items():
+        rows = [r for r in res if keep is None or keep(rid, r.query_id)]
+        s = summarise(rows)
+        sides[rid] = {
+            "run": board.get(rid),
+            "queries": len(s.per_query),
+            "passed": s.passed,
+            "scored": s.scored,
+            "pass_rate_micro": s.pass_rate_micro,
+            "pass_rate_macro": s.pass_rate_macro,
+            "timeouts": s.timeouts,
+            "errors": s.errors,
+            "rate_limited": s.rate_limited,
+            "cost_usd": s.cost_usd,
+            "profile": profile(rows),
+        }
+        by_group: dict[str, list[dict[str, Any]]] = {}
+        for q, e in s.per_query.items():
+            by_group.setdefault(_group_key(ix, group, q), []).append(e)
+            per_query.setdefault(q, {})[rid] = e
+        for g, es in by_group.items():
+            groups.setdefault(g, {"key": g})[rid] = {
+                "passed": sum(int(e["passed"]) for e in es),
+                "n": sum(int(e["n"]) for e in es),
+                "rate": sum(float(e["rate"]) for e in es) / len(es),  # mean per-query rate
+                "queries": len(es),
+            }
+    fixed: list[str] = []
+    broken: list[str] = []
+    if len(ids) == 2:
+        a, b = ids
+        for q, e in sorted(per_query.items()):
+            if a in e and b in e:
+                if e[a]["passed"] == 0 and e[b]["passed"] > 0:
+                    fixed.append(q)
+                elif e[a]["passed"] > 0 and e[b]["passed"] == 0:
+                    broken.append(q)
+    return {
+        "focus": ids[0],
+        "challenger": ids[1] if len(ids) > 1 else None,
+        "group": group,
+        "scope": scope if len(ids) > 1 else "all",
+        "common_queries": len(common),
+        "scored_queries": {rid: len(q) for rid, q in scored_q.items()},
+        "sides": sides,
+        "groups": sorted(groups.values(), key=lambda g: g["key"]),
+        "fixed": fixed,
+        "broken": broken,
+    }
 
 
 def _run_summary(d: dict[str, Any]) -> dict[str, Any]:

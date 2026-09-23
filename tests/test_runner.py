@@ -137,3 +137,72 @@ def test_runs_api_lists_folders_and_serves_traces(
     trace = client.get(f"/api/runs/{run_dir.name}/traces/bookreview_2_t1").json()
     assert trace["answer"] == "42" and trace["passed"] is True and trace["spans"] == []
     assert client.get("/api/runs/nope").status_code == 404
+
+
+def _write_run(root: Path, run_id: str, rows: list[TrialResult], split: str = "smoke") -> None:
+    from dataclasses import asdict
+
+    d = root / run_id
+    d.mkdir(parents=True)
+    write_results(d / "results.jsonl", rows)
+    meta = runner.RunMeta(
+        run_id=run_id,
+        agent="v0",
+        fingerprint="abc",
+        context_sha="def",
+        model="claude-haiku-4-5",
+        effort="medium",
+        split=split,
+        n_queries=len({r.query_id for r in rows}),
+        trials=1,
+        workers=1,
+        hints=False,
+        dry_run=False,
+        started_at="2026-01-01T00:00:00+00:00",
+        max_turns=60,
+    )
+    meta.summary = asdict(summarise(rows))
+    (d / "run.json").write_text(json.dumps(asdict(meta)))
+
+
+def test_compare_two_runs_on_their_common_queries(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # focus scored three queries; the challenger two of them plus one rate-limited row
+    _write_run(
+        tmp_path,
+        "a",
+        [_row("bookreview/2", 1, True), _row("yelp/1", 1, False), _row("agnews/1", 1, False)],
+    )
+    _write_run(
+        tmp_path,
+        "b",
+        [
+            _row("bookreview/2", 1, False),
+            _row("yelp/1", 1, True),
+            _row("agnews/1", 1, None, rate_limited=True),
+        ],
+    )
+    monkeypatch.setattr(runner, "RUNS_DIR", tmp_path)
+    monkeypatch.setattr(serving, "RUNS_DIR", tmp_path)
+    client = TestClient(serving.create_app())
+
+    r = client.get("/api/runs/compare", params={"focus": "a", "challenger": "b"}).json()
+    # agnews/1 is rate-limited in b, so it is not scored there and not common
+    assert r["common_queries"] == 2 and r["scored_queries"] == {"a": 3, "b": 2}
+    assert r["sides"]["a"]["scored"] == 2 and r["sides"]["b"]["scored"] == 2
+    assert r["fixed"] == ["yelp/1"] and r["broken"] == ["bookreview/2"]
+    assert [g["key"] for g in r["groups"]] == ["bookreview", "yelp"]
+
+    # each run on its own queries: the focus keeps agnews/1
+    own = client.get(
+        "/api/runs/compare", params={"focus": "a", "challenger": "b", "scope": "all"}
+    ).json()
+    assert own["sides"]["a"]["scored"] == 3 and "agnews" in [g["key"] for g in own["groups"]]
+
+    style = client.get("/api/runs/compare", params={"focus": "a", "group": "style"}).json()
+    assert style["challenger"] is None and style["scope"] == "all"
+    assert sum(g["a"]["n"] for g in style["groups"]) == 3  # every scored trial lands in one style
+
+    assert client.get("/api/runs/compare", params={"focus": "nope"}).status_code == 404
+    assert client.get("/api/runs/compare", params={"focus": "a", "group": "x"}).status_code == 400

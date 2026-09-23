@@ -193,6 +193,34 @@ export type RunSummary = {
   role: RunRole;
   profile: Profile;
 };
+/** GET /api/runs/compare: two runs on the same queries, grouped by dataset, validator style or query. */
+export type CompareGroup = 'dataset' | 'style' | 'query';
+export type CompareRate = { passed: number; n: number; rate: number; queries: number };
+export type CompareSide = {
+  run: RunSummary | null;
+  queries: number;
+  passed: number;
+  scored: number;
+  pass_rate_micro: number | null;
+  pass_rate_macro: number | null;
+  timeouts: number;
+  errors: number;
+  rate_limited: number;
+  cost_usd: number;
+  profile: Profile;
+};
+export type CompareResp = {
+  focus: string;
+  challenger: string | null;
+  group: CompareGroup;
+  scope: 'common' | 'all';
+  common_queries: number;
+  scored_queries: Record<string, number>;
+  sides: Record<string, CompareSide>;
+  groups: ({ key: string } & Record<string, CompareRate | string>)[];
+  fixed: string[];
+  broken: string[];
+};
 export type RunRole = 'champion' | 'challenger' | 'superseded' | 'smoke' | 'dry';
 export type Board = { champion: string; champion_run_id: string | null; runs: RunSummary[] };
 export type Stat = { mean: number; p50: number; p95: number; max: number; sum: number };

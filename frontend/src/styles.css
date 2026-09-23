@@ -135,6 +135,13 @@ figcaption{margin-top:var(--s2);font-size:var(--t-1);color:var(--muted);max-widt
 .dia .bar{fill:var(--line-2)}
 .dia .bar.hi{fill:var(--accent)}
 .dia .bar.pro{fill:var(--amber)}
+.dia .bar.b{fill:var(--ink-2)}
+/* legend swatches for the focus / challenger pair */
+.sw{display:inline-block;width:.8em;height:.8em;border-radius:2px;vertical-align:-.05em;margin-right:.25em}
+.sw.a{background:var(--accent)} .sw.b{background:var(--ink-2)}
+.dia .ax.mark.base{stroke:var(--amber);stroke-width:2.5}
+th .path{display:block;font-family:var(--mono);font-size:var(--t-2);font-weight:400;text-transform:none;letter-spacing:0;margin-top:2px}
+.warn-note{color:var(--amber);margin-top:var(--s3)}
 .dia .ax{stroke:var(--line-2);stroke-width:1}
 .dia .tx{font:500 13px var(--sans);fill:var(--ink)}
 .dia .tx.s{font:400 13px var(--sans);fill:var(--muted)}

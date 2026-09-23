@@ -124,7 +124,12 @@ trial, and in the explorer under **Runs**. The next step in the plan — v0 at
   9 levenshtein, 0 read the CSV) and which queries use each.
 - **Leaderboard** — the site's 40 entries, the nine with committed answers
   marked, and the stratified tables with our rescore beside them.
-- **Runs / Run / Trace** — our own evals from `runs/`: the champion and every
+- **Runs / Run / Trace** — our own evals from `runs/`. The Runs tab opens on a
+  comparison: pick a focus run and a challenger run (any two scored runs, labelled
+  by agent version), group the figure by dataset, validator style or query, and
+  read every Δ — pass rates on the queries both scored, cost, turns, tokens, wall,
+  the queries fixed and broken (`/api/runs/compare`, the same `summarise` /
+  `profile` arithmetic as the board). Then the champion and every
   challenger measured against it, the per-trial profile (mean / p50 / p95 of
   turns, tokens, wall, cost), every trial with its tokens and cost, and the
   full trace as a span waterfall plus the transcript, each linked to (and,
