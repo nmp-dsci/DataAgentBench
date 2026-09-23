@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { type QuerySummary, STYLE_LABEL, fmtInt, fmtPct, queryPath, useGet } from './api';
-import { Gold, Rate } from './ui';
+import { Clip, Gold, Rate } from './ui';
 
 type SortKey = 'rate' | 'id' | 'gold' | 'best';
 
@@ -125,7 +125,9 @@ export function QueryTable({ rows: all, scope }: { rows: QuerySummary[]; scope?:
                     <Link to={`/datasets/${x.dataset_key}`}>{x.dataset_key}</Link>
                   </td>
                 )}
-                <td className="q wrap">{x.question.length > 200 ? `${x.question.slice(0, 200)}…` : x.question}</td>
+                <td className="q wrap">
+                  <Clip text={x.question} at={200} />
+                </td>
                 <td className="pre">
                   <Gold preview={x.gold_preview} lines={x.gold_lines} full={x.gold_text} />
                 </td>

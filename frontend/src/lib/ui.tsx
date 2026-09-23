@@ -57,6 +57,20 @@ export function Loading({ error }: { error: string | null }) {
 }
 
 /** The gold answer beside a question, wherever a question is shown: the first line (cut) and how many more, the full text on hover. */
+/** Long text clipped at `at` characters, with a toggle that opens the rest in place. */
+export function Clip({ text, at }: { text: string; at: number }) {
+  const [open, setOpen] = useState(false);
+  if (text.length <= at) return <>{text}</>;
+  return (
+    <>
+      {open ? text : `${text.slice(0, at).trimEnd()}…`}
+      <button type="button" className="more" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+        {open ? 'less' : 'more'}
+      </button>
+    </>
+  );
+}
+
 /** The gold answer in a cell: its first line, and — when `full` is given — a toggle that opens every line. */
 export function Gold({ preview, lines, full }: { preview: string; lines: number; full?: string }) {
   const [open, setOpen] = useState(false);
