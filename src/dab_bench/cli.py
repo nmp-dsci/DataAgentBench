@@ -73,6 +73,22 @@ def data_load(datasets: str | None = None) -> None:
         raise typer.Exit(1)
 
 
+@data_app.command("load-questions")
+def data_load_questions() -> None:
+    """Copy data/index/queries.json into dataagentbench_meta.queries for ad-hoc SQL.
+
+    The JSON stays the record; this table is dropped and rebuilt. It holds gold
+    answers, so it lives outside the schema the agent can read.
+    """
+    from dab_bench.data.meta import load_questions
+
+    r = load_questions()
+    console.print(
+        f"{r.rows} questions → {r.schema}.{r.table} (upstream {r.upstream_commit[:7]}); "
+        "not readable by dab_agent"
+    )
+
+
 @data_app.command("smoke")
 def data_smoke() -> None:
     """Zero-model proof the central database serves this project: the agent role can read the

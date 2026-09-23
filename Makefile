@@ -43,6 +43,9 @@ data: ## download the 12 datasets' database files (8.4 GB, sha256-verified) and 
 	uv run dab data load
 	uv run dab data check
 
+questions: ## copy data/index/queries.json into dataagentbench_meta for ad-hoc SQL (holds gold; not granted to dab_agent)
+	uv run dab data load-questions
+
 context: ## generate the context pack from Postgres (schema, profile, samples, joins) — no model
 	uv run dab context build
 
@@ -75,4 +78,4 @@ lint: ## ruff + mypy (+ frontend typecheck and design lint when node_modules exi
 fmt: ## ruff format + fix
 	uv run ruff format src tests && uv run ruff check --fix src tests
 
-.PHONY: help setup upstream ingest rescore stats dev build test lint fmt platform-up db-roles db-smoke db-reset data context curate sandbox eval
+.PHONY: help setup upstream ingest rescore stats dev build test lint fmt platform-up db-roles db-smoke db-reset data questions context curate sandbox eval

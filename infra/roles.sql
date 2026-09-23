@@ -31,3 +31,13 @@ ALTER ROLE dab_agent SET default_transaction_read_only = on;
 REVOKE CREATE ON SCHEMA public FROM dab_agent;
 REVOKE ALL ON SCHEMA public FROM dab_agent;
 ALTER ROLE dab_owner SET search_path = dataagentbench, public;
+
+-- The question set's copy (`dab data load-questions`) lives apart from the benchmark
+-- data: every question, its gold answer and its validator. dataagentbench grants SELECT
+-- to dab_agent by default, so a gold table there would hand the agent the answers. This
+-- schema grants nothing, and dab_agent's search_path above does not include it.
+CREATE SCHEMA IF NOT EXISTS dataagentbench_meta AUTHORIZATION dab_owner;
+REVOKE ALL ON SCHEMA dataagentbench_meta FROM PUBLIC;
+REVOKE ALL ON SCHEMA dataagentbench_meta FROM dab_agent;
+ALTER DEFAULT PRIVILEGES FOR ROLE dab_owner IN SCHEMA dataagentbench_meta
+  REVOKE SELECT ON TABLES FROM dab_agent;

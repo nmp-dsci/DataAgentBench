@@ -57,6 +57,8 @@ src/dab_bench/
   config.py           paths + Settings (no keys)
   cli.py              `dab upstream | ingest | rescore | stats | serve`
   data/               aliases.py (keys, the released 12, the 9 answer files) · upstream.py · ingest.py · index.py
+                      load.py (the three engines into one schema) · meta.py (the question set's copy,
+                      schema dataagentbench_meta, granted to nobody: it holds gold)
   eval/               validators.py (import + alarm-bounded call) · rescore.py (pool, summary, site check)
   serving/app.py      FastAPI over the index + SPA fallback
 frontend/             Vite + React; src/tokens.css verbatim from DESIGN.md; scripts/design_lint.mjs

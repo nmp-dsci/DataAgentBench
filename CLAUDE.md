@@ -33,6 +33,13 @@
   MLflow; the platform's rule zero applies. The benchmark lives in database
   `dab` on the central Postgres (:5432) since 2026-09-22; `make db-reset` only
   ever drops this project's schema, never the database (platform D16).
+- **The questions are not in the data.** `data/index/queries.json` is the
+  question set; schema `dataagentbench` holds only what the agent queries, and
+  `dab_agent` can read nothing else. `dab data load-questions` keeps a
+  convenience copy in `dataagentbench_meta` for ad-hoc SQL — it holds gold, so
+  it is granted to nobody but `dab_owner`, and `tests/test_meta.py` asserts the
+  agent role is refused. Never put a gold table in `dataagentbench`: that schema
+  grants SELECT to `dab_agent` by default.
 - **A rate-limited trial is not a fail.** It is `rate_limited`, unscored, and
   `dab eval --resume <run>` finishes it after the window resets.
 - **The index is the contract.** The API and the explorer read only
