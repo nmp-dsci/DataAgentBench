@@ -1,23 +1,18 @@
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { type DatasetDetail, type DatasetSummary, STYLE_LABEL, fmtBytes, fmtPct, queryPath, useGet } from '../lib/api';
-import { Gold, Loading, Rate } from '../lib/ui';
+import { Link, useParams } from 'react-router-dom';
+import { type DatasetDetail, STYLE_LABEL, fmtBytes, fmtPct, queryPath, useGet } from '../lib/api';
+import { DatasetChips, Gold, Loading, Rate } from '../lib/ui';
 
 export function Dataset() {
   const { key } = useParams();
-  const nav = useNavigate();
-  const { data: all } = useGet<DatasetSummary[]>('/api/datasets');
   const { data: d, error } = useGet<DatasetDetail>(key ? `/api/datasets/${key}` : null);
   const [showHints, setShowHints] = useState(false);
   if (!d) return <Loading error={error} />;
   const rows = d.query_rows.slice().sort((a, b) => (a.trials?.rate ?? 1) - (b.trials?.rate ?? 1));
   const hardest = rows[0];
-  // Same order as the Datasets cards, so stepping through matches what was on screen there.
-  const order = (all ?? []).slice().sort((a, b) => b.n_queries - a.n_queries || a.key.localeCompare(b.key));
-  const at = order.findIndex((x) => x.key === d.key);
-  const step = (n: number) => order.length > 0 && nav(`/datasets/${order[(at + n + order.length) % order.length].key}`);
   return (
     <>
+      <DatasetChips current={d.key} />
       <p className="crumbs">
         <Link to="/datasets">Datasets</Link> › {d.key}
       </p>
@@ -34,28 +29,6 @@ export function Dataset() {
           <Link to={queryPath(rows[rows.length - 1].id)}>{rows[rows.length - 1].id}</Link> at {fmtPct(rows[rows.length - 1].trials?.rate)}.
         </p>
       )}
-
-      <div className="filters">
-        <label className="pick">
-          <span className="label">dataset</span>
-          <select value={d.key} onChange={(e) => nav(`/datasets/${e.target.value}`)} aria-label="switch dataset">
-            {order.map((x) => (
-              <option key={x.key} value={x.key}>
-                {x.key} — {x.n_queries} {x.n_queries === 1 ? 'query' : 'queries'}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button type="button" className="tog" onClick={() => step(-1)} disabled={order.length < 2} aria-label="previous dataset">
-          ‹ prev
-        </button>
-        <button type="button" className="tog" onClick={() => step(1)} disabled={order.length < 2} aria-label="next dataset">
-          next ›
-        </button>
-        <span className="count">
-          {at < 0 ? '—' : at + 1} of {order.length || '…'}
-        </span>
-      </div>
 
       <h2>The databases an agent must join</h2>
       <div className="tw">

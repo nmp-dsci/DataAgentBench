@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { type DatasetSummary, type Stats, fmtBytes, fmtInt, fmtPct, useGet } from '../lib/api';
-import { Loading, Rate } from '../lib/ui';
+import { DatasetChips, Loading, Rate } from '../lib/ui';
 
 export function Datasets() {
   const { data: ds, error } = useGet<DatasetSummary[]>('/api/datasets');
@@ -12,6 +12,7 @@ export function Datasets() {
   const biggest = sorted[0];
   return (
     <>
+      <DatasetChips />
       <p className="label">datasets · {ds.length} in scope</p>
       <h1>
         {ds.length} datasets carry {ds.reduce((n, d) => n + d.n_queries, 0)} queries and {fmtBytes(bytes)} of databases; <em>{biggest.key}</em> alone is {biggest.n_queries} of them

@@ -150,6 +150,13 @@ tr.dim td{color:var(--muted)}
 pre.wrap-any{white-space:pre-wrap;word-break:break-word}
 td.answer{min-width:18rem;max-width:28rem;white-space:pre-wrap;overflow-wrap:anywhere}
 .chip.role{text-transform:uppercase;letter-spacing:var(--track-label)}
+/* the dataset lozenge bar: every dataset, one click into it; nothing selected on the index */
+.chips.datasetbar{margin:0 0 var(--s5);padding-bottom:var(--s3);border-bottom:1px solid var(--line)}
+a.chip.nav{display:inline-flex;align-items:center;gap:var(--s2);text-decoration:none;cursor:pointer}
+a.chip.nav .n{font:400 var(--t-2)/1 var(--mono);color:var(--muted)}
+a.chip.nav:hover{border-color:var(--line-3);color:var(--ink)}
+a.chip.nav.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+a.chip.nav.on .n{color:var(--accent)}
 .dia .ax.mark{stroke:var(--ink);stroke-width:2}
 .dia .pt rect{transition:opacity var(--dur) var(--ease)}
 .dia .pt:hover rect{opacity:.7}

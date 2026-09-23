@@ -1,5 +1,22 @@
 import { Link } from 'react-router-dom';
-import { fmtPct, queryPath } from './api';
+import { type DatasetSummary, fmtPct, queryPath, useGet } from './api';
+
+/** Every dataset as a lozenge, in the order the cards use. `current` is unset on the index: nothing is selected there. */
+export function DatasetChips({ current }: { current?: string }) {
+  const { data: ds } = useGet<DatasetSummary[]>('/api/datasets');
+  if (!ds) return null;
+  const order = ds.slice().sort((a, b) => b.n_queries - a.n_queries || a.key.localeCompare(b.key));
+  return (
+    <nav className="chips datasetbar" aria-label="datasets">
+      {order.map((d) => (
+        <Link key={d.key} to={`/datasets/${d.key}`} className={`chip nav ${d.key === current ? 'on' : ''}`} aria-current={d.key === current ? 'page' : undefined}>
+          {d.key}
+          <span className="n">{d.n_queries}</span>
+        </Link>
+      ))}
+    </nav>
+  );
+}
 
 /** A pass rate with its denominator in the same cell, per DESIGN.md: never a bare percentage. */
 export function Rate({ passed, n, digits = 0 }: { passed: number | null | undefined; n: number | null | undefined; digits?: number }) {
