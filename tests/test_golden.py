@@ -36,6 +36,24 @@ def test_a_table_renders_like_the_gold_files() -> None:
     assert golden.render(["x"], []) == ""
 
 
+@pytest.mark.parametrize(
+    ("columns", "rows", "gold", "match"),
+    [
+        (["avg"], [[3.547008547008547]], "3.547008547008547", "exact"),
+        (["avg"], [[2.7135713051934523]], "2.713571305193452", "exact"),  # last-digit noise
+        (["name", "v"], [["x", "2.6.2"]], "\ufeffName,V\nx,2.6.2", "exact"),  # BOM, header case
+        (["n", "v"], [["x", "2.6.2"]], "Name,Version\nx,2.6.2", "exact_values"),
+        (["t"], [["b"], ["a"]], "a\nb", "reordered"),
+        (["state", "r"], [["PA", 3.699395770392749]], "PA,3.699395770392749", "exact"),  # no header
+        (["avg"], [[3.2]], "3.547008547008547", "differs"),
+    ],
+)
+def test_the_result_is_matched_against_the_gold_itself(
+    columns: list[str], rows: list[list[object]], gold: str, match: str
+) -> None:
+    assert golden.match_gold(columns, rows, gold)["match"] == match
+
+
 def test_writes_are_refused_before_the_database() -> None:
     for sql in ("drop table yelp_review", "  DELETE FROM x", "set role dab_owner"):
         assert golden.execute(sql).error
@@ -46,7 +64,7 @@ def test_a_golden_runs_as_the_agent_and_passes_its_validator() -> None:
     client = TestClient(create_app())
     r = client.post("/api/golden/yelp/1/run", json={"sql": YELP_1}).json()
     assert r["answer_text"] == "3.547008547008547"
-    assert r["verdict"]["passed"] is True
+    assert r["verdict"]["passed"] is True and r["gold_match"]["match"] == "exact"
 
     wrong = client.post("/api/golden/yelp/1/run", json={"sql": "select 3.2"}).json()
     assert wrong["verdict"]["passed"] is False
@@ -68,6 +86,7 @@ def test_a_save_is_appended_and_becomes_current() -> None:
     try:
         one = client.get("/api/golden/yelp/1").json()
         assert one["current"]["id"] == gid and one["current"]["passed"] is True
+        assert one["current"]["gold_match"] == "exact"
         listing = client.get("/api/golden").json()
         row = next(q for q in listing["queries"] if q["id"] == "yelp/1")
         assert row["golden"]["passed"] is True and listing["n"] == 54

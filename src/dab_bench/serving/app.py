@@ -247,7 +247,17 @@ def create_app(index: Index | None = None) -> FastAPI:
                 | {
                     "golden": None
                     if g is None
-                    else {k: g[k] for k in ("passed", "created_at", "versions", "author", "note")}
+                    else {
+                        k: g[k]
+                        for k in (
+                            "passed",
+                            "gold_match",
+                            "created_at",
+                            "versions",
+                            "author",
+                            "note",
+                        )
+                    }
                 }
             )
         return {
@@ -255,6 +265,11 @@ def create_app(index: Index | None = None) -> FastAPI:
             "n": len(rows),
             "written": sum(1 for r in rows if r["golden"]),
             "passing": sum(1 for r in rows if r["golden"] and r["golden"]["passed"]),
+            "exact": sum(
+                1
+                for r in rows
+                if r["golden"] and r["golden"]["gold_match"] in ("exact", "exact_values")
+            ),
         }
 
     @app.get("/api/golden/{key}/{n}")
@@ -282,10 +297,16 @@ def create_app(index: Index | None = None) -> FastAPI:
         else:
             folder = ix.dataset_by_key[q["dataset_key"]]["folder"]
             verdict = golden.judge_answer(folder, int(q["query_id"]), answer)
+        gold = (
+            golden.match_gold(ex.columns, ex.rows, q["gold_text"])
+            if not ex.error
+            else {"match": "differs", "detail": ex.error}
+        )
         return {
             "execution": ex.as_dict() | {"rows": ex.rows[:200]},  # the page shows 200
             "answer_text": answer,
             "verdict": verdict,
+            "gold_match": gold,
             "_ex": ex,
         }
 
@@ -304,7 +325,15 @@ def create_app(index: Index | None = None) -> FastAPI:
         q = _golden_query(key, n)
         out = _golden_attempt(q, body.sql)
         ex = out.pop("_ex")
-        saved = golden.save(q["id"], body.sql, ex, out["answer_text"], out["verdict"], body.note)
+        saved = golden.save(
+            q["id"],
+            body.sql,
+            ex,
+            out["answer_text"],
+            out["verdict"],
+            body.note,
+            gold_match=out["gold_match"]["match"],
+        )
         return out | {"saved": saved}
 
     # ── the agent: versions, the composed prompt, and the playground ─────────────

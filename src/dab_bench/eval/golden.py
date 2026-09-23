@@ -57,6 +57,8 @@ create table if not exists {PG_META_SCHEMA}.{GOLDEN_TABLE} (
   upstream_commit  text not null,
   created_at       timestamptz not null default now()
 );
+alter table {PG_META_SCHEMA}.{GOLDEN_TABLE}
+  add column if not exists gold_match text not null default '';  -- exact | exact_values | reordered | differs
 create index if not exists {GOLDEN_TABLE}_query on {PG_META_SCHEMA}.{GOLDEN_TABLE} (query_id, id desc);
 comment on table {PG_META_SCHEMA}.{GOLDEN_TABLE} is
   'Golden SQL, curated in the explorer. Append-only: the newest row per query_id is current. '
@@ -140,6 +142,59 @@ def render(columns: list[str], rows: list[list[Any]]) -> str:
     return "\n".join(lines)
 
 
+def _cells_equal(a: str, b: str) -> bool:
+    a, b = a.strip().lower(), b.strip().lower()
+    if a == b:
+        return True
+    try:
+        x, y = float(a), float(b)
+    except ValueError:
+        return False
+    return abs(x - y) <= 1e-9 * max(1.0, abs(x), abs(y))  # float noise in the last digit
+
+
+def _lines_equal(xs: list[str], ys: list[str]) -> bool:
+    if len(xs) != len(ys):
+        return False
+    for x, y in zip(xs, ys, strict=True):
+        cx, cy = x.split(","), y.split(",")
+        if len(cx) != len(cy) or not all(_cells_equal(a, b) for a, b in zip(cx, cy, strict=True)):
+            return False
+    return True
+
+
+def _sorted(xs: list[str]) -> list[str]:
+    return sorted(x.strip().lower() for x in xs)
+
+
+def match_gold(columns: list[str], rows: list[list[Any]], gold_text: str) -> dict[str, str]:
+    """Does the result recreate the gold answer itself, not just satisfy the validator?
+
+    `exact`: every gold line, in order (a gold header line, when there is one, must match
+    the column names too). `exact_values`: the same rows, but the header names differ.
+    `reordered`: the same rows in another order. `differs`: anything else. Cells compare
+    case-insensitively, and numbers to 1e-9 relative, the noise of a float's last digit."""
+    gold = [ln.strip() for ln in gold_text.lstrip("\ufeff").strip().splitlines() if ln.strip()]
+    body = [",".join(_text(v) for v in r) for r in rows]
+    header = ",".join(columns)
+    if not gold:
+        return {"match": "differs", "detail": "the gold answer is empty"}
+    if _lines_equal(body, gold) or _lines_equal([header, *body], gold):
+        return {"match": "exact", "detail": f"all {len(gold)} gold line(s), in order"}
+    if len(gold) > 1 and _lines_equal(body, gold[1:]):
+        return {
+            "match": "exact_values",
+            "detail": f"all {len(gold) - 1} gold rows in order; column names {header!r} vs {gold[0]!r}",
+        }
+    if _sorted(body) in (_sorted(gold), _sorted(gold[1:])):
+        return {"match": "reordered", "detail": "the same rows as the gold, in a different order"}
+    n_gold = len(gold)
+    return {
+        "match": "differs",
+        "detail": f"{len(body)} result row(s) against {n_gold} gold line(s)",
+    }
+
+
 _POOL: ProcessPoolExecutor | None = None
 
 
@@ -170,14 +225,15 @@ def save(
     verdict: dict[str, Any],
     note: str = "",
     author: str | None = None,
+    gold_match: str = "",
 ) -> dict[str, Any]:
     ensure_table()
     with pg.connect() as con:
         row = con.execute(
             f"""insert into {PG_META_SCHEMA}.{GOLDEN_TABLE}
                 (query_id, sql, answer_text, passed, reason, row_count, duration_ms, error,
-                 note, author, db_role, upstream_commit)
-                values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'dab_agent', %s)
+                 note, author, db_role, upstream_commit, gold_match)
+                values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'dab_agent', %s, %s)
                 returning id, created_at""",  # type: ignore[arg-type,unused-ignore]
             (
                 query_id,
@@ -191,6 +247,7 @@ def save(
                 note.strip(),
                 author or getpass.getuser(),
                 _commit(),
+                gold_match,
             ),
         ).fetchone()
     assert row is not None
@@ -211,6 +268,7 @@ _COLS = (
     "author",
     "upstream_commit",
     "created_at",
+    "gold_match",
 )
 
 

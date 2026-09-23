@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { type GoldenAttempt, type GoldenBrief, type GoldenList, type GoldenOne, STYLE_LABEL, fmtInt, post, queryPath, useGet } from '../lib/api';
+import { type GoldMatch, type GoldenAttempt, type GoldenBrief, type GoldenList, type GoldenOne, STYLE_LABEL, fmtInt, post, queryPath, useGet } from '../lib/api';
 import { Clip, Gold, Loading } from '../lib/ui';
 
 function Status({ g }: { g: GoldenBrief | { passed: boolean | null } | null }) {
@@ -8,6 +8,18 @@ function Status({ g }: { g: GoldenBrief | { passed: boolean | null } | null }) {
   if (g.passed === true) return <span className="chip ok">passes</span>;
   if (g.passed === false) return <span className="chip warn">fails</span>;
   return <span className="chip warn">errored</span>;
+}
+
+const MATCH_LABEL: Record<GoldMatch, string> = {
+  exact: 'recreates the gold exactly',
+  exact_values: 'same rows as the gold; column names differ',
+  reordered: 'same rows as the gold, other order',
+  differs: 'differs from the gold',
+};
+
+function Match({ m }: { m: GoldMatch | '' | undefined }) {
+  if (!m) return <span className="small muted">—</span>;
+  return <span className={`chip ${m === 'exact' || m === 'exact_values' ? 'ok' : 'warn'}`}>{MATCH_LABEL[m]}</span>;
 }
 
 /** Every question with its current golden SQL: the coverage you are curating. */
@@ -21,7 +33,7 @@ export function Golden() {
     <>
       <p className="label">golden · SQL by hand, run as the agent's role, judged by the question's validator</p>
       <h1>
-        {data.written} of {data.n} questions have golden SQL, and {data.passing} of {data.n} <em>pass</em> their validator
+        {data.written} of {data.n} questions have golden SQL; {data.exact} of {data.n} <em>recreate</em> the gold answer and {data.passing} of {data.n} pass their validator
       </h1>
       <p className="lead">
         A golden is one Postgres query that reproduces a question's gold answer. It runs as <code>dab_agent</code>, read-only, over exactly the tables the agent sees, so a
@@ -47,8 +59,9 @@ export function Golden() {
             <tr>
               <th>Query</th>
               <th>Question</th>
+              <th>Style</th>
               <th>Validator</th>
-              <th>Golden</th>
+              <th>Against the gold</th>
               <th className="num">Saves</th>
               <th>Last saved</th>
             </tr>
@@ -65,6 +78,9 @@ export function Golden() {
                 <td className="small">{STYLE_LABEL[q.validator_style] ?? q.validator_style}</td>
                 <td>
                   <Status g={q.golden} />
+                </td>
+                <td>
+                  <Match m={q.golden?.gold_match} />
                 </td>
                 <td className="num">{q.golden ? q.golden.versions : '—'}</td>
                 <td className="small mono">{q.golden ? q.golden.created_at.slice(0, 16).replace('T', ' ') : '—'}</td>
@@ -122,9 +138,13 @@ export function GoldenQuery() {
       <h1>
         {q.id}{' '}
         {cur ? (
-          cur.passed ? (
+          cur.gold_match === 'exact' || cur.gold_match === 'exact_values' ? (
             <>
-              has golden SQL that <em>passes</em> its validator
+              has golden SQL that <em>recreates</em> the gold answer
+            </>
+          ) : cur.passed ? (
+            <>
+              has golden SQL that <em>passes</em> its validator but doesn't match the gold exactly
             </>
           ) : (
             <>
@@ -190,6 +210,7 @@ export function GoldenQuery() {
         <>
           <div className="chips" style={{ marginTop: 'var(--s4)' }}>
             <Status g={res.verdict} />
+            <Match m={res.gold_match.match} />
             <span className="chip">
               {fmtInt(res.execution.row_count)}
               {res.execution.truncated ? '+' : ''} rows · {res.execution.duration_ms} ms
@@ -199,6 +220,10 @@ export function GoldenQuery() {
           <div className={`code ${res.verdict.passed ? '' : 'err'}`}>
             <p className="label">validator</p>
             <pre>{res.verdict.reason || '—'}</pre>
+          </div>
+          <div className={`code ${res.gold_match.match === 'exact' || res.gold_match.match === 'exact_values' ? '' : 'err'}`}>
+            <p className="label">against the gold answer itself</p>
+            <pre>{res.gold_match.detail}</pre>
           </div>
           {res.answer_text && (
             <div className="code">
@@ -244,6 +269,7 @@ export function GoldenQuery() {
                 <th>#</th>
                 <th>Saved</th>
                 <th>Verdict</th>
+                <th>Against the gold</th>
                 <th className="num">Rows</th>
                 <th>Note</th>
                 <th>SQL</th>
@@ -258,6 +284,9 @@ export function GoldenQuery() {
                   </td>
                   <td>
                     <Status g={h} />
+                  </td>
+                  <td>
+                    <Match m={h.gold_match} />
                   </td>
                   <td className="num">{h.row_count ?? '—'}</td>
                   <td className="small">{h.note || '—'}</td>

@@ -127,14 +127,17 @@ export type GoldenRow = {
   author: string;
   upstream_commit: string;
   created_at: string;
+  gold_match: GoldMatch | '';
 };
-export type GoldenBrief = { passed: boolean | null; created_at: string; versions: number; author: string; note: string };
-export type GoldenList = { queries: (QuerySummary & { golden: GoldenBrief | null })[]; n: number; written: number; passing: number };
+export type GoldMatch = 'exact' | 'exact_values' | 'reordered' | 'differs';
+export type GoldenBrief = { passed: boolean | null; gold_match: GoldMatch | ''; created_at: string; versions: number; author: string; note: string };
+export type GoldenList = { queries: (QuerySummary & { golden: GoldenBrief | null })[]; n: number; written: number; passing: number; exact: number };
 export type GoldenOne = { query: QuerySummary; hints: string; current: GoldenRow | null; history: GoldenRow[] };
 export type GoldenAttempt = {
   execution: { columns: string[]; rows: unknown[][]; row_count: number; truncated: boolean; duration_ms: number; error: string | null };
   answer_text: string;
   verdict: { passed: boolean | null; reason: string; timed_out?: boolean };
+  gold_match: { match: GoldMatch; detail: string };
   saved?: { id: number; created_at: string };
 };
 
