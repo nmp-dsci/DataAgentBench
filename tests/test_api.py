@@ -49,5 +49,9 @@ def test_validators_and_leaderboard(client: TestClient) -> None:
         "levenshtein": 9,
     }
     lb = client.get("/api/leaderboard").json()
-    assert len(lb["overallLeaderboard"]) == 40 and len(lb["answer_files"]) == 9
-    assert sum(f["rows"] for f in lb["answer_files"]) == 14480
+    assert len(lb["overallLeaderboard"]) == 40 and len(lb["answer_files"]) == 11
+    # nine committed upstream and pooled; the top two read from their PRs as references
+    pooled = [f for f in lb["answer_files"] if f["pooled"]]
+    assert len(pooled) == 9 and sum(f["rows"] for f in pooled) == 14480
+    refs = {f["name"]: f["rank"] for f in lb["answer_files"] if not f["pooled"]}
+    assert refs == {"permute_eq": 1, "oceanbase_lab_scout": 2}

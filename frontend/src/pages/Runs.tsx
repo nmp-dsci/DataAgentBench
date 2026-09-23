@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { type Board, type CompareGroup, type CompareRate, type CompareResp, type Leaderboard, type RunSummary, ROLE_LABEL, STYLE_LABEL, fmtDur, fmtPct, fmtSec, fmtTok, fmtUsd, queryPath, useGet } from '../lib/api';
+import { type Board, type CompareGroup, type CompareRate, type CompareResp, type CompareSide, type Leaderboard, type RunSummary, type Submission, ROLE_LABEL, STYLE_LABEL, fmtDur, fmtPct, fmtSec, fmtTok, fmtUsd, queryPath, useGet } from '../lib/api';
 import { Delta, ProfileTable, Ratios, Role } from '../lib/runs';
 import { Loading, Rate } from '../lib/ui';
 
@@ -104,6 +104,39 @@ function runLabel(r: RunSummary): string {
   return `${r.agent}@${r.fingerprint.slice(0, 7)} · ${r.split} ${r.n_queries}×${r.trials} · ${score} · ${r.started_at.slice(5, 16).replace('T', ' ')} · ${ROLE_LABEL[r.role]}`;
 }
 
+/** Label a leaderboard answer file: rank, name, our rescore beside the site's number. */
+function subLabel(s: Submission): string {
+  const rank = s.rank != null ? `#${s.rank} ` : '';
+  const site = s.pass_at_1_site != null ? ` (site ${fmtPct(s.pass_at_1_site)})` : '';
+  return `${rank}${s.label} · ${s.rows / Math.max(s.trials, 1)}×${s.trials} · ${s.passed}/${s.rows} · macro ${fmtPct(s.pass_rate_macro)}${site}`;
+}
+
+/** Both kinds of compare target in one picker: our runs, then the leaderboard's answer files. */
+function Targets({ runs, subs, skip }: { runs: RunSummary[]; subs: Submission[]; skip?: string | null }) {
+  return (
+    <>
+      <optgroup label="our runs">
+        {runs
+          .filter((r) => r.run_id !== skip)
+          .map((r) => (
+            <option key={r.run_id} value={r.run_id}>
+              {runLabel(r)}
+            </option>
+          ))}
+      </optgroup>
+      <optgroup label="leaderboard submissions (rescored here)">
+        {subs
+          .filter((x) => x.id !== skip)
+          .map((x) => (
+            <option key={x.id} value={x.id}>
+              {subLabel(x)}
+            </option>
+          ))}
+      </optgroup>
+    </>
+  );
+}
+
 const REMEMBER = 'dab.runs.view';
 
 /** Focus against challenger: pick any two scored runs, group the figure, read every Δ. */
@@ -121,9 +154,11 @@ function Compare({ board, base }: { board: Board; base: ReturnType<typeof bestBa
   }, [sp, setSp]);
   const scored = board.runs.filter((r) => !r.dry_run && (r.scored ?? 0) > 0);
   const byId = new Map(scored.map((r) => [r.run_id, r]));
+  const subs = board.submissions ?? [];
+  const subById = new Map(subs.map((x) => [x.id, x]));
   const pick = (k: string) => {
     const v = sp.get(k);
-    return v && byId.has(v) ? v : null;
+    return v && (byId.has(v) || subById.has(v)) ? v : null;
   };
   const focus = pick('focus') ?? board.champion_run_id ?? scored[0]?.run_id ?? null;
   const challenger = pick('challenger');
@@ -142,25 +177,43 @@ function Compare({ board, base }: { board: Board; base: ReturnType<typeof bestBa
   if (!focus) return <p className="empty">No scored run yet — nothing to compare.</p>;
   const label = (id: string) => {
     const r = byId.get(id);
-    return r ? `${r.agent}@${r.fingerprint.slice(0, 7)} ${r.split}` : id;
+    const x = subById.get(id);
+    return r ? `${r.agent}@${r.fingerprint.slice(0, 7)} ${r.split}` : x ? x.label : id;
+  };
+  // our runs link to their page; a submission links to its PR, or the leaderboard
+  const Target = ({ id }: { id: string }) => {
+    const x = subById.get(id);
+    if (!x) return <Link to={`/runs/${id}`}>{label(id)}</Link>;
+    return x.pr_url ? (
+      <a href={x.pr_url} target="_blank" rel="noreferrer">
+        {label(id)}
+      </a>
+    ) : (
+      <Link to="/leaderboard">{label(id)}</Link>
+    );
   };
   const f = cmp?.sides[cmp.focus];
   const c = cmp?.challenger ? cmp.sides[cmp.challenger] : undefined;
   const fp = f?.profile;
   const cp = c?.profile;
+  // a leaderboard submission has pass / fail only: its cost, turn and time rows read "—"
+  const pr =
+    (fn: (p: NonNullable<CompareSide['profile']>) => string) =>
+    (x: CompareSide): string =>
+      x.profile ? fn(x.profile) : '—';
   type Row = [string, (x: NonNullable<typeof f>) => string, number | null | undefined, number | null | undefined, 'pct' | 'usd' | 'int' | 'tok' | 'sec', boolean, number?];
   const rows: Row[] = f
     ? [
         ['macro Pass@1', (x) => fmtPct(x.pass_rate_macro), f.pass_rate_macro, c?.pass_rate_macro, 'pct', false],
         ['passed / scored (micro)', (x) => `${x.passed}/${x.scored} · ${fmtPct(x.pass_rate_micro)}`, f.pass_rate_micro, c?.pass_rate_micro, 'pct', false],
-        ['cost per trial, p50', (x) => fmtUsd(x.profile.metrics.cost_usd.p50, 3), fp?.metrics.cost_usd.p50, cp?.metrics.cost_usd.p50, 'usd', true, 3],
-        ['cost per trial, p95', (x) => fmtUsd(x.profile.metrics.cost_usd.p95, 3), fp?.metrics.cost_usd.p95, cp?.metrics.cost_usd.p95, 'usd', true, 3],
-        ['cost per passed trial', (x) => fmtUsd(x.profile.cost_per_pass), fp?.cost_per_pass, cp?.cost_per_pass, 'usd', true, 2],
-        ['turns, p50 / p95', (x) => `${x.profile.metrics.turns.p50} / ${x.profile.metrics.turns.p95}`, fp?.metrics.turns.p50, cp?.metrics.turns.p50, 'int', true],
-        ['total tokens, p50 / p95', (x) => `${fmtTok(x.profile.metrics.total.p50)} / ${fmtTok(x.profile.metrics.total.p95)}`, fp?.metrics.total.p50, cp?.metrics.total.p50, 'tok', true],
-        ['wall time, p50 / p95', (x) => `${fmtSec(x.profile.metrics.wall_s.p50)} / ${fmtSec(x.profile.metrics.wall_s.p95)}`, fp?.metrics.wall_s.p50, cp?.metrics.wall_s.p50, 'sec', true],
-        ['timed out · errored', (x) => `${x.timeouts} · ${x.errors}`, f.timeouts, c?.timeouts, 'int', true],
-        ['total cost', (x) => fmtUsd(x.cost_usd), f.cost_usd, c?.cost_usd, 'usd', true, 2],
+        ['cost per trial, p50', pr((p) => fmtUsd(p.metrics.cost_usd.p50, 3)), fp?.metrics.cost_usd.p50, cp?.metrics.cost_usd.p50, 'usd', true, 3],
+        ['cost per trial, p95', pr((p) => fmtUsd(p.metrics.cost_usd.p95, 3)), fp?.metrics.cost_usd.p95, cp?.metrics.cost_usd.p95, 'usd', true, 3],
+        ['cost per passed trial', pr((p) => fmtUsd(p.cost_per_pass)), fp?.cost_per_pass, cp?.cost_per_pass, 'usd', true, 2],
+        ['turns, p50 / p95', pr((p) => `${p.metrics.turns.p50} / ${p.metrics.turns.p95}`), fp?.metrics.turns.p50, cp?.metrics.turns.p50, 'int', true],
+        ['total tokens, p50 / p95', pr((p) => `${fmtTok(p.metrics.total.p50)} / ${fmtTok(p.metrics.total.p95)}`), fp?.metrics.total.p50, cp?.metrics.total.p50, 'tok', true],
+        ['wall time, p50 / p95', pr((p) => `${fmtSec(p.metrics.wall_s.p50)} / ${fmtSec(p.metrics.wall_s.p95)}`), fp?.metrics.wall_s.p50, cp?.metrics.wall_s.p50, 'sec', true],
+        ['timed out · errored', (x) => (x.profile ? `${x.timeouts} · ${x.errors}` : '—'), fp ? f.timeouts : null, cp ? c?.timeouts : null, 'int', true],
+        ['total cost', (x) => (x.cost_usd != null ? fmtUsd(x.cost_usd) : '—'), f.cost_usd, c?.cost_usd, 'usd', true, 2],
       ]
     : [];
   return (
@@ -177,24 +230,14 @@ function Compare({ board, base }: { board: Board; base: ReturnType<typeof bestBa
         <label className="pick">
           <span className="label">focus</span>
           <select value={focus} onChange={(e) => set({ focus: e.target.value })} aria-label="focus run">
-            {scored.map((r) => (
-              <option key={r.run_id} value={r.run_id}>
-                {runLabel(r)}
-              </option>
-            ))}
+            <Targets runs={scored} subs={subs} />
           </select>
         </label>
         <label className="pick">
           <span className="label">challenger</span>
           <select value={challenger ?? ''} onChange={(e) => set({ challenger: e.target.value || null })} aria-label="challenger run">
             <option value="">— none —</option>
-            {scored
-              .filter((r) => r.run_id !== focus)
-              .map((r) => (
-                <option key={r.run_id} value={r.run_id}>
-                  {runLabel(r)}
-                </option>
-              ))}
+            <Targets runs={scored} subs={subs} skip={focus} />
           </select>
         </label>
         <label className="pick">
@@ -232,14 +275,14 @@ function Compare({ board, base }: { board: Board; base: ReturnType<typeof bestBa
                   <th className="num">
                     <span className="sw a" /> focus
                     <span className="path">
-                      <Link to={`/runs/${cmp.focus}`}>{label(cmp.focus)}</Link>
+                      <Target id={cmp.focus} />
                     </span>
                   </th>
                   {c && (
                     <th className="num">
                       <span className="sw b" /> challenger
                       <span className="path">
-                        <Link to={`/runs/${cmp.challenger}`}>{label(cmp.challenger ?? '')}</Link>
+                        <Target id={cmp.challenger ?? ''} />
                       </span>
                     </th>
                   )}
@@ -280,13 +323,19 @@ function Compare({ board, base }: { board: Board; base: ReturnType<typeof bestBa
           )}
           {c && cmp.fixed.length === 0 && cmp.broken.length === 0 && <p className="small muted">No query flips between the two: every query that passes in one passes in the other.</p>}
           <GroupBars cmp={cmp} base={base} label={label} />
-          {f && <Ratios p={f.profile} />}
-          {f && (
+          {f?.profile && <Ratios p={f.profile} />}
+          {f && (f.submission || c?.submission) && (
+            <p className="small muted">
+              A leaderboard submission is compared on its rescored pass / fail per trial ({(f.submission ?? c?.submission)?.trials} trials a query). Its cost, turns, tokens and traces are not in the
+              published answer file, so those rows read "—".
+            </p>
+          )}
+          {f?.profile && (!c || c.profile) && (
             <>
               <p className="label" style={{ marginTop: 'var(--s5)' }}>
                 Per-trial distribution — {c ? `${label(cmp.challenger ?? '')}, with each Δ against the focus` : label(cmp.focus)}
               </p>
-              {c ? <ProfileTable p={c.profile} versus={f.profile} versusLabel="focus" /> : <ProfileTable p={f.profile} />}
+              {c?.profile ? <ProfileTable p={c.profile} versus={f.profile} versusLabel="focus" /> : <ProfileTable p={f.profile} />}
             </>
           )}
         </>

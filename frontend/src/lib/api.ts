@@ -94,6 +94,10 @@ export type AnswerFile = {
   rank: number | null;
   pass_at_1_site: number | null;
   stratified: string | null;
+  pooled: boolean; // false: a reference file, kept out of each query's pooled rate
+  pr: number | null; // read from this submission PR's branch, pinned at `commit`
+  pr_url: string | null;
+  commit: string | null;
   rows: number;
   rows_unmatched: number;
   queries: number;
@@ -196,8 +200,23 @@ export type RunSummary = {
 /** GET /api/runs/compare: two runs on the same queries, grouped by dataset, validator style or query. */
 export type CompareGroup = 'dataset' | 'style' | 'query';
 export type CompareRate = { passed: number; n: number; rate: number; queries: number };
+/** A rescored leaderboard answer file as a compare target: id is `lb:<name>`. */
+export type Submission = {
+  id: string;
+  name: string;
+  label: string;
+  rank: number | null;
+  pass_at_1_site: number | null;
+  pass_rate_macro: number | null;
+  passed: number;
+  rows: number;
+  trials: number;
+  pooled: boolean;
+  pr_url: string | null;
+};
 export type CompareSide = {
   run: RunSummary | null;
+  submission: Submission | null;
   queries: number;
   passed: number;
   scored: number;
@@ -206,8 +225,8 @@ export type CompareSide = {
   timeouts: number;
   errors: number;
   rate_limited: number;
-  cost_usd: number;
-  profile: Profile;
+  cost_usd: number | null; // null for a submission: the rescore keeps pass / fail only
+  profile: Profile | null;
 };
 export type CompareResp = {
   focus: string;
@@ -222,7 +241,7 @@ export type CompareResp = {
   broken: string[];
 };
 export type RunRole = 'champion' | 'challenger' | 'superseded' | 'smoke' | 'dry';
-export type Board = { champion: string; champion_run_id: string | null; runs: RunSummary[] };
+export type Board = { champion: string; champion_run_id: string | null; runs: RunSummary[]; submissions: Submission[] };
 export type Stat = { mean: number; p50: number; p95: number; max: number; sum: number };
 export type ProfileKey = 'turns' | 'tool_calls' | 'wall_s' | 'fresh_in' | 'cache_read' | 'output' | 'total' | 'cost_usd';
 export type Profile = {

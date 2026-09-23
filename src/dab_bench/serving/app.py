@@ -31,6 +31,7 @@ from dab_bench.config import (
     settings,
 )
 from dab_bench.data.index import Index, load, stats
+from dab_bench.eval.score import TrialResult
 
 EXAMPLES_PER_FILE = 3
 
@@ -124,7 +125,7 @@ def create_app(index: Index | None = None) -> FastAPI:
         """Every run folder with its role (champion, challenger, superseded, smoke, dry) and
         its per-trial profile. The champion is derived: the newest scored full-split run of
         the agent `agents/champion` names that is not itself a challenger."""
-        return _board()
+        return _board() | {"submissions": _submissions(ix)}
 
     @app.get("/api/runs/compare")
     def runs_compare(
@@ -133,14 +134,19 @@ def create_app(index: Index | None = None) -> FastAPI:
         """Two runs side by side: the summary and the per-group rates, on the queries both
         scored (`scope=common`, the default) or on each run's own (`scope=all`). Every number
         comes from `score.summarise` / `score.profile` on the filtered trials, the same
-        arithmetic as the board, so a comparison can never disagree with a run page."""
+        arithmetic as the board, so a comparison can never disagree with a run page.
+        Either side may be a leaderboard answer file, `lb:<name>` (e.g. `lb:permute_eq`):
+        its rescored verdicts, with no cost or trace profile."""
         if group not in _GROUPS:
             raise HTTPException(400, f"group must be one of {sorted(_GROUPS)}")
         if scope not in ("common", "all"):
             raise HTTPException(400, "scope must be common or all")
         ids = [focus] + ([challenger] if challenger else [])
         for rid in ids:
-            if not (RUNS_DIR / rid / "run.json").exists():
+            if rid.startswith(LB_PREFIX):
+                if rid.removeprefix(LB_PREFIX) not in ((ix.trials or {}).get("per_file") or {}):
+                    raise HTTPException(404, f"no rescored answer file {rid}")
+            elif not (RUNS_DIR / rid / "run.json").exists():
                 raise HTTPException(404, f"no run {rid}")
         return _compare(ix, ids, group, scope)
 
@@ -443,12 +449,69 @@ def _group_key(ix: Index, group: str, query_id: str) -> str:
     return query_id
 
 
+LB_PREFIX = "lb:"
+
+
+def _submissions(ix: Index) -> list[dict[str, Any]]:
+    """The rescored leaderboard answer files, as compare targets: ranked entries first."""
+    per_file = (ix.trials or {}).get("per_file") or {}
+    out = []
+    for f in ix.leaderboard.get("answer_files", []):
+        pf = per_file.get(f["name"])
+        if not pf:
+            continue
+        out.append(
+            {
+                "id": LB_PREFIX + f["name"],
+                "name": f["name"],
+                "label": f["label"],
+                "rank": f["rank"],
+                "pass_at_1_site": f["pass_at_1_site"],
+                "pass_rate_macro": pf["macro"],
+                "passed": pf["passed"],
+                "rows": pf["rows"],
+                "trials": max(f["runs_per_query"] or [0]),
+                "pooled": f.get("pooled", True),
+                "pr_url": f.get("pr_url"),
+            }
+        )
+    return sorted(out, key=lambda s: (s["rank"] is None, s["rank"] or 0, s["name"]))
+
+
+def _submission_results(ix: Index, name: str) -> list[TrialResult]:
+    """An answer file's rescored verdicts as result rows, so `summarise` scores it like a run.
+    Only pass / fail per trial survives the rescore summary, so cost and turns stay empty."""
+    rows: list[TrialResult] = []
+    for qid, t in ((ix.trials or {}).get("per_query") or {}).items():
+        f = t["files"].get(name)
+        if not f:
+            continue
+        rows += [
+            TrialResult(
+                query_id=qid,
+                dataset=qid.split("/")[0],
+                trial=i + 1,
+                question="",
+                answer="",
+                passed=i < int(f["passed"]),
+            )
+            for i in range(int(f["n"]))
+        ]
+    return rows
+
+
 def _compare(ix: Index, ids: list[str], group: str, scope: str) -> dict[str, Any]:
     from dab_bench.eval.runner import load_run
     from dab_bench.eval.score import profile, summarise
 
     board = {r["run_id"]: r for r in _board()["runs"]}
-    loaded = {rid: load_run(rid)[1] for rid in ids}
+    subs = {s["id"]: s for s in _submissions(ix)}
+    loaded = {
+        rid: _submission_results(ix, rid.removeprefix(LB_PREFIX))
+        if rid.startswith(LB_PREFIX)
+        else load_run(rid)[1]
+        for rid in ids
+    }
     scored_q = {
         rid: {r.query_id for r in res if r.passed is not None} for rid, res in loaded.items()
     }
@@ -461,8 +524,10 @@ def _compare(ix: Index, ids: list[str], group: str, scope: str) -> dict[str, Any
     for rid, res in loaded.items():
         rows = [r for r in res if keep is None or keep(rid, r.query_id)]
         s = summarise(rows)
+        sub = subs.get(rid)
         sides[rid] = {
             "run": board.get(rid),
+            "submission": sub,
             "queries": len(s.per_query),
             "passed": s.passed,
             "scored": s.scored,
@@ -471,8 +536,8 @@ def _compare(ix: Index, ids: list[str], group: str, scope: str) -> dict[str, Any
             "timeouts": s.timeouts,
             "errors": s.errors,
             "rate_limited": s.rate_limited,
-            "cost_usd": s.cost_usd,
-            "profile": profile(rows),
+            "cost_usd": None if sub else s.cost_usd,
+            "profile": None if sub else profile(rows),
         }
         by_group: dict[str, list[dict[str, Any]]] = {}
         for q, e in s.per_query.items():

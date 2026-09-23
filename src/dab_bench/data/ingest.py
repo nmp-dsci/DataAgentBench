@@ -42,7 +42,7 @@ from dab_bench.data.aliases import (
     dataset_key,
     query_key,
 )
-from dab_bench.data.upstream import Upstream, is_lfs_pointer, require
+from dab_bench.data.upstream import Upstream, is_lfs_pointer, require, show
 
 VALIDATOR_STYLES = ("regex", "reads-gold-file", "substring", "levenshtein")
 
@@ -226,7 +226,7 @@ def _site_queries(root: Path) -> dict[str, str]:
 
 
 def _copy_answers(
-    root: Path, in_scope: set[str], leaderboard: dict[str, Any]
+    root: Path, in_scope: set[str], leaderboard: dict[str, Any], warnings: list[str]
 ) -> tuple[list[dict[str, Any]], int, int]:
     """Normalise each committed answer file into data/answers/<name>.json and describe it."""
     ANSWERS_DIR.mkdir(parents=True, exist_ok=True)
@@ -237,10 +237,22 @@ def _copy_answers(
     total = 0
     unmatched_total = 0
     for upstream_path, meta in ANSWER_FILES.items():
-        src = root / upstream_path
-        if not src.exists():
-            continue
-        rows = json.loads(src.read_text())
+        if meta.get("commit"):
+            if not (root / ".git").exists():
+                continue  # an unpacked tree (the test fixture) carries no PR objects
+            text = show(str(meta["commit"]), upstream_path, root)
+            if text is None:
+                warnings.append(
+                    f"{upstream_path} skipped: pinned to PR #{meta['pr']} at {meta['commit']}, "
+                    "which the clone has not fetched; run `make upstream`"
+                )
+                continue
+        else:
+            src = root / upstream_path
+            if not src.exists():
+                continue
+            text = src.read_text()
+        rows = json.loads(text)
         name = answer_file_name(upstream_path)
         norm: list[dict[str, Any]] = []
         unmatched = 0
@@ -271,6 +283,12 @@ def _copy_answers(
                 "rank": row["rank"] if row else None,
                 "pass_at_1_site": row["passAt1"] if row else None,
                 "stratified": meta["stratified"],
+                "pooled": bool(meta.get("pooled", True)),
+                "pr": meta.get("pr"),
+                "pr_url": f"{UPSTREAM_REPO.removesuffix('.git')}/pull/{meta['pr']}"
+                if meta.get("pr")
+                else None,
+                "commit": meta.get("commit"),
                 "rows": len(norm),
                 "rows_unmatched": unmatched,
                 "queries": len(per_query),
@@ -298,8 +316,9 @@ and Hasura PromptQL:
 The index carries the question text, the ground-truth answers, the validator
 source and the dataset descriptions of the {counts.queries_in_scope} leaderboard
 queries across {counts.datasets_in_scope} datasets, and normalised copies of the
-{counts.answer_rows} published answers committed upstream. No database file is
-copied. The upstream repository publishes no licence file; this copy exists so
+{counts.answer_rows} published answers, committed upstream or on a leaderboard
+submission's PR branch (pinned by commit in `leaderboard.json`). No database file
+is copied. The upstream repository publishes no licence file; this copy exists so
 the explorer runs from a bare clone, and it is removed on request.
 """
 
@@ -362,7 +381,7 @@ def run(root: Path | None = None, commit: str | None = None) -> IngestResult:
         "total_lines": sum(q["validator"]["lines"] for q in queries),
     }
 
-    answer_files, answer_rows, unmatched = _copy_answers(root, ours, leaderboard)
+    answer_files, answer_rows, unmatched = _copy_answers(root, ours, leaderboard, warnings)
     leaderboard_out = {**leaderboard, "answer_files": answer_files}
 
     when = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")

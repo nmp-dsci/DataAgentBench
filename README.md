@@ -122,11 +122,13 @@ trial, and in the explorer under **Runs**. The next step in the plan — v0 at
   validator's own reason on each failure.
 - **Validators** — the four styles (33 regex/number, 12 substring/list,
   9 levenshtein, 0 read the CSV) and which queries use each.
-- **Leaderboard** — the site's 40 entries, the nine with committed answers
-  marked, and the stratified tables with our rescore beside them.
+- **Leaderboard** — the site's 40 entries, the eleven with answers here marked
+  (nine committed upstream; #1 Permute EQ and #2 Scout read from their
+  submission PRs, pinned by commit), and the stratified tables with our rescore
+  beside them.
 - **Runs / Run / Trace** — our own evals from `runs/`. The Runs tab opens on a
-  comparison: pick a focus run and a challenger run (any two scored runs, labelled
-  by agent version), group the figure by dataset, validator style or query, and
+  comparison: pick a focus and a challenger (any two scored runs, labelled by
+  agent version, or a leaderboard answer file such as `lb:permute_eq`), group the figure by dataset, validator style or query, and
   read every Δ — pass rates on the queries both scored, cost, turns, tokens, wall,
   the queries fixed and broken (`/api/runs/compare`, the same `summarise` /
   `profile` arithmetic as the board). Then the champion and every

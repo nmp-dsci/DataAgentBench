@@ -1,12 +1,12 @@
 {
  "summary": {
-  "generated_at": "2026-09-20T06:12:42Z",
+  "generated_at": "2026-09-23T05:06:22Z",
   "commit": "0290945c2b38ccbe1ccec6f4765d078350291129",
-  "seconds": 165.8,
+  "seconds": 251.9,
   "timeout_s": 30,
   "rows": 14480,
   "queries": 54,
-  "files": 9,
+  "files": 11,
   "timed_out": 2,
   "never_passed": [
    "agnews/3",
@@ -55,6 +55,46 @@
     "stockindex": 0.7333333333333334,
     "stockmarket": 0.72,
     "yelp": 0.6571428571428571
+   }
+  },
+  "oceanbase_lab_scout": {
+   "rows": 270,
+   "passed": 242,
+   "micro": 0.8962962962962963,
+   "macro": 0.9062362637362638,
+   "per_dataset": {
+    "agnews": 0.45,
+    "bookreview": 1.0,
+    "crmarenapro": 0.9076923076923078,
+    "deps_dev_v1": 0.9,
+    "github_repos": 0.8,
+    "googlelocal": 1.0,
+    "music_brainz_20k": 1.0,
+    "pancancer_atlas": 1.0,
+    "patents": 1.0,
+    "stockindex": 1.0,
+    "stockmarket": 0.96,
+    "yelp": 0.8571428571428571
+   }
+  },
+  "permute_eq": {
+   "rows": 270,
+   "passed": 256,
+   "micro": 0.9481481481481482,
+   "macro": 0.93,
+   "per_dataset": {
+    "agnews": 0.5,
+    "bookreview": 1.0,
+    "crmarenapro": 1.0,
+    "deps_dev_v1": 0.7,
+    "github_repos": 1.0,
+    "googlelocal": 1.0,
+    "music_brainz_20k": 1.0,
+    "pancancer_atlas": 1.0,
+    "patents": 1.0,
+    "stockindex": 1.0,
+    "stockmarket": 0.96,
+    "yelp": 1.0
    }
   },
   "promptql_gemini31pro_wiki4_pp2_n5": {
@@ -237,6 +277,30 @@
      ],
      "fail_examples": []
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      235,
+      236,
+      237
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      0,
+      1,
+      2
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 5,
@@ -415,6 +479,48 @@
       {
        "i": 242,
        "reason": "Ground truth '0.14414414414414414' (tol=0.0001) not found in LLM output: 24 out of 111 articles authored by Amy Jones belong to the Science/Technology category, which is a fraction of approximately 24/111 ≈ 0.2162 (about 21.62%)."
+      }
+     ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 0,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [],
+     "fail_examples": [
+      {
+       "i": 240,
+       "reason": "Ground truth '0.14414414414414414' (tol=0.0001) not found in LLM output: 0.13513513513513514\n\nOf the 111 articles authored by Amy Jones, 15 belong to the Science/Technology category, giving a fraction of 15/111 ≈ 0.13513513513513514.\n\nCategory breakdown of Amy Jones's 111 articles:\n- Business: 39\n- World: 29\n- Sports: 28\n- Science/Technology: 15"
+      },
+      {
+       "i": 241,
+       "reason": "Ground truth '0.14414414414414414' (tol=0.0001) not found in LLM output: 18/111 ≈ 0.1622 (about 16.22%) of all articles authored by Amy Jones belong to the Science/Technology category."
+      },
+      {
+       "i": 242,
+       "reason": "Ground truth '0.14414414414414414' (tol=0.0001) not found in LLM output: Approximately 0.1532 (17/111) of all articles authored by Amy Jones belong to the Science/Technology category.\n\nComputation:\n- Amy Jones (author_id = 218) authored 111 articles total (denominator).\n- Classifying all 111 articles by the meaning of their title and description into the four categories (World, Sports, Business, S"
+      }
+     ]
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 0,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [],
+     "fail_examples": [
+      {
+       "i": 5,
+       "reason": "Ground truth '0.14414414414414414' (tol=0.0001) not found in LLM output: ## Answer\n\n**≈ 0.171 — 19 of Amy Jones's 111 articles (17.12%) belong to Science/Technology** [calc_1]\n\n- Denominator (T4 denominator scope): 111 distinct `article_id` attributed to author \"Amy Jones\" (author_id 218)\n- Numerator (T4 numerator scope): 19 of those articles whose **dominant** semantic frame is Science/Technology"
+      },
+      {
+       "i": 6,
+       "reason": "Ground truth '0.14414414414414414' (tol=0.0001) not found in LLM output: ## Answer\n\n**≈ 22.5% — 25 of Amy Jones's 111 articles carry a Science/Technology dominant frame (0.225 as a fraction)** [calc_1]\n\n---\n\n### 1. Execution contract read from the Arbiter1 JSON (before any SQL)\n\n| JSON element | Resolved instruction | Source expression used |\n|---|---|---|\n| `T1` predicate_execution (`equality`, t"
+      },
+      {
+       "i": 7,
+       "reason": "Ground truth '0.14414414414414414' (tol=0.0001) not found in LLM output: ## Answer\n\n**≈ 22.5% of Amy Jones's articles are Science/Technology — 25 of her 111 articles (fraction ≈ 0.225)** [calc_1].\n\n## Execution contract audit (Arbiter1 JSON → SQL)\n\n| # | Contract item | Resolved source_expr | Enforcement |\n|---|---|---|---|\n| 1 | T1 predicate (`equality`, \"Amy Jones\") | A12 `agnews_metadata_databa"
       }
      ]
     },
@@ -623,6 +729,48 @@
       }
      ]
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 0,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [],
+     "fail_examples": [
+      {
+       "i": 245,
+       "reason": "Ground truth numeric value '336.6363636363636' (tol=0.01) not found in LLM output: 370.8181818181818"
+      },
+      {
+       "i": 246,
+       "reason": "Ground truth numeric value '336.6363636363636' (tol=0.01) not found in LLM output: The average number of business articles published per year in Europe from 2010 to 2020 (inclusive) is **368.0**.\n\nThis is based on 4048 business articles identified across the 11-year period (2010–2020), derived by classifying all 14860 Europe-region articles published during that date range into one of four categor"
+      },
+      {
+       "i": 247,
+       "reason": "Ground truth numeric value '336.6363636363636' (tol=0.01) not found in LLM output: 365.1818"
+      }
+     ]
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 0,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [],
+     "fail_examples": [
+      {
+       "i": 10,
+       "reason": "Ground truth numeric value '336.6363636363636' (tol=0.01) not found in LLM output: ## Answer\n\n**≈ 336 Business articles per year** — precisely **336.45 per year** (3,701 Business articles ÷ 11 years, 2010–2020 inclusive, region = Europe) [calc_1].\n\n## Execution contract (Arbiter1 JSON → SQL)\n\n| JSON task | Requirement (`description` / `why`) | source_expr used | Implementation |\n|---|---|---|---|\n"
+      },
+      {
+       "i": 11,
+       "reason": "Ground truth numeric value '336.6363636363636' (tol=0.01) not found in LLM output: ## Answer\n\n**≈ 325 Business articles per year** (mean of the 11 yearly counts) — precisely **325.3 articles/year** [calc_1], from **3,578** Business-classified articles published in the **Europe** region between **2010-01-01 and 2020-12-31 inclusive** [calc_1].\n\n- Metric definition executed (T5): `mean(count(distinc"
+      },
+      {
+       "i": 12,
+       "reason": "Ground truth numeric value '336.6363636363636' (tol=0.01) not found in LLM output: ## Answer\n\n**≈ 333 Business articles per year** (mean of the 11 yearly counts) — **332.9/year** [calc_1], from **3,662 Business articles** identified across **14,860** Europe-region articles published 2010‑01‑01 → 2020‑12‑31 inclusive.\n\n---\n\n## 1. Execution contract resolved from the Arbiter1 JSON\n\n| Task | JSON ins"
+      }
+     ]
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 0,
@@ -822,6 +970,35 @@
       }
      ]
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 4,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      250,
+      251,
+      252
+     ],
+     "fail_examples": [
+      {
+       "i": 253,
+       "reason": "Ground truth 'Africa' not found in LLM output: In 2015, North America published the largest number of World-category articles (323), the most among all regions after classifying the 6696 articles published that year into World, Sports, Business, and Science/Technology categories (1581 were classified as World)."
+      }
+     ]
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      15,
+      16,
+      17
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 0,
@@ -1015,6 +1192,30 @@
      ],
      "fail_examples": []
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      0,
+      1,
+      2
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      20,
+      21,
+      22
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 5,
@@ -1196,6 +1397,30 @@
      ],
      "fail_examples": []
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      5,
+      6,
+      7
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      25,
+      26,
+      27
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 5,
@@ -1367,6 +1592,30 @@
       10,
       11,
       12
+     ],
+     "fail_examples": []
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      10,
+      11,
+      12
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      30,
+      31,
+      32
      ],
      "fail_examples": []
     },
@@ -1543,6 +1792,30 @@
      ],
      "fail_examples": []
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      15,
+      16,
+      17
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      35,
+      36,
+      37
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 5,
@@ -1656,6 +1929,30 @@
       60,
       61,
       62
+     ],
+     "fail_examples": []
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      60,
+      61,
+      62
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      80,
+      81,
+      82
      ],
      "fail_examples": []
     },
@@ -1843,6 +2140,30 @@
      ],
      "fail_examples": []
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      65,
+      66,
+      67
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      85,
+      86,
+      87
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 5,
@@ -1985,6 +2306,35 @@
        "reason": "Found agent IDs ['005Wt000003NJgAIAW'], but expected '005Wt000003NDEBIA4'"
       }
      ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 4,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      70,
+      72,
+      73
+     ],
+     "fail_examples": [
+      {
+       "i": 71,
+       "reason": "Found agent IDs ['005Wt000003NJjNIAW'], but expected '005Wt000003NDEBIA4'"
+      }
+     ]
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      90,
+      91,
+      92
+     ],
+     "fail_examples": []
     },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
@@ -2189,6 +2539,30 @@
       }
      ]
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      75,
+      76,
+      77
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      95,
+      96,
+      97
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 1,
@@ -2385,6 +2759,42 @@
        "reason": "Found knowledge article IDs ['ka0Wt000000Ens5IAC'], but expected 'ka0Wt000000Eq0MIAS'"
       }
      ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 2,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      21,
+      24
+     ],
+     "fail_examples": [
+      {
+       "i": 20,
+       "reason": "Found knowledge article IDs ['ka0Wt000000Ens5IAC'], but expected 'ka0Wt000000Eq0MIAS'"
+      },
+      {
+       "i": 22,
+       "reason": "Found knowledge article IDs ['ka0Wt000000Ens5IAC'], but expected 'ka0Wt000000Eq0MIAS'"
+      },
+      {
+       "i": 23,
+       "reason": "Found knowledge article IDs ['ka0Wt000000Ens5IAC'], but expected 'ka0Wt000000Eq0MIAS'"
+      }
+     ]
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      40,
+      41,
+      42
+     ],
+     "fail_examples": []
     },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
@@ -2598,6 +3008,35 @@
      ],
      "fail_examples": []
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 4,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      25,
+      26,
+      27
+     ],
+     "fail_examples": [
+      {
+       "i": 28,
+       "reason": "No valid stage name found in LLM output"
+      }
+     ]
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      45,
+      46,
+      47
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 1,
@@ -2791,6 +3230,30 @@
      ],
      "fail_examples": []
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      30,
+      31,
+      32
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      50,
+      51,
+      52
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 5,
@@ -2969,6 +3432,30 @@
       35,
       36,
       37
+     ],
+     "fail_examples": []
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      35,
+      36,
+      37
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      55,
+      56,
+      57
      ],
      "fail_examples": []
     },
@@ -3158,6 +3645,30 @@
       }
      ]
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      40,
+      41,
+      42
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      60,
+      61,
+      62
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 5,
@@ -3346,6 +3857,35 @@
        "reason": "Found knowledge article IDs ['ka0Wt000000EpSUIA0'], but expected 'ka0Wt000000EoD3IAK'"
       }
      ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 4,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      45,
+      47,
+      48
+     ],
+     "fail_examples": [
+      {
+       "i": 46,
+       "reason": "Found knowledge article IDs ['ka0Wt000000EpSUIA0'], but expected 'ka0Wt000000EoD3IAK'"
+      }
+     ]
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      65,
+      66,
+      67
+     ],
+     "fail_examples": []
     },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
@@ -3552,6 +4092,30 @@
      ],
      "fail_examples": []
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      50,
+      51,
+      52
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      70,
+      71,
+      72
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 0,
@@ -3742,6 +4306,30 @@
      ],
      "fail_examples": []
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      55,
+      56,
+      57
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      75,
+      76,
+      77
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 5,
@@ -3919,6 +4507,42 @@
       {
        "i": 83,
        "reason": "Missing or mis-versioned above-cutoff package: @dmrvos/infrajs>0.0.6>typescript 2.6.2"
+      }
+     ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      80,
+      81,
+      82
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 2,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      101,
+      103
+     ],
+     "fail_examples": [
+      {
+       "i": 100,
+       "reason": "Reported package outside the top 4 and the fifth-place tie: @dreampie/semantic-ui"
+      },
+      {
+       "i": 102,
+       "reason": "Reported package outside the top 4 and the fifth-place tie: @dreampie/semantic-ui"
+      },
+      {
+       "i": 104,
+       "reason": "Reported package outside the top 4 and the fifth-place tie: @dreampie/semantic-ui"
       }
      ]
     },
@@ -4123,6 +4747,35 @@
        "reason": "Missing project name: moment/moment"
       }
      ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 4,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      85,
+      86,
+      87
+     ],
+     "fail_examples": [
+      {
+       "i": 89,
+       "reason": "Missing project name: sveltejs/svelte"
+      }
+     ]
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      105,
+      106,
+      107
+     ],
+     "fail_examples": []
     },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
@@ -4331,6 +4984,39 @@
       }
      ]
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 3,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      91,
+      92,
+      94
+     ],
+     "fail_examples": [
+      {
+       "i": 90,
+       "reason": "No value in LLM output rounds to 0.33"
+      },
+      {
+       "i": 93,
+       "reason": "No value in LLM output rounds to 0.33"
+      }
+     ]
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      110,
+      111,
+      112
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 0,
@@ -4532,6 +5218,39 @@
       }
      ]
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 3,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      95,
+      96,
+      98
+     ],
+     "fail_examples": [
+      {
+       "i": 97,
+       "reason": "No fuzzy match found for 'swiftandroid/swift' within 3-character distance"
+      },
+      {
+       "i": 99,
+       "reason": "No fuzzy match found for 'swiftandroid/swift' within 3-character distance"
+      }
+     ]
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      115,
+      116,
+      117
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 0,
@@ -4723,6 +5442,30 @@
      ],
      "fail_examples": []
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      100,
+      101,
+      102
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      120,
+      121,
+      122
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 5,
@@ -4908,6 +5651,30 @@
        "reason": "Could not match: 'tensorflow/tensorflow'"
       }
      ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      105,
+      106,
+      107
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      125,
+      126,
+      127
+     ],
+     "fail_examples": []
     },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
@@ -5116,6 +5883,30 @@
      ],
      "fail_examples": []
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      110,
+      111,
+      112
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      130,
+      131,
+      132
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 5,
@@ -5284,6 +6075,30 @@
        "reason": "No score found after name: Elite Massage"
       }
      ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      115,
+      116,
+      117
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      135,
+      136,
+      137
+     ],
+     "fail_examples": []
     },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
@@ -5476,6 +6291,30 @@
       120,
       121,
       122
+     ],
+     "fail_examples": []
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      120,
+      121,
+      122
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      140,
+      141,
+      142
      ],
      "fail_examples": []
     },
@@ -5681,6 +6520,30 @@
      ],
      "fail_examples": []
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      125,
+      126,
+      127
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      145,
+      146,
+      147
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 5,
@@ -5861,6 +6724,30 @@
        "reason": "Ground truth '1059.46' not found in LLM output: Apple Music made $601.44 USD in revenue from Beyoncé's song \"Get Me Bodied\" in Canada."
       }
      ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      255,
+      256,
+      257
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      150,
+      151,
+      152
+     ],
+     "fail_examples": []
     },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
@@ -6082,6 +6969,30 @@
       }
      ]
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      260,
+      261,
+      262
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      155,
+      156,
+      157
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 5,
@@ -6268,6 +7179,30 @@
       265,
       266,
       267
+     ],
+     "fail_examples": []
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      265,
+      266,
+      267
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      160,
+      161,
+      162
      ],
      "fail_examples": []
     },
@@ -6470,6 +7405,30 @@
       }
      ]
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      130,
+      131,
+      132
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      165,
+      166,
+      167
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 0,
@@ -6658,6 +7617,30 @@
      ],
      "fail_examples": []
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      135,
+      136,
+      137
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      170,
+      171,
+      172
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 5,
@@ -6817,6 +7800,30 @@
        "reason": "No value in LLM output matches 305.12, 305.1, or 305"
       }
      ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      140,
+      141,
+      142
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      175,
+      176,
+      177
+     ],
+     "fail_examples": []
     },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
@@ -7007,6 +8014,30 @@
        "reason": "Missing CPC code: A22B"
       }
      ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      145,
+      146,
+      147
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      180,
+      181,
+      182
+     ],
+     "fail_examples": []
     },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
@@ -7204,6 +8235,30 @@
        "reason": "Code/year not found near 'BAKING; EDIBLE DOUGHS' (CPC: A21, Year: 2015, Window: 'styear200916a21bakingedibledoughshighestema10bes')"
       }
      ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      150,
+      151,
+      152
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      185,
+      186,
+      187
+     ],
+     "fail_examples": []
     },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
@@ -7404,6 +8459,30 @@
       }
      ]
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      155,
+      156,
+      157
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      190,
+      191,
+      192
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 4,
@@ -7592,6 +8671,30 @@
      ],
      "fail_examples": []
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      160,
+      161,
+      162
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      195,
+      196,
+      197
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 5,
@@ -7749,6 +8852,30 @@
       165,
       166,
       167
+     ],
+     "fail_examples": []
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      165,
+      166,
+      167
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      200,
+      201,
+      202
      ],
      "fail_examples": []
     },
@@ -7917,6 +9044,30 @@
        "reason": "Neither candidate ranking matched: Missing name: 399001.SZ | Missing name: NSEI"
       }
      ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      170,
+      171,
+      172
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      205,
+      206,
+      207
+     ],
+     "fail_examples": []
     },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
@@ -8117,6 +9268,30 @@
      ],
      "fail_examples": []
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      175,
+      176,
+      177
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      210,
+      211,
+      212
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 5,
@@ -8254,6 +9429,35 @@
        "reason": "Missing number: 31"
       }
      ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 4,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      180,
+      181,
+      182
+     ],
+     "fail_examples": [
+      {
+       "i": 184,
+       "reason": "Missing number: 31"
+      }
+     ]
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      215,
+      216,
+      217
+     ],
+     "fail_examples": []
     },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
@@ -8430,6 +9634,35 @@
       {
        "i": 188,
        "reason": "Number near 'BIO-key International, Inc' does not match rounded 10988"
+      }
+     ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      185,
+      186,
+      187
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 4,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      220,
+      221,
+      222
+     ],
+     "fail_examples": [
+      {
+       "i": 223,
+       "reason": "No number found near name: Apex Global Brands Inc"
       }
      ]
     },
@@ -8638,6 +9871,30 @@
       }
      ]
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      190,
+      191,
+      192
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      225,
+      226,
+      227
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 0,
@@ -8823,6 +10080,30 @@
      ],
      "fail_examples": []
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      195,
+      196,
+      197
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      230,
+      231,
+      232
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 5,
@@ -8995,6 +10276,30 @@
        "reason": "No matching number (≈ 3.55) found in LLM output."
       }
      ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      200,
+      201,
+      202
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      235,
+      236,
+      237
+     ],
+     "fail_examples": []
     },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
@@ -9175,6 +10480,30 @@
        "reason": "No occurrence of 3.7 near PA/Pennsylvania."
       }
      ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      205,
+      206,
+      207
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      240,
+      241,
+      242
+     ],
+     "fail_examples": []
     },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
@@ -9359,6 +10688,35 @@
       }
      ]
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 4,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      210,
+      211,
+      212
+     ],
+     "fail_examples": [
+      {
+       "i": 214,
+       "reason": "Number 35 not found in LLM output."
+      }
+     ]
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      245,
+      246,
+      247
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 5,
@@ -9540,6 +10898,35 @@
       }
      ]
     },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 4,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      215,
+      216,
+      217
+     ],
+     "fail_examples": [
+      {
+       "i": 219,
+       "reason": "Category 'Restaurant' not found in LLM output."
+      }
+     ]
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      250,
+      251,
+      252
+     ],
+     "fail_examples": []
+    },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
      "passed": 4,
@@ -9708,6 +11095,39 @@
       220,
       221,
       222
+     ],
+     "fail_examples": []
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 3,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      220,
+      222,
+      224
+     ],
+     "fail_examples": [
+      {
+       "i": 221,
+       "reason": "No occurrence of 3.48 near PA/Pennsylvania."
+      },
+      {
+       "i": 223,
+       "reason": "No occurrence of 3.48 near PA/Pennsylvania."
+      }
+     ]
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      255,
+      256,
+      257
      ],
      "fail_examples": []
     },
@@ -9886,6 +11306,35 @@
       225,
       226,
       227
+     ],
+     "fail_examples": []
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 4,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      225,
+      227,
+      228
+     ],
+     "fail_examples": [
+      {
+       "i": 226,
+       "reason": "Missing name: Coffee House Too Cafe"
+      }
+     ]
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      260,
+      261,
+      262
      ],
      "fail_examples": []
     },
@@ -10089,6 +11538,30 @@
        "reason": "Missing category: Breakfast & Brunch"
       }
      ]
+    },
+    "oceanbase_lab_scout": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      230,
+      231,
+      232
+     ],
+     "fail_examples": []
+    },
+    "permute_eq": {
+     "n": 5,
+     "passed": 5,
+     "timed_out": 0,
+     "errors": 0,
+     "pass_examples": [
+      265,
+      266,
+      267
+     ],
+     "fail_examples": []
     },
     "promptql_gemini31pro_wiki4_pp2_n5": {
      "n": 5,
@@ -10802,6 +12275,58 @@
     },
     "overall_site": 0.2925,
     "overall_ours_macro": 0.2921916971916972
+   }
+  },
+  "overall": {
+   "claude-opus-4-6": {
+    "ours": 0.5551,
+    "site": 0.5551,
+    "diff": 0.0
+   },
+   "oceanbase_lab_scout": {
+    "ours": 0.9062,
+    "site": 0.9062,
+    "diff": 0.0
+   },
+   "permute_eq": {
+    "ours": 0.93,
+    "site": 0.9467,
+    "diff": -0.0167
+   },
+   "promptql_gemini31pro_wiki4_pp2_n5": {
+    "ours": 0.6,
+    "site": 0.6,
+    "diff": 0.0
+   },
+   "promptql_opus46_wiki4_pp2_n5": {
+    "ours": 0.5933,
+    "site": 0.5933,
+    "diff": 0.0
+   },
+   "react_gemini-2.5-flash": {
+    "ours": 0.1049,
+    "site": 0.1049,
+    "diff": -0.0
+   },
+   "react_gemini-3-pro": {
+    "ours": 0.4663,
+    "site": 0.4663,
+    "diff": -0.0
+   },
+   "react_gpt-5-mini": {
+    "ours": 0.3663,
+    "site": 0.3663,
+    "diff": 0.0
+   },
+   "react_gpt-5.2": {
+    "ours": 0.2991,
+    "site": 0.2991,
+    "diff": 0.0
+   },
+   "react_kimi-k2-thinking": {
+    "ours": 0.2922,
+    "site": 0.2925,
+    "diff": -0.0003
    }
   },
   "max_abs_diff": 0.14

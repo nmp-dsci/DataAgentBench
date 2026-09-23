@@ -24,8 +24,8 @@ export function Leaderboard() {
       </h1>
       <p className="lead">
         Straight from the site's <code>docs/data/leaderboards.json</code>. Pass@1 is the mean over datasets of each dataset's mean per-query pass rate. A "tuned prompt" is one built
-        from studying the datasets' conventions; hiding those shows what a general-purpose agent reaches. {lb.answer_files.length} entries have their answers committed upstream,
-        and those are rescored here per query.
+        from studying the datasets' conventions; hiding those shows what a general-purpose agent reaches. {lb.answer_files.length} entries have their answers here, rescored
+        per query: {lb.answer_files.filter((f) => !f.pr).length} committed upstream and {lb.answer_files.filter((f) => f.pr).length} read from their submission PR's branch.
       </p>
       <div className="filters">
         <button type="button" className={`tog ${hideTuned ? 'on' : ''}`} onClick={() => setHideTuned((v) => !v)}>
@@ -83,7 +83,8 @@ export function Leaderboard() {
 
       <h2>The {lb.answer_files.length} answer files, rescored here</h2>
       <p>
-        Each file's rows were judged by the validators at the ingested commit. "Macro" is the site's Pass@1 definition; "micro" is over rows. They differ because dataset query counts
+        Each file's rows were judged by the validators at the ingested commit. A file read from a PR is a reference: it is compared on the Runs tab but kept out of each
+        query's pooled published rate, which stays the public baselines' number. "Macro" is the site's Pass@1 definition; "micro" is over rows. They differ because dataset query counts
         vary{mostQueriesDs && fewestQueriesDs && mostQueriesDs.key !== fewestQueriesDs.key
           ? ` — ${mostQueriesDs.key} has ${mostQueriesDs.n_queries} queries and ${fewestQueriesDs.key} has ${fewestQueriesDs.n_queries}`
           : ''}.
@@ -109,7 +110,17 @@ export function Leaderboard() {
                 <tr key={f.name}>
                   <td className="sub">
                     {f.label}
-                    <span className="path">{f.upstream_path}</span>
+                    <span className="path">
+                      {f.upstream_path}
+                      {f.pr_url && (
+                        <>
+                          {' · '}
+                          <a href={f.pr_url} target="_blank" rel="noreferrer">
+                            PR #{f.pr} @ {f.commit?.slice(0, 7)}
+                          </a>
+                        </>
+                      )}
+                    </span>
                   </td>
                   <td className="num">{f.rank ?? '—'}</td>
                   <td className="num">{fmtInt(f.rows)}</td>

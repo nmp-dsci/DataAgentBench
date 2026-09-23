@@ -62,6 +62,12 @@
 - **The rescore is trusted only because it reproduces the site**
   (`tests/test_trials.py`). If a validator upstream changes and the test
   breaks, widen `TOLERATED` with the reason, do not loosen the tolerance.
+- **A leaderboard file read from a PR is a reference, never pooled.** An
+  `ANSWER_FILES` entry with `pr` + `commit` is fetched by `make upstream` and
+  read with `git show`, so the checkout stays at the ingested commit. It is
+  rescored and comparable on the Runs tab (`lb:<name>`), but `pooled: False`
+  keeps it out of each query's published rate. Its overall Pass@1 must still
+  reproduce the site's, or carry a reason in `TOLERATED_OVERALL`.
 - **Visuals follow DESIGN.md**: tokens verbatim, assertion headings, one `<em>`
   per page, every number with its baseline. Never the Tailwind/DaisyUI fallback.
 - Never add `.lavish/` to `.gitignore`.

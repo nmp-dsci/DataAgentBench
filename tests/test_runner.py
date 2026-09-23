@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from dab_bench.config import TRIALS_PATH
 from dab_bench.eval import runner
 from dab_bench.eval.score import TrialResult, read_results, summarise, write_results
 from dab_bench.eval.splits import load_split
@@ -206,3 +207,35 @@ def test_compare_two_runs_on_their_common_queries(
 
     assert client.get("/api/runs/compare", params={"focus": "nope"}).status_code == 404
     assert client.get("/api/runs/compare", params={"focus": "a", "group": "x"}).status_code == 400
+
+
+@pytest.mark.skipif(not TRIALS_PATH.exists(), reason="not rescored")
+def test_compare_a_run_against_a_leaderboard_submission(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_run(tmp_path, "a", [_row("bookreview/2", 1, True), _row("yelp/1", 1, False)])
+    monkeypatch.setattr(runner, "RUNS_DIR", tmp_path)
+    monkeypatch.setattr(serving, "RUNS_DIR", tmp_path)
+    client = TestClient(serving.create_app())
+    trials = json.loads(TRIALS_PATH.read_text())
+
+    subs = client.get("/api/runs").json()["submissions"]
+    assert [s["name"] for s in subs[:2]] == ["permute_eq", "oceanbase_lab_scout"]
+    assert subs[0]["rank"] == 1 and subs[0]["pooled"] is False
+
+    # the submission alone: every query it answered, scored exactly as the rescore did
+    alone = client.get("/api/runs/compare", params={"focus": "lb:oceanbase_lab_scout"}).json()
+    side = alone["sides"]["lb:oceanbase_lab_scout"]
+    pf = trials["per_file"]["oceanbase_lab_scout"]
+    assert side["passed"] == pf["passed"] and side["scored"] == pf["rows"]
+    assert side["pass_rate_macro"] == pytest.approx(pf["macro"])
+    assert side["profile"] is None and side["cost_usd"] is None and side["run"] is None
+
+    # against our run: only the two queries the run scored are common
+    r = client.get("/api/runs/compare", params={"focus": "a", "challenger": "lb:permute_eq"}).json()
+    assert r["common_queries"] == 2
+    lb = r["sides"]["lb:permute_eq"]
+    assert lb["scored"] == 10 and lb["submission"]["label"].startswith("Permute EQ")
+    assert r["sides"]["a"]["profile"] is not None
+
+    assert client.get("/api/runs/compare", params={"focus": "lb:nope"}).status_code == 404
