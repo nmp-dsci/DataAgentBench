@@ -48,6 +48,7 @@ export type QuerySummary = {
   question: string;
   gold_lines: number;
   gold_preview: string;
+  gold_text: string;
   validator_style: string;
   validator_lines: number;
   footnote: string | null;

@@ -620,6 +620,8 @@ def _query_summary(ix: Index, q: dict[str, Any]) -> dict[str, Any]:
         "question": q["question"],
         "gold_lines": q["gold_lines"],
         "gold_preview": q["gold_text"][:120],
+        # the whole answer, for the expandable cell; 8.8 kB over all 54
+        "gold_text": q["gold_text"],
         "validator_style": q["validator"]["style"],
         "validator_lines": q["validator"]["lines"],
         "footnote": q["footnote"],

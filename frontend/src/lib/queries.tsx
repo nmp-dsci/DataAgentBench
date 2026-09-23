@@ -1,16 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { type QuerySummary, STYLE_LABEL, fmtInt, fmtPct, queryPath, useGet } from './api';
-import { Rate } from './ui';
+import { Gold, Rate } from './ui';
 
 type SortKey = 'rate' | 'id' | 'gold' | 'best';
-
-/** The first gold line, clipped, plus how many more there are: a list of 73 codes is not a table cell. */
-function goldCell(preview: string, lines: number): string {
-  const first = preview.split('\n')[0] ?? '';
-  const head = first.length > 48 ? `${first.slice(0, 48)}…` : first;
-  return lines > 1 ? `${head}  (+${lines - 1} more)` : head;
-}
 
 /** Every query in `rows`, filterable and sortable. `scope` is the dataset the caller already
  *  narrowed to: it names that in the caption and drops the dataset select, which would be a
@@ -30,7 +23,7 @@ export function QueryTable({ rows: all, scope }: { rows: QuerySummary[]; scope?:
         (scope || dataset === 'all' || x.dataset_key === dataset) &&
         (style === 'all' || x.validator_style === style) &&
         (shape === 'all' || (shape === 'single' ? x.gold_lines === 1 : x.gold_lines > 1)) &&
-        (!needle || x.question.toLowerCase().includes(needle) || x.id.includes(needle) || x.gold_preview.toLowerCase().includes(needle)),
+        (!needle || x.question.toLowerCase().includes(needle) || x.id.includes(needle) || x.gold_text.toLowerCase().includes(needle)),
     );
     const key = (x: QuerySummary): number | string => {
       if (sort === 'rate') return x.trials?.rate ?? 2;
@@ -133,7 +126,9 @@ export function QueryTable({ rows: all, scope }: { rows: QuerySummary[]; scope?:
                   </td>
                 )}
                 <td className="q wrap">{x.question.length > 200 ? `${x.question.slice(0, 200)}…` : x.question}</td>
-                <td className="pre">{goldCell(x.gold_preview, x.gold_lines)}</td>
+                <td className="pre">
+                  <Gold preview={x.gold_preview} lines={x.gold_lines} full={x.gold_text} />
+                </td>
                 <td className="num">{x.gold_lines}</td>
                 <td>{STYLE_LABEL[x.validator_style] ?? x.validator_style}</td>
                 <td>

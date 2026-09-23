@@ -224,4 +224,7 @@ td.replay-cell .linkbtn{margin-top:var(--s1);font-size:var(--t-2)}
 .rowacts{display:inline-flex;flex-direction:column;gap:var(--s1)}
 .gold-cell{color:var(--ink);font-size:var(--t-2);white-space:pre-wrap;overflow-wrap:anywhere}
 .gold-cell .path{display:inline;margin-left:var(--s2)}
+.gold-cell button.more{font:500 var(--t-2)/1.4 var(--mono);color:var(--accent);background:none;border:0;padding:0;margin-left:var(--s2);cursor:pointer;text-decoration:underline;text-underline-offset:.2em;white-space:nowrap}
+.gold-cell button.more:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.gold-cell pre.gold-full{margin:0 0 var(--s1);min-width:min(22rem,70vw);white-space:pre-wrap;overflow-wrap:anywhere;max-height:24rem;overflow-y:auto;user-select:text}
 .answer pre{white-space:pre-wrap}

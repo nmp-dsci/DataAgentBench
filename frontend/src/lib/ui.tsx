@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { type DatasetSummary, fmtPct, queryPath, useGet } from './api';
 
@@ -56,13 +57,27 @@ export function Loading({ error }: { error: string | null }) {
 }
 
 /** The gold answer beside a question, wherever a question is shown: the first line (cut) and how many more, the full text on hover. */
+/** The gold answer in a cell: its first line, and — when `full` is given — a toggle that opens every line. */
 export function Gold({ preview, lines, full }: { preview: string; lines: number; full?: string }) {
+  const [open, setOpen] = useState(false);
   const first = preview.split('\n')[0] ?? '';
-  const head = first.length > 60 ? `${first.slice(0, 60)}…` : first;
+  const cut = first.length > 60;
+  const head = cut ? `${first.slice(0, 60)}…` : first;
+  const more = lines > 1 ? `+${lines - 1} more line${lines === 2 ? '' : 's'}` : cut ? 'show all' : null;
+  if (!full || !more) {
+    return (
+      <span className="gold-cell mono" title={full ?? preview}>
+        {head}
+        {more && <span className="path">{more}</span>}
+      </span>
+    );
+  }
   return (
-    <span className="gold-cell mono" title={full ?? preview}>
-      {head}
-      {lines > 1 && <span className="path">+{lines - 1} more line{lines === 2 ? '' : 's'}</span>}
+    <span className="gold-cell mono">
+      {open ? <pre className="gold-full">{full}</pre> : head}
+      <button type="button" className="more" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+        {open ? 'show less' : more}
+      </button>
     </span>
   );
 }
