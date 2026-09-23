@@ -128,6 +128,7 @@ export type GoldenRow = {
   upstream_commit: string;
   created_at: string;
   gold_match: GoldMatch | '';
+  source: string; // where the SQL started: '' by hand, else a run's trial and call
 };
 export type GoldMatch = 'exact' | 'exact_values' | 'reordered' | 'differs';
 export type GoldenBrief = { passed: boolean | null; gold_match: GoldMatch | ''; created_at: string; versions: number; author: string; note: string };

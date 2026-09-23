@@ -63,9 +63,11 @@
   MLflow trace, only /work files under `workspace/playground/`. Golden SQL,
   `POST /api/golden/<ds>/<n>[/run]`, runs one SELECT as `dab_agent` and judges
   it with the question's validator.
-- **Golden SQL is curated, and it encodes answers.** It is written by hand in
-  the Golden tab, never generated, and a question's golden starts empty until
-  someone writes it. Saves append to `dataagentbench_meta.golden_sql` (the
+- **Golden SQL is curated, and it encodes answers.** A person saves every
+  golden in the Golden tab. The editor may start from the SQL a run's agent
+  wrote for that question (the run picker; the champion by default), but nothing
+  saves a golden without someone running and saving it, and each save records
+  where its SQL started (`source`). A question's golden starts empty. Saves append to `dataagentbench_meta.golden_sql` (the
   newest is current, and nothing is ever dropped; `make db-reset` leaves the
   meta schema alone). `dab_agent` is refused there (`tests/test_golden.py`).
   A golden never reaches a prompt, the pack, the curator or a proposer.

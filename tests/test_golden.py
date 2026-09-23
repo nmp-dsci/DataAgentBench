@@ -81,12 +81,17 @@ def test_a_golden_runs_as_the_agent_and_passes_its_validator() -> None:
 @live
 def test_a_save_is_appended_and_becomes_current() -> None:
     client = TestClient(create_app())
-    saved = client.post("/api/golden/yelp/1", json={"sql": YELP_1, "note": "test"}).json()
+    src = "run 20260921T064521Z_v0_all_haiku · yelp/1/t1 · query_db #2"
+    saved = client.post(
+        "/api/golden/yelp/1", json={"sql": YELP_1, "note": "test", "source": src}
+    ).json()
     gid = saved["saved"]["id"]
     try:
         one = client.get("/api/golden/yelp/1").json()
         assert one["current"]["id"] == gid and one["current"]["passed"] is True
         assert one["current"]["gold_match"] == "exact"
+        # a golden seeded from a run's trial says where it started
+        assert one["current"]["source"] == src and one["history"][0]["source"] == src
         listing = client.get("/api/golden").json()
         row = next(q for q in listing["queries"] if q["id"] == "yelp/1")
         assert row["golden"]["passed"] is True and listing["n"] == 54

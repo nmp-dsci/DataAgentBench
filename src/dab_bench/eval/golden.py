@@ -7,7 +7,9 @@ is rendered as text and judged by the question's own `validate.py`, the same jud
 trial gets. A golden that passes is proof the question is answerable in one SQL
 statement over the loaded data.
 
-Goldens are curated work, so they are never dropped: every save appends a row, and
+A golden may start from an agent's own SQL (the Golden tab seeds the editor from a
+run's trial), but a person reviews, runs and saves it; `source` records where it
+started. Goldens are curated work, so they are never dropped: every save appends a row, and
 the newest row per question is its current golden. They live in
 `dataagentbench_meta`, next to the question copy, because a golden encodes the
 answer: `dab_agent` is refused there (`infra/roles.sql`, `tests/test_golden.py`), and
@@ -59,6 +61,8 @@ create table if not exists {PG_META_SCHEMA}.{GOLDEN_TABLE} (
 );
 alter table {PG_META_SCHEMA}.{GOLDEN_TABLE}
   add column if not exists gold_match text not null default '';  -- exact | exact_values | reordered | differs
+alter table {PG_META_SCHEMA}.{GOLDEN_TABLE}
+  add column if not exists source text not null default '';  -- where the SQL started: '' by hand, or a run's trial
 create index if not exists {GOLDEN_TABLE}_query on {PG_META_SCHEMA}.{GOLDEN_TABLE} (query_id, id desc);
 comment on table {PG_META_SCHEMA}.{GOLDEN_TABLE} is
   'Golden SQL, curated in the explorer. Append-only: the newest row per query_id is current. '
@@ -226,14 +230,18 @@ def save(
     note: str = "",
     author: str | None = None,
     gold_match: str = "",
+    source: str = "",
 ) -> dict[str, Any]:
+    """Append one golden. `source` says where the SQL started (empty: typed by hand; else a
+    run's trial and call, e.g. `run 2026…_v0_all_haiku · yelp/1/t1 · query_db #3`); a person
+    still reviewed, ran and saved it."""
     ensure_table()
     with pg.connect() as con:
         row = con.execute(
             f"""insert into {PG_META_SCHEMA}.{GOLDEN_TABLE}
                 (query_id, sql, answer_text, passed, reason, row_count, duration_ms, error,
-                 note, author, db_role, upstream_commit, gold_match)
-                values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'dab_agent', %s, %s)
+                 note, author, db_role, upstream_commit, gold_match, source)
+                values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'dab_agent', %s, %s, %s)
                 returning id, created_at""",  # type: ignore[arg-type,unused-ignore]
             (
                 query_id,
@@ -248,6 +256,7 @@ def save(
                 author or getpass.getuser(),
                 _commit(),
                 gold_match,
+                source.strip(),
             ),
         ).fetchone()
     assert row is not None
@@ -269,6 +278,7 @@ _COLS = (
     "upstream_commit",
     "created_at",
     "gold_match",
+    "source",
 )
 
 

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate, useOutletContext, useParams } from 'react-router-dom';
-import { type GoldMatch, type GoldenAttempt, type GoldenBrief, type GoldenList, type GoldenOne, STYLE_LABEL, fmtInt, post, useGet } from '../lib/api';
+import { type Board, type GoldMatch, type GoldenAttempt, type GoldenBrief, type GoldenList, type GoldenOne, type RunDetail, type RunSummary, type ToolCall, type Trace, type TrialRow, ROLE_LABEL, STYLE_LABEL, fmtInt, post, useGet } from '../lib/api';
 import { Clip, Gold, Loading } from '../lib/ui';
-import { datasetPath, goldenPath, questionPath, useLens } from '../lib/url';
+import { apiTrialPath, datasetPath, goldenPath, questionPath, trialId, trialPath, useLens } from '../lib/url';
 
 function Status({ g }: { g: GoldenBrief | { passed: boolean | null } | null }) {
   if (!g) return <span className="chip">none yet</span>;
@@ -23,13 +23,49 @@ function Match({ m }: { m: GoldMatch | '' | undefined }) {
   return <span className={`chip ${m === 'exact' || m === 'exact_values' ? 'ok' : 'warn'}`}>{MATCH_LABEL[m]}</span>;
 }
 
+/** The run picked on the list, with its trials by question. */
+type PickedRun = { id: string; label: string; trials: Map<string, TrialRow[]> };
+
 /** What the list page hands the editor it opens in place. */
 type EditorCtx = {
   order: string[]; // question ids in the list's current order, for prev / next
   lens: string; // the list's `?…`, kept as the editor moves so the filter survives
   refresh: () => void; // re-read the coverage after a save
-  drafts: Map<string, string>; // unsaved SQL per question, while this page is open
+  drafts: Map<string, { sql: string; source: string }>; // unsaved SQL per question, while this page is open
+  run: PickedRun | null;
 };
+
+function runLabel(r: RunSummary): string {
+  return `${r.agent}@${r.fingerprint.slice(0, 7)} · ${r.split} · ${ROLE_LABEL[r.role]}`;
+}
+
+/** A question's trials in the picked run: one verdict, or k of n passed. */
+function RunVerdict({ rows }: { rows: TrialRow[] | undefined }) {
+  if (!rows?.length) return <span className="small muted">not in this run</span>;
+  const scored = rows.filter((r) => r.passed != null);
+  const passed = scored.filter((r) => r.passed).length;
+  if (!scored.length) return <span className="chip">not scored</span>;
+  if (rows.length === 1) return <span className={`chip ${passed ? 'ok' : 'warn'}`}>{passed ? 'pass' : 'fail'}</span>;
+  return <span className={`chip ${passed ? 'ok' : 'warn'}`}>{passed} of {scored.length} passed</span>;
+}
+
+const passedAny = (rows: TrialRow[] | undefined) => !!rows?.some((r) => r.passed);
+
+/** The SQL the agent ran in a trial: every query_db call, in order. */
+function sqlCalls(trace: Trace | null): (ToolCall & { k: number; sql: string })[] {
+  return (trace?.tool_calls ?? [])
+    .filter((c) => c.tool === 'query_db' && typeof c.input.sql === 'string')
+    .map((c, i) => ({ ...c, k: i + 1, sql: String(c.input.sql).trim() }));
+}
+
+/** The SQL most likely behind the answer: the last error-free call whose output contains a piece of
+ *  the agent's answer (`3.76` is in `3.7648…`), else the last error-free call. The last call is often a
+ *  check the agent ran after it had the answer, so recency alone picks the wrong one. */
+export function seedCall<T extends { error: boolean; output: string }>(calls: T[], answer: string): T | null {
+  const bits = answer.split(/[^\p{L}\p{N}.]+/u).map((s) => s.replace(/\.+$/, '')).filter((s) => s.length >= 2);
+  const ok = [...calls].reverse().filter((c) => !c.error);
+  return ok.find((c) => bits.some((b) => c.output.includes(b))) ?? ok[0] ?? calls[calls.length - 1] ?? null;
+}
 
 /** The last value a fetch returned, kept while the next one loads, so a refresh never blanks the page. */
 function useKept<T>(v: T | null): T | null {
@@ -51,23 +87,42 @@ export function Golden() {
   const [bump, setBump] = useState(0);
   const { data: fresh, error } = useGet<GoldenList>(`/api/golden${bump ? `?v=${bump}` : ''}`);
   const data = useKept(fresh);
-  const drafts = useRef(new Map<string, string>());
+  const drafts = useRef(new Map<string, { sql: string; source: string }>());
+  // the run whose verdicts and SQL seed the editor: `?run=<id>`, the champion by default, `?run=none` for none
+  const { data: board } = useGet<Board>('/api/runs');
+  const runs = (board?.runs ?? []).filter((r) => !r.dry_run && (r.scored ?? 0) > 0);
+  const runParam = sp.get('run');
+  const runId = runParam === 'none' ? null : runParam || board?.champion_run_id || runs[0]?.run_id || null;
+  const { data: runDetail } = useGet<RunDetail>(runId ? `/api/runs/${runId}` : null);
   if (!data) return <Loading error={error} />;
   const only = sp.get('dataset') ?? '';
-  const rows = data.queries.filter((q) => !only || q.dataset_key === only);
+  const picked: PickedRun | null =
+    runId && runDetail?.run_id === runId
+      ? {
+          id: runId,
+          label: runLabel(runDetail),
+          trials: runDetail.results.reduce((m, r) => m.set(r.query_id, [...(m.get(r.query_id) ?? []), r]), new Map<string, TrialRow[]>()),
+        }
+      : null;
+  const verdict = picked ? sp.get('verdict') ?? '' : '';
+  const rows = data.queries
+    .filter((q) => !only || q.dataset_key === only)
+    .filter((q) => !verdict || (verdict === 'pass' ? passedAny(picked?.trials.get(q.id)) : picked?.trials.has(q.id) && !passedAny(picked.trials.get(q.id))));
+  const inRun = picked ? data.queries.filter((q) => picked.trials.has(q.id)) : [];
   const datasets = [...new Set(data.queries.map((q) => q.dataset_key))].sort();
   const order = (open && !rows.some((q) => q.id === open) ? data.queries : rows).map((q) => q.id);
-  const ctx: EditorCtx = { order, lens, refresh: () => setBump((b) => b + 1), drafts: drafts.current };
+  const ctx: EditorCtx = { order, lens, refresh: () => setBump((b) => b + 1), drafts: drafts.current, run: picked };
   return (
     <>
-      <p className="label">golden · SQL by hand, run as the agent's role, judged by the question's validator</p>
+      <p className="label">golden · SQL a person reviews and saves, run as the agent's role, judged by the question's validator</p>
       <h1>
         {data.written} of {data.n} questions have golden SQL; {data.exact} of {data.n} <em>recreate</em> the gold answer and {data.passing} of {data.n} pass their validator
       </h1>
       <p className="lead">
         A golden is one Postgres query that reproduces a question's gold answer. It runs as <code>dab_agent</code>, read-only, over exactly the tables the agent sees, so a
         passing golden proves the question is answerable in SQL. Every save is kept; the newest is current. Goldens live in <code>dataagentbench_meta</code>, which the agent's role
-        cannot read, and never reach a prompt. Pick a question below; its editor opens here and the list stays.
+        cannot read, and never reach a prompt. Pick a run to see how it did on each question; opening one starts the editor from the SQL that run's
+        agent wrote, for you to review, run and save. The editor opens here and the list stays.
       </p>
       <Outlet context={ctx} />
       <div className="filters">
@@ -82,8 +137,31 @@ export function Golden() {
             ))}
           </select>
         </label>
+        <label className="pick">
+          <span className="label">run · seeds the editor</span>
+          <select value={runId ?? 'none'} onChange={(e) => set({ run: e.target.value, verdict: null })} aria-label="run">
+            <option value="none">— none, start from scratch —</option>
+            {runs.map((r) => (
+              <option key={r.run_id} value={r.run_id}>
+                {r.run_id === board?.champion_run_id ? '★ ' : ''}
+                {runLabel(r)} · {r.passed ?? 0}/{r.scored ?? 0} · {r.run_id.slice(0, 16)}
+              </option>
+            ))}
+          </select>
+        </label>
+        {picked && (
+          <label className="pick">
+            <span className="label">in that run</span>
+            <select value={verdict} onChange={(e) => set({ verdict: e.target.value || null })} aria-label="verdict in the run">
+              <option value="">any verdict</option>
+              <option value="pass">passed</option>
+              <option value="fail">failed</option>
+            </select>
+          </label>
+        )}
         <span className="count">
           {rows.length} of {data.n} shown
+          {picked && ` · the run answered ${inRun.length} of ${data.n}, ${inRun.filter((q) => passedAny(picked.trials.get(q.id))).length} passed`}
         </span>
       </div>
       <div className="tw">
@@ -93,6 +171,7 @@ export function Golden() {
               <th>Query</th>
               <th>Question</th>
               <th>Style</th>
+              <th>In the run</th>
               <th>Validator</th>
               <th>Against the gold</th>
               <th className="num">Saves</th>
@@ -111,6 +190,7 @@ export function Golden() {
                   <Clip text={q.question} at={110} />
                 </td>
                 <td className="small">{STYLE_LABEL[q.validator_style] ?? q.validator_style}</td>
+                <td>{picked ? <RunVerdict rows={picked.trials.get(q.id)} /> : <span className="small muted">—</span>}</td>
                 <td>
                   <Status g={q.golden} />
                 </td>
@@ -133,12 +213,23 @@ export function Golden() {
 export function GoldenEditor() {
   const { key = '', n = '' } = useParams();
   const id = `${key}/${n}`;
-  const { order, lens, refresh, drafts } = useOutletContext<EditorCtx>();
+  const { order, lens, refresh, drafts, run } = useOutletContext<EditorCtx>();
   const [bump, setBump] = useState(0);
   const { data: fresh, error } = useGet<GoldenOne>(`/api/golden/${key}/${n}${bump ? `?v=${bump}` : ''}`);
   const kept = useKept(fresh);
   const data = fresh ?? (kept?.query.id === id ? kept : null);
   const [sql, setSql] = useState('');
+  const [source, setSource] = useState(''); // where the SQL in the editor started
+  // the picked run's trial of this question: the first that passed, else the first; a select picks another
+  const trials = run?.trials.get(id) ?? [];
+  const [pick, setPick] = useState<number | null>(null);
+  useEffect(() => setPick(null), [id, run?.id]);
+  const trial = trials.find((r) => r.trial === pick) ?? trials.find((r) => r.passed) ?? trials[0] ?? null;
+  const { data: rawTrace } = useGet<Trace>(run && trial?.trace_file ? apiTrialPath(run.id, trialId(trial)) : null);
+  const trace = rawTrace && trial && rawTrace.query_id === id && rawTrace.trial === trial.trial ? rawTrace : null;
+  const calls = sqlCalls(trace);
+  const seed = seedCall(calls, trial?.answer ?? '');
+  const from = (c: { k: number }) => (run && trial ? `run ${run.id} · ${trialId(trial)} · query_db #${c.k}` : '');
   const [note, setNote] = useState('');
   const [res, setRes] = useState<GoldenAttempt | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -146,15 +237,23 @@ export function GoldenEditor() {
   const panel = useRef<HTMLElement>(null);
   const loaded = data?.query.id;
   useEffect(() => {
-    // a new question: start from its unsaved draft, else its current golden, else empty
     if (!loaded) return;
-    setSql(drafts.get(loaded) ?? data?.current?.sql ?? '');
     setNote('');
     setRes(null);
     setErr(null);
     // the row picked may be far down the list; bring the editor, which sits above it, into view
     panel.current?.scrollIntoView({ block: 'start' });
-  }, [loaded]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loaded]);
+  const seedKey = seed ? from(seed) : '';
+  useEffect(() => {
+    // what the editor starts from: your unsaved draft, else the current golden, else the run's SQL, else nothing
+    if (!loaded) return;
+    const d = drafts.get(loaded);
+    const cur = data?.current;
+    const [s, src] = d ? [d.sql, d.source] : cur ? [cur.sql, `golden #${cur.id}`] : seed ? [seed.sql, seedKey] : ['', ''];
+    setSql(s);
+    setSource(src);
+  }, [loaded, seedKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const at = order.indexOf(id);
   const prev = at > 0 ? order[at - 1] : null;
@@ -176,15 +275,16 @@ export function GoldenEditor() {
       </section>
     );
   const q = data.query;
-  const edit = (v: string) => {
+  const edit = (v: string, src = source) => {
     setSql(v);
-    drafts.set(q.id, v);
+    setSource(src);
+    drafts.set(q.id, { sql: v, source: src });
   };
   async function go(kind: 'run' | 'save') {
     setBusy(kind);
     setErr(null);
     try {
-      const r = await post<GoldenAttempt>(`/api/golden/${key}/${n}${kind === 'run' ? '/run' : ''}`, { sql, note });
+      const r = await post<GoldenAttempt>(`/api/golden/${key}/${n}${kind === 'run' ? '/run' : ''}`, { sql, note, source });
       setRes(r);
       if (kind === 'save') {
         setNote('');
@@ -207,6 +307,36 @@ export function GoldenEditor() {
         </p>
         {nav}
       </div>
+      {run &&
+        (trial ? (
+          <div className={`answer ${trial.passed == null ? '' : trial.passed ? 'ok' : 'no'}`}>
+            <p className="label">
+              {run.label} · trial {trial.trial} · {trial.passed == null ? 'not scored' : trial.passed ? 'pass' : 'fail'}
+              {trials.length > 1 && (
+                <>
+                  {' · '}
+                  <select value={trial.trial} onChange={(e) => setPick(Number(e.target.value))} aria-label="trial">
+                    {trials.map((r) => (
+                      <option key={r.trial} value={r.trial}>
+                        t{r.trial} · {r.passed == null ? 'not scored' : r.passed ? 'pass' : 'fail'}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              )}
+            </p>
+            <pre className="wrap-any">{trial.answer || '(no answer)'}</pre>
+            {!trial.passed && trial.reason && <p className="reason">{trial.reason}</p>}
+            <p className="small">
+              {trace ? `${calls.length} query_db call${calls.length === 1 ? '' : 's'}` : 'loading its SQL…'}
+              {trace && trace.tool_calls.some((c) => c.tool === 'execute_python') && ' and some execute_python: the answer may have been finished in Python, so the SQL alone may not reproduce it'}
+              {' · '}
+              <Link to={trialPath(run.id, trialId(trial))}>the full trace</Link>
+            </p>
+          </div>
+        ) : (
+          <p className="small muted">{run.label} did not run {id}; the editor starts empty.</p>
+        ))}
       <h2>
         {q.id}{' '}
         {cur
@@ -247,7 +377,9 @@ export function GoldenEditor() {
         }}
       >
         <label className="field">
-          <span className="label">SQL · runs as dab_agent · read-only · 60 s · search_path dataagentbench (tables are {q.dataset_key}_*)</span>
+          <span className="label">
+            SQL · runs as dab_agent · read-only · 60 s · search_path dataagentbench (tables are {q.dataset_key}_*) · {source ? `started from ${source.replace(/^run \S+ · /, '')}` : 'by hand'}
+          </span>
           <textarea value={sql} onChange={(e) => edit(e.target.value)} rows={12} spellCheck={false} placeholder={`select … from ${q.dataset_key}_…`} />
         </label>
         <label className="field">
@@ -318,6 +450,37 @@ export function GoldenEditor() {
         </>
       )}
 
+      {run && trial && calls.length > 0 && (
+        <>
+          <h3>
+            The agent's SQL in {trialId(trial)}: {calls.length} call{calls.length === 1 ? '' : 's'}, {calls.filter((c) => c.error).length} errored
+          </h3>
+          <ol className="sqlcalls">
+            {calls.map((c) => (
+              <li key={c.k} className={c.error ? 'err' : ''}>
+                <div className="sqlcall-head">
+                  <span className="label">
+                    query_db #{c.k} · {c.error ? 'error' : `${c.output.split('\n').length - 1} lines out`} · {c.elapsed_s.toFixed(1)} s
+                  </span>
+                  {source === from(c) ? (
+                    <span className="chip ok">in the editor</span>
+                  ) : (
+                    <button type="button" className="more" onClick={() => edit(c.sql, from(c))}>
+                      load into the editor
+                    </button>
+                  )}
+                </div>
+                <pre>{c.sql}</pre>
+                <details>
+                  <summary>what it returned</summary>
+                  <pre>{c.output.length > 2000 ? `${c.output.slice(0, 2000)}\n…` : c.output}</pre>
+                </details>
+              </li>
+            ))}
+          </ol>
+        </>
+      )}
+
       <h3>{data.history.length === 0 ? 'No saves yet' : `${data.history.length} save${data.history.length === 1 ? '' : 's'}, newest first; the top one is current`}</h3>
       {data.history.length > 0 && (
         <div className="tw">
@@ -330,6 +493,7 @@ export function GoldenEditor() {
                 <th>Against the gold</th>
                 <th className="num">Rows</th>
                 <th>Note</th>
+                <th>Started from</th>
                 <th>SQL</th>
               </tr>
             </thead>
@@ -348,8 +512,9 @@ export function GoldenEditor() {
                   </td>
                   <td className="num">{h.row_count ?? '—'}</td>
                   <td className="small">{h.note || '—'}</td>
+                  <td className="small mono">{h.source ? h.source.replace(/^run (\S{16})\S* · /, 'run $1… · ') : 'by hand'}</td>
                   <td>
-                    <button type="button" className="more" onClick={() => edit(h.sql)}>
+                    <button type="button" className="more" onClick={() => edit(h.sql, `golden #${h.id}`)}>
                       load into the editor
                     </button>
                   </td>

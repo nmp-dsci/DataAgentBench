@@ -137,7 +137,12 @@ redirect.
 - **Golden** — golden SQL, written by hand: per question, a Postgres query run
   as the agent's read-only role and judged by the question's own validator.
   Save keeps every version (`dataagentbench_meta.golden_sql`, unreadable to
-  the agent). It starts at 0/54; `/api/golden` reports coverage. Picking a
+  the agent). It starts at 0/54; `/api/golden` reports coverage. A run picker
+  (the champion by default) adds that run's pass or fail to every row, and
+  opening a question shows the run's verdict and answer at the top and seeds the
+  editor with the agent's SQL: the last call whose output holds its answer, with
+  every other call listed to load instead. A save records where its SQL started.
+  Picking a
   question opens its editor above the list at `/golden/<ds>/<n>`, with
   previous / next through the 54; the list stays.
 - **Runs / Run / Trace** — our own evals from `runs/`. The Runs tab opens on a

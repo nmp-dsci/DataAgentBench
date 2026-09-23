@@ -356,6 +356,7 @@ def create_app(index: Index | None = None) -> FastAPI:
             out["verdict"],
             body.note,
             gold_match=out["gold_match"]["match"],
+            source=body.source,
         )
         return out | {"saved": saved}
 
@@ -505,6 +506,7 @@ def create_app(index: Index | None = None) -> FastAPI:
 class GoldenSQL(BaseModel):
     sql: str
     note: str = ""
+    source: str = ""  # where the SQL started: '' by hand, else a run's trial and call
 
 
 class ToolCall(BaseModel):

@@ -103,3 +103,18 @@ describe('ids and the lens', () => {
     expect(patchLens(new URLSearchParams('focus=x&challenger=lb%3Apermute_eq'), { focus: null, group: 'style' })).toBe('?challenger=lb:permute_eq&group=style');
   });
 });
+
+describe('the golden editor starts from the SQL behind the answer', () => {
+  const call = (output: string, error = false) => ({ output, error });
+  it('prefers the last call whose output holds the answer over a later check', async () => {
+    const { seedCall } = await import('./pages/Golden');
+    const calls = [call('state\tn\nPA\t1000'), call('avg\n3.7648'), call('count\n42')];
+    expect(seedCall(calls, 'Pennsylvania; 3.76')).toBe(calls[1]);
+  });
+  it('falls back to the last error-free call, and skips errors', async () => {
+    const { seedCall } = await import('./pages/Golden');
+    const calls = [call('a\n1'), call('b\n2'), call('ERROR', true)];
+    expect(seedCall(calls, 'nothing matches')).toBe(calls[1]);
+    expect(seedCall([], 'x')).toBeNull();
+  });
+});

@@ -247,3 +247,11 @@ tr.pickrow{cursor:pointer}
 tr.pickrow:hover td{background:var(--band)}
 tr.pickrow.cur td{background:var(--accent-soft)}
 tr.pickrow.cur td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.golden-editor .answer{margin:var(--s3) 0}
+.golden-editor .answer select{font:inherit;text-transform:none;letter-spacing:0}
+ol.sqlcalls{list-style:none;padding:0;margin:var(--s3) 0 0;display:grid;gap:var(--s3)}
+ol.sqlcalls li{border:1px solid var(--line);border-radius:var(--r-sm);padding:var(--s3);background:var(--bg);min-width:0}
+ol.sqlcalls li.err{border-color:var(--amber)}
+ol.sqlcalls pre{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:var(--s2);max-height:18rem;overflow:auto}
+.sqlcall-head{display:flex;gap:var(--s3);align-items:baseline;justify-content:space-between;flex-wrap:wrap}
+.golden-editor > h3{margin-top:var(--s6)}
