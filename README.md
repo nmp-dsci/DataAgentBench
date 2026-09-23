@@ -76,7 +76,8 @@ make db-roles                    # schema dataagentbench + roles dab_owner / dab
 make data                        # download the 12 datasets (8.4 GB, sha256-verified) and load them: 2 811 tables
 make context                     # the generated half of the context pack (no model)
 make curate                      # the curator agent writes summary.md + pitfalls.md per dataset (≈ $1.40 once)
-make sandbox                     # the execute_python image (python:3.12-slim, no network)
+make sandbox                     # the execute_python image (python:3.12-slim, no network, one container per trial)
+uv run dab isolation-check       # one short turn: proves a session gets only its prompt and its dab tools
 make eval SPLIT=smoke            # v0 on one median-difficulty query per dataset (12 trials, ≈ $1.3)
 make eval SPLIT=all TRIALS=1     # all 54 once
 uv run dab runs list · uv run dab runs profile <run> · uv run dab eval --resume <run>

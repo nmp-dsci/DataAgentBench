@@ -22,6 +22,17 @@
   the Agent tab's playground runs every tool *except* `llm_extract`, which
   stays display-only (decision D8-A; `DAB_PLAYGROUND_LLM=1` is the only way
   to change that, and it is not wired).
+- **A session sees its prompt and its `dab` tools, nothing else.**
+  `agent/isolation.py`: every eval and curator session starts in an empty
+  directory outside the repo, with auto-memory, CLAUDE.md and the `agents-md`
+  plugin off, no settings sources, no built-in tools and a strict MCP config.
+  The CLI's `init` message is recorded on each trace, and any tool, server or
+  plugin beyond the version's own stops the run. `dab isolation-check` (one
+  short turn) also reads the session transcript against an allowlist of the
+  context the CLI adds. The account email is on that list because the CLI
+  offers no switch for it; it never reaches a trace or MLflow. Each trial's
+  `execute_python` runs in its own container with only its own `/work`
+  folder mounted (`tests/test_sandbox.py`).
 - **The pack is the knowledge base, and it is legitimate by construction.**
   `dab context build` is code; the curator never sees a question;
   `tests/test_context.py` asserts no question text lands in `summary.md` or

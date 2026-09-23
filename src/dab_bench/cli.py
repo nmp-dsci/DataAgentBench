@@ -388,6 +388,23 @@ def runs_log(run_id: str) -> None:
     console.print(f"logged {run_id} → mlflow run {meta.mlflow_run_id}")
 
 
+@app.command("isolation-check")
+def isolation_check_cmd(agent: str = "champion", dataset: str = "yelp") -> None:
+    """Start one session exactly as a trial would and show what the CLI gave it (one short turn)."""
+    import asyncio
+
+    from dab_bench.agent.prompt import load_context
+    from dab_bench.agent.session import isolation_check
+    from dab_bench.agent.versions import load_version
+
+    out = asyncio.run(isolation_check(load_version(agent), load_context(dataset)))
+    console.print_json(data=out)
+    if out["problems"]:
+        console.print(f"[red]not isolated[/red]: {'; '.join(out['problems'])}")
+        raise typer.Exit(1)
+    console.print("[green]isolated[/green]: the dab tools and the prompt, nothing else")
+
+
 @app.command()
 def serve(port: int = 8091, host: str = "127.0.0.1", reload: bool = False) -> None:
     """Run the API (and the built explorer when frontend/dist exists)."""

@@ -20,7 +20,7 @@ from typing import Any
 
 from dab_bench.agent.llm import EFFORT, require_live, resolve_model, subscription_env
 from dab_bench.agent.versions import AgentConfig, AgentVersion, load_version
-from dab_bench.config import CONTEXT_DIR, ROOT
+from dab_bench.config import CONTEXT_DIR
 
 MARK_SUMMARY = "=== summary.md ==="
 MARK_PITFALLS = "=== pitfalls.md ==="
@@ -113,23 +113,35 @@ async def curate_dataset(
         ClaudeAgentOptions,
         ClaudeSDKClient,
         ResultMessage,
+        SystemMessage,
         TextBlock,
+    )
+
+    from dab_bench.agent.isolation import (
+        SESSION_SETTINGS,
+        IsolationError,
+        check_init,
+        isolated_cwd,
     )
 
     require_live()
     version = version or load_version("curator")
     cfg: AgentConfig = version.config
     model_id = resolve_model(model or cfg.model)
+    cwd = isolated_cwd()
     options = ClaudeAgentOptions(
         system_prompt=version.system_prompt,
         model=model_id,
         tools=[],
         allowed_tools=[],
+        mcp_servers={},
+        strict_mcp_config=True,
         permission_mode="bypassPermissions",
         max_turns=max(1, cfg.max_turns),
-        cwd=str(ROOT),
+        cwd=str(cwd),  # empty and outside the repo, like an eval session
         env=subscription_env(),
         setting_sources=[],
+        settings=SESSION_SETTINGS,
         effort=cfg.effort or EFFORT,  # type: ignore[arg-type]
     )
     prompt = pack_message(dataset, context_dir)
@@ -142,7 +154,12 @@ async def curate_dataset(
         async with ClaudeSDKClient(options=options) as client:
             await client.query(prompt)
             async for msg in client.receive_response():
-                if isinstance(msg, AssistantMessage):
+                if isinstance(msg, SystemMessage) and msg.subtype == "init":
+                    # the curator has no tools at all; it reads the pack in its prompt
+                    problems = check_init(msg.data, [], cwd)
+                    if problems:
+                        raise IsolationError("; ".join(problems))
+                elif isinstance(msg, AssistantMessage):
                     texts = [b.text for b in msg.content if isinstance(b, TextBlock)]
                     if texts:
                         final = texts[-1]
@@ -163,6 +180,8 @@ async def curate_dataset(
 
     try:
         await asyncio.wait_for(_run(), timeout=cfg.timeout_s)
+    except IsolationError:
+        raise
     except TimeoutError:
         cur.error = f"timeout after {cfg.timeout_s}s"
     except Exception as e:  # noqa: BLE001 - recorded, the CLI reports it

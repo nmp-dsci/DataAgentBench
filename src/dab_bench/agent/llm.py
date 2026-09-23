@@ -11,6 +11,7 @@ from __future__ import annotations
 import os
 from typing import Literal
 
+from dab_bench.agent.isolation import ISOLATION_ENV
 from dab_bench.config import settings
 
 MODELS: dict[str, str] = {
@@ -69,4 +70,6 @@ def subscription_env() -> dict[str, str]:
     if settings().billing == "subscription":
         env["ANTHROPIC_API_KEY"] = ""
         env["CLAUDECODE"] = ""
+    # no auto-memory and no CLAUDE.md: a session sees its prompt and its tools only
+    env.update(ISOLATION_ENV)
     return env
