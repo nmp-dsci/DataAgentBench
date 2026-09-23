@@ -8,6 +8,7 @@ const NAV: [string, string][] = [
   ['/leaderboard', 'Leaderboard'],
   ['/runs', 'Runs'],
   ['/agent', 'Agent'],
+  ['/golden', 'Golden'],
 ];
 
 export function Shell() {

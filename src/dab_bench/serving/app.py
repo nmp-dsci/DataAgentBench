@@ -4,9 +4,12 @@ Every route serves committed files — the index under `data/index/`, the
 answers under `data/answers/`, the context pack under `data/context/`, the
 agent versions under `agents/` — plus this machine's run folders under `runs/`.
 Nothing here reads the upstream clone or calls a model; MLflow is linked, never
-read. The one route that executes is the playground, `POST /api/agent/tools/<name>`:
-the trial's own tool bodies on the read-only role and the network-off sandbox,
-writing nothing but /work files under `workspace/playground_*`.
+read. Two routes execute, both on the agent's read-only role: the playground,
+`POST /api/agent/tools/<name>` (the trial's own tool bodies and the network-off
+sandbox, writing nothing but /work files under `workspace/playground_*`), and the
+golden SQL routes, `POST /api/golden/<dataset>/<n>[/run]`, which run one SELECT as
+`dab_agent`, judge it with the question's validator in a worker process and, on
+save, append it to `dataagentbench_meta.golden_sql` (which `dab_agent` cannot read).
 """
 
 from __future__ import annotations
@@ -215,6 +218,95 @@ def create_app(index: Index | None = None) -> FastAPI:
         )
         return {"dataset": key, "files": files, "curation": cur}
 
+    # ── golden SQL: written by hand, run as the agent's role, judged by the validator ──
+
+    def _golden_query(key: str, n: int) -> dict[str, Any]:
+        q = ix.query_by_id.get(f"{key}/{n}")
+        if q is None:
+            raise HTTPException(404, f"no query {key}/{n} in the index")
+        return q
+
+    def _golden_db(fn: Any, *args: Any) -> Any:
+        from dab_bench.data.pg import reachable
+
+        if not reachable():
+            raise HTTPException(503, "database dab is unreachable: run `make platform-up`")
+        return fn(*args)
+
+    @app.get("/api/golden")
+    def golden_list() -> dict[str, Any]:
+        """Every question with its current golden SQL, if any (newest save per question)."""
+        from dab_bench.eval import golden
+
+        cur = _golden_db(golden.current)
+        rows = []
+        for q in ix.queries:
+            g = cur.get(q["id"])
+            rows.append(
+                _query_summary(ix, q)
+                | {
+                    "golden": None
+                    if g is None
+                    else {k: g[k] for k in ("passed", "created_at", "versions", "author", "note")}
+                }
+            )
+        return {
+            "queries": rows,
+            "n": len(rows),
+            "written": sum(1 for r in rows if r["golden"]),
+            "passing": sum(1 for r in rows if r["golden"] and r["golden"]["passed"]),
+        }
+
+    @app.get("/api/golden/{key}/{n}")
+    def golden_one(key: str, n: int) -> dict[str, Any]:
+        from dab_bench.eval import golden
+
+        q = _golden_query(key, n)
+        hist = _golden_db(golden.history, q["id"])
+        return {
+            "query": _query_summary(ix, q),
+            "hints": ix.dataset_by_key[q["dataset_key"]]["hints"],
+            "current": hist[0] if hist else None,
+            "history": hist,
+        }
+
+    def _golden_attempt(q: dict[str, Any], sql: str) -> dict[str, Any]:
+        from dab_bench.eval import golden
+
+        ex = _golden_db(golden.execute, sql)
+        answer = golden.render(ex.columns, ex.rows)
+        if ex.error:
+            verdict: dict[str, Any] = {"passed": None, "reason": ex.error}
+        elif not answer:
+            verdict = {"passed": False, "reason": "the query returned no rows"}
+        else:
+            folder = ix.dataset_by_key[q["dataset_key"]]["folder"]
+            verdict = golden.judge_answer(folder, int(q["query_id"]), answer)
+        return {
+            "execution": ex.as_dict() | {"rows": ex.rows[:200]},  # the page shows 200
+            "answer_text": answer,
+            "verdict": verdict,
+            "_ex": ex,
+        }
+
+    @app.post("/api/golden/{key}/{n}/run")
+    def golden_run(key: str, n: int, body: GoldenSQL) -> dict[str, Any]:
+        """Run and judge without saving."""
+        out = _golden_attempt(_golden_query(key, n), body.sql)
+        out.pop("_ex")
+        return out
+
+    @app.post("/api/golden/{key}/{n}")
+    def golden_save(key: str, n: int, body: GoldenSQL) -> dict[str, Any]:
+        """Run, judge and append. A failing golden is saved too (work in progress) and says so."""
+        from dab_bench.eval import golden
+
+        q = _golden_query(key, n)
+        out = _golden_attempt(q, body.sql)
+        ex = out.pop("_ex")
+        saved = golden.save(q["id"], body.sql, ex, out["answer_text"], out["verdict"], body.note)
+        return out | {"saved": saved}
+
     # ── the agent: versions, the composed prompt, and the playground ─────────────
 
     @app.get("/api/agents")
@@ -356,6 +448,11 @@ def create_app(index: Index | None = None) -> FastAPI:
 
     _mount_frontend(app)
     return app
+
+
+class GoldenSQL(BaseModel):
+    sql: str
+    note: str = ""
 
 
 class ToolCall(BaseModel):

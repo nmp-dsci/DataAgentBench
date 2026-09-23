@@ -127,6 +127,10 @@ trial, and in the explorer under **Runs**. The next step in the plan — v0 at
   (nine committed upstream; #1 Permute EQ and #2 Scout read from their
   submission PRs, pinned by commit), and the stratified tables with our rescore
   beside them.
+- **Golden** — golden SQL, written by hand: per question, a Postgres query run
+  as the agent's read-only role and judged by the question's own validator.
+  Save keeps every version (`dataagentbench_meta.golden_sql`, unreadable to
+  the agent). It starts at 0/54; `/api/golden` reports coverage.
 - **Runs / Run / Trace** — our own evals from `runs/`. The Runs tab opens on a
   comparison: pick a focus and a challenger (any two scored runs, labelled by
   agent version, or a leaderboard answer file such as `lb:permute_eq`), group the figure by dataset, validator style or query, and

@@ -112,6 +112,39 @@ export type TrialsIndex = {
   site_check: { files: Record<string, SiteCheckFile>; max_abs_diff: number };
 };
 
+// ── golden SQL ─────────────────────────────────────────────────────────────
+export type GoldenRow = {
+  id: number;
+  query_id: string;
+  sql: string;
+  answer_text: string;
+  passed: boolean | null;
+  reason: string;
+  row_count: number | null;
+  duration_ms: number | null;
+  error: string | null;
+  note: string;
+  author: string;
+  upstream_commit: string;
+  created_at: string;
+};
+export type GoldenBrief = { passed: boolean | null; created_at: string; versions: number; author: string; note: string };
+export type GoldenList = { queries: (QuerySummary & { golden: GoldenBrief | null })[]; n: number; written: number; passing: number };
+export type GoldenOne = { query: QuerySummary; hints: string; current: GoldenRow | null; history: GoldenRow[] };
+export type GoldenAttempt = {
+  execution: { columns: string[]; rows: unknown[][]; row_count: number; truncated: boolean; duration_ms: number; error: string | null };
+  answer_text: string;
+  verdict: { passed: boolean | null; reason: string; timed_out?: boolean };
+  saved?: { id: number; created_at: string };
+};
+
+export async function post<T>(url: string, body: unknown): Promise<T> {
+  const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.detail ?? `${r.status} ${url}`);
+  return j as T;
+}
+
 // ── fetching ───────────────────────────────────────────────────────────────
 export async function get<T>(url: string): Promise<T> {
   const r = await fetch(url);

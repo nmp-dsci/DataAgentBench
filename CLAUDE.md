@@ -56,11 +56,19 @@
 - **The index is the contract.** The API and the explorer read only
   `data/index/`, `data/answers/`, `data/context/`, `agents/` and `runs/`.
   Never hand-edit those files; change the ingest and re-run it. Never
-  hard-code a dataset, a query or a number in the frontend. The one route
-  that executes is the playground, `POST /api/agent/tools/<name>`: the
-  trial's own tool bodies (`call_tool`), the read-only role, the network-off
-  sandbox; it writes no run folder and no MLflow trace, only /work files
-  under `workspace/playground/`.
+  hard-code a dataset, a query or a number in the frontend. Two routes
+  execute, both on the read-only role. The playground,
+  `POST /api/agent/tools/<name>`, runs the trial's own tool bodies
+  (`call_tool`) and the network-off sandbox; it writes no run folder and no
+  MLflow trace, only /work files under `workspace/playground/`. Golden SQL,
+  `POST /api/golden/<ds>/<n>[/run]`, runs one SELECT as `dab_agent` and judges
+  it with the question's validator.
+- **Golden SQL is curated, and it encodes answers.** It is written by hand in
+  the Golden tab, never generated, and a question's golden starts empty until
+  someone writes it. Saves append to `dataagentbench_meta.golden_sql` (the
+  newest is current, and nothing is ever dropped; `make db-reset` leaves the
+  meta schema alone). `dab_agent` is refused there (`tests/test_golden.py`).
+  A golden never reaches a prompt, the pack, the curator or a proposer.
 - **Scope is the 54.** `aliases.RELEASED_DATASETS` is the 12 leaderboard
   datasets. The five unreleased datasets upstream are a count in
   `source.json` and nothing more (review decision B). Widening the scope is a

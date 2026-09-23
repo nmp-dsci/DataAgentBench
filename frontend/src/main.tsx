@@ -12,6 +12,7 @@ import { Runs } from './pages/Runs';
 import { Run } from './pages/Run';
 import { TracePage } from './pages/TracePage';
 import { Agent } from './pages/Agent';
+import { Golden, GoldenQuery } from './pages/Golden';
 import './styles.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -31,6 +32,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route path="/runs/:id" element={<Run />} />
           <Route path="/runs/:id/traces/:key" element={<TracePage />} />
           <Route path="/agent" element={<Agent />} />
+          <Route path="/golden" element={<Golden />} />
+          <Route path="/golden/:key/:n" element={<GoldenQuery />} />
         </Route>
       </Routes>
     </BrowserRouter>
