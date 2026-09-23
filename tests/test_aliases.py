@@ -27,3 +27,12 @@ def test_answer_file_names() -> None:
 def test_released_set_is_the_leaderboard_twelve() -> None:
     assert len(RELEASED_DATASETS) == 12
     assert "cve" not in RELEASED_DATASETS
+
+
+def test_a_trial_has_one_id_and_its_file_name_is_derived() -> None:
+    from dab_bench.data.aliases import trace_stem, trial_id
+
+    assert trial_id("deps_dev_v1/1", 1) == "deps_dev_v1/1/t1"
+    # dataset keys carry underscores and digits; the file name still ends _<n>_t<k>
+    assert trace_stem("deps_dev_v1/1", 1) == "deps_dev_v1_1_t1"
+    assert trace_stem("pancancer_atlas/12", 3) == "pancancer_atlas_12_t3"

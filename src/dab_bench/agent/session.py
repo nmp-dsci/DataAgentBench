@@ -42,6 +42,7 @@ from dab_bench.agent.prompt import DatasetContext, compose_system_prompt, user_m
 from dab_bench.agent.sandbox import Sandbox
 from dab_bench.agent.tools import ToolState, make_tool_server
 from dab_bench.agent.versions import AgentVersion
+from dab_bench.data.aliases import trace_stem
 from dab_bench.eval.splits import Query
 
 
@@ -116,7 +117,7 @@ def _rate_limited(text: str, error: str | None, reason: str | None) -> bool:
 
 
 def trial_key(query: Query, trial: int) -> str:
-    return f"{query.dataset}_{query.query_id}_t{trial}"
+    return trace_stem(f"{query.dataset}/{query.query_id}", trial)
 
 
 async def solve(

@@ -68,8 +68,9 @@ dev: ## run the API on :$(PORT) (frontend: cd frontend && npm run dev → :5173)
 build: ## build the explorer into frontend/dist so `make dev` serves it on one port
 	cd frontend && npm run build
 
-test: ## pytest
+test: ## pytest (+ the frontend's routing test when node_modules exist)
 	uv run pytest -q
+	@test -d frontend/node_modules && (cd frontend && npm test) || true
 
 lint: ## ruff + mypy (+ frontend typecheck and design lint when node_modules exist)
 	uv run ruff format --check src tests && uv run ruff check src tests && uv run mypy

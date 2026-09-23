@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { type AnswerFile, type DatasetSummary, type Leaderboard, type Stats, type TrialsIndex, STYLE_LABEL, fmtBytes, fmtInt, fmtPct, shortSha, useGet } from '../lib/api';
 import { Kpi, Loading, QLink, Rate } from '../lib/ui';
+import { questionPath, datasetPath } from '../lib/url';
 
 export function Overview() {
   const { data: s, error } = useGet<Stats>('/api/stats');
@@ -63,18 +64,18 @@ export function Overview() {
           </p>
           <div className="chips">
             {t.summary.never_passed.map((id) => (
-              <Link key={id} to={`/queries/${id}`} className="chip warn">
+              <Link key={id} to={questionPath(id)} className="chip warn">
                 {id} · 0 passes
               </Link>
             ))}
             {t.summary.at_least_95pct.map((id) => (
-              <Link key={id} to={`/queries/${id}`} className="chip ok">
+              <Link key={id} to={questionPath(id)} className="chip ok">
                 {id} · ≥95%
               </Link>
             ))}
           </div>
           <p className="small">
-            <Link to="/queries">All {s.queries} queries, sortable by pass rate →</Link>
+            <Link to="/datasets">All {s.queries} queries, sortable by pass rate →</Link>
           </p>
         </section>
       )}
@@ -100,7 +101,7 @@ export function Overview() {
               {rows.map((d) => (
                 <tr key={d.key}>
                   <td className="sub">
-                    <Link to={`/datasets/${d.key}`}>{d.key}</Link>
+                    <Link to={datasetPath(d.key)}>{d.key}</Link>
                     <span className="path">{d.folder}</span>
                   </td>
                   <td className="num">{d.n_queries}</td>

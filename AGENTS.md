@@ -62,7 +62,9 @@ src/dab_bench/
   eval/               validators.py (import + alarm-bounded call) · rescore.py (pool, summary, site check)
   serving/app.py      FastAPI over the index + SPA fallback
 frontend/             Vite + React; src/tokens.css verbatim from DESIGN.md; scripts/design_lint.mjs
-  src/pages/          Overview · Datasets · Dataset · Query · Validators · Leaderboard · Runs · Run · TracePage · Agent
+  src/routes.tsx      every address, as data; old ones are redirect loaders (routes.test.tsx drives it)
+  src/lib/url.ts      the URL grammar: one id per thing, path = subject, query string = lens
+  src/pages/          Overview · Datasets · Dataset · Query · Validators · Leaderboard · Runs · Run · TracePage · Agent · Golden
   src/lib/queries.tsx QueryTable: one table for all 54 and for one dataset's, so the columns cannot drift
 tests/                fixture-tree ingest · aliases · validator runner with timeout · API on the
                       committed index · trials reproduce the site
@@ -163,7 +165,7 @@ src/dab_bench/
   agent/llm.py · versions.py · prompt.py · tools.py · sandbox.py · session.py
   eval/splits.py · score.py · runner.py               splits; TrialResult, summary + `profile()` (p50/p95); `dab eval`
   tracking/mlflow_log.py · tracing.py                 the run record on MLflow; one trace per trial
-  serving/app.py                                      `/api/runs` = the board (roles derived, profile per run); `/traces/<key>` adds the span tree
+  serving/app.py                                      `/api/runs` = the board (roles derived, profile per run); `/api/runs/<run>/<ds>/<n>/t<k>` adds the span tree
 frontend/src/pages/Runs.tsx · Run.tsx · TracePage.tsx · lib/runs.tsx   the board, one run vs the champion, the span waterfall
 frontend/src/pages/Agent.tsx · lib/agent.tsx        the Agent tab: the system graph, the node panel + tool form, the replay
 ```

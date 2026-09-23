@@ -110,6 +110,13 @@ trial, and in the explorer under **Runs**. The next step in the plan — v0 at
 
 ## 4 · The pages
 
+Every address uses the same ids the tables print: a question is
+`/datasets/deps_dev_v1/1`, one trial of it in a run is
+`/runs/<run>/deps_dev_v1/1/t1` (chop the end off and you land on the question
+in that run, then the run), and the Agent tab is `/agent/<version>` with the
+run, trial and node in the query string. Addresses from before this still
+redirect.
+
 - **Overview** — the numbers above with their denominators, the datasets
   hardest-first, the validator styles, the leaderboard's spread.
 - **Datasets & queries** — one tab, since every query belongs to a dataset. A
@@ -130,7 +137,9 @@ trial, and in the explorer under **Runs**. The next step in the plan — v0 at
 - **Golden** — golden SQL, written by hand: per question, a Postgres query run
   as the agent's read-only role and judged by the question's own validator.
   Save keeps every version (`dataagentbench_meta.golden_sql`, unreadable to
-  the agent). It starts at 0/54; `/api/golden` reports coverage.
+  the agent). It starts at 0/54; `/api/golden` reports coverage. Picking a
+  question opens its editor above the list at `/golden/<ds>/<n>`, with
+  previous / next through the 54; the list stays.
 - **Runs / Run / Trace** — our own evals from `runs/`. The Runs tab opens on a
   comparison: pick a focus and a challenger (any two scored runs, labelled by
   agent version, or a leaderboard answer file such as `lb:permute_eq`), group the figure by dataset, validator style or query, and

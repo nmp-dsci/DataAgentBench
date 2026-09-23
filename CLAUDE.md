@@ -69,6 +69,15 @@
   newest is current, and nothing is ever dropped; `make db-reset` leaves the
   meta schema alone). `dab_agent` is refused there (`tests/test_golden.py`).
   A golden never reaches a prompt, the pack, the curator or a proposer.
+- **One address per thing** (`frontend/src/lib/url.ts`; test
+  `frontend/src/routes.test.tsx`). One id, spelled the same everywhere:
+  question `deps_dev_v1/1`, trial `deps_dev_v1/1/t1`; the trace file's flat
+  name stays on disk (`aliases.trace_stem`) and never reaches a URL. The path
+  names the subject (`/datasets/deps_dev_v1/1`, `/runs/<run>/deps_dev_v1/1/t1`,
+  `/agent/champion`); the query string holds the lens, written readably by
+  `search()`. Picking from a list opens the detail in place through a nested
+  route (`/golden/<ds>/<n>`). Build every link with the helpers; an address that
+  changes gets a redirect loader in `routes.tsx`, never a 404.
 - **Scope is the 54.** `aliases.RELEASED_DATASETS` is the 12 leaderboard
   datasets. The five unreleased datasets upstream are a count in
   `source.json` and nothing more (review decision B). Widening the scope is a

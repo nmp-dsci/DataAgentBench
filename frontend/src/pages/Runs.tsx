@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { type Board, type CompareGroup, type CompareRate, type CompareResp, type CompareSide, type Leaderboard, type RunSummary, type Submission, ROLE_LABEL, STYLE_LABEL, fmtDur, fmtPct, fmtSec, fmtTok, fmtUsd, queryPath, useGet } from '../lib/api';
+import { Link, useNavigate } from 'react-router-dom';
+import { type Board, type CompareGroup, type CompareRate, type CompareResp, type CompareSide, type Leaderboard, type RunSummary, type Submission, ROLE_LABEL, STYLE_LABEL, fmtDur, fmtPct, fmtSec, fmtTok, fmtUsd, useGet } from '../lib/api';
 import { Delta, ProfileTable, Ratios, Role } from '../lib/runs';
 import { Loading, Rate } from '../lib/ui';
+import { questionPath, runPath, runsPath, useLens } from '../lib/url';
 
 /** The best plain-ReAct baseline column on the leaderboard's stratified table: the honest bar for a Haiku agent. */
 function bestBaseline(lb: Leaderboard | null): { key: string; label: string; overall: number; perDataset: Record<string, number> } | null {
@@ -141,17 +142,20 @@ const REMEMBER = 'dab.runs.view';
 
 /** Focus against challenger: pick any two scored runs, group the figure, read every Δ. */
 function Compare({ board, base }: { board: Board; base: ReturnType<typeof bestBaseline> }) {
-  const [sp, setSp] = useSearchParams();
+  const [sp, set] = useLens();
+  const nav = useNavigate();
+  const qs = sp.toString();
   useEffect(() => {
+    // the compare lives in the URL; a bare /runs (the nav) restores this browser tab's last one
     try {
-      if ([...sp.keys()].length === 0) {
+      if (!qs) {
         const last = sessionStorage.getItem(REMEMBER);
-        if (last) setSp(new URLSearchParams(last), { replace: true });
-      } else sessionStorage.setItem(REMEMBER, sp.toString());
+        if (last) nav(runsPath(Object.fromEntries(new URLSearchParams(last).entries())), { replace: true });
+      } else sessionStorage.setItem(REMEMBER, qs);
     } catch {
       /* storage unavailable: the URL still carries the view */
     }
-  }, [sp, setSp]);
+  }, [qs, nav]);
   const scored = board.runs.filter((r) => !r.dry_run && (r.scored ?? 0) > 0);
   const byId = new Map(scored.map((r) => [r.run_id, r]));
   const subs = board.submissions ?? [];
@@ -164,14 +168,6 @@ function Compare({ board, base }: { board: Board; base: ReturnType<typeof bestBa
   const challenger = pick('challenger');
   const group = (['dataset', 'style', 'query'] as const).find((g) => g === sp.get('group')) ?? 'dataset';
   const scope = sp.get('scope') === 'all' ? 'all' : 'common';
-  const set = (patch: Record<string, string | null>) => {
-    const next = new URLSearchParams(sp);
-    for (const [k, v] of Object.entries(patch)) {
-      if (v) next.set(k, v);
-      else next.delete(k);
-    }
-    setSp(next, { replace: true });
-  };
   const q = focus ? `/api/runs/compare?focus=${focus}${challenger && challenger !== focus ? `&challenger=${challenger}` : ''}&group=${group}&scope=${scope}` : null;
   const { data: cmp, error } = useGet<CompareResp>(q);
   if (!focus) return <p className="empty">No scored run yet — nothing to compare.</p>;
@@ -183,7 +179,7 @@ function Compare({ board, base }: { board: Board; base: ReturnType<typeof bestBa
   // our runs link to their page; a submission links to its PR, or the leaderboard
   const Target = ({ id }: { id: string }) => {
     const x = subById.get(id);
-    if (!x) return <Link to={`/runs/${id}`}>{label(id)}</Link>;
+    if (!x) return <Link to={runPath(id)}>{label(id)}</Link>;
     return x.pr_url ? (
       <a href={x.pr_url} target="_blank" rel="noreferrer">
         {label(id)}
@@ -309,13 +305,13 @@ function Compare({ board, base }: { board: Board; base: ReturnType<typeof bestBa
             <div className="chips">
               <span className="chip ok">fixed {cmp.fixed.length}</span>
               {cmp.fixed.map((qid) => (
-                <Link key={qid} to={queryPath(qid)} className="chip ok">
+                <Link key={qid} to={questionPath(qid)} className="chip ok">
                   {qid}
                 </Link>
               ))}
               <span className="chip warn">broken {cmp.broken.length}</span>
               {cmp.broken.map((qid) => (
-                <Link key={qid} to={queryPath(qid)} className="chip warn">
+                <Link key={qid} to={questionPath(qid)} className="chip warn">
                   {qid}
                 </Link>
               ))}
@@ -411,7 +407,7 @@ export function Runs() {
               {challengers.map((r) => (
                 <tr key={r.run_id}>
                   <td className="sub">
-                    <Link to={`/runs/${r.run_id}`} className="mono">
+                    <Link to={runPath(r.run_id)} className="mono">
                       {r.run_id}
                     </Link>
                     <span className="path">
@@ -476,7 +472,7 @@ export function Runs() {
             {runs.map((r) => (
               <tr key={r.run_id} className={r.role === 'dry' || r.role === 'superseded' ? 'dim' : r.role === 'champion' ? 'pro' : ''}>
                 <td className="sub">
-                  <Link to={`/runs/${r.run_id}`} className="mono">
+                  <Link to={runPath(r.run_id)} className="mono">
                     {r.run_id}
                   </Link>
                   <span className="path">

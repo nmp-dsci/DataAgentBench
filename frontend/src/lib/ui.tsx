@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { type DatasetSummary, fmtPct, queryPath, useGet } from './api';
+import { type DatasetSummary, fmtPct, useGet } from './api';
+import { questionPath, datasetPath } from './url';
 
 /** Every dataset as a lozenge, in the order the cards use. `current` is unset on the index: nothing is selected there. */
 export function DatasetChips({ current }: { current?: string }) {
@@ -10,7 +11,7 @@ export function DatasetChips({ current }: { current?: string }) {
   return (
     <nav className="chips datasetbar" aria-label="datasets">
       {order.map((d) => (
-        <Link key={d.key} to={`/datasets/${d.key}`} className={`chip nav ${d.key === current ? 'on' : ''}`} aria-current={d.key === current ? 'page' : undefined}>
+        <Link key={d.key} to={datasetPath(d.key)} className={`chip nav ${d.key === current ? 'on' : ''}`} aria-current={d.key === current ? 'page' : undefined}>
           {d.key}
           <span className="n">{d.n_queries}</span>
         </Link>
@@ -46,7 +47,7 @@ export function Kpi({ n, b, tone }: { n: string; b: string; tone?: 'ok' | 'warn'
 
 export function QLink({ id }: { id: string }) {
   return (
-    <Link to={queryPath(id)} className="mono">
+    <Link to={questionPath(id)} className="mono">
       {id}
     </Link>
   );

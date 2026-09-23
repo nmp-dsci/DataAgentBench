@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { type DatasetSummary, type Stats, fmtBytes, fmtInt, fmtPct, useGet } from '../lib/api';
 import { QueryTable, useAllQueries } from '../lib/queries';
 import { DatasetChips, Loading, Rate } from '../lib/ui';
+import { datasetPath } from '../lib/url';
 
 export function Datasets() {
   const { data: ds, error } = useGet<DatasetSummary[]>('/api/datasets');
@@ -26,9 +27,9 @@ export function Datasets() {
       </p>
       <div className="cards">
         {sorted.map((d) => (
-          <div key={d.key} className="card link" onClick={() => nav(`/datasets/${d.key}`)} role="link" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && nav(`/datasets/${d.key}`)}>
+          <div key={d.key} className="card link" onClick={() => nav(datasetPath(d.key))} role="link" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && nav(datasetPath(d.key))}>
             <h3>
-              <Link to={`/datasets/${d.key}`}>{d.key}</Link>
+              <Link to={datasetPath(d.key)}>{d.key}</Link>
             </h3>
             <p className="small">
               {d.n_queries} {d.n_queries === 1 ? 'query' : 'queries'} · {d.n_dbs} DBs · {d.engines.join(', ')} · {fmtBytes(d.bytes_total)}

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { type QueryDetail, type QuerySummary, type TrialFile, STYLE_LABEL, fmtBytes, fmtPct, queryPath, useGet } from '../lib/api';
+import { type QueryDetail, type QuerySummary, type TrialFile, STYLE_LABEL, fmtBytes, fmtPct, useGet } from '../lib/api';
 import { Loading, Rate } from '../lib/ui';
+import { datasetPath, goldenPath, questionPath } from '../lib/url';
 
 export function Query() {
   const { key, n } = useParams();
@@ -22,10 +23,10 @@ export function Query() {
   return (
     <>
       <p className="crumbs">
-        <Link to="/queries">Queries</Link> › <Link to={`/datasets/${q.dataset_key}`}>{q.dataset_key}</Link> › {q.query_id}
+        <Link to="/datasets">Datasets</Link> › <Link to={datasetPath(q.dataset_key)}>{q.dataset_key}</Link> › {q.query_id}
       </p>
       <p className="label">
-        {q.id} · {STYLE_LABEL[q.validator.style] ?? q.validator.style} validator · gold {q.gold_lines} {q.gold_lines === 1 ? 'line' : 'lines'}
+        {q.id} · {STYLE_LABEL[q.validator.style] ?? q.validator.style} validator · gold {q.gold_lines} {q.gold_lines === 1 ? 'line' : 'lines'} · <Link to={goldenPath(q.id)}>its golden SQL</Link>
       </p>
       <h1>
         {q.id} — {verdict}
@@ -56,7 +57,7 @@ export function Query() {
           <dl className="kv">
             <dt>dataset</dt>
             <dd>
-              <Link to={`/datasets/${q.dataset_key}`}>{q.dataset_key}</Link> · {q.dataset.n_queries} queries
+              <Link to={datasetPath(q.dataset_key)}>{q.dataset_key}</Link> · {q.dataset.n_queries} queries
             </dd>
             <dt>engines</dt>
             <dd>{q.dataset.engines.join(', ')}</dd>
@@ -136,15 +137,15 @@ export function Query() {
       <p className="small" style={{ marginTop: 'var(--s7)' }}>
         {prev && (
           <>
-            <Link to={queryPath(prev.id)}>← {prev.id}</Link>
+            <Link to={questionPath(prev.id)}>← {prev.id}</Link>
             {' · '}
           </>
         )}
-        <Link to={`/datasets/${q.dataset_key}`}>all {q.dataset_key} queries</Link>
+        <Link to={datasetPath(q.dataset_key)}>all {q.dataset_key} queries</Link>
         {next && (
           <>
             {' · '}
-            <Link to={queryPath(next.id)}>{next.id} →</Link>
+            <Link to={questionPath(next.id)}>{next.id} →</Link>
           </>
         )}
       </p>

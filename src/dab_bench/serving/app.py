@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import functools
 import json
+import re
 from dataclasses import asdict
 from typing import Any
 
@@ -33,6 +34,7 @@ from dab_bench.config import (
     WORKSPACE_DIR,
     settings,
 )
+from dab_bench.data.aliases import trial_id
 from dab_bench.data.index import Index, load, stats
 from dab_bench.eval.score import TrialResult
 
@@ -175,17 +177,9 @@ def create_app(index: Index | None = None) -> FastAPI:
         )
         return d
 
-    @app.get("/api/runs/{run_id}/traces/{key}")
-    def run_trace(run_id: str, key: str) -> dict[str, Any]:
-        from dab_bench.eval.runner import load_run
-
-        p = RUNS_DIR / run_id / "traces" / f"{key}.json"
-        if not p.exists():
-            raise HTTPException(404, f"no trace {key} in {run_id}")
-        t: dict[str, Any] = json.loads(p.read_text())
+    def _trace(run_id: str, row: TrialResult | None, path: Any) -> dict[str, Any]:
+        t: dict[str, Any] = json.loads(path.read_text())
         # the verdict and the MLflow link live on the result row, not in the trace file
-        _, results = load_run(run_id)
-        row = next((r for r in results if r.trace_file == f"traces/{key}.json"), None)
         t["passed"] = row.passed if row else None
         t["reason"] = row.reason if row else ""
         t["mlflow_trace_id"] = row.mlflow_trace_id if row else None
@@ -194,6 +188,35 @@ def create_app(index: Index | None = None) -> FastAPI:
         t["gold"] = _gold(ix, t.get("query_id", ""))
         t["spans"] = _spans(t)
         return t
+
+    @app.get("/api/runs/{run_id}/traces/{key}")
+    def run_trace(run_id: str, key: str) -> dict[str, Any]:
+        """The trace by its file name. Superseded by the trial route below; kept one release
+        so an old link or script still resolves."""
+        from dab_bench.eval.runner import load_run
+
+        p = RUNS_DIR / run_id / "traces" / f"{key}.json"
+        if not p.exists():
+            raise HTTPException(404, f"no trace {key} in {run_id}")
+        _, results = load_run(run_id)
+        row = next((r for r in results if r.trace_file == f"traces/{key}.json"), None)
+        return _trace(run_id, row, p)
+
+    @app.get("/api/runs/{run_id}/{ds}/{n}/{t}")
+    def run_trial(run_id: str, ds: str, n: int, t: str) -> dict[str, Any]:
+        """One trial by its id, `<run>/deps_dev_v1/1/t1`: the explorer's own address for it."""
+        from dab_bench.eval.runner import load_run
+
+        m = re.fullmatch(r"t(\d+)", t)
+        if not m or not (RUNS_DIR / run_id / "run.json").exists():
+            raise HTTPException(404, f"no trial {ds}/{n}/{t} in {run_id}")
+        _, results = load_run(run_id)
+        qid, k = f"{ds}/{n}", int(m[1])
+        row = next((r for r in results if r.query_id == qid and r.trial == k), None)
+        p = RUNS_DIR / run_id / row.trace_file if row and row.trace_file else None
+        if p is None or not p.exists():
+            raise HTTPException(404, f"no trace for {trial_id(qid, k)} in {run_id}")
+        return _trace(run_id, row, p)
 
     @app.get("/api/context/{key}")
     def context_pack(key: str) -> dict[str, Any]:

@@ -188,10 +188,6 @@ export function fmtInt(n: number | null | undefined): string {
 export function shortSha(sha: string | undefined): string {
   return sha ? sha.slice(0, 7) : '…';
 }
-export function queryPath(id: string): string {
-  const [ds, n] = id.split('/');
-  return `/queries/${ds}/${n}`;
-}
 export const STYLE_LABEL: Record<string, string> = {
   regex: 'regex / number',
   'reads-gold-file': 'reads ground_truth.csv',
@@ -383,6 +379,3 @@ export const ROLE_LABEL: Record<RunRole, string> = {
   smoke: 'smoke',
   dry: 'dry run',
 };
-export function traceKey(r: { dataset: string; query_id: string; trial: number }): string {
-  return `${r.dataset}_${r.query_id.split('/')[1]}_t${r.trial}`;
-}

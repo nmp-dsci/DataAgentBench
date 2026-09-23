@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { type QuerySummary, STYLE_LABEL, fmtInt, fmtPct, queryPath, useGet } from './api';
+import { type QuerySummary, STYLE_LABEL, fmtInt, fmtPct, useGet } from './api';
 import { Clip, Gold, Rate } from './ui';
+import { questionPath, datasetPath } from './url';
 
 type SortKey = 'rate' | 'id' | 'gold' | 'best';
 
@@ -108,7 +109,7 @@ export function QueryTable({ rows: all, scope }: { rows: QuerySummary[]; scope?:
             {rows.map((x) => (
               <tr key={x.id} className={x.trials && x.trials.passed === 0 ? 'dim' : ''}>
                 <td className="sub">
-                  <Link to={queryPath(x.id)}>{x.id}</Link>
+                  <Link to={questionPath(x.id)}>{x.id}</Link>
                   {x.footnote && (
                     <span className="path">
                       <span className="tag warn">gold revised upstream</span>
@@ -122,7 +123,7 @@ export function QueryTable({ rows: all, scope }: { rows: QuerySummary[]; scope?:
                 </td>
                 {!scope && (
                   <td className="sub">
-                    <Link to={`/datasets/${x.dataset_key}`}>{x.dataset_key}</Link>
+                    <Link to={datasetPath(x.dataset_key)}>{x.dataset_key}</Link>
                   </td>
                 )}
                 <td className="q wrap">

@@ -235,3 +235,15 @@ button.more{font:500 var(--t-2)/1.4 var(--mono);color:var(--accent);background:n
 button.more:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .gold-cell pre.gold-full{margin:0 0 var(--s1);min-width:min(22rem,70vw);white-space:pre-wrap;overflow-wrap:anywhere;max-height:24rem;overflow-y:auto;user-select:text}
 .answer pre{white-space:pre-wrap}
+
+/* Golden: the list is the page, the editor opens above it in place (a nested route) */
+.golden-editor{margin:var(--s5) 0;box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent);scroll-margin-top:80px}
+.golden-editor h2{margin-top:var(--s2)}
+.golden-editor .editor-head{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4);align-items:baseline;justify-content:space-between}
+.golden-editor .editor-head .label{margin:0;min-width:0}
+.golden-editor .editor-nav{margin:0;white-space:nowrap}
+.golden-editor .result-scroll{max-height:60vh;overflow:auto}
+tr.pickrow{cursor:pointer}
+tr.pickrow:hover td{background:var(--band)}
+tr.pickrow.cur td{background:var(--accent-soft)}
+tr.pickrow.cur td:first-child{box-shadow:inset 3px 0 0 var(--accent)}

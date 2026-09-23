@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { type DatasetDetail, fmtBytes, fmtPct, queryPath, useGet } from '../lib/api';
+import { type DatasetDetail, fmtBytes, fmtPct, useGet } from '../lib/api';
 import { QueryTable } from '../lib/queries';
 import { DatasetChips, Loading } from '../lib/ui';
+import { questionPath } from '../lib/url';
 
 export function Dataset() {
   const { key } = useParams();
@@ -26,8 +27,8 @@ export function Dataset() {
       </h1>
       {hardest?.trials && (
         <p className="lead">
-          Hardest here is <Link to={queryPath(hardest.id)}>{hardest.id}</Link> at {fmtPct(hardest.trials.rate)} of {hardest.trials.n} trials; easiest is{' '}
-          <Link to={queryPath(rows[rows.length - 1].id)}>{rows[rows.length - 1].id}</Link> at {fmtPct(rows[rows.length - 1].trials?.rate)}.
+          Hardest here is <Link to={questionPath(hardest.id)}>{hardest.id}</Link> at {fmtPct(hardest.trials.rate)} of {hardest.trials.n} trials; easiest is{' '}
+          <Link to={questionPath(rows[rows.length - 1].id)}>{rows[rows.length - 1].id}</Link> at {fmtPct(rows[rows.length - 1].trials?.rate)}.
         </p>
       )}
 

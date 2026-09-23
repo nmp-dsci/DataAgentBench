@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { type Span, type SpanTokens, fmtInt, fmtTok, fmtUsd, queryPath } from './api';
+import { type Span, type SpanTokens, fmtInt, fmtTok, fmtUsd } from './api';
+import { questionPath, trialId, trialPath } from './url';
 
 // ── shapes served by /api/agents* and /api/agent/tools ────────────────────────
 export type AgentRow = { name: string; fingerprint: string; model: string; effort: string | null; max_turns: number; timeout_s: number; exec_timeout_s: number; hints: boolean; tools: string[] };
@@ -328,14 +329,14 @@ export function Replay({ spans, onlyTools, filterTool, onRerun }: { spans: Span[
   );
 }
 
-export function TraceLine({ runId, traceKey, queryId, trial, passed, cost }: { runId: string; traceKey: string; queryId: string; trial: number; passed: boolean | null; cost: number | null }) {
+export function TraceLine({ runId, queryId, trial, passed, cost }: { runId: string; queryId: string; trial: number; passed: boolean | null; cost: number | null }) {
   return (
     <span>
-      <Link to={queryPath(queryId)} className="mono">
+      <Link to={questionPath(queryId)} className="mono">
         {queryId}
       </Link>{' '}
       trial {trial} · {passed == null ? 'not scored' : passed ? <span className="v-ok">pass</span> : <span className="v-warn">fail</span>} · {fmtUsd(cost, 3)} ·{' '}
-      <Link to={`/runs/${runId}/traces/${traceKey}`} className="mono">
+      <Link to={trialPath(runId, trialId({ query_id: queryId, trial }))} className="mono">
         full trace
       </Link>
     </span>

@@ -56,6 +56,21 @@ def query_key(dataset: str, query: str | int) -> str:
     return f"{dataset_key(dataset)}/{int(q)}"
 
 
+# One address per thing: a question is `deps_dev_v1/1` everywhere, and one trial of it
+# is `deps_dev_v1/1/t1` (the explorer's `/runs/<run>/deps_dev_v1/1/t1`). The trace file
+# keeps its flat name on disk; `trace_stem` is the only place that spelling is made,
+# and no address shows it.
+def trial_id(query_id: str, trial: int) -> str:
+    """`deps_dev_v1/1/t1` — one trial of one question, as every explorer address spells it."""
+    return f"{query_id}/t{int(trial)}"
+
+
+def trace_stem(query_id: str, trial: int) -> str:
+    """`deps_dev_v1_1_t1` — a trial's trace file name in its run folder (and its /work folder)."""
+    ds, n = query_id.rsplit("/", 1)
+    return f"{ds}_{int(n)}_t{int(trial)}"
+
+
 # The answer files committed upstream, and the leaderboard row each one is.
 # `agent` is matched exactly against `overallLeaderboard[].agent` in the site's
 # leaderboards.json; `stratified` names the table and column that carry the
