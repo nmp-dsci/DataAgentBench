@@ -111,10 +111,12 @@ trial, and in the explorer under **Runs**. The next step in the plan — v0 at
 
 - **Overview** — the numbers above with their denominators, the datasets
   hardest-first, the validator styles, the leaderboard's spread.
-- **Datasets / Dataset** — engines, database files with sizes, the schema
-  description the agent reads, the hint file as a toggle, the queries.
-- **Queries** — all 54, filterable by dataset, validator style and gold shape,
-  sortable by published pass rate.
+- **Datasets & queries** — one tab, since every query belongs to a dataset. A
+  lozenge per dataset across the top; with none selected the page is the cards
+  plus all 54 queries, filterable by dataset, validator style and gold shape and
+  sortable by published pass rate. Pick a lozenge and the same table narrows to
+  that dataset, under its engines, database files with sizes, the schema
+  description the agent reads and the hint file as a toggle.
 - **Query** — question, gold and `validate.py` side by side; then every
   answer file's trials with passing and failing answers verbatim and the
   validator's own reason on each failure.

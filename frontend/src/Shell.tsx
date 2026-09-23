@@ -3,8 +3,7 @@ import { type Health, shortSha, useGet } from './lib/api';
 
 const NAV: [string, string][] = [
   ['/', 'Overview'],
-  ['/datasets', 'Datasets'],
-  ['/queries', 'Queries'],
+  ['/datasets', 'Datasets & queries'],
   ['/validators', 'Validators'],
   ['/leaderboard', 'Leaderboard'],
   ['/runs', 'Runs'],

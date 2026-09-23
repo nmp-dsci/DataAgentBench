@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { type DatasetDetail, STYLE_LABEL, fmtBytes, fmtPct, queryPath, useGet } from '../lib/api';
-import { DatasetChips, Gold, Loading, Rate } from '../lib/ui';
+import { type DatasetDetail, fmtBytes, fmtPct, queryPath, useGet } from '../lib/api';
+import { QueryTable } from '../lib/queries';
+import { DatasetChips, Loading } from '../lib/ui';
 
 export function Dataset() {
   const { key } = useParams();
@@ -83,40 +84,8 @@ export function Dataset() {
         )}
       </div>
 
-      <h2>The {d.n_queries} queries, hardest first</h2>
-      <div className="tw">
-        <table>
-          <thead>
-            <tr>
-              <th>Query</th>
-              <th>Question</th>
-              <th>Gold</th>
-              <th>Validator</th>
-              <th>Published pass rate</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((q) => (
-              <tr key={q.id}>
-                <td className="sub">
-                  <Link to={queryPath(q.id)}>{q.id}</Link>
-                </td>
-                <td className="q wrap">
-                  {q.question.length > 220 ? `${q.question.slice(0, 220)}…` : q.question}
-                  {q.footnote && <span className="tag warn" style={{ marginLeft: 'var(--s2)' }}>revised</span>}
-                </td>
-                <td className="pre">
-                  <Gold preview={q.gold_preview} lines={q.gold_lines} />
-                </td>
-                <td>{STYLE_LABEL[q.validator_style] ?? q.validator_style}</td>
-                <td>
-                  <Rate passed={q.trials?.passed} n={q.trials?.n} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <h2>The {d.n_queries} {d.n_queries === 1 ? 'query' : 'queries'}, hardest first</h2>
+      <QueryTable rows={d.query_rows} scope={d.key} />
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { type QuerySummary, STYLE_LABEL, fmtInt, fmtPct, queryPath, useGet } from '../lib/api';
-import { Loading, Rate } from '../lib/ui';
+import { type QuerySummary, STYLE_LABEL, fmtInt, fmtPct, queryPath, useGet } from './api';
+import { Rate } from './ui';
 
 type SortKey = 'rate' | 'id' | 'gold' | 'best';
 
@@ -12,8 +12,10 @@ function goldCell(preview: string, lines: number): string {
   return lines > 1 ? `${head}  (+${lines - 1} more)` : head;
 }
 
-export function Queries() {
-  const { data: qs, error } = useGet<QuerySummary[]>('/api/queries');
+/** Every query in `rows`, filterable and sortable. `scope` is the dataset the caller already
+ *  narrowed to: it names that in the caption and drops the dataset select, which would be a
+ *  list of one. Both dataset pages share this, so the columns can never drift apart. */
+export function QueryTable({ rows: all, scope }: { rows: QuerySummary[]; scope?: string }) {
   const [dataset, setDataset] = useState('all');
   const [style, setStyle] = useState('all');
   const [shape, setShape] = useState<'all' | 'single' | 'list'>('all');
@@ -22,11 +24,10 @@ export function Queries() {
   const [asc, setAsc] = useState(true);
 
   const rows = useMemo(() => {
-    if (!qs) return [];
     const needle = q.trim().toLowerCase();
-    const out = qs.filter(
+    const out = all.filter(
       (x) =>
-        (dataset === 'all' || x.dataset_key === dataset) &&
+        (scope || dataset === 'all' || x.dataset_key === dataset) &&
         (style === 'all' || x.validator_style === style) &&
         (shape === 'all' || (shape === 'single' ? x.gold_lines === 1 : x.gold_lines > 1)) &&
         (!needle || x.question.toLowerCase().includes(needle) || x.id.includes(needle) || x.gold_preview.toLowerCase().includes(needle)),
@@ -44,14 +45,10 @@ export function Queries() {
       return asc ? c : -c;
     });
     return out;
-  }, [qs, dataset, style, shape, q, sort, asc]);
+  }, [all, scope, dataset, style, shape, q, sort, asc]);
 
-  if (!qs) return <Loading error={error} />;
-  const datasets = Array.from(new Set(qs.map((x) => x.dataset_key))).sort();
-  const scored = qs.filter((x) => x.trials);
-  const under10 = scored.filter((x) => (x.trials?.rate ?? 1) < 0.1).length;
-  const never = scored.filter((x) => x.trials?.passed === 0).length;
-  const trialsPer = scored[0]?.trials?.n;
+  const datasets = Array.from(new Set(all.map((x) => x.dataset_key))).sort();
+  const scored = all.filter((x) => x.trials);
 
   const th = (k: SortKey, label: string, cls = '') => (
     <th
@@ -70,32 +67,17 @@ export function Queries() {
 
   return (
     <>
-      <p className="label">queries · {qs.length} in scope</p>
-      <h1>
-        {scored.length ? (
-          <>
-            {under10} of {qs.length} queries pass in under 10% of {trialsPer} published trials; <em>{never}</em> never pass
-          </>
-        ) : (
-          <>
-            {qs.length} queries, every one with gold and a validator; <em>not</em> rescored yet
-          </>
-        )}
-      </h1>
-      <p className="lead">
-        Filter by dataset, validator style or gold shape; sort by pass rate to find the questions the field cannot answer. Every rate carries its denominator; a query with no
-        published trial reads "not scored", never a number.
-      </p>
-
       <div className="filters">
-        <select value={dataset} onChange={(e) => setDataset(e.target.value)} aria-label="dataset">
-          <option value="all">all {datasets.length} datasets</option>
-          {datasets.map((d) => (
-            <option key={d} value={d}>
-              {d}
-            </option>
-          ))}
-        </select>
+        {!scope && (
+          <select value={dataset} onChange={(e) => setDataset(e.target.value)} aria-label="dataset">
+            <option value="all">all {datasets.length} datasets</option>
+            {datasets.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
+        )}
         <select value={style} onChange={(e) => setStyle(e.target.value)} aria-label="validator style">
           <option value="all">any validator</option>
           {Object.entries(STYLE_LABEL).map(([k, v]) => (
@@ -111,7 +93,7 @@ export function Queries() {
         </select>
         <input type="search" placeholder="search question, id or gold" value={q} onChange={(e) => setQ(e.target.value)} aria-label="search" />
         <span className="count">
-          {rows.length} of {qs.length}
+          {rows.length} of {all.length}
         </span>
       </div>
 
@@ -120,6 +102,7 @@ export function Queries() {
           <thead>
             <tr>
               {th('id', 'Query')}
+              {!scope && <th>Dataset</th>}
               <th>Question</th>
               <th>Gold</th>
               {th('gold', 'Lines', 'num')}
@@ -144,6 +127,11 @@ export function Queries() {
                     </span>
                   )}
                 </td>
+                {!scope && (
+                  <td className="sub">
+                    <Link to={`/datasets/${x.dataset_key}`}>{x.dataset_key}</Link>
+                  </td>
+                )}
                 <td className="q wrap">{x.question.length > 200 ? `${x.question.slice(0, 200)}…` : x.question}</td>
                 <td className="pre">{goldCell(x.gold_preview, x.gold_lines)}</td>
                 <td className="num">{x.gold_lines}</td>
@@ -166,9 +154,15 @@ export function Queries() {
         </table>
       </div>
       <p className="small muted">
-        {fmtInt(scored.reduce((n, x) => n + (x.trials?.n ?? 0), 0))} trials across {scored.length} scored queries. "Best file" is the single answer file with the highest pass rate on
-        that query and its denominator is that file's trials (50 for a ReAct baseline, 5 for the others).
+        {fmtInt(scored.reduce((n, x) => n + (x.trials?.n ?? 0), 0))} trials across {scored.length} scored {scored.length === 1 ? 'query' : 'queries'}
+        {scope ? ` in ${scope}` : ''}. "Best file" is the single answer file with the highest pass rate on that query and its denominator is that file's trials (50 for a ReAct
+        baseline, 5 for the others).
       </p>
     </>
   );
+}
+
+/** The whole 54 — used by the Datasets index, where no dataset is selected. */
+export function useAllQueries() {
+  return useGet<QuerySummary[]>('/api/queries');
 }

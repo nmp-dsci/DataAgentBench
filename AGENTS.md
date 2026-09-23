@@ -60,7 +60,8 @@ src/dab_bench/
   eval/               validators.py (import + alarm-bounded call) · rescore.py (pool, summary, site check)
   serving/app.py      FastAPI over the index + SPA fallback
 frontend/             Vite + React; src/tokens.css verbatim from DESIGN.md; scripts/design_lint.mjs
-  src/pages/          Overview · Datasets · Dataset · Queries · Query · Validators · Leaderboard
+  src/pages/          Overview · Datasets · Dataset · Query · Validators · Leaderboard · Runs · Run · TracePage · Agent
+  src/lib/queries.tsx QueryTable: one table for all 54 and for one dataset's, so the columns cannot drift
 tests/                fixture-tree ingest · aliases · validator runner with timeout · API on the
                       committed index · trials reproduce the site
 .github/workflows/    ci.yml (python + frontend; no upstream clone in CI)
