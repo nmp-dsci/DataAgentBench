@@ -76,7 +76,8 @@ make db-roles                    # schema dataagentbench + roles dab_owner / dab
 make data                        # download the 12 datasets (8.4 GB, sha256-verified) and load them: 2 811 tables
 make context                     # the generated half of the context pack (no model)
 make curate                      # the curator agent writes summary.md + pitfalls.md per dataset (≈ $1.40 once)
-make sandbox                     # the execute_python image (python:3.12-slim, no network)
+make sandbox                     # the execute_python image (python:3.12-slim, no network, one container per trial)
+uv run dab isolation-check       # one short turn: proves a session gets only its prompt and its dab tools
 make eval SPLIT=smoke            # v0 on one median-difficulty query per dataset (12 trials, ≈ $1.3)
 make eval SPLIT=all TRIALS=1     # all 54 once
 uv run dab runs list · uv run dab runs profile <run> · uv run dab eval --resume <run>
@@ -109,20 +110,52 @@ trial, and in the explorer under **Runs**. The next step in the plan — v0 at
 
 ## 4 · The pages
 
+Every address uses the same ids the tables print: a question is
+`/datasets/deps_dev_v1/1`, one trial of it in a run is
+`/runs/<run>/deps_dev_v1/1/t1` (chop the end off and you land on the question
+in that run, then the run), and the Agent tab is `/agent/<version>` with the
+run, trial and node in the query string. Addresses from before this still
+redirect.
+
 - **Overview** — the numbers above with their denominators, the datasets
   hardest-first, the validator styles, the leaderboard's spread.
-- **Datasets / Dataset** — engines, database files with sizes, the schema
-  description the agent reads, the hint file as a toggle, the queries.
-- **Queries** — all 54, filterable by dataset, validator style and gold shape,
-  sortable by published pass rate.
+- **Datasets & queries** — one tab, since every query belongs to a dataset. A
+  lozenge per dataset across the top; with none selected the page is the cards
+  plus all 54 queries, filterable by dataset, validator style and gold shape and
+  sortable by published pass rate. Pick a lozenge and the same table narrows to
+  that dataset, under its engines, database files with sizes, the schema
+  description the agent reads and the hint file as a toggle.
 - **Query** — question, gold and `validate.py` side by side; then every
   answer file's trials with passing and failing answers verbatim and the
   validator's own reason on each failure.
 - **Validators** — the four styles (33 regex/number, 12 substring/list,
   9 levenshtein, 0 read the CSV) and which queries use each.
-- **Leaderboard** — the site's 40 entries, the nine with committed answers
-  marked, and the stratified tables with our rescore beside them.
-- **Runs / Run / Trace** — our own evals from `runs/`: the champion and every
+- **Leaderboard** — the site's 40 entries, the eleven with answers here marked
+  (nine committed upstream; #1 Permute EQ and #2 Scout read from their
+  submission PRs, pinned by commit), and the stratified tables with our rescore
+  beside them.
+- **Golden** — golden SQL, written by hand: per question, a Postgres query run
+  as the agent's read-only role and judged by the question's own validator.
+  Save keeps every version (`dataagentbench_meta.golden_sql`, unreadable to
+  the agent). It starts at 0/54; `/api/golden` reports coverage. A run picker
+  (the champion by default) adds that run's pass or fail to every row, and
+  opening a question shows the run's verdict and answer at the top and seeds the
+  editor with the agent's SQL: the last call whose output holds its answer, with
+  every other call listed to load instead. A save records where its SQL started.
+  Proposed SQL (loaded with `uv run dab golden-propose <folder>`, already run
+  and judged) shows as a "Proposed" column and a "proposals to review" filter;
+  opening one puts it in the editor with its verdict on top, and saving it is
+  the confirmation. Judgment questions take an *evidence* golden: the SQL
+  returns the evidence and the expected answer is recorded beside it.
+  Picking a
+  question opens its editor above the list at `/golden/<ds>/<n>`, with
+  previous / next through the 54; the list stays.
+- **Runs / Run / Trace** — our own evals from `runs/`. The Runs tab opens on a
+  comparison: pick a focus and a challenger (any two scored runs, labelled by
+  agent version, or a leaderboard answer file such as `lb:permute_eq`), group the figure by dataset, validator style or query, and
+  read every Δ — pass rates on the queries both scored, cost, turns, tokens, wall,
+  the queries fixed and broken (`/api/runs/compare`, the same `summarise` /
+  `profile` arithmetic as the board). Then the champion and every
   challenger measured against it, the per-trial profile (mean / p50 / p95 of
   turns, tokens, wall, cost), every trial with its tokens and cost, and the
   full trace as a span waterfall plus the transcript, each linked to (and,

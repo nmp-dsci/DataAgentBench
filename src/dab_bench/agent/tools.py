@@ -6,6 +6,11 @@ Compute: `query_db(sql, save_as=)` as the read-only role (rows back, or parquet 
 trial's `/work` for Python); `execute_python(code)` in the network-off sandbox;
 `llm_extract(sql, column, instruction, labels)` for text columns.
 Answer: `return_answer(answer)` records the value; the harness takes it as final.
+Or, for a version that answers with SQL (s06, D27): `submit_answer(sql, mode, answer?, step?)`.
+The harness re-runs `sql` as the read-only role and keeps its columns, rows and rendered
+text, so the agent's result is known exactly, not as the model retold it. Mode
+`pass_through`: the answer is that rendered result. Mode `derived`: the model writes the
+answer from the rows and says in one line what it did (`step`).
 
 Every tool result is cut at 10 000 characters (the reference scaffold's rule).
 The state object is the trace the run keeps: every call, its inputs, its result.
@@ -49,6 +54,7 @@ class ToolState:
     extract_cost_usd: float = 0.0
     extract_input_tokens: int = 0
     extract_output_tokens: int = 0
+    submission: dict[str, Any] | None = None  # submit_answer's record: sql, result, mode, step
 
     def record(
         self, name: str, inputs: dict[str, Any], output: str, t0: float, error: bool = False
@@ -358,7 +364,12 @@ class ToolSpec:
 
 
 def _obj(props: dict[str, Any], required: list[str]) -> dict[str, Any]:
-    return {"type": "object", "properties": props, "required": required}
+    return {
+        "type": "object",
+        "properties": props,
+        "required": required,
+        "additionalProperties": False,
+    }
 
 
 TOOL_SPECS: dict[str, ToolSpec] = {
@@ -455,6 +466,34 @@ TOOL_SPECS: dict[str, ToolSpec] = {
             "pack",
         ),
         ToolSpec(
+            "submit_answer",
+            "Finish: submit the ONE final SQL statement and how the answer comes from it. The harness re-runs "
+            "`sql` read-only. mode `pass_through`: the answer IS the SQL's result, rendered by the harness (one value "
+            "alone, or a header line and one comma-separated line per row). mode `derived`: the answer needs one step "
+            "after the SQL (reading returned text to reach a verdict, choosing between returned rows); give `answer` "
+            "and describe the step in one line in `step`. A SQL error or an empty result is sent back to fix. Call it "
+            "once it succeeds, then stop.",
+            _obj(
+                {
+                    "sql": {
+                        "type": "string",
+                        "description": "the final read-only SELECT / WITH statement",
+                    },
+                    "mode": {"type": "string", "enum": ["pass_through", "derived"]},
+                    "answer": {
+                        "type": "string",
+                        "description": "derived only: the answer, values only, no explanation",
+                    },
+                    "step": {
+                        "type": "string",
+                        "description": "derived only: one line on what was done after the SQL",
+                    },
+                },
+                ["sql", "mode"],
+            ),
+            "state",
+        ),
+        ToolSpec(
             "return_answer",
             "Submit the final answer: the value(s) only, in the shape the question asks for, no explanation. Call it once, then stop.",
             _obj({"answer": {"type": "string"}}, ["answer"]),
@@ -494,7 +533,7 @@ def _sample_rows(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, Any]
 def _query_db(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, Any], str]:
     sql = str(args.get("sql", ""))
     limit = int(args.get("limit") or DEFAULT_LIMIT)
-    save_as = str(args.get("save_as") or "").strip() or None
+    save_as = str(args.get("save_as") or "").strip() or None if state.work_dir is not None else None
     inputs = {"sql": sql, "limit": limit, "save_as": save_as}
     try:
         return inputs, run_sql(state, sql, limit, save_as)
@@ -520,6 +559,62 @@ def _search_context_tool(state: ToolState, args: dict[str, Any]) -> tuple[dict[s
     return {"term": term}, _search_context(state, term)
 
 
+SUBMIT_PREVIEW_LINES = 20
+MODES = ("pass_through", "derived")
+
+
+def _submit_answer(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, Any], str]:
+    """Re-run the agent's SQL as dab_agent and record the result with the mode. A SQL error or
+    an empty result is sent back (nothing recorded), so the agent can fix it and submit again."""
+    from dab_bench.eval.golden import execute, render  # the golden's own executor and render
+
+    sql = str(args.get("sql", "")).strip()
+    mode = str(args.get("mode", "")).strip()
+    answer = str(args.get("answer") or "").strip()
+    step = str(args.get("step") or "").strip()
+    inputs = {"sql": sql, "mode": mode, "answer": answer, "step": step}
+    if mode not in MODES:
+        return inputs, f"Error: mode must be one of {', '.join(MODES)}; nothing recorded."
+    if mode == "derived" and not answer:
+        return (
+            inputs,
+            "Error: mode derived needs `answer` (and a one-line `step`); nothing recorded.",
+        )
+    ex = execute(sql)
+    if ex.error:
+        return (
+            inputs,
+            f"Error: the SQL failed when re-run: {ex.error.removeprefix('Error: ')}. Fix it and submit again; nothing recorded.",
+        )
+    rendered = render(ex.columns, ex.rows)
+    if not rendered:
+        return inputs, "Error: the SQL returned no rows. Fix it and submit again; nothing recorded."
+    state.submission = {
+        "sql": sql,
+        "mode": mode,
+        "step": step,
+        "model_answer": answer,
+        "columns": ex.columns,
+        "rows": ex.rows[:RESULT_ROWS_KEPT],
+        "row_count": ex.row_count,
+        "truncated": ex.truncated,
+        "duration_ms": ex.duration_ms,
+        "result": rendered,
+    }
+    state.answer = rendered if mode == "pass_through" else answer
+    preview = "\n".join(rendered.splitlines()[:SUBMIT_PREVIEW_LINES])
+    more = ex.row_count - (SUBMIT_PREVIEW_LINES - 1)
+    tail = f"\n… {more} more row(s)" if len(rendered.splitlines()) > SUBMIT_PREVIEW_LINES else ""
+    what = "the answer is this result" if mode == "pass_through" else f"the answer is {answer!r}"
+    return (
+        inputs,
+        f"recorded ({mode}; {ex.row_count} row(s)); {what}:\n{preview}{tail}\nDo not call any more tools.",
+    )
+
+
+RESULT_ROWS_KEPT = 500  # the agent's result rows kept on the trace for the diagnosis
+
+
 def _return_answer(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, Any], str]:
     state.answer = str(args.get("answer", "")).strip()
     return {"answer": state.answer}, "recorded. Do not call any more tools."
@@ -534,6 +629,7 @@ _BODIES: dict[str, Any] = {
     "read_context": _read_context_tool,
     "search_context": _search_context_tool,
     "return_answer": _return_answer,
+    "submit_answer": _submit_answer,
 }
 
 
@@ -575,8 +671,31 @@ async def call_tool_async(state: ToolState, name: str, args: dict[str, Any]) -> 
     return await asyncio.to_thread(call_tool, state, name, args)
 
 
-def make_tool_server(state: ToolState) -> McpSdkServerConfig:
-    """The `dab` MCP server for one trial: every spec, wrapped around `call_tool_async`."""
+def specs_for(tools: list[str] | None) -> list[ToolSpec]:
+    """The specs a version's tool list names (`mcp__dab__<name>`), in the table's order.
+    Without execute_python, `query_db` loses `save_as`: it only ever fed the sandbox."""
+    names = None if tools is None else {t.removeprefix("mcp__dab__") for t in tools}
+    out = []
+    for spec in TOOL_SPECS.values():
+        if names is not None and spec.name not in names:
+            continue
+        if spec.name == "query_db" and names is not None and "execute_python" not in names:
+            props = {k: v for k, v in spec.schema["properties"].items() if k != "save_as"}
+            spec = ToolSpec(
+                spec.name,
+                "Run read-only Postgres SQL against the dataset (schema dataagentbench is the search_path; tables "
+                "are <dataset>_<table>). Returns up to `limit` rows (default 50, max 500).",
+                _obj(props, ["sql"]),
+                spec.backend,
+            )
+        out.append(spec)
+    return out
+
+
+def make_tool_server(state: ToolState, tools: list[str] | None = None) -> McpSdkServerConfig:
+    """The `dab` MCP server for one trial: the version's own specs (`tools`, every spec when
+    None), each wrapped around `call_tool_async`. A tool the version lacks is not registered,
+    so the session cannot see it, let alone call it."""
 
     def _make(spec: ToolSpec) -> Any:
         async def _fn(args: dict[str, Any]) -> dict[str, Any]:
@@ -590,5 +709,5 @@ def make_tool_server(state: ToolState) -> McpSdkServerConfig:
         return tool(spec.name, spec.description, spec.schema)(_fn)
 
     return create_sdk_mcp_server(
-        name="dab", version="1.0.0", tools=[_make(spec) for spec in TOOL_SPECS.values()]
+        name="dab", version="1.0.0", tools=[_make(spec) for spec in specs_for(tools)]
     )

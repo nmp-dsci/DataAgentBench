@@ -1,7 +1,10 @@
-import { Link } from 'react-router-dom';
-import { type Board, type Leaderboard, type RunSummary, fmtDur, fmtPct, fmtSec, fmtTok, fmtUsd, useGet } from '../lib/api';
+import { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { type Board, type CompareGroup, type CompareRate, type CompareResp, type CompareSide, type ChampionHistory, type Leaderboard, type Promotion, type PromotionCandidate, type RunSummary, type Submission, ROLE_LABEL, STYLE_LABEL, fmtDur, fmtPct, fmtSec, fmtTok, fmtUsd, useGet } from '../lib/api';
 import { Delta, ProfileTable, Ratios, Role } from '../lib/runs';
-import { Kpi, Loading, Rate } from '../lib/ui';
+import { Totals, rate } from '../lib/scorecard';
+import { Loading, Rate } from '../lib/ui';
+import { agentPath, questionPath, runPath, runsPath, useLens } from '../lib/url';
 
 /** The best plain-ReAct baseline column on the leaderboard's stratified table: the honest bar for a Haiku agent. */
 function bestBaseline(lb: Leaderboard | null): { key: string; label: string; overall: number; perDataset: Record<string, number> } | null {
@@ -14,21 +17,30 @@ function bestBaseline(lb: Leaderboard | null): { key: string; label: string; ove
   return { ...best, overall: Number(s.overall[best.key]), perDataset };
 }
 
-/** Champion rate per dataset against the best plain baseline: where the pack helps and where it does not. */
-function DatasetBars({ run, base }: { run: RunSummary; base: ReturnType<typeof bestBaseline> }) {
-  const ds = Object.entries(run.per_dataset ?? {}).sort(([a], [b]) => a.localeCompare(b));
-  if (!ds.length) return null;
+const GROUP_LABEL: Record<CompareGroup, string> = { dataset: 'dataset', style: 'validator style', query: 'query' };
+
+/** One bar per run per group — the focus run above, the challenger below — with the best plain baseline as a tick when grouped by dataset. */
+function GroupBars({ cmp, base, label }: { cmp: CompareResp; base: ReturnType<typeof bestBaseline>; label: (id: string) => string }) {
+  const ids = [cmp.focus, ...(cmp.challenger ? [cmp.challenger] : [])];
+  const rows = cmp.groups;
+  if (!rows.length) return null;
   const W = 1000;
-  const rowH = 30;
+  const barH = 13;
+  const rowH = ids.length === 2 ? 38 : 26;
   const top = 26;
-  const H = top + ds.length * rowH + 8;
-  const labelW = 190;
-  const trackW = W - labelW - 70;
+  const H = top + rows.length * rowH + 8;
+  const labelW = cmp.group === 'query' ? 210 : 190;
+  const trackW = W - labelW - 90;
+  const cls = ['bar hi', 'bar b'];
+  const name = (k: string) => (cmp.group === 'style' ? STYLE_LABEL[k] ?? k : k);
   return (
     <figure>
-      <p className="label">Fig · the champion per dataset, against {base ? `the ${base.label} baseline` : 'nothing yet'}</p>
-      <svg className="dia" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Pass rate per dataset for the champion run, with the best plain baseline as a marker">
-        <title>Champion pass rate per dataset</title>
+      <p className="label">
+        Fig · pass rate by {GROUP_LABEL[cmp.group]} — {ids.map(label).join(' against ')}
+        {cmp.challenger && cmp.scope === 'common' ? `, on the ${cmp.common_queries} queries both scored` : ''}
+      </p>
+      <svg className="dia" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Pass rate by ${GROUP_LABEL[cmp.group]} for ${ids.length} run(s)`}>
+        <title>Pass rate by {GROUP_LABEL[cmp.group]}</title>
         {[0, 0.25, 0.5, 0.75, 1].map((f) => (
           <g key={f}>
             <line className="ax" x1={labelW + f * trackW} x2={labelW + f * trackW} y1={top - 6} y2={H - 8} />
@@ -37,33 +49,295 @@ function DatasetBars({ run, base }: { run: RunSummary; base: ReturnType<typeof b
             </text>
           </g>
         ))}
-        {ds.map(([name, v], i) => {
+        {rows.map((g, i) => {
           const y = top + i * rowH;
-          const r = v.rate ?? 0;
-          const b = base?.perDataset[name];
+          const b = cmp.group === 'dataset' ? base?.perDataset[g.key] : undefined;
           return (
-            <g key={name} id={`ds-${name}`}>
+            <g key={g.key} id={`grp-${g.key}`}>
               <title>
-                {name}: {v.passed}/{v.n} passed ({fmtPct(r)}){b != null ? `, baseline ${fmtPct(b)}` : ''}
+                {name(g.key)}:{' '}
+                {ids
+                  .map((id) => {
+                    const v = g[id] as CompareRate | undefined;
+                    return v ? `${label(id)} ${v.passed}/${v.n} (${fmtPct(v.rate)})` : `${label(id)} not scored`;
+                  })
+                  .join(' · ')}
+                {b != null ? ` · baseline ${fmtPct(b)}` : ''}
               </title>
-              <text className="tx" x={labelW - 10} y={y + 19} textAnchor="end">
-                {name}
+              <text className="tx" x={labelW - 10} y={y + (ids.length === 2 ? 22 : 17)} textAnchor="end">
+                {name(g.key)}
               </text>
-              <rect className="bar" x={labelW} y={y + 6} width={trackW} height={16} opacity={0.35} />
-              <rect className={r > 0 ? 'bar hi' : 'bar pro'} x={labelW} y={y + 6} width={Math.max(2, r * trackW)} height={16} />
-              {b != null && <line className="ax mark" x1={labelW + b * trackW} x2={labelW + b * trackW} y1={y + 2} y2={y + 26} />}
-              <text className="tx k" x={labelW + trackW + 8} y={y + 19}>
-                {v.passed}/{v.n}
-              </text>
+              {ids.map((id, j) => {
+                const v = g[id] as CompareRate | undefined;
+                const yy = y + 4 + j * (barH + 3);
+                return (
+                  <g key={id}>
+                    <rect className="bar" x={labelW} y={yy} width={trackW} height={barH} opacity={0.3} />
+                    {v && <rect className={cls[j]} x={labelW} y={yy} width={Math.max(2, v.rate * trackW)} height={barH} />}
+                    <text className="tx k" x={labelW + trackW + 8} y={yy + 11}>
+                      {v ? `${v.passed}/${v.n}` : 'not scored'}
+                    </text>
+                  </g>
+                );
+              })}
+              {b != null && <line className="ax mark base" x1={labelW + b * trackW} x2={labelW + b * trackW} y1={y + 1} y2={y + rowH - 4} />}
             </g>
           );
         })}
       </svg>
       <figcaption>
-        Bars are the champion's pass rate per dataset (passed/trials at the right); the dark tick is {base ? `${base.label}, the best plain-ReAct baseline on the leaderboard (${fmtPct(base.overall)} overall)` : 'absent until the leaderboard loads'}. Source:{' '}
-        <code>runs/{run.run_id}/run.json</code>, <code>data/index/leaderboard.json</code>.
+        <span className="sw a" /> {label(cmp.focus)} (focus){cmp.challenger && (
+          <>
+            {' '}
+            · <span className="sw b" /> {label(cmp.challenger)} (challenger)
+          </>
+        )}
+        . A group's rate is the mean per-query pass rate over its queries (passed/trials at the right), the same arithmetic as the run page.
+        {cmp.group === 'dataset' && base ? ` The amber tick is ${base.label}, the best plain-ReAct baseline on the leaderboard (${fmtPct(base.overall)} overall).` : ''} Source:{' '}
+        <code>runs/&lt;id&gt;/results.jsonl</code> through <code>/api/runs/compare</code>.
       </figcaption>
     </figure>
+  );
+}
+
+/** Label a run for a picker: agent version first, then what it ran and what it scored. */
+function runLabel(r: RunSummary): string {
+  const score = r.dry_run ? 'dry run' : `${r.passed ?? 0}/${r.scored ?? 0}`;
+  return `${r.agent}@${r.fingerprint.slice(0, 7)} · ${r.split} ${r.n_queries}×${r.trials} · ${score} · ${r.started_at.slice(5, 16).replace('T', ' ')} · ${ROLE_LABEL[r.role]}`;
+}
+
+/** Label a leaderboard answer file: rank, name, our rescore beside the site's number. */
+function subLabel(s: Submission): string {
+  const rank = s.rank != null ? `#${s.rank} ` : '';
+  const site = s.pass_at_1_site != null ? ` (site ${fmtPct(s.pass_at_1_site)})` : '';
+  return `${rank}${s.label} · ${s.rows / Math.max(s.trials, 1)}×${s.trials} · ${s.passed}/${s.rows} · macro ${fmtPct(s.pass_rate_macro)}${site}`;
+}
+
+/** Both kinds of compare target in one picker: our runs, then the leaderboard's answer files. */
+function Targets({ runs, subs, skip }: { runs: RunSummary[]; subs: Submission[]; skip?: string | null }) {
+  return (
+    <>
+      <optgroup label="our runs">
+        {runs
+          .filter((r) => r.run_id !== skip)
+          .map((r) => (
+            <option key={r.run_id} value={r.run_id}>
+              {runLabel(r)}
+            </option>
+          ))}
+      </optgroup>
+      <optgroup label="leaderboard submissions (rescored here)">
+        {subs
+          .filter((x) => x.id !== skip)
+          .map((x) => (
+            <option key={x.id} value={x.id}>
+              {subLabel(x)}
+            </option>
+          ))}
+      </optgroup>
+    </>
+  );
+}
+
+const REMEMBER = 'dab.runs.view';
+
+/** Focus against challenger: pick any two scored runs, group the figure, read every Δ. */
+function Compare({ board, base }: { board: Board; base: ReturnType<typeof bestBaseline> }) {
+  const [sp, set] = useLens();
+  const nav = useNavigate();
+  const qs = sp.toString();
+  useEffect(() => {
+    // the compare lives in the URL; a bare /runs (the nav) restores this browser tab's last one
+    try {
+      if (!qs) {
+        const last = sessionStorage.getItem(REMEMBER);
+        if (last) nav(runsPath(Object.fromEntries(new URLSearchParams(last).entries())), { replace: true });
+      } else sessionStorage.setItem(REMEMBER, qs);
+    } catch {
+      /* storage unavailable: the URL still carries the view */
+    }
+  }, [qs, nav]);
+  const scored = board.runs.filter((r) => !r.dry_run && (r.scored ?? 0) > 0);
+  const byId = new Map(scored.map((r) => [r.run_id, r]));
+  const subs = board.submissions ?? [];
+  const subById = new Map(subs.map((x) => [x.id, x]));
+  const pick = (k: string) => {
+    const v = sp.get(k);
+    return v && (byId.has(v) || subById.has(v)) ? v : null;
+  };
+  const focus = pick('focus') ?? board.champion_run_id ?? scored[0]?.run_id ?? null;
+  const challenger = pick('challenger');
+  const group = (['dataset', 'style', 'query'] as const).find((g) => g === sp.get('group')) ?? 'dataset';
+  const scope = sp.get('scope') === 'all' ? 'all' : 'common';
+  const q = focus ? `/api/runs/compare?focus=${focus}${challenger && challenger !== focus ? `&challenger=${challenger}` : ''}&group=${group}&scope=${scope}` : null;
+  const { data: cmp, error } = useGet<CompareResp>(q);
+  if (!focus) return <p className="empty">No scored run yet — nothing to compare.</p>;
+  const label = (id: string) => {
+    const r = byId.get(id);
+    const x = subById.get(id);
+    return r ? `${r.agent}@${r.fingerprint.slice(0, 7)} ${r.split}` : x ? x.label : id;
+  };
+  // our runs link to their page; a submission links to its PR, or the leaderboard
+  const Target = ({ id }: { id: string }) => {
+    const x = subById.get(id);
+    if (!x) return <Link to={runPath(id)}>{label(id)}</Link>;
+    return x.pr_url ? (
+      <a href={x.pr_url} target="_blank" rel="noreferrer">
+        {label(id)}
+      </a>
+    ) : (
+      <Link to="/leaderboard">{label(id)}</Link>
+    );
+  };
+  const f = cmp?.sides[cmp.focus];
+  const c = cmp?.challenger ? cmp.sides[cmp.challenger] : undefined;
+  const fp = f?.profile;
+  const cp = c?.profile;
+  // a leaderboard submission has pass / fail only: its cost, turn and time rows read "—"
+  const pr =
+    (fn: (p: NonNullable<CompareSide['profile']>) => string) =>
+    (x: CompareSide): string =>
+      x.profile ? fn(x.profile) : '—';
+  type Row = [string, (x: NonNullable<typeof f>) => string, number | null | undefined, number | null | undefined, 'pct' | 'usd' | 'int' | 'tok' | 'sec', boolean, number?];
+  const rows: Row[] = f
+    ? [
+        ['macro Pass@1', (x) => fmtPct(x.pass_rate_macro), f.pass_rate_macro, c?.pass_rate_macro, 'pct', false],
+        ['passed / scored (micro)', (x) => `${x.passed}/${x.scored} · ${fmtPct(x.pass_rate_micro)}`, f.pass_rate_micro, c?.pass_rate_micro, 'pct', false],
+        ['cost per trial, p50', pr((p) => fmtUsd(p.metrics.cost_usd.p50, 3)), fp?.metrics.cost_usd.p50, cp?.metrics.cost_usd.p50, 'usd', true, 3],
+        ['cost per trial, p95', pr((p) => fmtUsd(p.metrics.cost_usd.p95, 3)), fp?.metrics.cost_usd.p95, cp?.metrics.cost_usd.p95, 'usd', true, 3],
+        ['cost per passed trial', pr((p) => fmtUsd(p.cost_per_pass)), fp?.cost_per_pass, cp?.cost_per_pass, 'usd', true, 2],
+        ['turns, p50 / p95', pr((p) => `${p.metrics.turns.p50} / ${p.metrics.turns.p95}`), fp?.metrics.turns.p50, cp?.metrics.turns.p50, 'int', true],
+        ['total tokens, p50 / p95', pr((p) => `${fmtTok(p.metrics.total.p50)} / ${fmtTok(p.metrics.total.p95)}`), fp?.metrics.total.p50, cp?.metrics.total.p50, 'tok', true],
+        ['wall time, p50 / p95', pr((p) => `${fmtSec(p.metrics.wall_s.p50)} / ${fmtSec(p.metrics.wall_s.p95)}`), fp?.metrics.wall_s.p50, cp?.metrics.wall_s.p50, 'sec', true],
+        ['timed out · errored', (x) => (x.profile ? `${x.timeouts} · ${x.errors}` : '—'), fp ? f.timeouts : null, cp ? c?.timeouts : null, 'int', true],
+        ['total cost', (x) => (x.cost_usd != null ? fmtUsd(x.cost_usd) : '—'), f.cost_usd, c?.cost_usd, 'usd', true, 2],
+      ]
+    : [];
+  return (
+    <section className="band">
+      <h2>
+        01 · Compare —{' '}
+        {cmp && f
+          ? c
+            ? `${label(cmp.focus)} ${fmtPct(f.pass_rate_macro)} against ${label(cmp.challenger ?? '')} ${fmtPct(c.pass_rate_macro)}${cmp.scope === 'common' ? ` on the ${cmp.common_queries} queries both scored` : ''}`
+            : `${label(cmp.focus)} alone, ${fmtPct(f.pass_rate_macro)} macro; pick a challenger to compare`
+          : 'loading'}
+      </h2>
+      <div className="filters">
+        <label className="pick">
+          <span className="label">focus</span>
+          <select value={focus} onChange={(e) => set({ focus: e.target.value })} aria-label="focus run">
+            <Targets runs={scored} subs={subs} />
+          </select>
+        </label>
+        <label className="pick">
+          <span className="label">challenger</span>
+          <select value={challenger ?? ''} onChange={(e) => set({ challenger: e.target.value || null })} aria-label="challenger run">
+            <option value="">— none —</option>
+            <Targets runs={scored} subs={subs} skip={focus} />
+          </select>
+        </label>
+        <label className="pick">
+          <span className="label">group by</span>
+          <select value={group} onChange={(e) => set({ group: e.target.value })} aria-label="group the figure by">
+            <option value="dataset">dataset</option>
+            <option value="style">validator style</option>
+            <option value="query">query</option>
+          </select>
+        </label>
+        {challenger && (
+          <label className="pick">
+            <span className="label">queries</span>
+            <select value={scope} onChange={(e) => set({ scope: e.target.value === 'all' ? 'all' : null })} aria-label="which queries to compare on">
+              <option value="common">only those both scored</option>
+              <option value="all">each run's own</option>
+            </select>
+          </label>
+        )}
+      </div>
+      {!cmp ? (
+        <Loading error={error} />
+      ) : (
+        <>
+          {c && cmp.scope === 'all' && cmp.scored_queries[cmp.focus] !== cmp.scored_queries[cmp.challenger ?? ''] && (
+            <p className="small warn-note">
+              Each run on its own queries: {cmp.scored_queries[cmp.focus]} against {cmp.scored_queries[cmp.challenger ?? '']}. The Δs compare different question sets and are indicative only — switch to "only those both scored" for a like-for-like number.
+            </p>
+          )}
+          <div className="tw">
+            <table>
+              <thead>
+                <tr>
+                  <th>{cmp.scope === 'common' && c ? `On the ${cmp.common_queries} common queries` : 'On its own queries'}</th>
+                  <th className="num">
+                    <span className="sw a" /> focus
+                    <span className="path">
+                      <Target id={cmp.focus} />
+                    </span>
+                  </th>
+                  {c && (
+                    <th className="num">
+                      <span className="sw b" /> challenger
+                      <span className="path">
+                        <Target id={cmp.challenger ?? ''} />
+                      </span>
+                    </th>
+                  )}
+                  {c && <th className="num">Δ challenger − focus</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map(([name, show, fv, cv, fmt, lower, digits]) => (
+                  <tr key={name}>
+                    <td>{name}</td>
+                    <td className="num">{f && show(f)}</td>
+                    {c && <td className="num">{show(c)}</td>}
+                    {c && (
+                      <td className="num">
+                        <Delta v={cv} base={fv} fmt={fmt} lowerIsBetter={lower} digits={digits ?? (fmt === 'pct' ? 1 : 0)} />
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {c && (cmp.fixed.length > 0 || cmp.broken.length > 0) && (
+            <div className="chips">
+              <span className="chip ok">fixed {cmp.fixed.length}</span>
+              {cmp.fixed.map((qid) => (
+                <Link key={qid} to={questionPath(qid)} className="chip ok">
+                  {qid}
+                </Link>
+              ))}
+              <span className="chip warn">broken {cmp.broken.length}</span>
+              {cmp.broken.map((qid) => (
+                <Link key={qid} to={questionPath(qid)} className="chip warn">
+                  {qid}
+                </Link>
+              ))}
+            </div>
+          )}
+          {c && cmp.fixed.length === 0 && cmp.broken.length === 0 && <p className="small muted">No query flips between the two: every query that passes in one passes in the other.</p>}
+          <GroupBars cmp={cmp} base={base} label={label} />
+          {f?.profile && <Ratios p={f.profile} />}
+          {f && (f.submission || c?.submission) && (
+            <p className="small muted">
+              A leaderboard submission is compared on its rescored pass / fail per trial ({(f.submission ?? c?.submission)?.trials} trials a query). Its cost, turns, tokens and traces are not in the
+              published answer file, so those rows read "—".
+            </p>
+          )}
+          {f?.profile && (!c || c.profile) && (
+            <>
+              <p className="label" style={{ marginTop: 'var(--s5)' }}>
+                Per-trial distribution — {c ? `${label(cmp.challenger ?? '')}, with each Δ against the focus` : label(cmp.focus)}
+              </p>
+              {c?.profile ? <ProfileTable p={c.profile} versus={f.profile} versusLabel="focus" /> : <ProfileTable p={f.profile} />}
+            </>
+          )}
+        </>
+      )}
+    </section>
   );
 }
 
@@ -79,7 +353,6 @@ export function Runs() {
   const spent = live.reduce((s, r) => s + (r.cost_usd ?? 0), 0);
   const trials = live.reduce((s, r) => s + (r.n ?? 0), 0);
   const base = bestBaseline(lb);
-  const top = lb?.overallLeaderboard[0];
   const cp = champ?.profile;
   return (
     <>
@@ -103,36 +376,9 @@ export function Runs() {
         a smoke run screens one query per dataset and never holds the title. The same runs are logged to the central MLflow (<code>dataagentbench/evals</code>) and linked from each page.
       </p>
 
-      {champ && cp && (
-        <section className="band">
-          <h2>
-            01 · Champion — {fmtPct(champ.pass_rate_macro)} macro against {base ? `${fmtPct(base.overall)} for ${base.label}` : 'the leaderboard'}
-            {top ? ` and ${fmtPct(top.passAt1)} at the top` : ''}
-          </h2>
-          <p>
-            <Link to={`/runs/${champ.run_id}`} className="mono">
-              {champ.run_id}
-            </Link>{' '}
-            · <code>{champ.model.replace('claude-', '')}</code> at effort <code>{champ.effort}</code> · hints {champ.hints ? 'on' : 'off'} · context <code>{champ.context_sha}</code> · {fmtDur(champ.duration_ms)} of trial time summed, {fmtUsd(champ.cost_usd)} total.{champ.mlflow_url && (
-              <>
-                {' '}
-                <a href={champ.mlflow_url}>MLflow run</a>.
-              </>
-            )}
-          </p>
-          <div className="kpis">
-            <Kpi n={`${fmtPct(champ.pass_rate_macro)} · ${champ.passed}/${champ.scored}`} b={`macro Pass@1 · micro pass, ${champ.n_queries} queries × ${champ.trials}`} tone="ok" />
-            <Kpi n={`${fmtUsd(cp.metrics.cost_usd.p50, 2)} / ${fmtUsd(cp.metrics.cost_usd.p95, 2)}`} b="cost per trial, p50 / p95 (Agent SDK cost_usd)" />
-            <Kpi n={`${cp.metrics.turns.p50} / ${cp.metrics.turns.p95}`} b="turns per trial, p50 / p95" />
-            <Kpi n={`${fmtSec(cp.metrics.wall_s.p50)} / ${fmtSec(cp.metrics.wall_s.p95)}`} b="wall time per trial, p50 / p95" />
-            <Kpi n={`${fmtTok(cp.metrics.total.p50)} / ${fmtTok(cp.metrics.total.p95)}`} b="total tokens per trial, p50 / p95" />
-            <Kpi n={fmtUsd(cp.cost_per_pass)} b="cost per passed trial" tone={cp.cost_per_pass != null && cp.cost_per_trial != null && cp.cost_per_pass > 2 * cp.cost_per_trial ? 'warn' : undefined} />
-          </div>
-          <Ratios p={cp} />
-          <DatasetBars run={champ} base={base} />
-          <ProfileTable p={cp} />
-        </section>
-      )}
+      {board.history.reigns.length > 0 && <ChampionOverTime h={board.history} p={board.promotion} />}
+
+      <Compare board={board} base={base} />
 
       <h2>
         02 · Challengers — {challengers.length === 0 ? 'none has run; the first is the DAB addendum at 54 × 5' : `${challengers.length} measured against the champion on the same 54`}
@@ -152,6 +398,7 @@ export function Runs() {
                 <th className="num">Macro</th>
                 <th className="num">Δ macro</th>
                 <th>Pass (micro)</th>
+                <th title="the scorecard: the answer (validator), the SQL (its result against the golden's) and the decision (pass-through or derived), each passed of scored">Answer · SQL · decision</th>
                 <th className="num">Cost p50</th>
                 <th className="num">Δ</th>
                 <th className="num">Turns p50 / p95</th>
@@ -164,7 +411,7 @@ export function Runs() {
               {challengers.map((r) => (
                 <tr key={r.run_id}>
                   <td className="sub">
-                    <Link to={`/runs/${r.run_id}`} className="mono">
+                    <Link to={runPath(r.run_id)} className="mono">
                       {r.run_id}
                     </Link>
                     <span className="path">
@@ -185,6 +432,7 @@ export function Runs() {
                   <td>
                     <Rate passed={r.passed} n={r.scored} />
                   </td>
+                  <td className="small">{r.scorecard?.submits_sql ? <Totals t={r.scorecard.totals} /> : <span className="muted">answer only</span>}</td>
                   <td className="num">{fmtUsd(r.profile.metrics.cost_usd.p50, 3)}</td>
                   <td className="num">
                     <Delta v={r.profile.metrics.cost_usd.p50} base={cp?.metrics.cost_usd.p50} fmt="usd" lowerIsBetter digits={3} />
@@ -229,7 +477,7 @@ export function Runs() {
             {runs.map((r) => (
               <tr key={r.run_id} className={r.role === 'dry' || r.role === 'superseded' ? 'dim' : r.role === 'champion' ? 'pro' : ''}>
                 <td className="sub">
-                  <Link to={`/runs/${r.run_id}`} className="mono">
+                  <Link to={runPath(r.run_id)} className="mono">
                     {r.run_id}
                   </Link>
                   <span className="path">
@@ -256,13 +504,135 @@ export function Runs() {
                 <td className="num">{fmtUsd(r.cost_usd)}</td>
                 <td className="num">{fmtDur(r.duration_ms)}</td>
                 <td className="num">{r.timeouts ?? 0}</td>
-                <td className="wrap-any small">{r.note}</td>
+                <td className="small note-cell">{r.note}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
       {runs.length === 0 && <p className="empty">No runs yet. `make eval` writes the first one; a dry run (`dab eval --dry-run --no-mlflow`) needs no model.</p>}
+    </>
+  );
+}
+
+/** Accuracy over time by champion: every full-split run as a point, the champion's reign as a step line,
+ *  each promotion marked with its lift. The story of the agent improving, told by the runs themselves. */
+function ChampionOverTime({ h, p }: { h: ChampionHistory; p: Promotion | null }) {
+  const reigns = h.reigns;
+  const first = reigns[0];
+  const last = reigns[reigns.length - 1];
+  const promos = h.promotions.filter((p) => p.changed);
+  // x: the full-split runs in the order they ran; the champions' runs are joined by the line
+  const runs = h.points;
+  const reignOf = new Map(reigns.map((r) => [r.run_id, r]));
+  const n = Math.max(...runs.map((p) => p.scored), 1);
+  const W = 1000;
+  const H = 300;
+  const pad = { l: 96, r: 60, t: 40, b: 48 };
+  const step = runs.length > 1 ? (W - pad.l - pad.r) / (runs.length - 1) : 0;
+  const X = (i: number) => (runs.length > 1 ? pad.l + i * step : (W + pad.l - pad.r) / 2);
+  const Y = (v: number) => pad.t + (H - pad.t - pad.b) * (1 - v / n);
+  const champIdx = runs.map((p, i) => (reignOf.has(p.run_id) ? i : -1)).filter((i) => i >= 0);
+  const total = last.passed - first.passed;
+  // one row per version: the latest promotion's candidates, else the reigns alone
+  const reignByVersion = new Map(reigns.map((r) => [r.version, r]));
+  const rows: PromotionCandidate[] = p
+    ? p.candidates
+    : reigns.map((r) => ({ version: r.version, run_id: r.run_id, passed: r.passed, scored: r.scored, n: r.scored, heldout: null, scorecard: null, why_not: '' }));
+  return (
+    <>
+      <h2>
+        00 · The champion over time — {first.version} {first.passed}/{first.scored}
+        {reigns.length > 1 ? ` → ${last.version} ${last.passed}/${last.scored}, ${total >= 0 ? '+' : '−'}${Math.abs(total)} answers across ${promos.length} promotion${promos.length === 1 ? '' : 's'}` : ', no promotion yet'}
+      </h2>
+      <figure style={{ margin: 0 }}>
+        <p className="label">Fig · answers passed of {n} by every full-split run, in run order; the line joins the champions</p>
+        <svg className="dia" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Every full-split run in the order it ran, answers passed of ${n}; a solid line joins the champions from ${first.version} to ${last.version}, challengers are dots`}>
+          <title>The champion over the runs</title>
+          {[0, 0.25, 0.5, 0.75, 1].map((g) => (
+            <g key={g}>
+              <line className="ax" x1={pad.l} x2={W - pad.r} y1={Y(g * n)} y2={Y(g * n)} style={{ opacity: g === 0 ? 1 : 0.5 }} />
+              <text className="tx k" x={pad.l - 10} y={Y(g * n) + 5} textAnchor="end">
+                {Math.round(g * n)}/{n}
+              </text>
+            </g>
+          ))}
+          {champIdx.length > 1 && <polyline points={champIdx.map((i) => `${X(i)},${Y(runs[i].passed)}`).join(' ')} fill="none" stroke="var(--accent)" strokeWidth={3} />}
+          {runs.map((p, i) => {
+            const r = reignOf.get(p.run_id);
+            return (
+              <g key={p.run_id} className="pt">
+                <title>
+                  run {i + 1} · {p.run_id}: {p.agent} {p.passed}/{p.scored}
+                  {r ? ` · champion${r.lift != null ? `, ${r.lift >= 0 ? '+' : '−'}${Math.abs(r.lift)} over the one before` : ''}` : ' · challenger'}
+                </title>
+                <circle cx={X(i)} cy={Y(p.passed)} r={r ? 8 : 6} fill={r ? 'var(--accent)' : 'var(--panel)'} stroke={r ? 'var(--accent)' : 'var(--ink-2)'} strokeWidth={2} />
+                <text className="tx" x={X(i)} y={r ? Y(p.passed) - 16 : Y(p.passed) + 28} textAnchor="middle" style={r ? { fill: 'var(--accent)' } : undefined}>
+                  {p.agent} {p.passed}
+                  {r && r.lift != null ? ` (${r.lift >= 0 ? '+' : '−'}${Math.abs(r.lift)})` : ''}
+                </text>
+                <text className="tx k" x={X(i)} y={H - pad.b + 22} textAnchor="middle">
+                  run {i + 1} · {p.started_at.slice(5, 10)}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+        <figcaption className="small">
+          Runs in the order they ran, one per point (answers passed of {n}). Filled points joined by the accent line are the champions, each crowned by <code>dab promote</code>, labelled with its lift over the one before; open points are challengers that did not take the
+          title. Source: <code>runs/*/run.json</code> and <code>agents/promotions.jsonl</code>.
+        </figcaption>
+      </figure>
+      {p && (
+        <p style={{ marginTop: 'var(--s4)' }}>
+          The latest <code>dab promote</code> ({p.at.slice(0, 10)}): {p.reason}.{p.prompt_version != null && <> The champion's prompt is version {p.prompt_version} of <code>dataagentbench.system</code>, alias <code>champion</code>.</>}
+        </p>
+      )}
+      <div className="tw" style={{ marginTop: 'var(--s4)' }}>
+        <table>
+          <thead>
+            <tr>
+              <th>Version</th>
+              <th>Its run</th>
+              <th>Answer (the top line)</th>
+              <th>SQL · decision</th>
+              <th>Held-out answer</th>
+              <th>Held the title</th>
+              <th className="num">Lift</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((c) => {
+              const r = reignByVersion.get(c.version);
+              const current = c.version === last.version;
+              return (
+                <tr key={c.version}>
+                  <td className="sub">
+                    <Link to={agentPath(c.version)}>{c.version}</Link>{' '}
+                    {current ? <span className="chip ok">champion</span> : r ? <span className="chip">previous champion</span> : null}
+                  </td>
+                  <td className="mono small nw">
+                    {c.run_id ? (
+                      <Link to={runPath(c.run_id)} title={c.run_id}>
+                        {c.run_id.slice(4, 6)}-{c.run_id.slice(6, 8)} {c.run_id.slice(9, 11)}:{c.run_id.slice(11, 13)}
+                      </Link>
+                    ) : (
+                      c.why_not
+                    )}
+                  </td>
+                  <td>{c.passed != null ? <Rate passed={c.passed} n={c.scored} /> : '—'}</td>
+                  <td className="small nw">{c.scorecard && c.scorecard.sql.n > 0 ? `${rate(c.scorecard.sql)} · ${rate(c.scorecard.decision)}` : 'answer only'}</td>
+                  <td className="small">{c.heldout ? rate(c.heldout.answer) : '—'}</td>
+                  <td className="small nw">{r ? `${r.from.slice(5, 10)} → ${r.until ? r.until.slice(5, 10) : 'now'}` : '—'}</td>
+                  <td className="num" title={r?.lift == null ? 'the first champion' : 'answers over the champion before'}>
+                    {r ? (r.lift == null ? 'first' : `${r.lift >= 0 ? '+' : '−'}${Math.abs(r.lift)}`) : '—'}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }

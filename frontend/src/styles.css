@@ -135,6 +135,13 @@ figcaption{margin-top:var(--s2);font-size:var(--t-1);color:var(--muted);max-widt
 .dia .bar{fill:var(--line-2)}
 .dia .bar.hi{fill:var(--accent)}
 .dia .bar.pro{fill:var(--amber)}
+.dia .bar.b{fill:var(--ink-2)}
+/* legend swatches for the focus / challenger pair */
+.sw{display:inline-block;width:.8em;height:.8em;border-radius:2px;vertical-align:-.05em;margin-right:.25em}
+.sw.a{background:var(--accent)} .sw.b{background:var(--ink-2)}
+.dia .ax.mark.base{stroke:var(--amber);stroke-width:2.5}
+th .path{display:block;font-family:var(--mono);font-size:var(--t-2);font-weight:400;text-transform:none;letter-spacing:0;margin-top:2px}
+.warn-note{color:var(--amber);margin-top:var(--s3)}
 .dia .ax{stroke:var(--line-2);stroke-width:1}
 .dia .tx{font:500 13px var(--sans);fill:var(--ink)}
 .dia .tx.s{font:400 13px var(--sans);fill:var(--muted)}
@@ -150,6 +157,13 @@ tr.dim td{color:var(--muted)}
 pre.wrap-any{white-space:pre-wrap;word-break:break-word}
 td.answer{min-width:18rem;max-width:28rem;white-space:pre-wrap;overflow-wrap:anywhere}
 .chip.role{text-transform:uppercase;letter-spacing:var(--track-label)}
+/* the dataset lozenge bar: every dataset, one click into it; nothing selected on the index */
+.chips.datasetbar{margin:0 0 var(--s5);padding-bottom:var(--s3);border-bottom:1px solid var(--line)}
+a.chip.nav{display:inline-flex;align-items:center;gap:var(--s2);text-decoration:none;cursor:pointer}
+a.chip.nav .n{font:400 var(--t-2)/1 var(--mono);color:var(--muted)}
+a.chip.nav:hover{border-color:var(--line-3);color:var(--ink)}
+a.chip.nav.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+a.chip.nav.on .n{color:var(--accent)}
 .dia .ax.mark{stroke:var(--ink);stroke-width:2}
 .dia .pt rect{transition:opacity var(--dur) var(--ease)}
 .dia .pt:hover rect{opacity:.7}
@@ -217,4 +231,125 @@ td.replay-cell .linkbtn{margin-top:var(--s1);font-size:var(--t-2)}
 .rowacts{display:inline-flex;flex-direction:column;gap:var(--s1)}
 .gold-cell{color:var(--ink);font-size:var(--t-2);white-space:pre-wrap;overflow-wrap:anywhere}
 .gold-cell .path{display:inline;margin-left:var(--s2)}
+button.more{font:500 var(--t-2)/1.4 var(--mono);color:var(--accent);background:none;border:0;padding:0;margin-left:var(--s2);cursor:pointer;text-decoration:underline;text-underline-offset:.2em;white-space:nowrap}
+button.more:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.gold-cell pre.gold-full{margin:0 0 var(--s1);min-width:min(22rem,70vw);white-space:pre-wrap;overflow-wrap:anywhere;max-height:24rem;overflow-y:auto;user-select:text}
 .answer pre{white-space:pre-wrap}
+
+/* Golden: the list is the page, the editor opens above it in place (a nested route) */
+.golden-editor{margin:var(--s5) 0;box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent);scroll-margin-top:80px}
+.golden-editor h2{margin-top:var(--s2)}
+.golden-editor .editor-head{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4);align-items:baseline;justify-content:space-between}
+.golden-editor .editor-head .label{margin:0;min-width:0}
+.golden-editor .editor-nav{margin:0;white-space:nowrap}
+.golden-editor .result-scroll{max-height:60vh;overflow:auto}
+tr.pickrow{cursor:pointer}
+tr.pickrow:hover td{background:var(--band)}
+tr.pickrow.cur td{background:var(--accent-soft)}
+tr.pickrow.cur td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.golden-editor .answer{margin:var(--s3) 0}
+.golden-editor .answer select{font:inherit;text-transform:none;letter-spacing:0}
+ol.sqlcalls{list-style:none;padding:0;margin:var(--s3) 0 0;display:grid;gap:var(--s3)}
+ol.sqlcalls li{border:1px solid var(--line);border-radius:var(--r-sm);padding:var(--s3);background:var(--bg);min-width:0}
+ol.sqlcalls li.err{border-color:var(--amber)}
+ol.sqlcalls pre{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:var(--s2);max-height:18rem;overflow:auto}
+.sqlcall-head{display:flex;gap:var(--s3);align-items:baseline;justify-content:space-between;flex-wrap:wrap}
+.golden-editor > h3{margin-top:var(--s6)}
+
+/* the Golden editor's diff against the gold: − gold only (amber), + result only (accent), like a code review */
+.golddiff{padding:0;overflow:hidden}
+.golddiff-head{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s3);align-items:baseline;padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);background:var(--band)}
+.golddiff-head .label{margin:0}
+.golddiff-head .stat{font-family:var(--mono);font-size:var(--t-2)} .golddiff-head .stat .add{color:var(--accent)} .golddiff-head .stat .del{color:var(--amber)}
+.golddiff-head .seg{margin-left:auto;display:inline-flex;border:1px solid var(--line-2);border-radius:var(--r-sm);overflow:hidden}
+.golddiff-head .seg button{font:500 var(--t-2) var(--sans);background:var(--panel);color:var(--ink-2);border:0;padding:.3em .8em;cursor:pointer;min-height:24px}
+.golddiff-head .seg button.on{background:var(--accent);color:var(--accent-ink)}
+.golddiff-head .seg button:focus-visible,.golddiff .linkish:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+.golddiff-scroll{overflow-x:auto;max-height:560px;overflow-y:auto}
+.golddiff table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:var(--t-2);line-height:1.55}
+.golddiff th{font-weight:500;text-align:left;color:var(--faint);padding:var(--s1) var(--s3);border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel)}
+.golddiff td{padding:0 var(--s2);vertical-align:top;border:0}
+.golddiff td.ln{width:1%;min-width:3ch;text-align:right;color:var(--faint);user-select:none;white-space:nowrap}
+.golddiff td.mk{width:1%;user-select:none;text-align:center}
+.golddiff td.tx{white-space:pre;color:var(--ink-2)}
+.golddiff tr.del td,.golddiff td.tx.del{background:color-mix(in srgb,var(--amber-soft) 80%,transparent)}
+.golddiff tr.add td,.golddiff td.tx.add{background:var(--accent-soft)}
+.golddiff tr.del td.mk{color:var(--amber)} .golddiff tr.add td.mk{color:var(--accent)}
+.golddiff td.tx.blank{background:var(--band)}
+.golddiff table.split td.tx{width:50%}
+.golddiff table.split td.ln + td.tx{border-right:1px solid var(--line)}
+.golddiff mark{color:var(--ink);border-radius:2px;padding:0 1px}
+.golddiff tr.del mark,.golddiff td.tx.del mark{background:color-mix(in srgb,var(--amber) 28%,transparent)}
+.golddiff tr.add mark,.golddiff td.tx.add mark{background:color-mix(in srgb,var(--accent) 28%,transparent)}
+.golddiff tr.fold td{background:var(--band);padding:var(--s1) var(--s3)}
+.golddiff .linkish{font:500 var(--t-2) var(--mono);color:var(--accent);background:none;border:0;padding:0;cursor:pointer}
+
+/* the Golden tab's summary: the 54 by status, a status row filters the list */
+.gsum{margin:var(--s4) 0 var(--s5);display:grid;gap:var(--s3)}
+.gsum .tw table{min-width:0}
+.gsum i.sw,.gcov i.sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:var(--s2);vertical-align:-1px}
+.sw.ok{background:var(--accent)} .sw.mid{background:var(--amber)} .sw.bad{background:var(--red)}
+/* coverage by dataset: green exact, amber partial, red missing (DESIGN.md §2 Colour) */
+.gcov{margin:0}
+.dia .seg.ok{fill:var(--accent)} .dia .seg.mid{fill:var(--amber)} .dia .seg.bad{fill:var(--red)}
+.dia .tx.in{font:600 12.8px var(--mono);fill:var(--accent-ink);pointer-events:none}
+.dia .tx.all{font-weight:600}
+.dia .cov.pick{cursor:pointer} .dia .cov.pick:hover .tx:not(.in){fill:var(--accent)}
+.dia .cov.cur .tx:not(.in):not(.k){fill:var(--accent);text-decoration:underline}
+.dia .cov.pick:focus,.dia .cov.pick:focus-visible{outline:none} .dia .cov.pick:focus-visible .bar{stroke:var(--focus);stroke-width:2;opacity:1}
+.gcov figcaption{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4);font-size:var(--t-1);color:var(--muted);margin-top:var(--s2)}
+.gcov .lg{white-space:nowrap}
+.gsum tr[aria-disabled="true"]{opacity:.6}
+.linkish{font:inherit;color:var(--accent);background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.linkish:hover{text-decoration:underline;text-underline-offset:.2em}
+.linkish:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+/* the scorecard: agent SQL beside golden SQL (lib/scorecard.tsx) */
+.versus{margin-top:var(--s3);min-width:0}
+.versus .compare{margin-top:var(--s3)}
+.versus pre:not(.sql-code){white-space:pre-wrap;overflow-wrap:anywhere}
+table.structure td.mono{font:400 var(--t-1)/1.4 var(--mono);overflow-wrap:anywhere}
+.note-cell{min-width:18rem;overflow-wrap:anywhere}
+/* the Optimise tab: a round opens in place, its three steps as a flow of tabs */
+.round-open{margin-top:var(--s5)}
+.steps3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s4);margin:var(--s4) 0 var(--s5)}
+.steps3 .step{position:relative;display:flex;flex-direction:column;gap:var(--s2);text-align:left;padding:var(--s4);background:var(--panel);border:1px solid var(--line);border-radius:var(--r);color:var(--ink);font:inherit;cursor:pointer;min-width:0;transition:border-color var(--dur) var(--ease)}
+.steps3 .step:hover{border-color:var(--accent)}
+.steps3 .step.on{border-color:var(--accent);background:var(--accent-soft)}
+.steps3 .step:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.steps3 .arrow{position:absolute;right:calc(-1 * var(--s4));top:50%;transform:translate(50%,-50%);color:var(--muted);font:500 var(--t1)/1 var(--sans)}
+@media (max-width:760px){.steps3{grid-template-columns:minmax(0,1fr)}.steps3 .arrow{display:none}}
+.dia .bar.ho{fill:var(--panel);stroke:var(--ink-2);stroke-width:1.5}
+td.nw{white-space:nowrap}
+.versus .diagnosis{margin:var(--s3) 0;max-width:var(--measure)}
+.versus .diagnosis .label{margin-right:var(--s2)}
+table.checks td.small{min-width:14rem}
+/* SQL, shown as SQL (lib/sql.tsx): an editor frame, line numbers, typographic highlighting (colour stays for status) */
+.sql{margin-top:var(--s3);border:1px solid var(--line-2);border-radius:var(--r);background:var(--panel);overflow:hidden;min-width:0}
+.sql.band{background:var(--band)}
+.sql-head{display:flex;align-items:center;gap:var(--s3);padding:var(--s2) var(--s3);border-bottom:1px solid var(--line);background:var(--band);min-width:0}
+.sql.band .sql-head{background:var(--panel)}
+.sql-lang{font:500 var(--t-2)/1 var(--mono);letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);white-space:nowrap}
+.sql-label{font:500 var(--t-2)/1.3 var(--mono);color:var(--ink-2);min-width:0;overflow-wrap:anywhere}
+.sql-copy{margin-left:auto;font:500 var(--t-2)/1 var(--mono);color:var(--ink-2);background:none;border:1px solid var(--line-2);border-radius:var(--r-sm);padding:var(--s1) var(--s2);cursor:pointer}
+.sql-copy:hover{color:var(--ink);border-color:var(--ink-2)}
+.sql-copy:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.sql-body{display:flex;overflow:auto;min-width:0}
+.sql-gutter{flex:none;display:flex;flex-direction:column;padding:var(--s3) var(--s2) var(--s3) var(--s3);font:400 var(--t-1)/1.5 var(--mono);color:var(--faint);text-align:right;user-select:none;border-right:1px solid var(--line)}
+.sql-code{flex:1;margin:0;padding:var(--s3);font:400 var(--t-1)/1.5 var(--mono);color:var(--ink);white-space:pre;tab-size:2;min-width:0}
+.sql-code code{font:inherit}
+.sq-kw{color:var(--syn-kw);font-weight:600}
+.sq-fn{color:var(--syn-fn)}
+/* in the editor a call is marked over the grammar's keyword span: the call wins, whichever wraps which */
+.cm-call,.cm-call .sq-kw,.cm-call .sq-name,.sq-kw .cm-call,.sq-name .cm-call{color:var(--syn-fn);font-weight:400}
+.sq-str{color:var(--syn-str)}
+.sq-num{color:var(--syn-num)}
+.sq-id{color:var(--ink);font-weight:500}
+.sq-name{color:var(--ink)}
+.sq-com{color:var(--faint);font-style:italic}
+.sq-op{color:var(--muted)}
+/* the editor: CodeMirror 6 in the same frame (lib/sql.tsx sets its theme from the tokens) */
+.sql-cm{overflow:hidden}
+.sql-cm .cm-editor{height:100%}
+.sql.editing:focus-within{border-color:var(--focus)}
+/* the frame decides how SQL lays out, whatever container it sits in: no wrap, so line numbers stay true */
+.sql pre.sql-code{white-space:pre;overflow-wrap:normal;word-break:normal;max-height:none;overflow:visible;margin:0;font-size:var(--t-1);line-height:1.5}

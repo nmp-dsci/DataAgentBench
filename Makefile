@@ -43,6 +43,9 @@ data: ## download the 12 datasets' database files (8.4 GB, sha256-verified) and 
 	uv run dab data load
 	uv run dab data check
 
+questions: ## copy data/index/queries.json into dataagentbench_meta for ad-hoc SQL (holds gold; not granted to dab_agent)
+	uv run dab data load-questions
+
 context: ## generate the context pack from Postgres (schema, profile, samples, joins) — no model
 	uv run dab context build
 
@@ -65,8 +68,9 @@ dev: ## run the API on :$(PORT) (frontend: cd frontend && npm run dev → :5173)
 build: ## build the explorer into frontend/dist so `make dev` serves it on one port
 	cd frontend && npm run build
 
-test: ## pytest
+test: ## pytest (+ the frontend's routing test when node_modules exist)
 	uv run pytest -q
+	@test -d frontend/node_modules && (cd frontend && npm test) || true
 
 lint: ## ruff + mypy (+ frontend typecheck and design lint when node_modules exist)
 	uv run ruff format --check src tests && uv run ruff check src tests && uv run mypy
@@ -75,4 +79,4 @@ lint: ## ruff + mypy (+ frontend typecheck and design lint when node_modules exi
 fmt: ## ruff format + fix
 	uv run ruff format src tests && uv run ruff check --fix src tests
 
-.PHONY: help setup upstream ingest rescore stats dev build test lint fmt platform-up db-roles db-smoke db-reset data context curate sandbox eval
+.PHONY: help setup upstream ingest rescore stats dev build test lint fmt platform-up db-roles db-smoke db-reset data questions context curate sandbox eval

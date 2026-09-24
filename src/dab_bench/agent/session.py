@@ -1,10 +1,12 @@
 """One (query, trial), one Agent SDK session, one trace.
 
-The system prompt is `system.md` plus the dataset's curated facts (D7 A); the
-user message is the question. The `dab` MCP server is the whole toolbox. The
-answer is what `return_answer` recorded, else the last plain text (the
-reference scaffold's rule). Everything the model saw and did is the trace the
-run keeps and MLflow indexes.
+The system prompt is `system.md` plus the dataset's facts (D7 A); the user
+message is the question. The `dab` MCP server, holding only the version's own
+tools, is the whole toolbox. The answer is what `submit_answer` or
+`return_answer` recorded, else the last plain text (the reference scaffold's
+rule). A version that answers with SQL also leaves its submission on the trace:
+the SQL, the harness's re-run of it, the mode and the step. Everything the model
+saw and did is the trace the run keeps and MLflow indexes.
 """
 
 from __future__ import annotations
@@ -21,6 +23,7 @@ from claude_agent_sdk import (
     ClaudeAgentOptions,
     ClaudeSDKClient,
     ResultMessage,
+    SystemMessage,
     TextBlock,
     ThinkingBlock,
     ToolResultBlock,
@@ -28,12 +31,20 @@ from claude_agent_sdk import (
     UserMessage,
 )
 
+from dab_bench.agent.isolation import (
+    SESSION_SETTINGS,
+    IsolationError,
+    check_init,
+    check_transcript,
+    init_record,
+    isolated_cwd,
+)
 from dab_bench.agent.llm import EFFORT, require_live, resolve_model, subscription_env
-from dab_bench.agent.prompt import DatasetContext, compose_system_prompt, user_message
+from dab_bench.agent.prompt import DatasetContext, user_message
 from dab_bench.agent.sandbox import Sandbox
 from dab_bench.agent.tools import ToolState, make_tool_server
 from dab_bench.agent.versions import AgentVersion
-from dab_bench.config import ROOT
+from dab_bench.data.aliases import trace_stem
 from dab_bench.eval.splits import Query
 
 
@@ -62,6 +73,9 @@ class Solve:
     effort: str = EFFORT
     context_sha: str = ""
     system_prompt_chars: int = 0
+    submission: dict[str, Any] | None = (
+        None  # submit_answer: sql, mode, step, columns, rows, result
+    )
 
     def as_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -108,7 +122,7 @@ def _rate_limited(text: str, error: str | None, reason: str | None) -> bool:
 
 
 def trial_key(query: Query, trial: int) -> str:
-    return f"{query.dataset}_{query.query_id}_t{trial}"
+    return trace_stem(f"{query.dataset}/{query.query_id}", trial)
 
 
 async def solve(
@@ -126,7 +140,7 @@ async def solve(
     model_id = resolve_model(model or cfg.model)
     eff = effort or cfg.effort or EFFORT
     use_hints = cfg.hints if hints is None else hints
-    system_prompt = compose_system_prompt(version.system_prompt, ctx, hints=use_hints)
+    system_prompt = version.prompt_for(ctx, use_hints)
     key = trial_key(query, trial)
     state = ToolState(
         dataset=query.dataset,
@@ -135,21 +149,9 @@ async def solve(
         sandbox=sandbox,
         exec_timeout_s=cfg.exec_timeout_s,
     )
-    server = make_tool_server(state)
-    options = ClaudeAgentOptions(
-        system_prompt=system_prompt,
-        model=model_id,
-        tools=[],  # no built-in tools: the dab server is the whole toolbox
-        allowed_tools=list(cfg.tools),
-        mcp_servers={"dab": server},
-        strict_mcp_config=True,
-        permission_mode="bypassPermissions",
-        max_turns=cfg.max_turns,
-        cwd=str(ROOT),
-        env=subscription_env(),
-        setting_sources=[],
-        effort=eff,  # type: ignore[arg-type]
-    )
+    server = make_tool_server(state, list(cfg.tools))
+    cwd = isolated_cwd()
+    options = session_options(version, system_prompt, server, cwd, model_id, eff)
     prompt = user_message(query.question)
     s = Solve(
         query_id=query.id,
@@ -172,7 +174,14 @@ async def solve(
         async with ClaudeSDKClient(options=options) as client:
             await client.query(prompt)
             async for msg in client.receive_response():
-                if isinstance(msg, AssistantMessage):
+                if isinstance(msg, SystemMessage) and msg.subtype == "init":
+                    # what the CLI actually gave the session; anything beyond the version's
+                    # own dab tools stops the run, since every trial after it would share it
+                    s.trace.append({"role": "init", "content": init_record(msg.data)})
+                    problems = check_init(msg.data, list(cfg.tools), cwd)
+                    if problems:
+                        raise IsolationError("; ".join(problems))
+                elif isinstance(msg, AssistantMessage):
                     blocks = [_block_to_dict(b) for b in msg.content]
                     s.trace.append(
                         {
@@ -210,12 +219,17 @@ async def solve(
 
     try:
         await asyncio.wait_for(_run(), timeout=cfg.timeout_s)
+    except IsolationError:
+        raise
     except TimeoutError:
         s.error = f"timeout after {cfg.timeout_s}s"
         s.terminal_reason = "timeout"
         s.timed_out = True
     except Exception as e:  # noqa: BLE001 - recorded on the row, the run continues
         s.error = f"{type(e).__name__}: {e}"[:500]
+    finally:
+        if sandbox is not None:
+            sandbox.release(key)
     s.duration_ms = int((time.time() - started) * 1000)
     if _rate_limited(final_text, s.error, s.terminal_reason):
         # the subscription window closed mid-trial: not an answer, not a fail — a retry
@@ -225,12 +239,87 @@ async def solve(
         final_text = ""
     s.final_text = final_text
     s.answer = state.answer if state.answer is not None else final_text.strip()
+    s.submission = state.submission
     s.tool_calls = state.calls
     if state.extract_cost_usd:
         s.cost_usd = (s.cost_usd or 0.0) + state.extract_cost_usd
         s.input_tokens += state.extract_input_tokens
         s.output_tokens += state.extract_output_tokens
     return s
+
+
+def session_options(
+    version: AgentVersion,
+    system_prompt: str,
+    server: Any,
+    cwd: Path,
+    model_id: str,
+    effort: str,
+    max_turns: int | None = None,
+) -> ClaudeAgentOptions:
+    """The one place an eval session's options are built, so `isolation_check` sees exactly
+    what a trial sees."""
+    cfg = version.config
+    return ClaudeAgentOptions(
+        system_prompt=system_prompt,
+        model=model_id,
+        tools=[],  # no built-in tools: the dab server is the whole toolbox
+        allowed_tools=list(cfg.tools),
+        mcp_servers={"dab": server},
+        strict_mcp_config=True,
+        permission_mode="bypassPermissions",
+        max_turns=max_turns or cfg.max_turns,
+        cwd=str(cwd),  # empty and outside the repo: no project file or memory is keyed to it
+        env=subscription_env(),
+        setting_sources=[],
+        settings=SESSION_SETTINGS,
+        effort=effort,  # type: ignore[arg-type]
+    )
+
+
+async def isolation_check(version: AgentVersion, ctx: DatasetContext) -> dict[str, Any]:
+    """Start one session exactly as a trial would and report what the CLI gave it.
+
+    One short turn on the subscription (the eval agent's own path): the prompt asks for a
+    one-word reply and no tool call. Returns the init record and every problem found."""
+    require_live()
+    cfg = version.config
+    state = ToolState(dataset=ctx.dataset, ctx=ctx, trial_key="isolation_check", sandbox=None)
+    cwd = isolated_cwd()
+    system_prompt = version.prompt_for(ctx)
+    options = session_options(
+        version,
+        system_prompt,
+        make_tool_server(state, list(cfg.tools)),
+        cwd,
+        resolve_model(cfg.model),
+        cfg.effort or EFFORT,
+        max_turns=1,
+    )
+    out: dict[str, Any] = {"init": None, "context_added": [], "problems": [], "reply": ""}
+    session_id = None
+    async with ClaudeSDKClient(options=options) as client:
+        await client.query("Reply with the single word OK. Do not call any tool.")
+        async for msg in client.receive_response():
+            if isinstance(msg, SystemMessage) and msg.subtype == "init":
+                out["init"] = init_record(msg.data)
+                out["problems"] += check_init(msg.data, list(cfg.tools), cwd)
+            elif isinstance(msg, AssistantMessage):
+                texts = [b.text for b in msg.content if isinstance(b, TextBlock)]
+                if texts:
+                    out["reply"] = texts[-1]
+            elif isinstance(msg, ResultMessage):
+                session_id = msg.session_id
+    if out["init"] is None:
+        out["problems"].append("no init message")
+    projects = Path.home() / ".claude" / "projects"
+    transcript = next(projects.glob(f"*/{session_id}.jsonl"), None) if session_id else None
+    if transcript is None:
+        out["problems"].append("no session transcript to read")
+    else:
+        out["context_added"], problems = check_transcript(transcript)
+        out["problems"] += problems
+    return out
 
 
 def save_trace(path: Path, s: Solve) -> None:
@@ -241,16 +330,15 @@ def backfill_usage(run_dir: Path) -> tuple[int, int]:
     """Write `message_id` and `usage` onto the assistant entries of every trace under
     `run_dir/traces/` from the SDK session transcript, matching assistant lines in order.
     Returns (updated, skipped); a trace already carrying usage counts as skipped."""
-    from dab_bench.config import ROOT
-
-    key = str(ROOT).replace("/", "-")
-    proj = Path.home() / ".claude" / "projects" / key
+    # the CLI keeps a session's transcript under a folder named for the directory it started
+    # in: the repo root for runs before the isolated cwd, the isolated cwd since
+    projects = Path.home() / ".claude" / "projects"
     updated = skipped = 0
     for tp in sorted((run_dir / "traces").glob("*.json")):
         t = json.loads(tp.read_text())
         entries = [e for e in t.get("trace") or [] if e.get("role") == "assistant"]
         sid = t.get("session_id")
-        src = proj / f"{sid}.jsonl" if sid else None
+        src = next(projects.glob(f"*/{sid}.jsonl"), None) if sid else None
         if not entries or entries[0].get("usage") or src is None or not src.exists():
             skipped += 1
             continue

@@ -1,9 +1,11 @@
 """What the model receives: one fixed behaviour file plus one dataset's facts, then the question.
 
 Decision D7 A (plan s01): the dataset's facts go in the *system* prompt —
-`system.md` (identical for every trial) followed by the curated `summary.md`
-and `pitfalls.md`, the upstream description and, when the run asks for it,
-the upstream hints, all verbatim. The user message is the question alone, as
+`system.md` (identical for every trial) followed by the code-built tables map,
+the curated `summary.md` and `pitfalls.md` (when the version's `pack` is on),
+the version's own notes for the dataset (written by the optimiser, s06), the
+upstream description and, when the run asks for it, the upstream hints; the
+description and the hints verbatim. The user message is the question alone, as
 the benchmark poses it. `context_sha` pins which pack bytes a trial saw.
 """
 
@@ -68,7 +70,9 @@ def tables_block(ctx: DatasetContext) -> str:
     return "\n".join(lines)
 
 
-def compose_system_prompt(system_md: str, ctx: DatasetContext, hints: bool) -> str:
+def compose_system_prompt(
+    system_md: str, ctx: DatasetContext, hints: bool, pack: bool = True, notes: str = ""
+) -> str:
     parts = [
         system_md.rstrip(),
         f"\n\n# Dataset: {ctx.dataset}\n",
@@ -76,10 +80,12 @@ def compose_system_prompt(system_md: str, ctx: DatasetContext, hints: bool) -> s
         "`query_db` runs read-only SQL against it.\n",
         "## Tables\n" + tables_block(ctx),
     ]
-    if ctx.summary.strip():
+    if pack and ctx.summary.strip():
         parts.append("\n## Summary (curated from the data)\n" + ctx.summary.strip())
-    if ctx.pitfalls.strip():
+    if pack and ctx.pitfalls.strip():
         parts.append("\n## Pitfalls in the data\n" + ctx.pitfalls.strip())
+    if notes.strip():
+        parts.append("\n## Notes for this dataset\n" + notes.strip())
     if ctx.description.strip():
         parts.append("\n## Database description (upstream, verbatim)\n" + ctx.description.strip())
     if hints and ctx.hints.strip():

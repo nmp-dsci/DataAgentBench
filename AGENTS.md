@@ -57,10 +57,15 @@ src/dab_bench/
   config.py           paths + Settings (no keys)
   cli.py              `dab upstream | ingest | rescore | stats | serve`
   data/               aliases.py (keys, the released 12, the 9 answer files) · upstream.py · ingest.py · index.py
+                      load.py (the three engines into one schema) · meta.py (the question set's copy,
+                      schema dataagentbench_meta, granted to nobody: it holds gold)
   eval/               validators.py (import + alarm-bounded call) · rescore.py (pool, summary, site check)
   serving/app.py      FastAPI over the index + SPA fallback
 frontend/             Vite + React; src/tokens.css verbatim from DESIGN.md; scripts/design_lint.mjs
-  src/pages/          Overview · Datasets · Dataset · Queries · Query · Validators · Leaderboard
+  src/routes.tsx      every address, as data; old ones are redirect loaders (routes.test.tsx drives it)
+  src/lib/url.ts      the URL grammar: one id per thing, path = subject, query string = lens
+  src/pages/          Overview · Datasets · Dataset · Query · Validators · Leaderboard · Runs · Run · TracePage · Agent · Golden
+  src/lib/queries.tsx QueryTable: one table for all 54 and for one dataset's, so the columns cannot drift
 tests/                fixture-tree ingest · aliases · validator runner with timeout · API on the
                       committed index · trials reproduce the site
 .github/workflows/    ci.yml (python + frontend; no upstream clone in CI)
@@ -112,15 +117,35 @@ page shows the answers verbatim. Nothing in the frontend is hand-maintained.
 - A leaderboard Pass@1 is the macro average; `per_file[].macro` reproduces it.
 - "Not scored" means no trial, never zero. The deferred 50 never get a number.
 
-## 7 · Later builds
+## 7 · The SQL-answer challenger and one round of the loop (s06, 2026-09-24)
 
-The loop (v1 = whatever it promotes over v0), on the scaffolding §8 lays
-down: optimiser reads failed trials from MLflow traces, proposes one edit to
-one of three surfaces (`agents/v0/system.md`, `agents/curator/system.md`, a
-dataset's `pitfalls.md`), runs the challenger, gates with McNemar at 54 × 5,
-promotes by moving `agents/champion`. Its own plan (s02). The benchmark
-Postgres moved into nmp-central-ai on 2026-09-22 (platform M3, below); a demo
-deploy remains.
+Plan `.lavish/s06_golden-from-gold-and-hints.html`, decisions D26–D31:
+
+- **`agents/v1_sql/`**: the prompt is `system.md` + the code-built tables map + the
+  upstream description and hints, verbatim (`pack: false`, `hints: true`); three
+  tools (`query_db` without `save_as`, `describe_table`, `submit_answer`); no
+  sandbox. `submit_answer(sql, mode, answer?, step?)` re-runs the SQL as
+  `dab_agent`: mode `pass_through` makes the rendered result the answer, `derived`
+  keeps the model's answer and its one-line step. `results.jsonl`, the trace and
+  MLflow record `agent_sql`, `agent_result`, `mode`, `step`.
+- **The scorecard** (`eval/scorecard.py`, `dab diagnose <run>`): answer (the
+  validator, over 54) · SQL (the agent's result against the golden's, where a golden
+  exists) · decision (mode against the golden's kind), a category per failure from
+  the result diff and a `sqlglot` structure diff; `runs/<id>/scorecard.json`.
+- **The optimiser** (`agents/optimiser/`, Sonnet 5 medium; `dab optimise <run>
+  --into <version>`): one isolated session per dataset with failed *train* questions
+  (`data/splits/train.json`, 33 of the 49 goldened; 16 held out) writes
+  `agents/<version>/datasets/<ds>.md`, which the prompt carries under "Notes for
+  this dataset"; one cross-dataset pass may edit `system.md` (D31 A). Every write
+  passes `eval/guards.py`. `agents/<version>/optimise.json` records the round.
+- **Promotion** (`dab promote`, D30): the most answers passed of the 54 among the
+  versions' newest complete runs wins; a tie keeps the incumbent;
+  `agents/promotions.jsonl` keeps every verdict; the MLflow prompt
+  `dataagentbench.system` carries the `champion` alias.
+- **The explorer**: the Optimise tab (`/optimise`, a round at `/optimise/<version>`,
+  `eval/rounds.py`) shows every round as diagnostic → proposal → outcome, with the
+  version lineage and each question before and after; the Runs tab opens with the
+  champion over time (the reigns in `agents/promotions.jsonl` and every full-split run).
 
 ## 8 · The agent build — decisions, layout, contract
 
@@ -160,7 +185,7 @@ src/dab_bench/
   agent/llm.py · versions.py · prompt.py · tools.py · sandbox.py · session.py
   eval/splits.py · score.py · runner.py               splits; TrialResult, summary + `profile()` (p50/p95); `dab eval`
   tracking/mlflow_log.py · tracing.py                 the run record on MLflow; one trace per trial
-  serving/app.py                                      `/api/runs` = the board (roles derived, profile per run); `/traces/<key>` adds the span tree
+  serving/app.py                                      `/api/runs` = the board (roles derived, profile per run); `/api/runs/<run>/<ds>/<n>/t<k>` adds the span tree
 frontend/src/pages/Runs.tsx · Run.tsx · TracePage.tsx · lib/runs.tsx   the board, one run vs the champion, the span waterfall
 frontend/src/pages/Agent.tsx · lib/agent.tsx        the Agent tab: the system graph, the node panel + tool form, the replay
 ```

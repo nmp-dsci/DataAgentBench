@@ -1,42 +1,40 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { type AgentDetail, AgentGraph, type AgentsBoard, type NodeId, type PlayResult, type PromptResp, Replay, ToolForm, TraceLine, toolCounts } from '../lib/agent';
-import { type Board, type RunDetail, type Span, type Trace, fmtInt, traceKey, useGet } from '../lib/api';
+import { type Board, type RunDetail, type Span, type Trace, fmtInt, useGet } from '../lib/api';
 import { Gold, Loading } from '../lib/ui';
+import { agentPath, apiTrialPath, optimisePath, datasetPath, questionPath, runPath, trialId, useLens } from '../lib/url';
 
-const REMEMBER = 'dab.agent.view';
+/** sessionStorage key: the last Agent view in this browser tab, as `/agent/<v>?…`. The nav's bare
+ *  `/agent` redirects there (routes.tsx). */
+export const AGENT_VIEW = 'dab.agent.view';
 
-/** One page: the agent system as a graph, a node panel with the tool playground, and a trial replayed turn by turn. State lives in the URL so a view is linkable. */
+/** One page: the agent system as a graph, a node panel with the tool playground, and a trial replayed turn by turn.
+ *  The version is the subject, so it is the path (`/agent/champion`); the run, the trial (its id,
+ *  `deps_dev_v1/1/t1`), the node and the dataset are the lens. */
 export function Agent() {
-  const [sp, setSp] = useSearchParams();
-  const agent = sp.get('agent') ?? 'champion';
+  const { version: agent = 'champion' } = useParams();
+  const [sp, set] = useLens();
+  const nav = useNavigate();
+  const { pathname, search: qs } = useLocation();
   const runId = sp.get('run') ?? '';
   const key = sp.get('trial') ?? '';
   const node = (sp.get('node') as NodeId | null) ?? null;
-  const set = (patch: Record<string, string | null>) => {
-    const next = new URLSearchParams(sp);
-    for (const [k, v] of Object.entries(patch)) v == null || v === '' ? next.delete(k) : next.set(k, v);
-    setSp(next, { replace: true });
-  };
 
-  // the view lives in the URL; leaving the tab and coming back through the nav (a bare
-  // /agent) restores the last one from this browser tab's session
+  // remember this view, so leaving the tab and coming back through the nav restores it
   useEffect(() => {
     try {
-      if ([...sp.keys()].length === 0) {
-        const last = sessionStorage.getItem(REMEMBER);
-        if (last) setSp(new URLSearchParams(last), { replace: true });
-      } else sessionStorage.setItem(REMEMBER, sp.toString());
+      sessionStorage.setItem(AGENT_VIEW, `${pathname}${qs}`);
     } catch {
       /* storage unavailable: the URL alone still works */
     }
-  }, [sp, setSp]);
+  }, [pathname, qs]);
 
   const { data: board } = useGet<AgentsBoard>('/api/agents');
   const { data: detail, error } = useGet<AgentDetail>(`/api/agents/${agent}`);
   const { data: runs } = useGet<Board>('/api/runs');
   const { data: run } = useGet<RunDetail>(runId ? `/api/runs/${runId}` : null);
-  const { data: trace } = useGet<Trace>(runId && key ? `/api/runs/${runId}/traces/${key}` : null);
+  const { data: trace } = useGet<Trace>(runId && key ? apiTrialPath(runId, key) : null);
   const dataset = sp.get('dataset') ?? trace?.dataset ?? detail?.datasets[0] ?? '';
   const { data: prompt } = useGet<PromptResp>(detail && dataset && node === 'prompt' ? `/api/agents/${detail.name}/prompt?dataset=${dataset}` : null);
 
@@ -67,7 +65,7 @@ export function Agent() {
         agent · {detail.name}@{detail.fingerprint} · {detail.champion ? 'champion' : 'challenger'} · {detail.tools.length} tools · {String(detail.config.model)} @ {String(detail.config.effort ?? 'medium')} · max {String(detail.config.max_turns)} turns
       </p>
       <h1>
-        {detail.name} is one agent, one system prompt and {detail.tools.length} tools: the pack is what it knows, <em>{detail.tools.some((t) => t.name === 'query_db') ? 'query_db' : detail.tools[0]?.name}</em> is what it does
+        {detail.name} is one agent, one system prompt and {detail.tools.length} tools: {detail.config.pack === false ? 'the prompt' : 'the pack'} is what it knows, <em>{detail.tools.some((t) => t.name === 'query_db') ? 'query_db' : detail.tools[0]?.name}</em> is what it does
       </h1>
       <p className="lead">
         The graph is generated from <code>agents/{detail.name}/agent.yaml</code> and the tool server's own schemas. Click a node for its config, source and — for a tool — a form that runs it with the trial's guards (read-only role, network-off sandbox; never a model). Pick a trace to
@@ -77,7 +75,7 @@ export function Agent() {
       <div className="filters">
         <label className="pick">
           <span className="label">agent</span>
-          <select value={agent} onChange={(e) => set({ agent: e.target.value, node: null })}>
+          <select value={agent} onChange={(e) => nav(agentPath(e.target.value, Object.fromEntries([...sp.entries()].filter(([k]) => k !== 'node'))), { replace: true })}>
             <option value="champion">champion → {board?.champion ?? '…'}</option>
             {board?.versions.map((v) => (
               <option key={v.name} value={v.name}>
@@ -116,7 +114,7 @@ export function Agent() {
             <select value={key} onChange={(e) => set({ trial: e.target.value, dataset: null })}>
               <option value="">— pick —</option>
               {trials.map((r) => (
-                <option key={traceKey(r)} value={traceKey(r)}>
+                <option key={trialId(r)} value={trialId(r)}>
                   {r.query_id} t{r.trial} · {r.passed == null ? 'not scored' : r.passed ? 'pass' : 'fail'} · {r.n_turns} turns
                 </option>
               ))}
@@ -125,7 +123,7 @@ export function Agent() {
         )}
         {trace && (
           <span className="count">
-            <TraceLine runId={runId} traceKey={key} queryId={trace.query_id} trial={trace.trial} passed={trace.passed} cost={trace.cost_usd} />
+            <TraceLine runId={runId} queryId={trace.query_id} trial={trace.trial} passed={trace.passed} cost={trace.cost_usd} />
             {trace.gold && (
               <>
                 {' · gold '}
@@ -154,8 +152,18 @@ export function Agent() {
                 </dd>
                 <dt>hints</dt>
                 <dd>{detail.config.hints ? 'on' : 'off'} (the benchmark's --use_hints)</dd>
+                <dt>pack</dt>
+                <dd>{detail.config.pack === false ? 'off: no curated summary or pitfalls in the prompt' : 'on: the curated summary and pitfalls are in the prompt'}</dd>
+                {detail.config.challenger_of ? (
+                  <>
+                    <dt>optimised from</dt>
+                    <dd>
+                      <Link to={agentPath(String(detail.config.challenger_of))}>{String(detail.config.challenger_of)}</Link>
+                    </dd>
+                  </>
+                ) : null}
                 <dt>fingerprint</dt>
-                <dd className="mono">{detail.fingerprint} = sha256(system.md + agent.yaml + helper.py)</dd>
+                <dd className="mono">{detail.fingerprint} = sha256(system.md + agent.yaml + helper.py + datasets/*.md)</dd>
               </dl>
             </>
           )}
@@ -174,7 +182,7 @@ export function Agent() {
               )}
               {trace && (
                 <p className="small">
-                  <Link to={`/queries/${trace.query_id}`}>gold, validator and the leaderboard's trials for {trace.query_id}</Link>
+                  <Link to={questionPath(trace.query_id)}>gold, validator and the leaderboard's trials for {trace.query_id}</Link>
                 </p>
               )}
             </>
@@ -196,7 +204,9 @@ export function Agent() {
             <>
               <h3>System prompt for {dataset}</h3>
               <p className="small">
-                <code>system.md</code> (behaviour, {fmtInt(detail.files['system.md']?.length)} chars) + the pack's <code>summary.md</code>, <code>pitfalls.md</code> and the upstream description.{' '}
+                <code>system.md</code> (behaviour, {fmtInt(detail.files['system.md']?.length)} chars) + the tables map
+                {prompt?.pack === false ? '' : <> + the pack's <code>summary.md</code>, <code>pitfalls.md</code></>}
+                {prompt?.notes ? <> + this version's notes for {dataset}</> : ''} + the upstream description{prompt?.hints ? ' + the upstream hints' : ''}, both verbatim.{' '}
                 {prompt && (
                   <>
                     Composed: {fmtInt(prompt.chars)} chars, context <code>{prompt.context_sha}</code>.
@@ -234,7 +244,7 @@ export function Agent() {
                 All 12 datasets in one schema <code>dataagentbench</code>, tables <code>&lt;dataset&gt;_&lt;table&gt;</code>. The agent's role is read-only (<code>default_transaction_read_only</code>), <code>statement_timeout</code> 60 s, search_path set. Database <code>dab</code> on the central nmp-central-ai Postgres (:5432) since 22 Sep 2026 (platform D13).
               </p>
               <p className="small">
-                <Link to={`/datasets/${dataset}`}>{dataset}'s stores and tables</Link> · <code>list_db</code> shows what the agent sees.
+                <Link to={datasetPath(dataset)}>{dataset}'s stores and tables</Link> · <code>list_db</code> shows what the agent sees.
               </p>
             </>
           )}
@@ -291,7 +301,7 @@ export function Agent() {
               </p>
               {runId && (
                 <p className="small">
-                  <Link to={`/runs/${runId}`} className="mono">
+                  <Link to={runPath(runId)} className="mono">
                     {runId}
                   </Link>
                 </p>
@@ -326,6 +336,20 @@ export function Agent() {
           )}
         </div>
       </div>
+
+      {detail.lineage && (
+        <p className="small">
+          {detail.name} was optimised from <Link to={agentPath(detail.lineage.parent)}>{detail.lineage.parent}</Link>
+          {detail.lineage.round ? (
+            <>
+              {' '}
+              in a round of the loop: <Link to={optimisePath(detail.name)}>its diagnostic, proposal and outcome on the Optimise tab</Link>.
+            </>
+          ) : (
+            '.'
+          )}
+        </p>
+      )}
 
       <h2>
         {trace ? (

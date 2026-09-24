@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { type DatasetDetail, STYLE_LABEL, fmtBytes, fmtPct, queryPath, useGet } from '../lib/api';
-import { Gold, Loading, Rate } from '../lib/ui';
+import { type DatasetDetail, fmtBytes, fmtPct, useGet } from '../lib/api';
+import { QueryTable } from '../lib/queries';
+import { DatasetChips, Loading } from '../lib/ui';
+import { questionPath } from '../lib/url';
 
 export function Dataset() {
   const { key } = useParams();
@@ -12,6 +14,7 @@ export function Dataset() {
   const hardest = rows[0];
   return (
     <>
+      <DatasetChips current={d.key} />
       <p className="crumbs">
         <Link to="/datasets">Datasets</Link> › {d.key}
       </p>
@@ -24,8 +27,8 @@ export function Dataset() {
       </h1>
       {hardest?.trials && (
         <p className="lead">
-          Hardest here is <Link to={queryPath(hardest.id)}>{hardest.id}</Link> at {fmtPct(hardest.trials.rate)} of {hardest.trials.n} trials; easiest is{' '}
-          <Link to={queryPath(rows[rows.length - 1].id)}>{rows[rows.length - 1].id}</Link> at {fmtPct(rows[rows.length - 1].trials?.rate)}.
+          Hardest here is <Link to={questionPath(hardest.id)}>{hardest.id}</Link> at {fmtPct(hardest.trials.rate)} of {hardest.trials.n} trials; easiest is{' '}
+          <Link to={questionPath(rows[rows.length - 1].id)}>{rows[rows.length - 1].id}</Link> at {fmtPct(rows[rows.length - 1].trials?.rate)}.
         </p>
       )}
 
@@ -82,40 +85,8 @@ export function Dataset() {
         )}
       </div>
 
-      <h2>The {d.n_queries} queries, hardest first</h2>
-      <div className="tw">
-        <table>
-          <thead>
-            <tr>
-              <th>Query</th>
-              <th>Question</th>
-              <th>Gold</th>
-              <th>Validator</th>
-              <th>Published pass rate</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((q) => (
-              <tr key={q.id}>
-                <td className="sub">
-                  <Link to={queryPath(q.id)}>{q.id}</Link>
-                </td>
-                <td className="q wrap">
-                  {q.question.length > 220 ? `${q.question.slice(0, 220)}…` : q.question}
-                  {q.footnote && <span className="tag warn" style={{ marginLeft: 'var(--s2)' }}>revised</span>}
-                </td>
-                <td className="pre">
-                  <Gold preview={q.gold_preview} lines={q.gold_lines} />
-                </td>
-                <td>{STYLE_LABEL[q.validator_style] ?? q.validator_style}</td>
-                <td>
-                  <Rate passed={q.trials?.passed} n={q.trials?.n} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <h2>The {d.n_queries} {d.n_queries === 1 ? 'query' : 'queries'}, hardest first</h2>
+      <QueryTable rows={d.query_rows} scope={d.key} />
     </>
   );
 }

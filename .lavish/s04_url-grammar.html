@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>s04 · DataAgentBench — one address per thing: the explorer's URL grammar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Design source (2): the project's own system — DESIGN.md ("Field Guide"), tokens verbatim,
+   the same block s00–s03 and frontend/src/tokens.css carry. */
+:root{
+  --bg:#F7F6F2; --panel:#FFFFFF; --band:#EFEEE8;
+  --ink:#1A1D1B; --ink-2:#3B403D; --muted:#4A514D; --faint:#5C635E;
+  --line:#DCDAD2; --line-2:#C7C5BC; --line-3:#8A8880;
+  --accent:#0A6552; --accent-ink:#FFFFFF; --accent-soft:#DFEFE8;
+  --amber:#8A5006; --amber-soft:#F6E6CF;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --t-2:0.8rem; --t-1:0.875rem; --t0:1rem; --t1:1.125rem; --t2:1.406rem; --t3:1.758rem; --t4:2.197rem;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --r:10px; --r-sm:6px;
+  --shadow:0 1px 2px rgb(20 25 22 / .05), 0 12px 28px -18px rgb(20 25 22 / .22);
+  --dur:300ms; --ease:cubic-bezier(.2,.7,.2,1); --focus:var(--accent);
+  --w:1140px; --measure:68ch; --track-label:.08em;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121614; --panel:#191E1B; --band:#161A18;
+    --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+    --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+    --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+    --amber:#D99A4E; --amber-soft:#3A2A14;
+    --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121614; --panel:#191E1B; --band:#161A18;
+  --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+  --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+  --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+  --amber:#D99A4E; --amber-soft:#3A2A14;
+  --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+}
+@media (prefers-reduced-motion: reduce){ :root{ --dur:0.01ms; } }
+*,*::before,*::after{box-sizing:border-box}
+:where(.grid,.flex,.kpi,.cards,.mock-body,.mock-cols,.mock-top,.ladder)>*{min-width:0}
+:where(p,h1,h2,h3,h4,li,dd,figcaption,td,th,.chip,.label){overflow-wrap:anywhere}
+:where(img,svg,video,iframe){max-width:100%;height:auto}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink-2);font-family:var(--sans);font-size:var(--t0);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{color:var(--ink);margin:0;line-height:1.15;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+h1{font-size:var(--t4);font-family:var(--serif);font-weight:400} h1 em{font-style:italic;font-weight:400;color:var(--accent)}
+h2{font-size:var(--t3)} h3{font-size:var(--t1)} h4{font-size:var(--t0)}
+p{margin:0 0 var(--s4);text-wrap:pretty}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:.2em} a:hover{text-decoration-thickness:2px}
+strong,b{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:max(var(--t-2),.86em);background:var(--band);padding:.08em .32em;border-radius:var(--r-sm);color:var(--ink-2)}
+pre{margin:0;font-family:var(--mono);font-size:var(--t-2);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.wrap{max-width:var(--w);margin-inline:auto;padding-inline:var(--s5)}
+.label{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0}
+.lead{font-family:var(--serif);font-size:var(--t1);line-height:1.5;color:var(--ink-2);max-width:72ch}
+.small{font-size:var(--t-1);color:var(--muted)}
+.top{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:var(--w);margin-inline:auto;padding:var(--s3) var(--s5);display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.top b{font-family:var(--mono);font-size:var(--t-1);color:var(--ink);white-space:nowrap}
+.top nav{display:flex;gap:var(--s4);margin-left:auto;flex-wrap:wrap;font-size:var(--t-1);font-weight:500}
+.top nav a{color:var(--ink-2);text-decoration:none;padding:var(--s1) 0} .top nav a:hover{color:var(--accent)}
+header.hero{padding:var(--s7) 0 var(--s5)}
+.chips{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s4) 0 0}
+.chip{font-family:var(--mono);font-size:var(--t-2);padding:.3em .6em;border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--ink-2);background:var(--panel)}
+.chip.ok{border-color:var(--accent);color:var(--accent)} .chip.warn{border-color:var(--amber);color:var(--amber)}
+section.blk{padding-top:var(--s8)} section.blk:last-of-type{padding-bottom:var(--s9)}
+section.band-sec{background:var(--band);margin-top:var(--s8);padding:var(--s7) 0}
+section.band-sec + section.blk{padding-top:var(--s7)}
+.hd{margin-bottom:var(--s5);max-width:80ch} .hd .label{margin-bottom:var(--s2)} .hd h2{margin-bottom:var(--s3)}
+.panel{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5)}
+.grid{display:grid;gap:var(--s4)} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.g3,.g2{grid-template-columns:minmax(0,1fr)}}
+.card h3{margin-bottom:var(--s2)} .card p{margin-bottom:var(--s2);font-size:var(--t-1)} .card p:last-child{margin:0}
+.card.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r);box-shadow:var(--shadow);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:var(--t-1)}
+caption{text-align:left;padding:var(--s4) var(--s5) var(--s2);color:var(--muted);font-size:var(--t-1);caption-side:top}
+th,td{text-align:left;padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}
+thead th{font-family:var(--mono);font-size:var(--t-2);font-weight:500;color:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase;border-bottom:1px solid var(--line-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.sub{font-weight:600;color:var(--ink);white-space:nowrap}
+td.num{font-family:var(--mono);font-size:var(--t-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+td .path{display:block;font-family:var(--mono);font-size:var(--t-2);color:var(--faint);font-weight:400;margin-top:2px}
+td.mono,td code.u{font-family:var(--mono);font-size:var(--t-2)}
+code.u{background:none;padding:0;color:var(--ink)} code.u s{color:var(--faint);text-decoration:line-through}
+tr.pro td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+tr.dim td{color:var(--muted)}
+.v-ok{color:var(--accent);font-weight:600} .v-no{color:var(--muted)} .v-warn{color:var(--amber);font-weight:600}
+blockquote{margin:0;padding:var(--s3) var(--s4);border-left:2px solid var(--accent);background:var(--band);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:var(--t-1)}
+blockquote.warn{border-left-color:var(--amber)}
+.fig{margin:var(--s5) 0 0}
+.fig-title{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0 0 var(--s3);text-wrap:balance}
+.fig figcaption{font-family:var(--sans);font-size:var(--t-1);color:var(--muted);line-height:1.5;margin-top:var(--s3)}
+.fig figcaption b{color:var(--ink);font-weight:600}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:var(--s3)}
+.steps li{position:relative;padding-left:2.75rem;font-size:var(--t-1)}
+.steps li::before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:0;top:2px;font-family:var(--mono);color:var(--accent);font-weight:500}
+form.q{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5);display:grid;gap:var(--s3);margin-top:var(--s4)}
+form.q h3{margin:0} form.q .why{font-size:var(--t-1);color:var(--muted);margin:0}
+form.q label{display:grid;grid-template-columns:1.2rem minmax(0,1fr);gap:var(--s2);align-items:start;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;min-height:24px}
+form.q label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+form.q input[type=radio],form.q input[type=checkbox]{margin:3px 0 0;accent-color:var(--accent);width:16px;height:16px}
+form.q textarea{width:100%;font:inherit;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);color:var(--ink-2);min-height:3.2rem;resize:vertical}
+form.q .row{display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap}
+.btn{font:500 var(--t-1) var(--sans);background:var(--accent);color:var(--accent-ink);border:0;border-radius:var(--r-sm);padding:.55em 1em;cursor:pointer;min-height:24px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.08)} .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.queued{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);min-height:1.2em}
+.rec{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);margin-left:.4em}
+.tag{font-family:var(--mono);font-size:var(--t-2);padding:.15em .45em;border-radius:var(--r-sm);border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.tag.ok{border-color:var(--accent);color:var(--accent)} .tag.warn{border-color:var(--amber);color:var(--amber)} .tag.no{border-color:var(--line-3);color:var(--muted)}
+ul.tight{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.tight li{margin-bottom:var(--s1)}
+ul.qa{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.qa li{margin-bottom:var(--s2)}
+.code{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);margin-top:var(--s3);overflow-x:auto}
+.code .label{margin-bottom:var(--s2)}
+.code.band{background:var(--band)}
+.kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4);margin-top:var(--s5)}
+@media (max-width:900px){.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi .n{font-family:var(--serif);font-size:var(--t3);color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:var(--t-1);color:var(--muted);margin-top:var(--s1)}
+
+/* the hackable-address ladder */
+.ladder{display:grid;gap:var(--s2);margin-top:var(--s3)}
+.ladder .rung{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--s3);align-items:baseline;padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel);font-family:var(--mono);font-size:var(--t-2)}
+.ladder .rung .u{color:var(--ink)} .ladder .rung .u b{color:var(--accent);font-weight:500}
+.ladder .rung .w{font-family:var(--sans);color:var(--muted);font-size:var(--t-2);text-align:right;white-space:nowrap}
+@media (max-width:640px){.ladder .rung{grid-template-columns:minmax(0,1fr)} .ladder .rung .w{text-align:left;white-space:normal}}
+
+/* the mock of the explorer page, in the explorer's own styles */
+.addr{font-family:var(--mono);font-size:var(--t-2);color:var(--ink);background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:var(--s2) var(--s3);margin-top:var(--s4);display:flex;gap:var(--s2);align-items:center}
+.addr .lock{color:var(--faint)} .addr b{color:var(--accent);font-weight:500}
+.mock{background:var(--bg);border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin-top:var(--s2)}
+.mock-top{display:flex;gap:var(--s4);align-items:center;padding:var(--s2) var(--s4);border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 88%,transparent);font-size:var(--t-2);flex-wrap:wrap}
+.mock-top .brand{font-family:var(--mono);color:var(--ink);font-weight:500}
+.mock-top nav{display:flex;gap:var(--s3);flex-wrap:wrap} .mock-top nav span{color:var(--ink-2)} .mock-top nav span.on{color:var(--accent);border-bottom:2px solid var(--accent)}
+.mock-body{padding:var(--s4)}
+.mock h1{font-size:var(--t2)} .mock .label{font-size:.7rem}
+.mock .ed{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent);padding:var(--s4);margin:var(--s3) 0 var(--s4);display:grid;gap:var(--s2)}
+.mock .ed .hdr{display:flex;gap:var(--s3);align-items:baseline;flex-wrap:wrap;font-size:var(--t-1)}
+.mock .ed .hdr b{font-family:var(--mono);font-weight:500;color:var(--ink)} .mock .ed .hdr .nav{margin-left:auto;display:flex;gap:var(--s3);font-size:var(--t-2)}
+.mock .ed .hdr .nav a{text-decoration:underline}
+.mock .ed .qtext{font-size:var(--t-1);color:var(--ink-2);margin:0}
+.mock .ed .ta{font-family:var(--mono);font-size:var(--t-2);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);padding:var(--s2) var(--s3);min-height:4.4rem;color:var(--ink-2);white-space:pre-wrap}
+.mock .ed .row{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}
+.mock .ed .btn{font-size:var(--t-2);padding:.4em .8em} .mock .ed .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.mock table{min-width:0;font-size:var(--t-2)} .mock th,.mock td{padding:var(--s2) var(--s3)}
+.mock tr.cur td{background:var(--accent-soft)} .mock tr.cur td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.mock .tw{box-shadow:none;border:1px solid var(--line)}
+.cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.cmp{grid-template-columns:minmax(0,1fr)}}
+.cmp .side{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s4)}
+.cmp .side h4{margin-bottom:var(--s2)} .cmp .side .label{margin-bottom:var(--s2)}
+.cmp .side pre{background:var(--band);border-radius:var(--r-sm);padding:var(--s3)}
+.cmp .side.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.src{font-size:var(--t-1);color:var(--muted)} .src li{margin-bottom:var(--s1)}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in">
+  <b>s04 · URL grammar</b>
+  <nav aria-label="Sections">
+    <a href="#problems">Problems</a><a href="#today">Today</a><a href="#research">Research</a><a href="#grammar">Grammar</a><a href="#map">Map</a><a href="#golden">Golden</a><a href="#decide">Decide</a><a href="#build">Build</a><a href="#risks">Risks</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+<header class="hero">
+  <p class="label">DataAgentBench explorer · plan · 2026-09-24 · branch challenger_20260923 at d32d602</p>
+  <h1>The explorer spells one question three ways; <em>one address per thing</em> fixes the Golden URL and the page-jump together</h1>
+  <p class="lead">Two complaints came from the same root. <code>/golden/deps_dev_v1/1</code> looks arbitrary because the Agent tab writes the same question as <code>trial=pancancer_atlas_2_t1</code>, and clicking a Golden row throws the list away because that route is a separate page instead of a detail opened in place. The fix is a three-line grammar every tab follows, plus one page shape for "pick from a list, work on it here". It touches 13 routes, changes the address of 3 of them, and keeps every old link landing.</p>
+  <div class="chips">
+    <span class="chip">13 frontend routes today</span><span class="chip">3 spellings of a question</span><span class="chip ok">3 rules</span><span class="chip ok">9 changes, R-01…R-09</span><span class="chip ok">D22 decided: A · built</span>
+  </div>
+  <div class="kpi">
+    <div><div class="n">3 → 1</div><div class="d">spellings of one question in a URL: <code>deps_dev_v1/1</code>, <code>/queries/deps_dev_v1/1</code>, <code>deps_dev_v1_1_t1</code> → <code>deps_dev_v1/1</code></div></div>
+    <div><div class="n">2 → 2</div><div class="d">URL dialects stay, but named: a <b>record</b> (path names a thing) and a <b>workbench</b> (path names the subject, <code>?</code> holds the lens)</div></div>
+    <div><div class="n">13 → 13</div><div class="d">routes; the count does not fall, the vocabulary does. Every route uses the same ids, and old paths redirect</div></div>
+    <div><div class="n">0</div><div class="d">files renamed on disk. <code>runs/&lt;id&gt;/traces/deps_dev_v1_1_t1.json</code> stays; the run folder is the record</div></div>
+  </div>
+</header>
+
+<!-- ===================================================== PROBLEMS -->
+<section class="blk" id="problems">
+  <div class="hd">
+    <p class="label">01 · the two problems, as reported</p>
+    <h2>Both complaints are true, and both come from the same missing rule</h2>
+  </div>
+  <div class="grid g2">
+    <div class="panel card">
+      <h3>"What is the URL id <code>/1</code>?"</h3>
+      <p>It is the question's number inside its dataset: the index names every question <code>&lt;dataset&gt;/&lt;n&gt;</code>, so <code>deps_dev_v1/1</code> is the same id the Datasets table, the Runs board, the Query page and <code>results.jsonl</code> all print. The path only turned its slash into a path separator.</p>
+      <p>The confusion is real, though, because the Agent tab spells the same question <code>pancancer_atlas_2_t1</code>: that is the <em>trace file name</em> on disk (<code>traces/&lt;dataset&gt;_&lt;n&gt;_t&lt;trial&gt;.json</code>), built by <code>traceKey()</code> in <code>lib/api.ts</code>, leaked into two URLs (<code>/runs/…/traces/…</code> and <code>?trial=</code>). Nothing in the code says which spelling is the id.</p>
+    </div>
+    <div class="panel card">
+      <h3>"Clicking a query goes to a new URL, not the same page"</h3>
+      <p>Correct. <code>/golden/:key/:n</code> is a sibling route of <code>/golden</code> in <code>main.tsx</code>, so React Router unmounts the list and mounts the editor as a whole page; the coverage table you were scanning is gone, and you go back to find the next question.</p>
+      <p>The Agent tab and the Runs compare already do the other thing: one page, selection in the address (<code>?run=&amp;trial=&amp;node=</code>, <code>?focus=&amp;challenger=</code>). The Golden tab just was not built to that shape. The address should still change when you pick a row, so the view is linkable and refresh and back work; what must not change is the page around it.</p>
+    </div>
+  </div>
+  <blockquote style="margin-top:var(--s4)">Note on the transcript-rag-agent writes: I read s01 (frontend review), s02 (chat-first redesign), s13 (walkthrough), s20 (ship like a studio) and s21 (workbench studio). They do not discuss URL structure at all; s02 even chose hash tabs with no router. The one transferable pattern is s21's: a per-item drawer opened from the list plus a slim sticky in-page nav, which is the shape §6 gives the Golden tab.</blockquote>
+</section>
+
+<!-- ===================================================== TODAY -->
+<section class="blk" id="today">
+  <div class="hd">
+    <p class="label">02 · every address today</p>
+    <h2>13 routes in <code>main.tsx</code>, two dialects, and 4 places where the id changes shape</h2>
+    <p class="small">Verified against <code>frontend/src/main.tsx</code>, the <code>useParams</code>/<code>useSearchParams</code> uses in <code>pages/*.tsx</code>, and the 22 API routes in <code>serving/app.py</code>. "Record" = the path names a thing. "Workbench" = one page, selection in the query string. ✓ = follows the grammar in §4 already.</p>
+  </div>
+  <div class="tw"><table>
+    <caption>Frontend routes, with the ids each one carries. The three flagged rows are where the same question changes spelling; the fourth flag is the Golden page shape.</caption>
+    <thead><tr><th>Address today</th><th>Names</th><th>Dialect</th><th>Id spelling</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">/</td><td>Overview</td><td>record</td><td>—</td><td class="v-ok">✓</td></tr>
+      <tr><td class="mono">/datasets</td><td>the 12 datasets and all 54 queries</td><td>record</td><td>—</td><td class="v-ok">✓</td></tr>
+      <tr><td class="mono">/datasets/deps_dev_v1</td><td>one dataset</td><td>record</td><td><code>deps_dev_v1</code></td><td class="v-ok">✓</td></tr>
+      <tr><td class="mono">/queries → /datasets</td><td>redirect (the Queries tab merged into Datasets)</td><td>—</td><td>—</td><td class="v-ok">✓ keep</td></tr>
+      <tr><td class="mono">/queries/deps_dev_v1/1</td><td>one question: gold, validator, leaderboard trials, prev/next</td><td>record</td><td><code>deps_dev_v1/1</code> as two segments</td><td class="v-warn">not hackable: <code>/queries/deps_dev_v1</code> is a blank page, and the tab it lives under is <em>Datasets</em></td></tr>
+      <tr><td class="mono">/validators</td><td>the four validator styles</td><td>record</td><td>—</td><td class="v-ok">✓</td></tr>
+      <tr><td class="mono">/leaderboard</td><td>the 11 answer files, 9 pooled + 2 from PRs</td><td>record</td><td>—</td><td class="v-ok">✓</td></tr>
+      <tr><td class="mono">/runs?focus=&amp;challenger=&amp;group=&amp;scope=</td><td>the board, and any two sides compared</td><td>workbench</td><td>run id, or <code>lb:permute_eq</code> (shown as <code>lb%3Apermute_eq</code>)</td><td class="v-ok">✓ shape; the <code>:</code> gets percent-encoded by <code>URLSearchParams</code></td></tr>
+      <tr><td class="mono">/runs/20260921T064521Z_v0_all_haiku</td><td>one run</td><td>record</td><td>run id</td><td class="v-ok">✓</td></tr>
+      <tr><td class="mono">/runs/&lt;run&gt;/traces/deps_dev_v1_1_t1</td><td>one trial's trace</td><td>record</td><td><code>deps_dev_v1_1_t1</code>, the file name</td><td class="v-warn">the question is spelled as a file name; <code>traces</code> is a folder name, not a noun the reader knows</td></tr>
+      <tr><td class="mono">/agent?agent=champion&amp;run=&amp;trial=deps_dev_v1_1_t1&amp;node=tool:execute_python&amp;dataset=</td><td>the agent as a graph, a node panel, a trial replayed</td><td>workbench</td><td>version in <code>?</code>; trial as the file name; <code>:</code> shown as <code>%3A</code></td><td class="v-warn">the subject (which agent) sits in the query string; the trial spelling differs from every table</td></tr>
+      <tr><td class="mono">/golden</td><td>golden coverage, 0/54 written</td><td>record</td><td>—</td><td class="v-ok">✓</td></tr>
+      <tr><td class="mono">/golden/deps_dev_v1/1</td><td>the editor for one question</td><td>record, but should be workbench</td><td><code>deps_dev_v1/1</code> as two segments</td><td class="v-warn">a separate page: the list unmounts on click</td></tr>
+    </tbody>
+  </table></div>
+  <div class="grid g2" style="margin-top:var(--s5)">
+    <div class="panel card">
+      <h3>The API already agrees with the index, except for one route</h3>
+      <p><code>/api/queries/{key}/{n}</code>, <code>/api/golden/{key}/{n}</code> and <code>/api/datasets/{key}</code> carry the index ids. Only <code>/api/runs/{run}/traces/{key}</code> takes the file name, because that is what it opens. 22 routes total; 1 changes in this plan.</p>
+    </div>
+    <div class="panel card">
+      <h3>Where the shape is decided</h3>
+      <p><code>queryPath()</code> and <code>traceKey()</code> in <code>lib/api.ts</code> are the only two helpers, and they disagree with each other. Thirteen files build <code>/datasets/…</code> and <code>/runs/…</code> strings by hand. Nothing owns the grammar, so nothing can keep it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== RESEARCH -->
+<section class="band-sec" id="research"><div class="wrap">
+  <div class="hd">
+    <p class="label">03 · what the research says</p>
+    <h2>Four settled conventions cover both problems; none of them is exotic</h2>
+  </div>
+  <div class="grid g2">
+    <div class="panel card">
+      <h3>The URL is part of the interface (NN/g, "URL as UI")</h3>
+      <p>Nielsen's guidance, still the reference: URLs should be readable, lowercase, and <b>hackable</b>: a reader can chop segments off the end and land somewhere sensible. They should <b>visualise the site structure</b>, and they should <b>persist</b>: a changed address breaks bookmarks, so old ones must keep landing. People remember and share URLs; an opaque one is a small tax every time.</p>
+      <p>Applied here: <code>/queries/deps_dev_v1/1</code> fails the chop test (the parent is blank) and <code>deps_dev_v1_1_t1</code> is opaque; <code>/datasets/deps_dev_v1/1</code> and <code>/runs/&lt;run&gt;/deps_dev_v1/1/t1</code> pass both.</p>
+    </div>
+    <div class="panel card">
+      <h3>Path names the resource; query string carries options</h3>
+      <p>The API-design consensus (the same rule REST guides give) is that <b>path segments identify a resource or a hierarchy</b> and <b>query parameters hold optional, independent constraints</b> with defaults: filters, sort, a selection, a view. A query parameter can be dropped and the page still means something; a path segment cannot.</p>
+      <p>Applied here: which agent version is not optional on the Agent tab, so it belongs in the path (<code>/agent/champion</code>); which node is selected, which run is replayed, how the compare is grouped, all have defaults, so they stay in <code>?</code>.</p>
+    </div>
+    <div class="panel card">
+      <h3>Master-detail: the list stays, the detail opens beside or above it</h3>
+      <p>The master-detail pattern (Windows, Oracle Alta, Finastra, every design system) is "a list of something and the details of the selected item, on the same page". The detail is still addressable: the selection is in the URL, so a link opens the list <em>with</em> that item open. Only small screens collapse it into a drill-down.</p>
+      <p>Applied here: the Golden tab is a list of 54 questions with a tool for one at a time. That is master-detail by definition; the page-per-row shape was the wrong pick.</p>
+    </div>
+    <div class="panel card">
+      <h3>React Router does this with a nested route and an <code>&lt;Outlet&gt;</code></h3>
+      <p>In React Router 7 (the explorer is on 7.18.3) a child route renders <em>inside</em> its parent through <code>&lt;Outlet /&gt;</code>; the parent stays mounted while the address changes. That is precisely "same page, new URL". Dynamic segments (<code>:key/:n</code>) give the id; <code>useSearchParams</code> gives the lens. One caveat measured in this codebase: <code>URLSearchParams</code> percent-encodes <code>/</code> and <code>:</code>, which is why <code>node=tool%3Aexecute_python</code> looks the way it does today, so the lens serialiser has to be ours.</p>
+    </div>
+  </div>
+  <p class="small" style="margin-top:var(--s4)">Sources are listed at the end. The React Router page fetched documents v8.4; the nested-route and Outlet behaviour it describes is unchanged from v6 and is what 7.18.3 ships.</p>
+</div></section>
+
+<!-- ===================================================== GRAMMAR -->
+<section class="blk" id="grammar">
+  <div class="hd">
+    <p class="label">04 · the grammar · three rules, one module</p>
+    <h2>One id per thing, path for the subject, query string for the lens, and picking never leaves the page</h2>
+  </div>
+  <div class="grid g3">
+    <div class="panel card pro">
+      <h3>Rule 1 · one id, the same string everywhere</h3>
+      <p>Dataset <code>deps_dev_v1</code>. Question <code>deps_dev_v1/1</code>, exactly as the index and every table print it. Trial <code>deps_dev_v1/1/t1</code>. Run <code>20260921T064521Z_v0_all_haiku</code>. Agent version <code>champion</code>. Submission <code>lb:permute_eq</code>.</p>
+      <p>In a path, the id's slashes are path separators, which is what makes the address hackable. In a query string the id is written as-is. The trace file name <code>deps_dev_v1_1_t1.json</code> stays on disk and is derived from the id, never shown.</p>
+    </div>
+    <div class="panel card pro">
+      <h3>Rule 2 · path names the subject, <code>?</code> holds the lens</h3>
+      <p>If dropping it leaves nothing to show, it is the subject and goes in the path: a dataset, a question, a run, a trial, an agent version. If dropping it falls back to a default, it is a lens and goes in the query string: <code>node</code>, <code>run</code>+<code>trial</code> on the Agent tab, <code>focus</code>/<code>challenger</code>/<code>group</code>/<code>scope</code> on Runs.</p>
+      <p>Never an identity in the query string, never a preference in the path.</p>
+    </div>
+    <div class="panel card pro">
+      <h3>Rule 3 · picking from a list opens the detail in place</h3>
+      <p>A tab that is a tool over a list (Golden now; Runs compare and Agent already) keeps the list mounted and opens the selection above or beside it. The address still changes, through a nested route, so the view is linkable, refresh restores it and back closes it.</p>
+      <p>A thing's own page (a dataset, a question, a run, a trial) is a destination: it may replace the page, and its breadcrumb is its hackable path.</p>
+    </div>
+  </div>
+
+  <figure class="fig">
+    <p class="fig-title">Rule 1 and NN/g's chop test, on the deepest proposed address</p>
+    <div class="ladder">
+      <div class="rung"><span class="u">/runs/20260921T064521Z_v0_all_haiku/deps_dev_v1/1/<b>t1</b></span><span class="w">trial 1 of that question in that run: the trace, the answer, the verdict</span></div>
+      <div class="rung"><span class="u">/runs/20260921T064521Z_v0_all_haiku/deps_dev_v1/<b>1</b></span><span class="w">that question in that run → lands on the run page at its row</span></div>
+      <div class="rung"><span class="u">/runs/20260921T064521Z_v0_all_haiku/<b>deps_dev_v1</b></span><span class="w">that dataset in that run → the run page, grouped there</span></div>
+      <div class="rung"><span class="u">/runs/<b>20260921T064521Z_v0_all_haiku</b></span><span class="w">the run</span></div>
+      <div class="rung"><span class="u">/<b>runs</b></span><span class="w">the board</span></div>
+    </div>
+    <figcaption><b>Every chop lands.</b> Today the same trail is <code>/runs/&lt;run&gt;/traces/deps_dev_v1_1_t1</code>: chop once and <code>/runs/&lt;run&gt;/traces</code> is blank. The two middle rungs need no page of their own; a redirect to the run page with the row focused is enough (R-02).</figcaption>
+  </figure>
+
+  <div class="grid g2" style="margin-top:var(--s5)">
+    <div class="panel card">
+      <h3>One module owns it: <code>frontend/src/lib/url.ts</code></h3>
+      <p>Replaces <code>queryPath()</code> and <code>traceKey()</code> in <code>lib/api.ts</code> and the hand-built strings in thirteen files. Roughly:</p>
+      <div class="code band"><pre>datasetPath('deps_dev_v1')            → '/datasets/deps_dev_v1'
+questionPath('deps_dev_v1/1')          → '/datasets/deps_dev_v1/1'
+trialId({dataset, query_id, trial})    → 'deps_dev_v1/1/t1'
+trialPath(run, 'deps_dev_v1/1/t1')     → '/runs/&lt;run&gt;/deps_dev_v1/1/t1'
+goldenPath('deps_dev_v1/1')            → '/golden/deps_dev_v1/1'
+agentPath('champion', {run, trial, node})
+                                       → '/agent/champion?run=…&amp;trial=deps_dev_v1/1/t1&amp;node=tool:execute_python'
+lens(sp, patch)                        → the query string, serialised by us:
+                                         '/', ':' and ',' stay readable; only '&amp;', '=', '#', '%' and
+                                         spaces are escaped (all three are legal in a query per RFC 3986)</pre></div>
+      <p>The backend mirror is two functions next to <code>aliases.query_id()</code>: <code>trial_id()</code> and <code>trace_file(trial_id)</code>, so the API and the run folder agree by construction.</p>
+    </div>
+    <div class="panel card">
+      <h3>Why the lens serialiser is ours</h3>
+      <p><code>setSearchParams</code> always goes through <code>URLSearchParams.toString()</code>, the form-encoding serialiser, which turns <code>deps_dev_v1/1/t1</code> into <code>deps_dev_v1%2F1%2Ft1</code> and <code>lb:permute_eq</code> into <code>lb%3Apermute_eq</code>. Reading back is fine either way (<code>useSearchParams</code> decodes both), so the change is write-only: <code>navigate({ search })</code> with our string, one helper, no new dependency.</p>
+      <p>This is also the honest answer to "why not put the trial in the query string as it is": we can, once the serialiser stops mangling it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== MAP -->
+<section class="blk" id="map">
+  <div class="hd">
+    <p class="label">05 · the map · today → proposed</p>
+    <h2>Three addresses change, one page changes shape, every old link redirects</h2>
+    <p class="small">Struck text is what goes; green rows are the changes. Old addresses keep working through <code>&lt;Navigate replace&gt;</code> routes, the way <code>/queries</code> already does, because a changed URL that 404s breaks the s03 review notes and any bookmark.</p>
+  </div>
+  <div class="tw"><table>
+    <caption>The proposed address of every route, with the reason and the redirect for the old one.</caption>
+    <thead><tr><th>Today</th><th>Proposed</th><th>Why</th><th>Old link</th></tr></thead>
+    <tbody>
+      <tr class="dim"><td class="mono">/ · /datasets · /datasets/:key · /validators · /leaderboard · /runs · /runs/:id · /golden</td><td class="mono">unchanged</td><td>already record pages with index ids</td><td>—</td></tr>
+      <tr class="pro"><td><code class="u">/<s>queries</s>/deps_dev_v1/1</code></td><td><code class="u">/datasets/deps_dev_v1/1</code></td><td>the question lives under its dataset, under the tab called Datasets &amp; queries; chops to the dataset, then the list (R-01)</td><td><code>/queries/:key/:n</code> → redirect</td></tr>
+      <tr class="pro"><td><code class="u">/runs/&lt;run&gt;/<s>traces/deps_dev_v1_1_t1</s></code></td><td><code class="u">/runs/&lt;run&gt;/deps_dev_v1/1/t1</code></td><td>the trial is spelled as the id, not the file; chops to the run (R-02)</td><td><code>/runs/:id/traces/:key</code> → redirect, parsing the file name once</td></tr>
+      <tr class="pro"><td><code class="u">/agent<s>?agent=champion</s>&amp;run=…&amp;trial=<s>deps_dev_v1_1_t1</s>&amp;node=tool<s>%3A</s>execute_python</code></td><td><code class="u">/agent/champion?run=…&amp;trial=deps_dev_v1/1/t1&amp;node=tool:execute_python</code></td><td>the version is the subject (rule 2); the trial is the id (rule 1); readable lens (R-03). <code>/agent</code> alone → <code>/agent/champion</code></td><td><code>/agent?agent=x&amp;trial=old</code> → rewritten on load</td></tr>
+      <tr class="pro"><td><code class="u">/golden/deps_dev_v1/1</code> as its own page</td><td><code class="u">/golden/deps_dev_v1/1</code> nested in <code>/golden</code></td><td>same address, new shape: the list stays, the editor opens above it (R-04, §6)</td><td>same address</td></tr>
+      <tr><td><code class="u">/runs?focus=…&amp;challenger=lb<s>%3A</s>permute_eq&amp;group=&amp;scope=</code></td><td><code class="u">/runs?focus=…&amp;challenger=lb:permute_eq&amp;group=&amp;scope=</code></td><td>already the right shape; only the serialiser changes (R-05)</td><td>same, decodes either way</td></tr>
+      <tr><td class="mono">GET /api/runs/{run}/traces/{key}</td><td class="mono">GET /api/runs/{run}/{ds}/{n}/t{k}</td><td>the API mirrors the page; the file name is computed from the id (R-06). The other 21 routes already carry index ids and keep their nouns</td><td>the old route stays one release, then goes</td></tr>
+    </tbody>
+  </table></div>
+
+  <form class="q" data-lavish-question="route-map" onsubmit="event.preventDefault(); const selected=[...event.currentTarget.querySelectorAll('input[name=items]:checked')].map(i=>({id:i.value,label:i.dataset.label,disposition:'build'})); const skipped=[...event.currentTarget.querySelectorAll('input[name=items]:not(:checked)')].map(i=>i.value); const note=event.currentTarget.querySelector('textarea').value.trim(); window.lavish.queuePrompt('Build exactly the ticked URL-grammar changes (s04 §5) and give an item-by-item receipt that accounts for every R-id, ticked or not: '+selected.map(s=>s.id).join(', ')+(skipped.length?' · skipped: '+skipped.join(', '):'')+(note?' · note: '+note:''), {tag:'tracked-batch', text:'Route map: build '+selected.length+' of 9 (R-01…R-09)', element:event.currentTarget, data:{items:selected, skipped, note}}); event.currentTarget.querySelector('.queued').textContent='queued: '+selected.length+' to build, '+skipped.length+' skipped — press Send to Agent';">
+    <h3>Tracked batch · which of the nine changes to build</h3>
+    <p class="why">All nine are ticked as recommended. Untick anything you want left as it is; the receipt will name every R-id either way.</p>
+    <label><input type="checkbox" name="items" value="R-01" data-label="question page moves to /datasets/<ds>/<n>, /queries/* redirects" checked> <span><b>R-01</b> · the question page moves to <code>/datasets/&lt;ds&gt;/&lt;n&gt;</code>; <code>/queries/:key/:n</code> redirects</span></label>
+    <label><input type="checkbox" name="items" value="R-02" data-label="trace page at /runs/<run>/<ds>/<n>/t<k>, old traces/ path redirects, middle chops land on the run page" checked> <span><b>R-02</b> · the trace page moves to <code>/runs/&lt;run&gt;/&lt;ds&gt;/&lt;n&gt;/t&lt;k&gt;</code>; the old <code>traces/</code> path redirects; the two middle chops land on the run page</span></label>
+    <label><input type="checkbox" name="items" value="R-03" data-label="Agent tab at /agent/<version> with run, trial (as the id) and node in a readable query string; /agent and old params rewrite" checked> <span><b>R-03</b> · the Agent tab becomes <code>/agent/&lt;version&gt;?run=&amp;trial=&lt;ds&gt;/&lt;n&gt;/t&lt;k&gt;&amp;node=</code>; bare <code>/agent</code> and the old parameters rewrite themselves</span></label>
+    <label><input type="checkbox" name="items" value="R-04" data-label="Golden editor nested in the Golden list: same address, opens above the table, list stays" checked> <span><b>R-04</b> · the Golden editor becomes a nested route: same address, opens above the table, the list stays (§6)</span></label>
+    <label><input type="checkbox" name="items" value="R-05" data-label="one lens serialiser so '/', ':' and ',' stay readable in query strings (Runs, Agent)" checked> <span><b>R-05</b> · one lens serialiser, so <code>/</code>, <code>:</code> and <code>,</code> stay readable in every query string (Runs compare, Agent)</span></label>
+    <label><input type="checkbox" name="items" value="R-06" data-label="API mirror: GET /api/runs/{run}/{ds}/{n}/t{k}; old traces/{key} route kept one release" checked> <span><b>R-06</b> · the API mirrors it: <code>GET /api/runs/{run}/{ds}/{n}/t{k}</code>, old route kept for one release, <code>tests/test_api.py</code> updated</span></label>
+    <label><input type="checkbox" name="items" value="R-07" data-label="lib/url.ts owns the grammar; queryPath/traceKey and hand-built strings replaced; backend trial_id/trace_file next to aliases.query_id" checked> <span><b>R-07</b> · <code>lib/url.ts</code> owns the grammar in the frontend, <code>trial_id()</code>/<code>trace_file()</code> next to <code>aliases.query_id()</code> in the backend; the two old helpers and the hand-built strings go</span></label>
+    <label><input type="checkbox" name="items" value="R-08" data-label="CLAUDE.md rule 'One address per thing' (the three rules), README and AGENTS.md examples updated" checked> <span><b>R-08</b> · CLAUDE.md gets the rule "One address per thing" in three lines; README and AGENTS.md examples (<code>lb:permute_eq</code>, the golden route) updated</span></label>
+    <label><input type="checkbox" name="items" value="R-09" data-label="a frontend test that every old address redirects and every new one renders (RouterProvider + MemoryRouter)" checked> <span><b>R-09</b> · a routing test: every old address redirects and every new one renders, driven through a <code>MemoryRouter</code>, so the grammar is enforced not described</span></label>
+    <textarea placeholder="anything to change in the map before it is built (optional)"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue the ticked changes</button><span class="queued"></span></div>
+  </form>
+</section>
+
+<!-- ===================================================== GOLDEN -->
+<section class="blk" id="golden">
+  <div class="hd">
+    <p class="label">06 · the Golden tab, rebuilt to rule 3</p>
+    <h2>Click a row, the editor opens above the table, the row stays lit, and the address is still <code>/golden/deps_dev_v1/1</code></h2>
+    <p class="small">A mock in the explorer's own styles. The list is the parent route; the editor is its <code>&lt;Outlet&gt;</code> child. Closing the editor navigates to <code>/golden</code>; prev/next move through the 54 without touching the list; the open row scrolls into view on load.</p>
+  </div>
+  <div class="addr"><span class="lock">▢</span> localhost:8091<b>/golden/deps_dev_v1/1</b></div>
+  <div class="mock" aria-label="Mock of the Golden tab with the editor open in place">
+    <div class="mock-top"><span class="brand">DAB explorer</span><nav><span>Overview</span><span>Datasets &amp; queries</span><span>Validators</span><span>Leaderboard</span><span>Runs</span><span>Agent</span><span class="on">Golden</span></nav></div>
+    <div class="mock-body">
+      <p class="label">golden · SQL by hand, run as the agent's role, judged by the question's validator</p>
+      <h1>0 of 54 questions have a golden; <em>deps_dev_v1/1</em> is open below</h1>
+      <div class="ed">
+        <div class="hdr"><b>deps_dev_v1/1</b><span class="small">exact-match validator · gold 6 lines</span><span class="nav"><a>← bookreview/6</a><a>deps_dev_v1/2 →</a><a>close ×</a></span></div>
+        <p class="qtext">Considering only the latest release versions for each distinct NPM package, which packages are the top 5 most popular based on the Github star number, as well as their versions?</p>
+        <div class="ta">select name, version
+from deps_dev_v1_…
+order by stars desc limit 5</div>
+        <div class="row"><span class="btn">Run and check</span><span class="btn ghost">Save as golden</span><span class="tag ok">passed</span><span class="tag ok">recreates the gold exactly</span><span class="tag">6 rows · 41 ms</span></div>
+      </div>
+      <div class="tw"><table>
+        <thead><tr><th>Query</th><th>Question</th><th>Style</th><th>Validator</th><th>Against the gold</th><th>Saves</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">bookreview/6</td><td>Which reviewer wrote the most reviews…</td><td>regex / number</td><td class="v-no">not written</td><td class="v-no">—</td><td class="num">0</td></tr>
+          <tr class="cur"><td class="mono">deps_dev_v1/1</td><td>Considering only the latest release versions…</td><td>exact</td><td class="v-ok">passed</td><td class="v-ok">exact</td><td class="num">0 → 1</td></tr>
+          <tr><td class="mono">deps_dev_v1/2</td><td>Which NPM package has the most dependents…</td><td>exact</td><td class="v-no">not written</td><td class="v-no">—</td><td class="num">0</td></tr>
+          <tr><td class="mono">deps_dev_v1/3</td><td>…</td><td>regex / number</td><td class="v-no">not written</td><td class="v-no">—</td><td class="num">0</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+  <div class="cmp">
+    <div class="side">
+      <p class="label">today · main.tsx</p>
+      <pre>&lt;Route path="/golden" element={&lt;Golden /&gt;} /&gt;
+&lt;Route path="/golden/:key/:n" element={&lt;GoldenQuery /&gt;} /&gt;
+<span class="small">two sibling pages: the second replaces the first</span></pre>
+    </div>
+    <div class="side pro">
+      <p class="label">proposed · main.tsx</p>
+      <pre>&lt;Route path="/golden" element={&lt;Golden /&gt;}&gt;
+  &lt;Route path=":key/:n" element={&lt;GoldenEditor /&gt;} /&gt;
+&lt;/Route&gt;
+<span class="small">Golden renders &lt;Outlet /&gt; above its table; the child
+is the editor; useParams gives it the question</span></pre>
+    </div>
+  </div>
+  <div class="grid g3" style="margin-top:var(--s4)">
+    <div class="panel card"><h3>What the editor keeps</h3><p>Everything built in 42fedcb and d32d602: SQL box, note, Run and check, Save as golden, the validator verdict, the gold-match verdict, the rendered answer text, the result table, the version history with "load into the editor".</p></div>
+    <div class="panel card"><h3>What it gains</h3><p>prev / next through the 54 in list order; close; the open row highlighted and scrolled to; the list's coverage numbers update after a save without a reload; the Query page links here as "edit its golden" and shows the current golden read-only later, not now.</p></div>
+    <div class="panel card"><h3>What it loses</h3><p>The full-width page. The editor is a panel above a wide table, so on a laptop the result table and the history sit in a scrolling panel of about 60 vh; the table below stays visible under it. If that feels cramped in use, a "widen" toggle is a one-line change.</p></div>
+  </div>
+</section>
+
+<!-- ===================================================== DECIDE -->
+<section class="band-sec" id="decide"><div class="wrap">
+  <div class="hd">
+    <p class="label">07 · decide</p>
+    <h2>One real fork: where the golden editor lives</h2>
+    <p class="small">The route map above is a batch you tick; this is the one choice the map cannot make for you. D22 is numbered after s03's D21 so the decision log stays one sequence.</p>
+  </div>
+  <div class="grid g3">
+    <div class="panel card pro">
+      <h3>A · in place on the Golden tab <span class="rec">decided · built</span></h3>
+      <p>Master-detail as mocked in §6. The Golden tab is the curation workbench: scan coverage, open a row, write, save, next. The Query page links to it.</p>
+      <p><b>Cost</b>: one nested route, an Outlet, prev/next. About 2 h.</p>
+    </div>
+    <div class="panel card">
+      <h3>B · a section on the question's own page</h3>
+      <p>The editor becomes a section of <code>/datasets/&lt;ds&gt;/&lt;n&gt;</code>; the Golden tab is only the coverage list and links there. Fewest routes (one page holds gold, validator, trials and golden).</p>
+      <p><b>Cost</b>: the question page grows to five sections and two executing forms; curating 54 in a row means 54 page loads. About 2 h.</p>
+    </div>
+    <div class="panel card">
+      <h3>C · both</h3>
+      <p>A now, and the question page shows the current golden read-only with an "edit" link (one API call it already has). Two addresses show the same SQL; only one edits it.</p>
+      <p><b>Cost</b>: A plus about 30 min, once goldens exist to show.</p>
+    </div>
+  </div>
+  <form class="q" data-lavish-question="D22" onsubmit="event.preventDefault(); const c=new FormData(event.currentTarget).get('d22'); const note=event.currentTarget.querySelector('textarea').value.trim(); if(!c)return; window.lavish.queuePrompt('D22 · golden editor placement: '+c+(note?' — note: '+note:''), {tag:'choice', text:'D22: '+c, element:event.currentTarget, data:{question:'D22', answer:c, note}}); event.currentTarget.querySelector('.queued').textContent='queued: '+c+' — press Send to Agent';">
+    <h3>D22 · where does the golden editor live?</h3>
+    <p class="why">A is what you asked for and what the master-detail convention says; B condenses the most; C is A with a read-only echo later.</p>
+    <label><input type="radio" name="d22" value="A · in place on the Golden tab (nested route, list stays)" checked> A · in place on the Golden tab: nested route, the list stays, prev/next through the 54</label>
+    <label><input type="radio" name="d22" value="B · a section on the question page; Golden tab is the coverage list only"> B · a section on the question page; the Golden tab is only the coverage list</label>
+    <label><input type="radio" name="d22" value="C · A now, plus a read-only echo of the current golden on the question page later"> C · A now, plus a read-only echo of the current golden on the question page later</label>
+    <textarea placeholder="anything else about the editor's shape (optional)"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue this answer</button><span class="queued"></span></div>
+  </form>
+</div></section>
+
+<!-- ===================================================== BUILD -->
+<section class="blk" id="build">
+  <div class="hd">
+    <p class="label">08 · build · one PR, about half a day</p>
+    <h2>Grammar module first, then routes, then redirects, then the Golden shape, then docs and a routing test</h2>
+  </div>
+  <ol class="steps">
+    <li><b>lib/url.ts</b> with the helpers in §4; <code>queryPath</code> and <code>traceKey</code> in <code>lib/api.ts</code> become re-exports for one commit, then go. Backend: <code>trial_id()</code> and <code>trace_file()</code> beside <code>aliases.query_id()</code>, unit-tested both ways.</li>
+    <li><b>Routes</b> in <code>main.tsx</code>: <code>/datasets/:key/:n</code>, <code>/runs/:id/:ds/:n/:t</code> (with <code>:t</code> validated as <code>t\d+</code>), <code>/agent/:version</code>, and <code>/golden</code> with the nested <code>:key/:n</code>. The two middle chops of a trial (<code>/runs/:id/:ds</code>, <code>/runs/:id/:ds/:n</code>) redirect to the run page with a <code>#</code> anchor on the row.</li>
+    <li><b>Redirects</b>: <code>/queries/:key/:n</code>, <code>/runs/:id/traces/:key</code> (parse the file name once, with the dataset list from <code>/api/datasets</code> to split it safely), <code>/agent</code> → <code>/agent/champion</code>, and an effect on the Agent page that rewrites an old <code>?agent=…&amp;trial=&lt;file key&gt;</code> into the new address.</li>
+    <li><b>Lens serialiser</b> (R-05): <code>lens(sp, patch)</code> in <code>lib/url.ts</code>; the Runs compare and the Agent page call it instead of <code>setSearchParams</code>. The <code>sessionStorage</code> "last view" memory both pages keep stays as it is.</li>
+    <li><b>Golden</b>: <code>Golden</code> renders an <code>&lt;Outlet /&gt;</code> above the table and lights the open row; <code>GoldenQuery</code> becomes <code>GoldenEditor</code> with prev/next/close, and the list re-fetches <code>/api/golden</code> after a save. No API change.</li>
+    <li><b>API</b> (R-06): <code>GET /api/runs/{run}/{ds}/{n}/t{k}</code> alongside the old route; <code>test_api.py</code> covers both for one release; the frontend uses only the new one.</li>
+    <li><b>Docs</b>: CLAUDE.md rule "One address per thing" (rules 1–3 in three lines, pointing at <code>lib/url.ts</code>); README's Runs and Golden bullets; AGENTS.md's layout table; s03's Golden pivot banner gets the new address.</li>
+    <li><b>Routing test</b> (R-09): a Vitest file that mounts the routes in a <code>MemoryRouter</code> at every old address and asserts the redirect target, and at every new address and asserts the page renders; plus <code>npm run typecheck</code>, <code>npm run lint:design</code>, <code>uv run pytest -q</code>, <code>make lint</code>.</li>
+  </ol>
+  <div class="grid g3" style="margin-top:var(--s5)">
+    <div class="panel card"><h3>Files touched</h3><p><code>main.tsx</code>, <code>lib/url.ts</code> (new), <code>lib/api.ts</code>, <code>pages/{Golden,Agent,Runs,Run,TracePage,Query,Dataset,Datasets,Overview,Validators}.tsx</code>, <code>lib/{ui,runs,agent,queries}.tsx</code>, <code>Shell.tsx</code> (nav unchanged), <code>serving/app.py</code>, <code>data/aliases.py</code>, <code>tests/test_api.py</code>, one new Vitest file, CLAUDE.md, README.md, AGENTS.md.</p></div>
+    <div class="panel card"><h3>Not touched</h3><p>Anything under <code>runs/</code>, the trace file names, <code>data/index/</code>, the MLflow links (they point at MLflow, not at the explorer), the golden table, the isolation code. The ids in <code>results.jsonl</code> are already the index ids.</p></div>
+    <div class="panel card"><h3>Order and size</h3><p>Steps 1–4 are mechanical and can go to a cheaper model with the test from step 8 written first; step 5 is the design work; step 6 needs the API reviewed as CLAUDE.md asks. One PR, one commit per step, about 4–5 h.</p></div>
+  </div>
+</section>
+
+<!-- ===================================================== RISKS -->
+<section class="blk" id="risks">
+  <div class="hd">
+    <p class="label">09 · risks and what is deliberately left out</p>
+    <h2>Two things could bite; both have a cheap guard</h2>
+  </div>
+  <div class="grid g2">
+    <div class="panel card">
+      <h3>Parsing the old trial key</h3>
+      <p><code>deps_dev_v1_1_t1</code> cannot be split on <code>_</code> blindly: dataset keys contain underscores. The redirect matches the known dataset keys first, then <code>_&lt;n&gt;_t&lt;k&gt;</code>. That list is 12 long and already on the page. Guarded by the routing test with every dataset key.</p>
+    </div>
+    <div class="panel card">
+      <h3>Route order in FastAPI</h3>
+      <p><code>/api/runs/compare</code> is a literal route declared before <code>/api/runs/{run_id}</code>, which is why it works; the new <code>/api/runs/{run}/{ds}/{n}/t{k}</code> must be declared after it too, and <code>t{k}</code> must be matched as a pattern so <code>/traces/…</code> never falls into it. Covered by <code>test_api.py</code>.</p>
+    </div>
+    <div class="panel card">
+      <h3>Left out on purpose</h3>
+      <p>Merging the trace page into the Agent replay (they show the same trial twice, at two addresses). It would condense further, but it changes what the Agent tab is, which s02 decided; raise it after the goldens exist and the replay is used for real.</p>
+    </div>
+    <div class="panel card">
+      <h3>Also left out</h3>
+      <p>Renaming the index id itself (<code>deps_dev_v1/1</code>). It is the contract the API, <code>results.jsonl</code>, the rescore and the golden table all share, and it is readable; the problem was never the id, it was the other two spellings.</p>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:var(--s5)">
+    <p class="label">sources read for §3</p>
+    <ul class="src">
+      <li>Nielsen Norman Group, <a href="https://www.nngroup.com/articles/url-as-ui/">URL as UI</a>: readable, hackable, persistent addresses; people remember, type and share them.</li>
+      <li><a href="https://decodingtech1.substack.com/p/path-parameters-vs-query-parameters">Path parameters vs query parameters</a> and <a href="https://eduardoac.dev/blog/guide-for-url-query-vs-path-parameters-in-protected-web-apps">Guide for URL query vs path parameters in web apps</a>: path identifies, query filters/selects with defaults.</li>
+      <li><a href="https://reactrouter.com/start/declarative/routing">React Router, declarative routing</a>: nested routes, <code>&lt;Outlet&gt;</code>, index routes, dynamic segments (doc is v8.4; behaviour matches 7.18.3).</li>
+      <li><a href="https://blogs.windows.com/windowsdeveloper/2017/05/01/master-master-detail-pattern/">Master the master-detail pattern</a> and <a href="https://webapphuddle.com/master-detail-ui-pattern-design/">Master-detail UI pattern, six designs</a>: list plus detail on one page, addressable selection, drill-down only when the screen is small.</li>
+      <li><a href="https://visively.com/kb/content/url-structure-fundamentals">URL structure fundamentals</a>: the best structure is the one you never change; when you do, redirect.</li>
+      <li>transcript-rag-agent <code>.lavish/s01, s02, s13, s20, s21</code>: no URL guidance; s21's drawer-from-list and sticky in-page nav are the borrowed shape.</li>
+    </ul>
+  </div>
+</section>
+</div>
+</body>
+</html>

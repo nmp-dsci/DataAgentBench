@@ -1,0 +1,13 @@
+# v1_sql — the SQL-answer challenger (plan s06, D26–D28). Frozen across a comparison: only
+# system.md and datasets/<ds>.md move. Haiku, as v0, so the comparison isolates the build.
+model: haiku
+effort: medium
+max_turns: 30
+timeout_s: 900
+exec_timeout_s: 600
+hints: true           # upstream db_description_withhint.txt, verbatim (D26)
+pack: false           # the curated summary.md + pitfalls.md stay out (D26)
+tools:                # D28: nine down to three; no Python, no sandbox
+  - mcp__dab__query_db
+  - mcp__dab__describe_table
+  - mcp__dab__submit_answer

@@ -26,6 +26,9 @@ FRONTEND_DIST = ROOT / "frontend" / "dist"
 # The one schema this project owns on the (for now project-local, later central)
 # Postgres, and the naming rule for every table in it: `<dataset>_<table>`.
 PG_SCHEMA = "dataagentbench"
+# The question set's convenience copy. A separate schema on purpose: PG_SCHEMA grants
+# SELECT to dab_agent by default, so gold answers must not live there (infra/roles.sql).
+PG_META_SCHEMA = "dataagentbench_meta"
 HF_DATA_REPO = "ruiyingm/DataAgentBench-data"
 MLFLOW_EXPERIMENT = "dataagentbench/evals"
 

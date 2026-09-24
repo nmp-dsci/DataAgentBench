@@ -90,6 +90,11 @@ def summarise(
     seconds: float,
     timeout_s: int,
 ) -> dict[str, Any]:
+    # A reference file (`pooled: False`, a leaderboard entry read from its PR) is judged and
+    # kept per file, but each query's pooled n / passed / rate stays the public baselines'.
+    reference = {
+        f["name"] for f in ix.leaderboard.get("answer_files", []) if not f.get("pooled", True)
+    }
     per_query: dict[str, Any] = {}
     for qid, by_file in verdicts.items():
         files: dict[str, Any] = {}
@@ -104,13 +109,14 @@ def summarise(
                 "pass_examples": passes[:EXAMPLES],
                 "fail_examples": fails[:EXAMPLES],
             }
-        n = sum(f["n"] for f in files.values())
-        passed = sum(f["passed"] for f in files.values())
+        pooled = [f for name, f in files.items() if name not in reference]
+        n = sum(f["n"] for f in pooled)
+        passed = sum(f["passed"] for f in pooled)
         per_query[qid] = {
             "n": n,
             "passed": passed,
             "rate": passed / n if n else None,
-            "timed_out": sum(f["timed_out"] for f in files.values()),
+            "timed_out": sum(f["timed_out"] for f in pooled),
             "files": dict(sorted(files.items())),
         }
 
@@ -164,8 +170,15 @@ def _site_check(ix: Index, per_file: dict[str, Any]) -> dict[str, Any]:
     """Our macro per-dataset numbers next to the site's stratified tables, for the files that have a column."""
     lb = ix.leaderboard
     meta = {f["name"]: f for f in lb.get("answer_files", [])}
-    out: dict[str, Any] = {"files": {}, "max_abs_diff": 0.0}
+    out: dict[str, Any] = {"files": {}, "overall": {}, "max_abs_diff": 0.0}
     for fname, pf in per_file.items():
+        site_p1 = (meta.get(fname) or {}).get("pass_at_1_site")
+        if site_p1 is not None and pf["macro"] is not None:
+            out["overall"][fname] = {
+                "ours": round(pf["macro"], 4),
+                "site": site_p1,
+                "diff": round(pf["macro"] - site_p1, 4),
+            }
         strat = (meta.get(fname) or {}).get("stratified")
         if not strat:
             continue

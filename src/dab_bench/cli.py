@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import typer
 from rich.console import Console
@@ -71,6 +72,22 @@ def data_load(datasets: str | None = None) -> None:
         console.print(f"[red]error[/] {e}")
     if r.errors:
         raise typer.Exit(1)
+
+
+@data_app.command("load-questions")
+def data_load_questions() -> None:
+    """Copy data/index/queries.json into dataagentbench_meta.queries for ad-hoc SQL.
+
+    The JSON stays the record; this table is dropped and rebuilt. It holds gold
+    answers, so it lives outside the schema the agent can read.
+    """
+    from dab_bench.data.meta import load_questions
+
+    r = load_questions()
+    console.print(
+        f"{r.rows} questions → {r.schema}.{r.table} (upstream {r.upstream_commit[:7]}); "
+        "not readable by dab_agent"
+    )
 
 
 @data_app.command("smoke")
@@ -370,6 +387,217 @@ def runs_log(run_id: str) -> None:
     meta.mlflow_run_id = log_run(RUNS_DIR / run_id, meta, results)
     _write_meta(RUNS_DIR / run_id, meta)
     console.print(f"logged {run_id} → mlflow run {meta.mlflow_run_id}")
+
+
+@app.command()
+def diagnose(run_id: str, refresh: bool = False, show: int = 60) -> None:
+    """The scorecard of a run: answer / SQL / decision per question, a category per failure,
+    and what to optimise first. Computed after the run (goldens re-run as dab_agent) and kept
+    in runs/<id>/scorecard.json; --refresh recomputes it."""
+    from dab_bench.eval.scorecard import load_scorecard, score_run
+
+    card = None if refresh else load_scorecard(run_id)
+    if card is None:
+        card = score_run(run_id)
+        from dab_bench.config import RUNS_DIR
+        from dab_bench.eval.runner import load_run
+
+        meta, _ = load_run(run_id)
+        if meta.mlflow_run_id:
+            try:
+                from dab_bench.tracking.mlflow_log import log_scorecard
+
+                log_scorecard(meta.mlflow_run_id, RUNS_DIR / run_id)
+            except Exception as e:  # noqa: BLE001 - the folder is the record
+                console.print(f"[yellow]mlflow: scorecard not re-logged ({e})[/]")
+    tot = card["totals"]
+    head = "   ".join(f"{k} {v['passed']}/{v['n']}" for k, v in tot.items())
+    console.print(f"[bold]{run_id}[/]   {head}")
+    for split, st in (card.get("by_split") or {}).items():
+        console.print(
+            f"  {split:<8} " + "   ".join(f"{k} {v['passed']}/{v['n']}" for k, v in st.items())
+        )
+    if card["optimise_first"]:
+        console.print("optimise first:")
+        for o in card["optimise_first"]:
+            qs = ", ".join(o["queries"][:4]) + (", …" if len(o["queries"]) > 4 else "")
+            console.print(f"  {o['category']:<26} {o['n']:>3}   {qs}")
+    t = Table(box=None)
+    for c in ("question", "split", "answer", "SQL", "decision", "category", "detail"):
+        t.add_column(c)
+
+    def mark(v: bool | None) -> str:
+        return "—" if v is None else "[green]pass[/]" if v else "[red]fail[/]"
+
+    for q in card["questions"][:show]:
+        t.add_row(
+            q["query_id"],
+            q.get("split") or "",
+            mark(q["answer"]),
+            mark(q["sql"]),
+            mark(q["decision"]),
+            q["category"] if q["category"] != "solved" else "—",
+            q["detail"][:70],
+        )
+    console.print(t)
+
+
+@app.command()
+def optimise(
+    run_id: str,
+    into: str = typer.Option(..., help="the new version's name, e.g. v2_sql"),
+    workers: int = 4,
+    system_pass_only: bool = typer.Option(
+        False, help="re-run only the cross-dataset system.md pass for an existing INTO"
+    ),
+) -> None:
+    """One optimisation round: the optimiser (Sonnet 5, medium) reads RUN's failed train
+    questions per dataset and writes agents/INTO/ = the run's version + dataset notes (+ a
+    guarded system.md pass). Every edit is checked for question text, gold values and golden
+    SQL; the held-out questions are never shown."""
+    import asyncio
+
+    from dab_bench.agent.optimise import optimise as _optimise
+    from dab_bench.tracking.mlflow_log import TrackingDownError, preflight
+
+    try:
+        preflight()
+    except TrackingDownError as e:
+        console.print(f"[red]{e}[/]")
+        raise typer.Exit(1) from None
+    if system_pass_only:
+        from dab_bench.agent.optimise import rerun_system_pass
+
+        rec = asyncio.run(rerun_system_pass(into))
+    else:
+        rec = asyncio.run(_optimise(run_id, into, workers=workers))
+    for s in rec["sessions"]:
+        state = (
+            "[red]error[/] " + s["error"]
+            if s["error"]
+            else "accepted"
+            if s["notes"] is not None
+            else "[yellow]dropped[/]"
+        )
+        console.print(
+            f"  {s['scope']:<18} {state}  {len(s['notes'] or ''):>5} chars  "
+            f"{len(s['refusals'])} refusal(s)  {s['n_turns']} turns  ${s['cost_usd'] or 0:.3f}"
+        )
+    console.print(
+        f"agents/{into} · fingerprint {rec['fingerprint']} · system.md "
+        f"{'changed' if rec['system_md_changed'] else 'unchanged'} · ${rec['cost_usd']:.2f}"
+    )
+
+
+@app.command()
+def promote(candidates: str | None = None, dry_run: bool = False) -> None:
+    """Crown the version with the most answers passed on the 54 (D30; a tie keeps the
+    incumbent). Each candidate is its newest complete full-split run. Moves agents/champion,
+    sets the MLflow prompt alias `champion` and appends the verdict to agents/promotions.jsonl."""
+    from dab_bench.eval.promote import promote as _promote
+
+    rec = _promote(_datasets_arg(candidates), dry_run=dry_run)
+    t = Table(box=None)
+    for c in ("version", "run", "answer", "SQL", "decision", "held-out answer", "note"):
+        t.add_column(c)
+    for c in rec["candidates"]:
+        sc = c.get("scorecard") or {}
+        ho = (c.get("heldout") or {}).get("answer")
+        t.add_row(
+            c["version"] + (" ★" if c["version"] == rec["winner"] else ""),
+            c["run_id"] or "—",
+            f"{c['passed']}/{c['scored']}" if c["passed"] is not None else "—",
+            f"{sc['sql']['passed']}/{sc['sql']['n']}" if sc.get("sql", {}).get("n") else "—",
+            f"{sc['decision']['passed']}/{sc['decision']['n']}"
+            if sc.get("decision", {}).get("n")
+            else "—",
+            f"{ho['passed']}/{ho['n']}" if ho else "—",
+            c["why_not"],
+        )
+    console.print(t)
+    console.print(("[dim]dry run[/] " if dry_run else "") + rec["reason"])
+
+
+@app.command("split-optimise")
+def split_optimise(force: bool = False) -> None:
+    """Write data/splits/train.json + heldout.json from today's goldens (2/3 per dataset,
+    seeded). Written once: every version is measured on the same split; --force re-draws it."""
+    from dab_bench.config import SPLITS_DIR
+    from dab_bench.eval import golden
+    from dab_bench.eval.scorecard import write_split
+
+    if (SPLITS_DIR / "train.json").exists() and not force:
+        console.print("[yellow]the split exists[/]; --force re-draws it (and breaks comparability)")
+        raise typer.Exit(1)
+    s = write_split(sorted(golden.current()))
+    console.print(f"train {len(s['train'])} · held-out {len(s['heldout'])}")
+
+
+@app.command("isolation-check")
+def isolation_check_cmd(agent: str = "champion", dataset: str = "yelp") -> None:
+    """Start one session exactly as a trial would and show what the CLI gave it (one short turn)."""
+    import asyncio
+
+    from dab_bench.agent.prompt import load_context
+    from dab_bench.agent.session import isolation_check
+    from dab_bench.agent.versions import load_version
+
+    out = asyncio.run(isolation_check(load_version(agent), load_context(dataset)))
+    console.print_json(data=out)
+    if out["problems"]:
+        console.print(f"[red]not isolated[/red]: {'; '.join(out['problems'])}")
+        raise typer.Exit(1)
+    console.print("[green]isolated[/green]: the dab tools and the prompt, nothing else")
+
+
+@app.command("golden-propose")
+def golden_propose_cmd(folder: Path) -> None:
+    """Load proposed golden SQL from FOLDER: one `<ds>_<n>.sql` + `<ds>_<n>.json` per question
+    (json: query_id, kind, replaces, note, expected_answer). Each is run as dab_agent and judged
+    before it is stored in `dataagentbench_meta.golden_proposal`. A proposal is not a golden: a
+    person confirms it by saving it in the Golden tab."""
+    import json
+
+    from dab_bench.data.index import load
+    from dab_bench.eval import golden
+
+    ix = load()
+    loaded = 0
+    for meta_path in sorted(folder.glob("*.json")):
+        meta = json.loads(meta_path.read_text())
+        if not isinstance(meta, dict) or "query_id" not in meta:
+            continue  # a request body or anything else that is not a proposal
+        sql_path = meta_path.with_suffix(".sql")
+        q = ix.query_by_id.get(meta["query_id"])
+        if q is None or not sql_path.exists():
+            console.print(
+                f"[yellow]skip[/yellow] {meta_path.name}: no such query or no .sql beside it"
+            )
+            continue
+        sql = sql_path.read_text()
+        kind = meta.get("kind", "answer")
+        folder_name = ix.dataset_by_key[q["dataset_key"]]["folder"]
+        out, ex = golden.attempt(q, folder_name, sql, kind)
+        saved = golden.propose(
+            q["id"],
+            sql,
+            out,
+            ex,
+            replaces=str(meta.get("replaces") or ""),
+            note=str(meta.get("note") or ""),
+            expected_answer=str(meta.get("expected_answer") or "") if kind == "evidence" else "",
+        )
+        loaded += 1
+        v = out["verdict"]["passed"]
+        verdict = (
+            "evidence"
+            if kind == "evidence"
+            else ("pass" if v else "fail" if v is False else "error")
+        )
+        console.print(
+            f"#{saved['id']:<4} {q['id']:<22} {verdict:<9} {out['gold_match']['match'] or '-':<13} {ex.duration_ms:>6} ms"
+        )
+    console.print(f"{loaded} proposal(s) loaded; none is a golden until someone saves it")
 
 
 @app.command()

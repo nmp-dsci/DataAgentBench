@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from dab_bench.config import TRIALS_PATH
 from dab_bench.eval import runner
 from dab_bench.eval.score import TrialResult, read_results, summarise, write_results
 from dab_bench.eval.splits import load_split
@@ -137,3 +138,104 @@ def test_runs_api_lists_folders_and_serves_traces(
     trace = client.get(f"/api/runs/{run_dir.name}/traces/bookreview_2_t1").json()
     assert trace["answer"] == "42" and trace["passed"] is True and trace["spans"] == []
     assert client.get("/api/runs/nope").status_code == 404
+
+
+def _write_run(root: Path, run_id: str, rows: list[TrialResult], split: str = "smoke") -> None:
+    from dataclasses import asdict
+
+    d = root / run_id
+    d.mkdir(parents=True)
+    write_results(d / "results.jsonl", rows)
+    meta = runner.RunMeta(
+        run_id=run_id,
+        agent="v0",
+        fingerprint="abc",
+        context_sha="def",
+        model="claude-haiku-4-5",
+        effort="medium",
+        split=split,
+        n_queries=len({r.query_id for r in rows}),
+        trials=1,
+        workers=1,
+        hints=False,
+        dry_run=False,
+        started_at="2026-01-01T00:00:00+00:00",
+        max_turns=60,
+    )
+    meta.summary = asdict(summarise(rows))
+    (d / "run.json").write_text(json.dumps(asdict(meta)))
+
+
+def test_compare_two_runs_on_their_common_queries(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # focus scored three queries; the challenger two of them plus one rate-limited row
+    _write_run(
+        tmp_path,
+        "a",
+        [_row("bookreview/2", 1, True), _row("yelp/1", 1, False), _row("agnews/1", 1, False)],
+    )
+    _write_run(
+        tmp_path,
+        "b",
+        [
+            _row("bookreview/2", 1, False),
+            _row("yelp/1", 1, True),
+            _row("agnews/1", 1, None, rate_limited=True),
+        ],
+    )
+    monkeypatch.setattr(runner, "RUNS_DIR", tmp_path)
+    monkeypatch.setattr(serving, "RUNS_DIR", tmp_path)
+    client = TestClient(serving.create_app())
+
+    r = client.get("/api/runs/compare", params={"focus": "a", "challenger": "b"}).json()
+    # agnews/1 is rate-limited in b, so it is not scored there and not common
+    assert r["common_queries"] == 2 and r["scored_queries"] == {"a": 3, "b": 2}
+    assert r["sides"]["a"]["scored"] == 2 and r["sides"]["b"]["scored"] == 2
+    assert r["fixed"] == ["yelp/1"] and r["broken"] == ["bookreview/2"]
+    assert [g["key"] for g in r["groups"]] == ["bookreview", "yelp"]
+
+    # each run on its own queries: the focus keeps agnews/1
+    own = client.get(
+        "/api/runs/compare", params={"focus": "a", "challenger": "b", "scope": "all"}
+    ).json()
+    assert own["sides"]["a"]["scored"] == 3 and "agnews" in [g["key"] for g in own["groups"]]
+
+    style = client.get("/api/runs/compare", params={"focus": "a", "group": "style"}).json()
+    assert style["challenger"] is None and style["scope"] == "all"
+    assert sum(g["a"]["n"] for g in style["groups"]) == 3  # every scored trial lands in one style
+
+    assert client.get("/api/runs/compare", params={"focus": "nope"}).status_code == 404
+    assert client.get("/api/runs/compare", params={"focus": "a", "group": "x"}).status_code == 400
+
+
+@pytest.mark.skipif(not TRIALS_PATH.exists(), reason="not rescored")
+def test_compare_a_run_against_a_leaderboard_submission(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_run(tmp_path, "a", [_row("bookreview/2", 1, True), _row("yelp/1", 1, False)])
+    monkeypatch.setattr(runner, "RUNS_DIR", tmp_path)
+    monkeypatch.setattr(serving, "RUNS_DIR", tmp_path)
+    client = TestClient(serving.create_app())
+    trials = json.loads(TRIALS_PATH.read_text())
+
+    subs = client.get("/api/runs").json()["submissions"]
+    assert [s["name"] for s in subs[:2]] == ["permute_eq", "oceanbase_lab_scout"]
+    assert subs[0]["rank"] == 1 and subs[0]["pooled"] is False
+
+    # the submission alone: every query it answered, scored exactly as the rescore did
+    alone = client.get("/api/runs/compare", params={"focus": "lb:oceanbase_lab_scout"}).json()
+    side = alone["sides"]["lb:oceanbase_lab_scout"]
+    pf = trials["per_file"]["oceanbase_lab_scout"]
+    assert side["passed"] == pf["passed"] and side["scored"] == pf["rows"]
+    assert side["pass_rate_macro"] == pytest.approx(pf["macro"])
+    assert side["profile"] is None and side["cost_usd"] is None and side["run"] is None
+
+    # against our run: only the two queries the run scored are common
+    r = client.get("/api/runs/compare", params={"focus": "a", "challenger": "lb:permute_eq"}).json()
+    assert r["common_queries"] == 2
+    lb = r["sides"]["lb:permute_eq"]
+    assert lb["scored"] == 10 and lb["submission"]["label"].startswith("Permute EQ")
+    assert r["sides"]["a"]["profile"] is not None
+
+    assert client.get("/api/runs/compare", params={"focus": "lb:nope"}).status_code == 404

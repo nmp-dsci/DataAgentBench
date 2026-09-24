@@ -48,6 +48,7 @@ export type QuerySummary = {
   question: string;
   gold_lines: number;
   gold_preview: string;
+  gold_text: string;
   validator_style: string;
   validator_lines: number;
   footnote: string | null;
@@ -93,6 +94,10 @@ export type AnswerFile = {
   rank: number | null;
   pass_at_1_site: number | null;
   stratified: string | null;
+  pooled: boolean; // false: a reference file, kept out of each query's pooled rate
+  pr: number | null; // read from this submission PR's branch, pinned at `commit`
+  pr_url: string | null;
+  commit: string | null;
   rows: number;
   rows_unmatched: number;
   queries: number;
@@ -106,6 +111,53 @@ export type TrialsIndex = {
   per_file: Record<string, PerFile>;
   site_check: { files: Record<string, SiteCheckFile>; max_abs_diff: number };
 };
+
+// ── golden SQL ─────────────────────────────────────────────────────────────
+export type GoldenRow = {
+  id: number;
+  query_id: string;
+  sql: string;
+  answer_text: string;
+  passed: boolean | null;
+  reason: string;
+  row_count: number | null;
+  duration_ms: number | null;
+  error: string | null;
+  note: string;
+  author: string;
+  upstream_commit: string;
+  created_at: string;
+  gold_match: GoldMatch | '';
+  source: string; // where the SQL started: '' by hand, else a run's trial and call
+  kind: GoldenKind;
+  expected_answer: string; // evidence only
+};
+/** answer: judged by the validator. evidence: a judgment question; the rows are the evidence (D23). */
+export type GoldenKind = 'answer' | 'evidence';
+export type ProposalBrief = { id: number; kind: GoldenKind; passed: boolean | null; gold_match: GoldMatch | ''; duration_ms: number | null; created_at: string };
+export type Proposal = ProposalBrief & { query_id: string; sql: string; expected_answer: string; answer_text: string; reason: string; row_count: number | null; error: string | null; replaces: string; note: string; author: string };
+/** One line of the gold-vs-result diff: `del` gold only, `add` result only; `changed` = differing cell indexes of a paired line. */
+export type GoldDiffLine = { op: 'eq' | 'del' | 'add'; gold: number | null; result: number | null; text: string; changed?: number[] };
+export type GoldMatch = 'exact' | 'exact_values' | 'reordered' | 'differs';
+export type GoldenBrief = { passed: boolean | null; gold_match: GoldMatch | ''; created_at: string; versions: number; author: string; note: string; kind: GoldenKind; source: string; origin: string /* where the SQL first came from, through re-saves */ };
+export type GoldenList = { queries: (QuerySummary & { golden: GoldenBrief | null; proposal: ProposalBrief | null })[]; n: number; written: number; evidence: number; proposed: number; passing: number; exact: number };
+export type GoldenOne = { query: QuerySummary; hints: string; current: GoldenRow | null; history: GoldenRow[]; proposal: Proposal | null };
+export type GoldenAttempt = {
+  execution: { columns: string[]; rows: unknown[][]; row_count: number; truncated: boolean; duration_ms: number; error: string | null };
+  answer_text: string;
+  verdict: { passed: boolean | null; reason: string; timed_out?: boolean };
+  gold_match: { match: GoldMatch | ''; detail: string };
+  gold_diff: GoldDiffLine[]; // empty when the result recreates the gold (or is evidence, or errored)
+  kind: GoldenKind;
+  saved?: { id: number; created_at: string };
+};
+
+export async function post<T>(url: string, body: unknown): Promise<T> {
+  const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.detail ?? `${r.status} ${url}`);
+  return j as T;
+}
 
 // ── fetching ───────────────────────────────────────────────────────────────
 export async function get<T>(url: string): Promise<T> {
@@ -147,10 +199,6 @@ export function fmtInt(n: number | null | undefined): string {
 export function shortSha(sha: string | undefined): string {
   return sha ? sha.slice(0, 7) : '…';
 }
-export function queryPath(id: string): string {
-  const [ds, n] = id.split('/');
-  return `/queries/${ds}/${n}`;
-}
 export const STYLE_LABEL: Record<string, string> = {
   regex: 'regex / number',
   'reads-gold-file': 'reads ground_truth.csv',
@@ -191,9 +239,126 @@ export type RunSummary = {
   per_dataset: Record<string, DatasetRate> | null;
   role: RunRole;
   profile: Profile;
+  scorecard: ScorecardTotals | null;
+};
+/** The scorecard (s06): each question scored three ways, with a category per failure. */
+export type Rate = { passed: number; n: number };
+export type ScoreTotals = { answer: Rate; sql: Rate; decision: Rate };
+export type ScorecardTotals = {
+  totals: ScoreTotals;
+  by_split: Record<string, ScoreTotals> | null;
+  goldens: number;
+  optimise_first: { category: string; n: number; queries: string[] }[];
+  submits_sql: boolean;
+};
+export type ScoreRow = {
+  query_id: string;
+  trial: number;
+  answer: boolean | null;
+  sql: boolean | null;
+  decision: boolean | null;
+  mode: string | null;
+  step: string | null;
+  golden_id: number | null;
+  golden_kind: GoldenKind | null;
+  category: string;
+  detail: string;
+  sql_detail?: string;
+  decision_detail?: string;
+  structure: Record<string, { golden: unknown; agent: unknown } | string>;
+  result_diff?: GoldDiffLine[];
+  split?: string | null;
+};
+export type GoldenBriefSql = { id: number; kind: GoldenKind; sql: string; passed: boolean | null; gold_match: string; created_at: string };
+export type AgentSubmission = { sql: string; mode: string; step: string; model_answer: string; columns: string[]; row_count: number; truncated: boolean; result: string };
+/** GET /api/runs/compare: two runs on the same queries, grouped by dataset, validator style or query. */
+export type CompareGroup = 'dataset' | 'style' | 'query';
+export type CompareRate = { passed: number; n: number; rate: number; queries: number };
+/** A rescored leaderboard answer file as a compare target: id is `lb:<name>`. */
+export type Submission = {
+  id: string;
+  name: string;
+  label: string;
+  rank: number | null;
+  pass_at_1_site: number | null;
+  pass_rate_macro: number | null;
+  passed: number;
+  rows: number;
+  trials: number;
+  pooled: boolean;
+  pr_url: string | null;
+};
+export type CompareSide = {
+  run: RunSummary | null;
+  submission: Submission | null;
+  queries: number;
+  passed: number;
+  scored: number;
+  pass_rate_micro: number | null;
+  pass_rate_macro: number | null;
+  timeouts: number;
+  errors: number;
+  rate_limited: number;
+  cost_usd: number | null; // null for a submission: the rescore keeps pass / fail only
+  profile: Profile | null;
+};
+export type CompareResp = {
+  focus: string;
+  challenger: string | null;
+  group: CompareGroup;
+  scope: 'common' | 'all';
+  common_queries: number;
+  scored_queries: Record<string, number>;
+  sides: Record<string, CompareSide>;
+  groups: ({ key: string } & Record<string, CompareRate | string>)[];
+  fixed: string[];
+  broken: string[];
 };
 export type RunRole = 'champion' | 'challenger' | 'superseded' | 'smoke' | 'dry';
-export type Board = { champion: string; champion_run_id: string | null; runs: RunSummary[] };
+export type PromotionCandidate = { version: string; run_id: string | null; passed: number | null; scored: number | null; n: number | null; heldout: ScoreTotals | null; scorecard: ScoreTotals | null; why_not: string };
+/** `dab promote`'s latest verdict (agents/promotions.jsonl): D30, the most answers passed of the 54 wins. */
+export type Promotion = { at: string; rule: string; incumbent: string; winner: string; changed: boolean; reason: string; candidates: PromotionCandidate[]; champion_run_id: string | null; prompt_version?: number };
+/** The champion over time (`eval/rounds.champion_history`): the reigns and every full-split run. */
+export type Reign = { version: string; run_id: string; from: string; until: string | null; passed: number; scored: number; reason: string; lift: number | null };
+export type HistoryPoint = { run_id: string; agent: string; started_at: string; passed: number; scored: number };
+export type ChampionHistory = { reigns: Reign[]; points: HistoryPoint[]; promotions: Promotion[] };
+export type Board = { champion: string; champion_run_id: string | null; runs: RunSummary[]; submissions: Submission[]; promotion: Promotion | null; history: ChampionHistory };
+
+// ── optimisation rounds (/api/optimise): diagnostic → proposal → outcome ─────────
+export type Tally = { n: number; before: number; after: number; improved: number; regressed: number; held: number; 'still failing': number; 'not scored': number };
+export type CardTotals = { totals: ScoreTotals; by_split: Record<string, ScoreTotals> | null };
+export type RoundSummary = {
+  version: string;
+  parent: string | null;
+  source_run: string;
+  outcome_run: string | null;
+  started_at: string;
+  optimiser: { model: string; effort: string } | null;
+  cost_usd: number | null;
+  sessions: number;
+  notes_written: number;
+  refusals: number;
+  system_md_changed: boolean;
+  split: { train: number; heldout: number } | null;
+  before: CardTotals | null;
+  after: CardTotals | null;
+  changes: Tally;
+  promoted_at: string | null;
+};
+export type VersionNode = { version: string; parent: string | null; measured_against: string | null; run_id: string | null; passed: number | null; scored: number | null; fingerprint: string; started_at: string | null };
+export type Rounds = { champion: string; rounds: RoundSummary[]; versions: VersionNode[] };
+export type Side = { answer: boolean | null; sql: boolean | null; decision: boolean | null; category: string; mode: string | null };
+export type Change = 'improved' | 'regressed' | 'held' | 'still failing' | 'not scored';
+export type QuestionChange = { query_id: string; dataset: string; question: string; split: string | null; read: boolean; before: Side | null; after: Side | null; change: Change };
+export type OptimiseSessionRec = { scope: string; notes: string | null; rationale: string; refusals: { problems: string[]; notes_chars?: number; rationale_chars?: number; redacted?: boolean }[]; questions: string[]; n_turns: number; cost_usd: number | null; error: string | null; duration_ms?: number };
+export type RoundDetail = {
+  summary: RoundSummary;
+  record: { version: string; challenger_of: string; source_run: string; started_at: string; optimiser: { model: string; effort: string }; split: { train: number; heldout: number }; cost_usd: number; sessions: OptimiseSessionRec[]; system_md_changed: boolean };
+  diagnostic: { run_id: string; totals: ScoreTotals | null; by_split: Record<string, ScoreTotals> | null; optimise_first: { category: string; n: number; queries: string[] }[]; categories: Record<string, number> };
+  questions: QuestionChange[];
+  outcome: { all: Tally; by_split: Record<string, Tally>; by_dataset: Record<string, Tally>; category_moves: { from: string; to: string; n: number }[] } | null;
+  files: { name: string; added: boolean; diff: GoldDiffLine[] }[];
+};
 export type Stat = { mean: number; p50: number; p95: number; max: number; sum: number };
 export type ProfileKey = 'turns' | 'tool_calls' | 'wall_s' | 'fresh_in' | 'cache_read' | 'output' | 'total' | 'cost_usd';
 export type Profile = {
@@ -232,6 +397,11 @@ export type TrialRow = {
   mlflow_trace_id: string | null;
   mlflow_trace_url: string | null;
   gold: GoldRef | null;
+  agent_sql?: string | null;
+  agent_result?: string | null;
+  mode?: string | null;
+  step?: string | null;
+  score?: ScoreRow | null;
 };
 export type GoldRef = { preview: string; lines: number; text: string };
 export type RunDetail = RunSummary & { max_turns: number; workers: number; code_sha: string; upstream_commit: string; query_ids: string[]; results: TrialRow[]; versus: RunSummary | null };
@@ -268,6 +438,9 @@ export type Trace = {
   mlflow_embeddable: boolean;
   gold: GoldRef | null;
   spans: Span[];
+  submission?: AgentSubmission | null;
+  score?: ScoreRow | null;
+  golden?: GoldenBriefSql | null;
 };
 export type ContextPack = { dataset: string; files: Record<string, string>; curation: { model: string; cost_usd: number | null; input_tokens: number; output_tokens: number; duration_ms: number } | null };
 
@@ -299,6 +472,3 @@ export const ROLE_LABEL: Record<RunRole, string> = {
   smoke: 'smoke',
   dry: 'dry run',
 };
-export function traceKey(r: { dataset: string; query_id: string; trial: number }): string {
-  return `${r.dataset}_${r.query_id.split('/')[1]}_t${r.trial}`;
-}

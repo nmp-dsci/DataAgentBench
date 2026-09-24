@@ -1,0 +1,22 @@
+{
+ "queries": [
+  "deps_dev_v1/1",
+  "github_repos/1",
+  "pancancer_atlas/2",
+  "patents/1",
+  "bookreview/1",
+  "crmarenapro/1",
+  "crmarenapro/3",
+  "crmarenapro/5",
+  "crmarenapro/6",
+  "googlelocal/3",
+  "music_brainz_20k/3",
+  "stockindex/2",
+  "stockmarket/4",
+  "stockmarket/5",
+  "yelp/4",
+  "yelp/7"
+ ],
+ "rule": "seed 20260924; per dataset, round(2/3) of the questions with a golden train the optimiser, the rest are held out (at least one each); written once from the goldens of the day and never re-drawn, so every version is measured on the same split",
+ "seed": 20260924
+}

@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ROLE_LABEL, type RunDetail, type TrialRow, fmtDur, fmtInt, fmtPct, fmtSec, fmtTok, fmtUsd, traceKey, useGet } from '../lib/api';
+import { ROLE_LABEL, type RunDetail, type TrialRow, fmtDur, fmtInt, fmtPct, fmtSec, fmtTok, fmtUsd, useGet } from '../lib/api';
 import { Delta, ProfileTable, Ratios, QueryCell, Role, TrialBars } from '../lib/runs';
+import { Mark, Totals } from '../lib/scorecard';
 import { Kpi, Loading, Rate } from '../lib/ui';
+import { datasetPath, runPath, trialId, trialPath, useLens } from '../lib/url';
 
 type Filter = 'all' | 'failed' | 'timeouts';
 type Sort = 'query' | 'cost' | 'turns' | 'tokens' | 'wall';
@@ -13,12 +15,16 @@ export function Run() {
   const { data: run, error } = useGet<RunDetail>(id ? `/api/runs/${id}` : null);
   const [filter, setFilter] = useState<Filter>('all');
   const [sort, setSort] = useState<Sort>('query');
+  // `?q=deps_dev_v1` or `?q=deps_dev_v1/1`: a trial address chopped back one or two levels lands here
+  const [sp, setLens] = useLens();
+  const q = sp.get('q') ?? '';
   if (!run) return <Loading error={error} />;
   const rows = run.results;
   const p = run.profile;
   const vs = run.versus;
   const tokens = (r: TrialRow) => r.input_tokens + r.cache_creation_tokens + r.cache_read_tokens + r.output_tokens;
   const shown = rows
+    .filter((r) => !q || r.query_id === q || r.query_id.startsWith(`${q}/`))
     .filter((r) => (filter === 'failed' ? r.passed === false : filter === 'timeouts' ? r.timed_out : true))
     .sort((a, b) => (sort === 'cost' ? (b.cost_usd ?? 0) - (a.cost_usd ?? 0) : sort === 'turns' ? b.n_turns - a.n_turns : sort === 'tokens' ? tokens(b) - tokens(a) : sort === 'wall' ? b.duration_ms - a.duration_ms : a.query_id.localeCompare(b.query_id) || a.trial - b.trial));
   const perDs = Object.entries(run.per_dataset ?? {}).sort(([a], [b]) => a.localeCompare(b));
@@ -51,7 +57,7 @@ export function Run() {
           <>
             {' '}
             Measured against the champion{' '}
-            <Link to={`/runs/${vs.run_id}`} className="mono">
+            <Link to={runPath(vs.run_id)} className="mono">
               {vs.run_id}
             </Link>
             {vs.split !== run.split && ` (a different split: ${vs.split}, ${vs.n_queries} queries — the Δs below are indicative only)`}.
@@ -66,6 +72,59 @@ export function Run() {
         <Kpi n={`${fmtSec(p.metrics.wall_s.p50)} / ${fmtSec(p.metrics.wall_s.p95)}`} b={`wall time per trial, p50 / p95${vs ? ` · champion ${fmtSec(vs.profile.metrics.wall_s.p50)} / ${fmtSec(vs.profile.metrics.wall_s.p95)}` : ''}`} />
         <Kpi n={`${p.timeout_rate ? fmtPct(p.timeout_rate) : '0%'} · ${run.errors ?? 0}`} b={`timed out · errored, of ${p.n} trials that ran`} tone={p.timeout_rate || run.errors ? 'warn' : undefined} />
       </div>
+
+      {run.scorecard?.submits_sql && (
+        <>
+          <h2>
+            00 · Scorecard — <Totals t={run.scorecard.totals} />
+          </h2>
+          <p>
+            Every question is scored on its answer (the validator; the leaderboard's number). Where a golden exists ({run.scorecard.goldens} of {run.n_queries}), the agent's SQL is also scored against the golden's result, and its decision (pass the result through, or
+            derive the answer from it) against the golden's kind. Each failure gets one category; <code>dab diagnose {run.run_id}</code> prints the same.
+            {run.scorecard.by_split && (
+              <>
+                {' '}
+                The optimiser's split: {Object.entries(run.scorecard.by_split).map(([s, tot], i) => (
+                  <span key={s}>
+                    {i > 0 && '; '}
+                    {s === 'heldout' ? 'held out' : s} <Totals t={tot} />
+                  </span>
+                ))}
+                .
+              </>
+            )}
+          </p>
+          {run.scorecard.optimise_first.length > 0 && (
+            <div className="tw">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Optimise first</th>
+                    <th className="num">Questions</th>
+                    <th>Which</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {run.scorecard.optimise_first.map((o) => (
+                    <tr key={o.category}>
+                      <td className="sub">{o.category}</td>
+                      <td className="num">{o.n}</td>
+                      <td className="small">
+                        {o.queries.map((qid, i) => (
+                          <span key={qid}>
+                            {i > 0 && ', '}
+                            <Link to={trialPath(run.run_id, `${qid}/t1`)}>{qid}</Link>
+                          </span>
+                        ))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
 
       <h2>
         01 · Profile — {tail >= 3 ? `the p95 trial costs ${tail.toFixed(0)}× the median; the tail is ${p.exhausted ? 'the trials that ran out' : 'a few long trials'}` : 'a flat distribution, the median and the p95 trial cost about the same'}
@@ -95,7 +154,7 @@ export function Run() {
                 {perDs.map(([ds, v]) => (
                   <tr key={ds} className={(v.rate ?? 0) === 0 ? 'warnrow' : ''}>
                     <td className="sub">
-                      <Link to={`/datasets/${ds}`}>{ds}</Link>
+                      <Link to={datasetPath(ds)}>{ds}</Link>
                     </td>
                     <td className="num">{v.queries}</td>
                     <td>
@@ -132,6 +191,11 @@ export function Run() {
           <option value="tokens">most tokens first</option>
           <option value="wall">slowest first</option>
         </select>
+        {q && (
+          <button type="button" className="tog on" onClick={() => setLens({ q: null })} title="show every query again">
+            only {q} ×
+          </button>
+        )}
         <span className="count">
           {shown.length} of {rows.length}
         </span>
@@ -143,6 +207,9 @@ export function Run() {
               <th>Query</th>
               <th className="num">t</th>
               <th>Verdict</th>
+              {run.scorecard?.submits_sql && <th title="the agent's result against the golden's">SQL</th>}
+              {run.scorecard?.submits_sql && <th title="pass-through or derived, against the golden's kind">Decision</th>}
+              {run.scorecard?.submits_sql && <th>Category</th>}
               <th>Answer</th>
               <th className="num">Turns</th>
               <th className="num">Tools</th>
@@ -164,6 +231,18 @@ export function Run() {
                   {r.error && <span className="path wrap-any">{r.error.slice(0, 80)}</span>}
                   {!r.passed && r.reason && <span className="path wrap-any">{r.reason.slice(0, 120)}</span>}
                 </td>
+                {run.scorecard?.submits_sql && (
+                  <td>
+                    <Mark v={r.score?.sql} />
+                  </td>
+                )}
+                {run.scorecard?.submits_sql && (
+                  <td>
+                    <Mark v={r.score?.decision} />
+                    {r.mode && <span className="path">{r.mode}</span>}
+                  </td>
+                )}
+                {run.scorecard?.submits_sql && <td className="small">{r.score?.category === 'solved' ? '—' : r.score?.category}</td>}
                 <td className="answer mono small">{r.answer.slice(0, 160)}</td>
                 <td className="num">{r.n_turns}</td>
                 <td className="num">{r.tool_calls}</td>
@@ -174,7 +253,7 @@ export function Run() {
                 <td className="num mono">{fmtDur(r.duration_ms)}</td>
                 <td>
                   {r.trace_file && (
-                    <Link to={`/runs/${run.run_id}/traces/${traceKey(r)}`} className="mono">
+                    <Link to={trialPath(run.run_id, trialId(r))} className="mono">
                       trace
                     </Link>
                   )}

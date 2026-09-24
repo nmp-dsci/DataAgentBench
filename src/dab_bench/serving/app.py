@@ -4,17 +4,22 @@ Every route serves committed files — the index under `data/index/`, the
 answers under `data/answers/`, the context pack under `data/context/`, the
 agent versions under `agents/` — plus this machine's run folders under `runs/`.
 Nothing here reads the upstream clone or calls a model; MLflow is linked, never
-read. The one route that executes is the playground, `POST /api/agent/tools/<name>`:
-the trial's own tool bodies on the read-only role and the network-off sandbox,
-writing nothing but /work files under `workspace/playground_*`.
+read. Two routes execute, both on the agent's read-only role: the playground,
+`POST /api/agent/tools/<name>` (the trial's own tool bodies and the network-off
+sandbox, writing nothing but /work files under `workspace/playground/playground_<dataset>/`),
+and the
+golden SQL routes, `POST /api/golden/<dataset>/<n>[/run]`, which run one SELECT as
+`dab_agent`, judge it with the question's validator in a worker process and, on
+save, append it to `dataagentbench_meta.golden_sql` (which `dab_agent` cannot read).
 """
 
 from __future__ import annotations
 
 import functools
 import json
+import re
 from dataclasses import asdict
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
@@ -30,7 +35,9 @@ from dab_bench.config import (
     WORKSPACE_DIR,
     settings,
 )
+from dab_bench.data.aliases import trial_id
 from dab_bench.data.index import Index, load, stats
+from dab_bench.eval.score import TrialResult
 
 EXAMPLES_PER_FILE = 3
 
@@ -124,7 +131,30 @@ def create_app(index: Index | None = None) -> FastAPI:
         """Every run folder with its role (champion, challenger, superseded, smoke, dry) and
         its per-trial profile. The champion is derived: the newest scored full-split run of
         the agent `agents/champion` names that is not itself a challenger."""
-        return _board()
+        return _board() | {"submissions": _submissions(ix)}
+
+    @app.get("/api/runs/compare")
+    def runs_compare(
+        focus: str, challenger: str | None = None, group: str = "dataset", scope: str = "common"
+    ) -> dict[str, Any]:
+        """Two runs side by side: the summary and the per-group rates, on the queries both
+        scored (`scope=common`, the default) or on each run's own (`scope=all`). Every number
+        comes from `score.summarise` / `score.profile` on the filtered trials, the same
+        arithmetic as the board, so a comparison can never disagree with a run page.
+        Either side may be a leaderboard answer file, `lb:<name>` (e.g. `lb:permute_eq`):
+        its rescored verdicts, with no cost or trace profile."""
+        if group not in _GROUPS:
+            raise HTTPException(400, f"group must be one of {sorted(_GROUPS)}")
+        if scope not in ("common", "all"):
+            raise HTTPException(400, "scope must be common or all")
+        ids = [focus] + ([challenger] if challenger else [])
+        for rid in ids:
+            if rid.startswith(LB_PREFIX):
+                if rid.removeprefix(LB_PREFIX) not in ((ix.trials or {}).get("per_file") or {}):
+                    raise HTTPException(404, f"no rescored answer file {rid}")
+            elif not (RUNS_DIR / rid / "run.json").exists():
+                raise HTTPException(404, f"no run {rid}")
+        return _compare(ix, ids, group, scope)
 
     @app.get("/api/runs/{run_id}")
     def run_detail(run_id: str) -> dict[str, Any]:
@@ -137,9 +167,15 @@ def create_app(index: Index | None = None) -> FastAPI:
         meta, results = load_run(run_id)
         d = asdict(meta) | (row or _run_summary(asdict(meta)))
         d["results"] = [r.as_dict() for r in results]
+        from dab_bench.eval.scorecard import load_scorecard
+
+        card = load_scorecard(run_id)
+        scores = {(q["query_id"], q["trial"]): q for q in (card or {}).get("questions", [])}
         for r in d["results"]:
             r["mlflow_trace_url"] = _mlflow_trace_url(r.get("mlflow_trace_id"))
             r["gold"] = _gold(ix, r["query_id"])
+            sc = scores.get((r["query_id"], r["trial"]))
+            r["score"] = None if sc is None else {k: v for k, v in sc.items() if k != "result_diff"}
         champ = board["champion_run_id"]
         d["versus"] = (
             next((r for r in board["runs"] if r["run_id"] == champ), None)
@@ -148,17 +184,9 @@ def create_app(index: Index | None = None) -> FastAPI:
         )
         return d
 
-    @app.get("/api/runs/{run_id}/traces/{key}")
-    def run_trace(run_id: str, key: str) -> dict[str, Any]:
-        from dab_bench.eval.runner import load_run
-
-        p = RUNS_DIR / run_id / "traces" / f"{key}.json"
-        if not p.exists():
-            raise HTTPException(404, f"no trace {key} in {run_id}")
-        t: dict[str, Any] = json.loads(p.read_text())
+    def _trace(run_id: str, row: TrialResult | None, path: Any) -> dict[str, Any]:
+        t: dict[str, Any] = json.loads(path.read_text())
         # the verdict and the MLflow link live on the result row, not in the trace file
-        _, results = load_run(run_id)
-        row = next((r for r in results if r.trace_file == f"traces/{key}.json"), None)
         t["passed"] = row.passed if row else None
         t["reason"] = row.reason if row else ""
         t["mlflow_trace_id"] = row.mlflow_trace_id if row else None
@@ -166,7 +194,38 @@ def create_app(index: Index | None = None) -> FastAPI:
         t["mlflow_embeddable"] = _mlflow_embeddable()
         t["gold"] = _gold(ix, t.get("query_id", ""))
         t["spans"] = _spans(t)
+        t["score"] = _trial_score(run_id, t.get("query_id", ""), int(t.get("trial") or 0))
+        t["golden"] = _golden_brief(t.get("query_id", "")) if t["score"] else None
         return t
+
+    @app.get("/api/runs/{run_id}/traces/{key}")
+    def run_trace(run_id: str, key: str) -> dict[str, Any]:
+        """The trace by its file name. Superseded by the trial route below; kept one release
+        so an old link or script still resolves."""
+        from dab_bench.eval.runner import load_run
+
+        p = RUNS_DIR / run_id / "traces" / f"{key}.json"
+        if not p.exists():
+            raise HTTPException(404, f"no trace {key} in {run_id}")
+        _, results = load_run(run_id)
+        row = next((r for r in results if r.trace_file == f"traces/{key}.json"), None)
+        return _trace(run_id, row, p)
+
+    @app.get("/api/runs/{run_id}/{ds}/{n}/{t}")
+    def run_trial(run_id: str, ds: str, n: int, t: str) -> dict[str, Any]:
+        """One trial by its id, `<run>/deps_dev_v1/1/t1`: the explorer's own address for it."""
+        from dab_bench.eval.runner import load_run
+
+        m = re.fullmatch(r"t(\d+)", t)
+        if not m or not (RUNS_DIR / run_id / "run.json").exists():
+            raise HTTPException(404, f"no trial {ds}/{n}/{t} in {run_id}")
+        _, results = load_run(run_id)
+        qid, k = f"{ds}/{n}", int(m[1])
+        row = next((r for r in results if r.query_id == qid and r.trial == k), None)
+        p = RUNS_DIR / run_id / row.trace_file if row and row.trace_file else None
+        if p is None or not p.exists():
+            raise HTTPException(404, f"no trace for {trial_id(qid, k)} in {run_id}")
+        return _trace(run_id, row, p)
 
     @app.get("/api/context/{key}")
     def context_pack(key: str) -> dict[str, Any]:
@@ -191,6 +250,171 @@ def create_app(index: Index | None = None) -> FastAPI:
         )
         return {"dataset": key, "files": files, "curation": cur}
 
+    # ── golden SQL: written by hand, run as the agent's role, judged by the validator ──
+
+    def _golden_query(key: str, n: int) -> dict[str, Any]:
+        q = ix.query_by_id.get(f"{key}/{n}")
+        if q is None:
+            raise HTTPException(404, f"no query {key}/{n} in the index")
+        return q
+
+    def _golden_db(fn: Any, *args: Any) -> Any:
+        from dab_bench.data.pg import reachable
+
+        if not reachable():
+            raise HTTPException(503, "database dab is unreachable: run `make platform-up`")
+        return fn(*args)
+
+    @app.get("/api/golden")
+    def golden_list() -> dict[str, Any]:
+        """Every question with its current golden SQL, if any (newest save per question)."""
+        from dab_bench.eval import golden
+
+        cur = _golden_db(golden.current)
+        props = _golden_db(golden.proposals)
+        starts = _golden_db(golden.origins)
+        rows = []
+        for q in ix.queries:
+            g = cur.get(q["id"])
+            rows.append(
+                _query_summary(ix, q)
+                | {
+                    "golden": None
+                    if g is None
+                    else {
+                        k: g[k]
+                        for k in (
+                            "passed",
+                            "gold_match",
+                            "created_at",
+                            "versions",
+                            "author",
+                            "note",
+                            "kind",
+                            "source",
+                        )
+                    }
+                    | {"origin": starts.get(q["id"], g["source"])},
+                    "proposal": None
+                    if (p := props.get(q["id"])) is None
+                    else {
+                        k: p[k]
+                        for k in ("id", "kind", "passed", "gold_match", "duration_ms", "created_at")
+                    },
+                }
+            )
+        return {
+            "queries": rows,
+            "n": len(rows),
+            "written": sum(1 for r in rows if r["golden"]),
+            "evidence": sum(1 for r in rows if r["golden"] and r["golden"]["kind"] == "evidence"),
+            "proposed": sum(1 for r in rows if r["proposal"]),
+            "passing": sum(1 for r in rows if r["golden"] and r["golden"]["passed"]),
+            "exact": sum(
+                1
+                for r in rows
+                if r["golden"] and r["golden"]["gold_match"] in ("exact", "exact_values")
+            ),
+        }
+
+    @app.get("/api/golden/{key}/{n}")
+    def golden_one(key: str, n: int) -> dict[str, Any]:
+        from dab_bench.eval import golden
+
+        q = _golden_query(key, n)
+        hist = _golden_db(golden.history, q["id"])
+        return {
+            "query": _query_summary(ix, q),
+            "hints": ix.dataset_by_key[q["dataset_key"]]["hints"],
+            "current": hist[0] if hist else None,
+            "history": hist,
+            "proposal": _golden_db(golden.proposals).get(q["id"]),
+        }
+
+    def _golden_attempt(q: dict[str, Any], sql: str, kind: str = "answer") -> dict[str, Any]:
+        from dab_bench.eval import golden
+
+        folder = ix.dataset_by_key[q["dataset_key"]]["folder"]
+        out: dict[str, Any]
+        out, ex = _golden_db(golden.attempt, q, folder, sql, kind)
+        return out | {"_ex": ex}
+
+    @app.post("/api/golden/{key}/{n}/run")
+    def golden_run(key: str, n: int, body: GoldenSQL) -> dict[str, Any]:
+        """Run and judge without saving."""
+        out = _golden_attempt(_golden_query(key, n), body.sql, body.kind)
+        out.pop("_ex")
+        return out
+
+    @app.post("/api/golden/{key}/{n}")
+    def golden_save(key: str, n: int, body: GoldenSQL) -> dict[str, Any]:
+        """Run, judge and append. A failing golden is saved too (work in progress) and says so."""
+        from dab_bench.eval import golden
+
+        q = _golden_query(key, n)
+        out = _golden_attempt(q, body.sql, body.kind)
+        ex = out.pop("_ex")
+        saved = golden.save(
+            q["id"],
+            body.sql,
+            ex,
+            out["answer_text"],
+            out["verdict"],
+            body.note,
+            gold_match=out["gold_match"]["match"],
+            source=body.source,
+            kind=body.kind,
+            expected_answer=body.expected_answer,
+        )
+        return out | {"saved": saved}
+
+    # ── optimisation rounds: diagnostic → proposal → outcome, over time ─────────
+
+    @app.get("/api/optimise")
+    def optimise_rounds() -> dict[str, Any]:
+        """Every optimisation round, oldest first, and the version lineage it built: each
+        version with its parent and the top line of its newest complete full-split run."""
+        from dab_bench.agent.versions import champion_name, list_versions, load_version
+        from dab_bench.eval.promote import candidate
+        from dab_bench.eval.rounds import round_records, round_summary
+        from dab_bench.eval.runner import list_runs
+
+        rounds = [round_summary(r) for r in round_records()]
+        agent_of = {m.run_id: m.agent for m in list_runs()}
+        nodes = []
+        for name in list_versions():
+            v = load_version(name)
+            c = candidate(name)
+            meta = next((m for m in list_runs() if m.run_id == c.run_id), None)
+            nodes.append(
+                {
+                    "version": name,
+                    "parent": v.config.challenger_of,
+                    # a hand-built challenger names no parent; its run says what it was measured against
+                    "measured_against": agent_of.get(meta.challenger_of or "") if meta else None,
+                    "started_at": meta.started_at if meta else None,
+                    "run_id": c.run_id if not c.why_not else None,
+                    "passed": c.passed if not c.why_not else None,
+                    "scored": c.scored if not c.why_not else None,
+                    "fingerprint": v.fingerprint,
+                }
+            )
+        return {"champion": champion_name(), "rounds": rounds, "versions": nodes}
+
+    @app.get("/api/optimise/{version}")
+    def optimise_round(version: str) -> dict[str, Any]:
+        """One round: what it read (the source run's scorecard), what it wrote (sessions, notes,
+        refusals, each file against the parent) and what it scored (every question before and
+        after)."""
+        from dab_bench.eval.rounds import round_detail
+
+        d = round_detail(version)
+        if d is None:
+            raise HTTPException(404, f"no optimisation round wrote {version!r}")
+        lin = _lineage(_version(version))
+        d["files"] = lin["files"] if lin else []
+        return d
+
     # ── the agent: versions, the composed prompt, and the playground ─────────────
 
     @app.get("/api/agents")
@@ -210,6 +434,9 @@ def create_app(index: Index | None = None) -> FastAPI:
                     "timeout_s": v.config.timeout_s,
                     "exec_timeout_s": v.config.exec_timeout_s,
                     "hints": v.config.hints,
+                    "pack": v.config.pack,
+                    "challenger_of": v.config.challenger_of,
+                    "notes": sorted(v.notes),
                     "tools": [t.replace("mcp__dab__", "") for t in v.config.tools],
                 }
             )
@@ -218,11 +445,10 @@ def create_app(index: Index | None = None) -> FastAPI:
     @app.get("/api/agents/{name}")
     def agent_detail(name: str) -> dict[str, Any]:
         from dab_bench.agent.sandbox import image_exists
-        from dab_bench.agent.tools import TOOL_SPECS
+        from dab_bench.agent.tools import specs_for
         from dab_bench.agent.versions import champion_name
 
         v = _version(name)
-        allowed = [t.replace("mcp__dab__", "") for t in v.config.tools]
         return {
             "name": v.name,
             "champion": v.name == champion_name(),
@@ -242,11 +468,16 @@ def create_app(index: Index | None = None) -> FastAPI:
                     if t.name == "return_answer"
                     else "on",
                 }
-                for t in TOOL_SPECS.values()
-                if t.name in allowed
+                for t in specs_for(list(v.config.tools))
             ],
             "sandbox_built": image_exists(),
             "playground_llm": s.playground_llm,
+            "lineage": {
+                "parent": v.config.challenger_of,
+                "round": (v.path / "optimise.json").exists(),
+            }
+            if v.config.challenger_of
+            else None,
             "datasets": sorted(
                 p.name for p in CONTEXT_DIR.iterdir() if (p / "tables.json").exists()
             )
@@ -255,18 +486,24 @@ def create_app(index: Index | None = None) -> FastAPI:
         }
 
     @app.get("/api/agents/{name}/prompt")
-    def agent_prompt(name: str, dataset: str, hints: bool = False) -> dict[str, Any]:
-        from dab_bench.agent.prompt import compose_system_prompt, load_context
+    def agent_prompt(name: str, dataset: str, hints: bool | None = None) -> dict[str, Any]:
+        """The system prompt a trial of this version gets on `dataset`: its own hints, pack
+        and notes settings unless `hints` overrides the first."""
+        from dab_bench.agent.prompt import load_context
 
         v = _version(name)
         try:
             ctx = load_context(dataset)
         except FileNotFoundError as e:
             raise HTTPException(404, str(e)) from e
-        prompt = compose_system_prompt(v.system_prompt, ctx, hints=hints)
+        use_hints = v.config.hints if hints is None else hints
+        prompt = v.prompt_for(ctx, use_hints)
         return {
             "agent": v.name,
             "dataset": dataset,
+            "hints": use_hints,
+            "pack": v.config.pack,
+            "notes": v.notes.get(dataset, ""),
             "context_sha": ctx.context_sha,
             "chars": len(prompt),
             "prompt": prompt,
@@ -275,7 +512,7 @@ def create_app(index: Index | None = None) -> FastAPI:
     @app.post("/api/agent/tools/{name}")
     def playground(name: str, body: ToolCall) -> dict[str, Any]:
         """Run one tool by hand with the trial's own guards. Not a trial: no run folder,
-        no MLflow trace; only /work files under workspace/playground_<dataset>."""
+        no MLflow trace; only /work files under workspace/playground/playground_<dataset>/."""
         from dab_bench.agent.prompt import load_context
         from dab_bench.agent.sandbox import image_exists
         from dab_bench.agent.tools import TOOL_SPECS, ToolState, call_tool
@@ -334,6 +571,15 @@ def create_app(index: Index | None = None) -> FastAPI:
     return app
 
 
+class GoldenSQL(BaseModel):
+    sql: str
+    note: str = ""
+    source: str = ""  # where the SQL started: '' by hand, else a run's trial and call
+    kind: Literal["answer", "evidence"] = "answer"  # chosen by the curator, e.g. for a judgment
+    # question such as crmarenapro/1,2,3,6,7 (D23); any question may be saved as evidence
+    expected_answer: str = ""  # evidence only: the answer a reader reaches from the rows
+
+
 class ToolCall(BaseModel):
     agent: str = "champion"
     dataset: str
@@ -351,6 +597,47 @@ def _playground_sandbox() -> Any:
     if _PLAYGROUND.get("sandbox") is None:
         _PLAYGROUND["sandbox"] = Sandbox.start("playground", WORKSPACE_DIR / "playground")
     return _PLAYGROUND["sandbox"]
+
+
+def _line_diff(a: str, b: str) -> list[dict[str, Any]]:
+    """Two texts as the explorer's diff lines (eq / del / add, with line numbers each side)."""
+    from difflib import SequenceMatcher
+
+    xs, ys = a.splitlines(), b.splitlines()
+    out: list[dict[str, Any]] = []
+    for op, i1, i2, j1, j2 in SequenceMatcher(None, xs, ys, autojunk=False).get_opcodes():
+        if op == "equal":
+            out += [
+                {"op": "eq", "gold": i + 1, "result": j + 1, "text": xs[i]}
+                for i, j in zip(range(i1, i2), range(j1, j2), strict=True)
+            ]
+            continue
+        out += [{"op": "del", "gold": i + 1, "result": None, "text": xs[i]} for i in range(i1, i2)]
+        out += [{"op": "add", "gold": None, "result": j + 1, "text": ys[j]} for j in range(j1, j2)]
+    return out
+
+
+def _lineage(v: Any) -> dict[str, Any] | None:
+    """For a version an optimisation round wrote: its parent, the round's record
+    (agents/<v>/optimise.json) and what changed in each editable file."""
+    parent_name = v.config.challenger_of
+    if not parent_name:
+        return None
+    rec_path = v.path / "optimise.json"
+    rec = json.loads(rec_path.read_text()) if rec_path.exists() else None
+    try:
+        parent = _version(parent_name)
+    except HTTPException:
+        return {"parent": parent_name, "optimise": rec, "files": []}
+    names = sorted(set(parent.files()) | set(v.files()))
+    files = []
+    for name in names:
+        if name == "agent.yaml":
+            continue
+        a, b = parent.files().get(name, ""), v.files().get(name, "")
+        if a != b:
+            files.append({"name": name, "diff": _line_diff(a, b), "added": not a})
+    return {"parent": parent_name, "optimise": rec, "files": files}
 
 
 def _version(name: str) -> Any:
@@ -413,6 +700,167 @@ def _mlflow_trace_url(trace_id: str | None) -> str | None:
     return f"{base}/#/experiments/{exp}/traces?traceId={trace_id}"
 
 
+_GROUPS = {"dataset", "style", "query"}
+
+
+def _group_key(ix: Index, group: str, query_id: str) -> str:
+    if group == "dataset":
+        return query_id.split("/")[0]
+    if group == "style":
+        q = ix.query_by_id.get(query_id)
+        return str(q["validator"]["style"]) if q else "unknown"
+    return query_id
+
+
+LB_PREFIX = "lb:"
+
+
+def _submissions(ix: Index) -> list[dict[str, Any]]:
+    """The rescored leaderboard answer files, as compare targets: ranked entries first."""
+    per_file = (ix.trials or {}).get("per_file") or {}
+    out = []
+    for f in ix.leaderboard.get("answer_files", []):
+        pf = per_file.get(f["name"])
+        if not pf:
+            continue
+        out.append(
+            {
+                "id": LB_PREFIX + f["name"],
+                "name": f["name"],
+                "label": f["label"],
+                "rank": f["rank"],
+                "pass_at_1_site": f["pass_at_1_site"],
+                "pass_rate_macro": pf["macro"],
+                "passed": pf["passed"],
+                "rows": pf["rows"],
+                "trials": max(f["runs_per_query"] or [0]),
+                "pooled": f.get("pooled", True),
+                "pr_url": f.get("pr_url"),
+            }
+        )
+    return sorted(out, key=lambda s: (s["rank"] is None, s["rank"] or 0, s["name"]))
+
+
+def _submission_results(ix: Index, name: str) -> list[TrialResult]:
+    """An answer file's rescored verdicts as result rows, so `summarise` scores it like a run.
+    Only pass / fail per trial survives the rescore summary, so cost and turns stay empty."""
+    rows: list[TrialResult] = []
+    for qid, t in ((ix.trials or {}).get("per_query") or {}).items():
+        f = t["files"].get(name)
+        if not f:
+            continue
+        rows += [
+            TrialResult(
+                query_id=qid,
+                dataset=qid.split("/")[0],
+                trial=i + 1,
+                question="",
+                answer="",
+                passed=i < int(f["passed"]),
+            )
+            for i in range(int(f["n"]))
+        ]
+    return rows
+
+
+def _compare(ix: Index, ids: list[str], group: str, scope: str) -> dict[str, Any]:
+    from dab_bench.eval.runner import load_run
+    from dab_bench.eval.score import profile, summarise
+
+    board = {r["run_id"]: r for r in _board()["runs"]}
+    subs = {s["id"]: s for s in _submissions(ix)}
+    loaded = {
+        rid: _submission_results(ix, rid.removeprefix(LB_PREFIX))
+        if rid.startswith(LB_PREFIX)
+        else load_run(rid)[1]
+        for rid in ids
+    }
+    scored_q = {
+        rid: {r.query_id for r in res if r.passed is not None} for rid, res in loaded.items()
+    }
+    common = set.intersection(*scored_q.values()) if scored_q else set()
+    keep = (lambda rid, q: q in common) if scope == "common" and len(ids) > 1 else None
+
+    sides: dict[str, Any] = {}
+    groups: dict[str, dict[str, Any]] = {}
+    per_query: dict[str, dict[str, Any]] = {}
+    for rid, res in loaded.items():
+        rows = [r for r in res if keep is None or keep(rid, r.query_id)]
+        s = summarise(rows)
+        sub = subs.get(rid)
+        sides[rid] = {
+            "run": board.get(rid),
+            "submission": sub,
+            "queries": len(s.per_query),
+            "passed": s.passed,
+            "scored": s.scored,
+            "pass_rate_micro": s.pass_rate_micro,
+            "pass_rate_macro": s.pass_rate_macro,
+            "timeouts": s.timeouts,
+            "errors": s.errors,
+            "rate_limited": s.rate_limited,
+            "cost_usd": None if sub else s.cost_usd,
+            "profile": None if sub else profile(rows),
+        }
+        by_group: dict[str, list[dict[str, Any]]] = {}
+        for q, e in s.per_query.items():
+            by_group.setdefault(_group_key(ix, group, q), []).append(e)
+            per_query.setdefault(q, {})[rid] = e
+        for g, es in by_group.items():
+            groups.setdefault(g, {"key": g})[rid] = {
+                "passed": sum(int(e["passed"]) for e in es),
+                "n": sum(int(e["n"]) for e in es),
+                "rate": sum(float(e["rate"]) for e in es) / len(es),  # mean per-query rate
+                "queries": len(es),
+            }
+    fixed: list[str] = []
+    broken: list[str] = []
+    if len(ids) == 2:
+        a, b = ids
+        for q, e in sorted(per_query.items()):
+            if a in e and b in e:
+                if e[a]["passed"] == 0 and e[b]["passed"] > 0:
+                    fixed.append(q)
+                elif e[a]["passed"] > 0 and e[b]["passed"] == 0:
+                    broken.append(q)
+    return {
+        "focus": ids[0],
+        "challenger": ids[1] if len(ids) > 1 else None,
+        "group": group,
+        "scope": scope if len(ids) > 1 else "all",
+        "common_queries": len(common),
+        "scored_queries": {rid: len(q) for rid, q in scored_q.items()},
+        "sides": sides,
+        "groups": sorted(groups.values(), key=lambda g: g["key"]),
+        "fixed": fixed,
+        "broken": broken,
+    }
+
+
+def _trial_score(run_id: str, query_id: str, trial: int) -> dict[str, Any] | None:
+    from dab_bench.eval.scorecard import load_scorecard
+
+    card = load_scorecard(run_id) or {}
+    return next(
+        (q for q in card.get("questions", []) if q["query_id"] == query_id and q["trial"] == trial),
+        None,
+    )
+
+
+def _golden_brief(query_id: str) -> dict[str, Any] | None:
+    """The question's current golden, for the explorer's side-by-side; None when the database
+    is down (the page still shows the scorecard)."""
+    from dab_bench.data.pg import reachable
+    from dab_bench.eval import golden
+
+    if not reachable():
+        return None
+    g = golden.current().get(query_id)
+    if g is None:
+        return None
+    return {k: g[k] for k in ("id", "kind", "sql", "passed", "gold_match", "created_at")}
+
+
 def _run_summary(d: dict[str, Any]) -> dict[str, Any]:
     s = d.get("summary") or {}
     return {
@@ -448,12 +896,28 @@ def _run_summary(d: dict[str, Any]) -> dict[str, Any]:
         "timeouts": s.get("timeouts"),
         "per_dataset": s.get("per_dataset"),
         "mlflow_url": _mlflow_run_url(d.get("mlflow_run_id")),
+        "scorecard": _scorecard_totals(str(d.get("run_id"))),
+    }
+
+
+def _scorecard_totals(run_id: str) -> dict[str, Any] | None:
+    """The three totals (answer / SQL / decision, each passed of n) and the split, when the run
+    has a scorecard (`dab diagnose`)."""
+    from dab_bench.eval.scorecard import load_scorecard
+
+    card = load_scorecard(run_id)
+    if card is None:
+        return None
+    return {
+        k: card.get(k) for k in ("totals", "by_split", "goldens", "optimise_first", "submits_sql")
     }
 
 
 def _board() -> dict[str, Any]:
     """The runs list with roles. Read from disk on every call: five folders, tiny files."""
     from dab_bench.agent.versions import champion_name
+    from dab_bench.eval.promote import history
+    from dab_bench.eval.rounds import champion_history
     from dab_bench.eval.runner import list_runs, load_run
     from dab_bench.eval.score import profile
 
@@ -463,7 +927,14 @@ def _board() -> dict[str, Any]:
         _, results = load_run(m.run_id)
         rows.append(_run_summary(asdict(m)) | {"profile": profile(results)})
     full = [r for r in rows if r["split"] == "all" and not r["dry_run"] and (r["scored"] or 0) > 0]
+    promotions = history()
+    # a version that once held the title and lost it: its full runs are superseded, not challengers
+    former = {p["incumbent"] for p in promotions if p.get("changed")} - {champion}
+    crowned = promotions[-1] if promotions and promotions[-1]["winner"] == champion else None
+    # the run `dab promote` crowned, else the newest full run of the champion that is not a challenger
     champ = next(
+        (r for r in full if crowned and r["run_id"] == crowned.get("champion_run_id")), None
+    ) or next(
         (r for r in full if r["agent"] == champion and not r["challenger_of"]), None
     )  # rows are newest first
     for r in rows:
@@ -473,7 +944,7 @@ def _board() -> dict[str, Any]:
             r["role"] = "smoke"
         elif champ and r["run_id"] == champ["run_id"]:
             r["role"] = "champion"
-        elif r["agent"] == champion and not r["challenger_of"]:
+        elif (r["agent"] == champion and not r["challenger_of"]) or r["agent"] in former:
             r["role"] = "superseded"
         else:
             r["role"] = "challenger"
@@ -481,6 +952,8 @@ def _board() -> dict[str, Any]:
         "champion": champion,
         "champion_run_id": champ["run_id"] if champ else None,
         "runs": rows,
+        "promotion": promotions[-1] if promotions else None,
+        "history": champion_history(),
     }
 
 
@@ -620,6 +1093,8 @@ def _query_summary(ix: Index, q: dict[str, Any]) -> dict[str, Any]:
         "question": q["question"],
         "gold_lines": q["gold_lines"],
         "gold_preview": q["gold_text"][:120],
+        # the whole answer, for the expandable cell; 8.8 kB over all 54
+        "gold_text": q["gold_text"],
         "validator_style": q["validator"]["style"],
         "validator_lines": q["validator"]["lines"],
         "footnote": q["footnote"],

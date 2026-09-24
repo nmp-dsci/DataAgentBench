@@ -92,9 +92,13 @@ def test_agent_api_lists_versions_and_guards_the_playground() -> None:
 
     client = TestClient(serving.create_app())
     board = client.get("/api/agents").json()
-    assert board["champion"] == "v0" and [v["name"] for v in board["versions"]] == ["v0"]
-    detail = client.get("/api/agents/champion").json()
-    assert detail["name"] == "v0" and detail["champion"] is True
+    names = [v["name"] for v in board["versions"]]
+    assert board["champion"] in names and "v0" in names and "v1_sql" in names
+    assert "curator" not in names and "optimiser" not in names
+    detail = client.get("/api/agents/v1_sql").json()
+    assert [t["name"] for t in detail["tools"]] == ["describe_table", "query_db", "submit_answer"]
+    assert "save_as" not in detail["tools"][1]["schema"]["properties"]
+    detail = client.get("/api/agents/v0").json()
     modes = {t["name"]: t["playground"] for t in detail["tools"]}
     assert modes["llm_extract"] == "off" and modes["return_answer"] == "echo"
     assert modes["query_db"] == "on" and len(modes) == 9
@@ -109,14 +113,20 @@ def test_agent_api_lists_versions_and_guards_the_playground() -> None:
     )
     llm = client.post(
         "/api/agent/tools/llm_extract",
-        json={"dataset": "yelp", "input": {"sql": "s", "column": "c", "instruction": "i"}},
+        json={
+            "agent": "v0",
+            "dataset": "yelp",
+            "input": {"sql": "s", "column": "c", "instruction": "i"},
+        },
     )
     assert llm.status_code == 403
     r = client.post(
-        "/api/agent/tools/search_context", json={"dataset": "yelp", "input": {"term": "stars"}}
+        "/api/agent/tools/search_context",
+        json={"agent": "v0", "dataset": "yelp", "input": {"term": "stars"}},
     ).json()
     assert r["error"] is False and "stars" in r["output"] and r["elapsed_s"] >= 0
     echo = client.post(
-        "/api/agent/tools/return_answer", json={"dataset": "yelp", "input": {"answer": "42"}}
+        "/api/agent/tools/return_answer",
+        json={"agent": "v0", "dataset": "yelp", "input": {"answer": "42"}},
     ).json()
     assert echo["output"].startswith("recorded")

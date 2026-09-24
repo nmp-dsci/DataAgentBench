@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { type Span, type SpanTokens, fmtInt, fmtTok, fmtUsd, queryPath } from './api';
+import { type Span, type SpanTokens, fmtInt, fmtTok, fmtUsd } from './api';
+import { SqlBlock, SqlEditor } from './sql';
+import { questionPath, trialId, trialPath } from './url';
 
 // ── shapes served by /api/agents* and /api/agent/tools ────────────────────────
-export type AgentRow = { name: string; fingerprint: string; model: string; effort: string | null; max_turns: number; timeout_s: number; exec_timeout_s: number; hints: boolean; tools: string[] };
+export type AgentRow = { name: string; fingerprint: string; model: string; effort: string | null; max_turns: number; timeout_s: number; exec_timeout_s: number; hints: boolean; pack: boolean; challenger_of: string | null; notes: string[]; tools: string[] };
 export type AgentsBoard = { champion: string; versions: AgentRow[] };
 export type ToolSpec = { name: string; description: string; schema: { type: string; properties: Record<string, { type: string; description?: string; items?: { type: string } }>; required: string[] }; backend: 'pack' | 'postgres' | 'sandbox' | 'model' | 'state'; calls_model: boolean; playground: 'on' | 'off' | 'echo' };
-export type AgentDetail = { name: string; champion: boolean; fingerprint: string; config: Record<string, unknown>; files: Record<string, string>; tools: ToolSpec[]; sandbox_built: boolean; playground_llm: boolean; datasets: string[] };
-export type PromptResp = { agent: string; dataset: string; context_sha: string; chars: number; prompt: string };
+export type AgentDetail = { name: string; champion: boolean; fingerprint: string; config: Record<string, unknown>; files: Record<string, string>; tools: ToolSpec[]; sandbox_built: boolean; playground_llm: boolean; datasets: string[]; lineage: { parent: string; round: boolean } | null };
+export type PromptResp = { agent: string; dataset: string; hints: boolean; pack: boolean; notes: string; context_sha: string; chars: number; prompt: string };
 export type PlayResult = { tool: string; dataset: string; input: Record<string, unknown>; output: string; chars: number; cut: boolean; elapsed_s: number; error: boolean };
 
 export type NodeId = 'question' | 'sdk' | 'prompt' | 'mcp' | 'postgres' | 'sandbox' | 'model' | 'pack' | 'judge' | 'runs' | 'mlflow' | `tool:${string}`;
@@ -40,12 +42,13 @@ export function AgentGraph({ detail, counts, selected, onSelect, question }: { d
   const H = Math.max(toolsTop + toolsH + 60, 330);
   const W = 1000;
   const x = { q: 10, sdk: 175, mcp: 435, tool: 585, back: 855 };
-  const backends: { id: NodeId; label: string; sub: string; ext?: boolean }[] = [
+  type Backend = { id: NodeId; label: string; sub: string; ext?: boolean };
+  const backends = ([
     { id: 'postgres', label: 'Postgres', sub: 'dab_agent · read-only' },
     { id: 'sandbox', label: 'sandbox', sub: detail.sandbox_built ? 'docker · --network none' : 'image not built' },
     { id: 'model', label: 'haiku 4.5', sub: 'llm_extract only', ext: true },
     { id: 'pack', label: 'pack files', sub: 'data/context/' },
-  ];
+  ] as Backend[]).filter((b) => tools.some((t) => BACKEND_NODE[t.backend] === b.id)); // only what this version's tools reach
   const backY: Record<string, number> = {};
   backends.forEach((b, i) => {
     backY[b.id] = toolsTop + 20 + i * 62;
@@ -181,7 +184,11 @@ export function ToolForm({ spec, agent, dataset, initial, original, onResult }: 
             {p.type === 'array' ? ' · comma-separated' : ''}
             {p.description ? ` — ${p.description}` : ''}
           </span>
-          {big(k) ? <textarea value={values[k] ?? ''} onChange={(e) => setValues({ ...values, [k]: e.target.value })} rows={k === 'code' ? 10 : 5} spellCheck={false} /> : <input type={p.type === 'integer' ? 'number' : 'text'} value={values[k] ?? ''} onChange={(e) => setValues({ ...values, [k]: e.target.value })} />}
+          {k === 'sql' ? (
+            <SqlEditor value={values[k] ?? ''} onChange={(v) => setValues({ ...values, [k]: v })} rows={8} ariaLabel={`${spec.name} sql`} />
+          ) : big(k) ? <textarea value={values[k] ?? ''} onChange={(e) => setValues({ ...values, [k]: e.target.value })} rows={k === 'code' ? 10 : 5} spellCheck={false} /> : (
+            <input type={p.type === 'integer' ? 'number' : 'text'} value={values[k] ?? ''} onChange={(e) => setValues({ ...values, [k]: e.target.value })} />
+          )}
         </label>
       ))}
       <div className="filters">
@@ -284,7 +291,11 @@ export function Replay({ spans, onlyTools, filterTool, onRerun }: { spans: Span[
                 <td className="num">{s.start.toFixed(1)}s</td>
                 <td className="num">{turn}</td>
                 <td className="mono small replay-cell">
-                  <pre className="cell">{isOpen ? sent : sent.slice(0, 140) + (sent.length > 140 ? '…' : '')}</pre>
+                  {isOpen && s.kind === 'tool' && typeof s.input?.sql === 'string' ? (
+                    <SqlBlock sql={s.input.sql} label={s.name} maxHeight={360} />
+                  ) : (
+                    <pre className="cell">{isOpen ? sent : sent.slice(0, 140) + (sent.length > 140 ? '…' : '')}</pre>
+                  )}
                   {(sent.length > 140 || recv.length > 140) && (
                     <button type="button" className="linkbtn small" onClick={() => setOpen(isOpen ? null : i)}>
                       {isOpen ? 'less' : 'more'}
@@ -328,14 +339,14 @@ export function Replay({ spans, onlyTools, filterTool, onRerun }: { spans: Span[
   );
 }
 
-export function TraceLine({ runId, traceKey, queryId, trial, passed, cost }: { runId: string; traceKey: string; queryId: string; trial: number; passed: boolean | null; cost: number | null }) {
+export function TraceLine({ runId, queryId, trial, passed, cost }: { runId: string; queryId: string; trial: number; passed: boolean | null; cost: number | null }) {
   return (
     <span>
-      <Link to={queryPath(queryId)} className="mono">
+      <Link to={questionPath(queryId)} className="mono">
         {queryId}
       </Link>{' '}
       trial {trial} · {passed == null ? 'not scored' : passed ? <span className="v-ok">pass</span> : <span className="v-warn">fail</span>} · {fmtUsd(cost, 3)} ·{' '}
-      <Link to={`/runs/${runId}/traces/${traceKey}`} className="mono">
+      <Link to={trialPath(runId, trialId({ query_id: queryId, trial }))} className="mono">
         full trace
       </Link>
     </span>

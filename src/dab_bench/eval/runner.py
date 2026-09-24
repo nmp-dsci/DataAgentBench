@@ -22,7 +22,7 @@ from typing import Any
 from rich.console import Console
 
 from dab_bench.agent.llm import EFFORT, resolve_model, short_model
-from dab_bench.agent.prompt import DatasetContext, compose_system_prompt, load_context
+from dab_bench.agent.prompt import DatasetContext, load_context
 from dab_bench.agent.sandbox import Sandbox, SandboxError
 from dab_bench.agent.session import Solve, save_trace, solve, trial_key
 from dab_bench.agent.versions import AgentVersion, load_version
@@ -61,6 +61,7 @@ class RunMeta:
         None  # the champion run this run is measured against (loop scaffolding)
     )
     sandbox: str | None = None
+    prompt_version: int | None = None  # the MLflow prompt registry version of system.md
 
 
 def new_run_id(version: AgentVersion, model: str, split: str, hints: bool) -> str:
@@ -109,6 +110,7 @@ class Judge:
 
 
 def _result_from(query: Query, trial: int, s: Solve, verdict: dict[str, Any]) -> TrialResult:
+    sub = s.submission or {}
     return TrialResult(
         query_id=query.id,
         dataset=query.dataset,
@@ -130,6 +132,11 @@ def _result_from(query: Query, trial: int, s: Solve, verdict: dict[str, Any]) ->
         timed_out=s.timed_out or bool(verdict.get("timed_out")),
         rate_limited=s.rate_limited,
         session_id=s.session_id,
+        agent_sql=sub.get("sql"),
+        agent_result=sub.get("result"),
+        mode=sub.get("mode"),
+        step=sub.get("step") or None,
+        result_rows=sub.get("row_count"),
     )
 
 
@@ -210,9 +217,16 @@ async def run_eval(
         from dab_bench.tracking.mlflow_log import preflight
 
         preflight()  # fail fast: the platform's rule, never a silent local store
+        try:
+            from dab_bench.tracking.prompts import register
+
+            meta.prompt_version = register(version)
+            _write_meta(run_dir, meta)
+        except Exception as e:  # noqa: BLE001 - the registry is an index; the folder is the record
+            console.print(f"[yellow]prompt registry: not registered ({type(e).__name__}: {e})[/]")
 
     sandbox: Sandbox | None = None
-    if not dry_run:
+    if not dry_run and version.needs_sandbox:
         try:
             sandbox = Sandbox.start(run_id)
             meta.sandbox = sandbox.name
@@ -242,9 +256,7 @@ async def run_eval(
                 s.trace = [
                     {
                         "role": "system",
-                        "content": compose_system_prompt(
-                            version.system_prompt, contexts[query.dataset], use_hints
-                        ),
+                        "content": version.prompt_for(contexts[query.dataset], use_hints),
                     },
                     {"role": "user", "content": query.question},
                 ]
@@ -305,6 +317,18 @@ async def run_eval(
     meta.summary = asdict(summary)
     _write_meta(run_dir, meta)
     _print_summary(summary, time.time() - started_run)
+    try:
+        from dab_bench.eval.scorecard import score_run
+
+        card = score_run(run_id)
+        tot = card["totals"]
+        console.print(
+            "scorecard: "
+            + " · ".join(f"{k} {v['passed']}/{v['n']}" for k, v in tot.items())
+            + f"  (`dab diagnose {run_id}`)"
+        )
+    except Exception as e:  # noqa: BLE001 - the scorecard is a reading of the run, never its record
+        console.print(f"[yellow]scorecard: not written ({type(e).__name__}: {e})[/]")
     if track and not dry_run:
         try:
             from dab_bench.tracking.mlflow_log import log_run
@@ -335,12 +359,13 @@ def _copy_agent_files(
     run_dir: Path, version: AgentVersion, contexts: dict[str, DatasetContext], hints: bool
 ) -> None:
     (run_dir / "agent").mkdir(exist_ok=True)
+    for name in version.files():
+        if name.startswith("datasets/"):
+            (run_dir / "agent" / "datasets").mkdir(exist_ok=True)
     for name, text in version.files().items():
         (run_dir / "agent" / name).write_text(text)
     for d, ctx in contexts.items():
-        (run_dir / "agent" / f"system.{d}.md").write_text(
-            compose_system_prompt(version.system_prompt, ctx, hints=hints)
-        )
+        (run_dir / "agent" / f"system.{d}.md").write_text(version.prompt_for(ctx, hints))
         dst = run_dir / "context" / d
         dst.mkdir(parents=True, exist_ok=True)
         for f in ("summary.md", "pitfalls.md", "curation.json"):

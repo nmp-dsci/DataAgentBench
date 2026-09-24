@@ -1,5 +1,7 @@
 """Against the committed index: what a bare clone serves."""
 
+import json
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -49,5 +51,39 @@ def test_validators_and_leaderboard(client: TestClient) -> None:
         "levenshtein": 9,
     }
     lb = client.get("/api/leaderboard").json()
-    assert len(lb["overallLeaderboard"]) == 40 and len(lb["answer_files"]) == 9
-    assert sum(f["rows"] for f in lb["answer_files"]) == 14480
+    assert len(lb["overallLeaderboard"]) == 40 and len(lb["answer_files"]) == 11
+    # nine committed upstream and pooled; the top two read from their PRs as references
+    pooled = [f for f in lb["answer_files"] if f["pooled"]]
+    assert len(pooled) == 9 and sum(f["rows"] for f in pooled) == 14480
+    refs = {f["name"]: f["rank"] for f in lb["answer_files"] if not f["pooled"]}
+    assert refs == {"permute_eq": 1, "oceanbase_lab_scout": 2}
+
+
+def _a_traced_trial() -> tuple[str, dict[str, object]] | None:
+    """The first result row with a trace file among this machine's runs (none in CI)."""
+    from dab_bench.config import RUNS_DIR
+
+    for run in sorted(RUNS_DIR.glob("*/results.jsonl")) if RUNS_DIR.exists() else []:
+        for line in run.read_text().splitlines():
+            row = json.loads(line)
+            if row.get("trace_file") and (run.parent / row["trace_file"]).exists():
+                return run.parent.name, row
+    return None
+
+
+def test_a_trial_is_addressed_by_its_id_and_the_old_file_route_agrees(client: TestClient) -> None:
+    found = _a_traced_trial()
+    if found is None:
+        pytest.skip("no run folder with a trace on this machine")
+    run, row = found
+    new = client.get(f"/api/runs/{run}/{row['query_id']}/t{row['trial']}")
+    assert new.status_code == 200, new.text
+    stem = str(row["trace_file"]).removeprefix("traces/").removesuffix(".json")
+    old = client.get(f"/api/runs/{run}/traces/{stem}")
+    assert old.status_code == 200
+    assert new.json() == old.json()
+    assert new.json()["query_id"] == row["query_id"]
+    # the trial segment is `t<k>`; anything else, or a trial the run lacks, is a 404
+    assert client.get(f"/api/runs/{run}/{row['query_id']}/x{row['trial']}").status_code == 404
+    assert client.get(f"/api/runs/{run}/{row['query_id']}/t999").status_code == 404
+    assert client.get(f"/api/runs/no_such_run/{row['query_id']}/t1").status_code == 404

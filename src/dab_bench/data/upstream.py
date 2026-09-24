@@ -67,7 +67,37 @@ def clone(commit: str | None = None, path: Path = UPSTREAM_DIR, force: bool = Fa
     elif commit and head_commit(path) != commit:
         _git(["fetch", "--quiet", "origin", commit], cwd=path)
         _git(["checkout", "--quiet", commit], cwd=path)
+    fetch_pinned(path)
     return Upstream(path=path, commit=head_commit(path) or "unknown", repo=UPSTREAM_REPO)
+
+
+def fetch_pinned(path: Path = UPSTREAM_DIR) -> None:
+    """Fetch each PR head a reference answer file is pinned to (`aliases.pinned_commits`).
+
+    One commit each, depth 1, no checkout: the objects land in the clone and
+    `show` reads the file from them, so the working tree stays at the ingested
+    commit. GitHub serves a PR head by hash even when the PR never merged.
+    """
+    from dab_bench.data.aliases import pinned_commits
+
+    missing = [c for c in pinned_commits() if not _has_commit(c, path)]
+    if missing:
+        _git(["fetch", "--quiet", "--depth", "1", "origin", *missing], cwd=path)
+
+
+def _has_commit(commit: str, path: Path) -> bool:
+    try:
+        _git(["cat-file", "-e", f"{commit}^{{commit}}"], cwd=path)
+    except subprocess.CalledProcessError:
+        return False
+    return True
+
+
+def show(commit: str, file: str, path: Path = UPSTREAM_DIR) -> str | None:
+    """`file` as it is at `commit`, or None when the commit has not been fetched."""
+    if not _has_commit(commit, path):
+        return None
+    return _git(["show", f"{commit}:{file}"], cwd=path)
 
 
 def require(path: Path = UPSTREAM_DIR) -> Upstream:

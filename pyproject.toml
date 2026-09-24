@@ -21,6 +21,7 @@ dependencies = [
   "pandas>=2.2",
   "claude-agent-sdk>=0.2.152",
   "mlflow>=3.12,<4",
+  "sqlglot>=30.19.0",
 ]
 
 [project.scripts]

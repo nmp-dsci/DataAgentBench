@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { type Trace, type TraceBlock, fmtDur, fmtInt, fmtUsd, queryPath, useGet } from '../lib/api';
+import { type Trace, type TraceBlock, fmtDur, fmtInt, fmtUsd, useGet } from '../lib/api';
 import { Waterfall } from '../lib/runs';
+import { SqlVersus } from '../lib/scorecard';
+import { SqlBlock } from '../lib/sql';
 import { Loading } from '../lib/ui';
+import { apiTrialPath, questionPath, runPath } from '../lib/url';
 
 function Block({ b }: { b: TraceBlock }) {
   if (b.type === 'text') return <p className="wrap-any">{b.text}</p>;
@@ -17,6 +20,18 @@ function Block({ b }: { b: TraceBlock }) {
     const input = b.input ?? {};
     const main = (input.sql ?? input.code ?? input.answer ?? input.table ?? input.path ?? input.term ?? '') as string;
     const rest = Object.entries(input).filter(([k]) => !['sql', 'code', 'answer', 'table', 'path', 'term'].includes(k));
+    if (typeof input.sql === 'string')
+      return (
+        <SqlBlock
+          sql={input.sql}
+          label={
+            <>
+              → {(b.name ?? '').replace('mcp__dab__', '')}
+              {rest.length > 0 && ` · ${rest.map(([k, v]) => `${k}=${JSON.stringify(v)}`).join(' ')}`}
+            </>
+          }
+        />
+      );
     return (
       <div className="code band">
         <p className="label">
@@ -39,10 +54,13 @@ function Block({ b }: { b: TraceBlock }) {
 
 /** One trial: the verdict, the span waterfall MLflow shows (rebuilt from the run folder), the MLflow view itself on request, and the full transcript. */
 export function TracePage() {
-  const { id, key } = useParams();
-  const { data: t, error } = useGet<Trace>(id && key ? `/api/runs/${id}/traces/${key}` : null);
+  const { id = '', ds = '', n = '', t: k = '' } = useParams();
+  // the address is the trial's id, `/runs/<run>/deps_dev_v1/1/t1`; the file name stays on disk
+  const tid = /^\d+$/.test(n) && /^t\d+$/.test(k) ? `${ds}/${n}/${k}` : null;
+  const { data: t, error } = useGet<Trace>(tid ? apiTrialPath(id, tid) : null);
   const [showSystem, setShowSystem] = useState(false);
   const [showMlflow, setShowMlflow] = useState(false);
+  if (!tid) return <Loading error={`${ds}/${n}/${k} is not a trial: the address is /runs/<run>/<dataset>/<n>/t<k>`} />;
   if (!t) return <Loading error={error} />;
   const system = t.trace.find((e) => e.role === 'system');
   const user = t.trace.find((e) => e.role === 'user');
@@ -54,14 +72,14 @@ export function TracePage() {
   return (
     <>
       <p className="label">
-        <Link to="/runs">runs</Link> · <Link to={`/runs/${id}`}>{id}</Link> · {key}
+        <Link to="/runs">runs</Link> · <Link to={runPath(id)}>{id}</Link> · <Link to={runPath(id, { q: ds })}>{ds}</Link> · <Link to={runPath(id, { q: `${ds}/${n}` })}>{n}</Link> · {k}
       </p>
       <h1>
-        <Link to={queryPath(t.query_id)}>{t.query_id}</Link> trial {t.trial}: <em>{verdict}</em> — {t.n_turns || t.spans.filter((s) => s.kind === 'turn').length} turns, {t.tool_calls.length} tool calls, {fmtDur(t.duration_ms)}, {fmtUsd(t.cost_usd, 3)}
+        <Link to={questionPath(t.query_id)}>{t.query_id}</Link> trial {t.trial}: <em>{verdict}</em> — {t.n_turns || t.spans.filter((s) => s.kind === 'turn').length} turns, {t.tool_calls.length} tool calls, {fmtDur(t.duration_ms)}, {fmtUsd(t.cost_usd, 3)}
         {t.error && ` — ${t.error}`}
       </h1>
       <p className="lead">
-        <code>{t.model}</code> at effort <code>{t.effort}</code>; the system prompt is {fmtInt(t.system_prompt_chars)} characters (behaviour + the <code>{t.dataset}</code> pack at <code>{t.context_sha}</code>). Tokens:{' '}
+        <code>{t.model}</code> at effort <code>{t.effort}</code>; the system prompt is {fmtInt(t.system_prompt_chars)} characters (behaviour + the <code>{t.dataset}</code> facts; context <code>{t.context_sha}</code>). Tokens:{' '}
         {fmtInt(t.input_tokens + t.cache_creation_tokens)} fresh input, {fmtInt(t.cache_read_tokens)} cache read, {fmtInt(t.output_tokens)} output.{' '}
         {errors > 0 && `${errors} tool call${errors === 1 ? '' : 's'} returned an error. `}
         {t.mlflow_trace_url ? (
@@ -84,12 +102,25 @@ export function TracePage() {
         </div>
       </div>
 
+      {t.score && (
+        <>
+          <h2>
+            00 · The SQL against the golden —{' '}
+            {t.score.category === 'solved' ? 'it recreates the golden result' : t.score.category === 'no golden' ? 'this question has no golden yet, so only the answer is scored' : `${t.score.category}`}
+          </h2>
+          <p>
+            After the run, <code>dab diagnose {id}</code> checks this trial three ways against the question's golden SQL and gives the failure one category. None of it reaches the agent.
+          </p>
+          <SqlVersus score={t.score} agentSql={t.submission?.sql} golden={t.golden} mode={t.submission?.mode} step={t.submission?.step} reason={t.reason} />
+        </>
+      )}
+
       <h2>
         01 · Timeline — {toolS > 0 && t.duration_ms > 0 ? `${Math.round((toolS * 1000 * 100) / t.duration_ms)}% of the ${fmtDur(t.duration_ms)} was inside tools` : 'no tool time recorded'}
         {tools.length > 0 && `, ${tools.filter((x) => x.status === 'ERROR').length} of ${tools.length} tool spans errored`}
       </h2>
       <p>
-        The span tree the harness logs to MLflow, rebuilt from <code>runs/{id}/traces/{key}.json</code>: a <code>turn</code> span per assistant message, a tool span per call. Click a span for its input and output.
+        The span tree the harness logs to MLflow, rebuilt from the trace file in <code>runs/{id}/traces/</code>: a <code>turn</code> span per assistant message, a tool span per call. Click a span for its input and output.
       </p>
       <Waterfall spans={t.spans} durationS={t.duration_ms / 1000} />
       {t.mlflow_trace_url && !t.mlflow_embeddable && (
