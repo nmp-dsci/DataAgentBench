@@ -350,7 +350,7 @@ export type Rounds = { champion: string; rounds: RoundSummary[]; versions: Versi
 export type Side = { answer: boolean | null; sql: boolean | null; decision: boolean | null; category: string; mode: string | null };
 export type Change = 'improved' | 'regressed' | 'held' | 'still failing' | 'not scored';
 export type QuestionChange = { query_id: string; dataset: string; question: string; split: string | null; read: boolean; before: Side | null; after: Side | null; change: Change };
-export type OptimiseSessionRec = { scope: string; notes: string | null; rationale: string; refusals: { notes: string; problems: string[] }[]; questions: string[]; n_turns: number; cost_usd: number | null; error: string | null; duration_ms?: number };
+export type OptimiseSessionRec = { scope: string; notes: string | null; rationale: string; refusals: { problems: string[]; notes_chars?: number; rationale_chars?: number; redacted?: boolean }[]; questions: string[]; n_turns: number; cost_usd: number | null; error: string | null; duration_ms?: number };
 export type RoundDetail = {
   summary: RoundSummary;
   record: { version: string; challenger_of: string; source_run: string; started_at: string; optimiser: { model: string; effort: string }; split: { train: number; heldout: number }; cost_usd: number; sessions: OptimiseSessionRec[]; system_md_changed: boolean };
