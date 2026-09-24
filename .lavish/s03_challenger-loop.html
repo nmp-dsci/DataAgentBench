@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>s03 · DataAgentBench — the challenger loop: hints first, a golden set, a proposer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Design source (2): the project's own system — DESIGN.md ("Field Guide"), tokens verbatim,
+   the same block s00/s01 and frontend/src/tokens.css carry. */
+:root{
+  --bg:#F7F6F2; --panel:#FFFFFF; --band:#EFEEE8;
+  --ink:#1A1D1B; --ink-2:#3B403D; --muted:#4A514D; --faint:#5C635E;
+  --line:#DCDAD2; --line-2:#C7C5BC; --line-3:#8A8880;
+  --accent:#0A6552; --accent-ink:#FFFFFF; --accent-soft:#DFEFE8;
+  --amber:#8A5006; --amber-soft:#F6E6CF;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --t-2:0.8rem; --t-1:0.875rem; --t0:1rem; --t1:1.125rem; --t2:1.406rem; --t3:1.758rem; --t4:2.197rem;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --r:10px; --r-sm:6px;
+  --shadow:0 1px 2px rgb(20 25 22 / .05), 0 12px 28px -18px rgb(20 25 22 / .22);
+  --dur:300ms; --ease:cubic-bezier(.2,.7,.2,1); --focus:var(--accent);
+  --w:1140px; --measure:68ch; --track-label:.08em;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121614; --panel:#191E1B; --band:#161A18;
+    --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+    --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+    --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+    --amber:#D99A4E; --amber-soft:#3A2A14;
+    --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121614; --panel:#191E1B; --band:#161A18;
+  --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+  --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+  --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+  --amber:#D99A4E; --amber-soft:#3A2A14;
+  --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+}
+@media (prefers-reduced-motion: reduce){ :root{ --dur:0.01ms; } }
+*,*::before,*::after{box-sizing:border-box}
+:where(.grid,.flex,.kpi,.cards,.mock-body,.mock-cols,.mock-top)>*{min-width:0}
+:where(p,h1,h2,h3,h4,li,dd,figcaption,td,th,.chip,.label){overflow-wrap:anywhere}
+:where(img,svg,video,iframe){max-width:100%;height:auto}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink-2);font-family:var(--sans);font-size:var(--t0);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{color:var(--ink);margin:0;line-height:1.15;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+h1{font-size:var(--t4);font-family:var(--serif);font-weight:400} h1 em{font-style:italic;font-weight:400;color:var(--accent)}
+h2{font-size:var(--t3)} h3{font-size:var(--t1)} h4{font-size:var(--t0)}
+p{margin:0 0 var(--s4);text-wrap:pretty}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:.2em} a:hover{text-decoration-thickness:2px}
+strong,b{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:max(var(--t-2),.86em);background:var(--band);padding:.08em .32em;border-radius:var(--r-sm);color:var(--ink-2)}
+pre{margin:0;font-family:var(--mono);font-size:var(--t-2);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.wrap{max-width:var(--w);margin-inline:auto;padding-inline:var(--s5)}
+.label{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0}
+.lead{font-family:var(--serif);font-size:var(--t1);line-height:1.5;color:var(--ink-2);max-width:72ch}
+.small{font-size:var(--t-1);color:var(--muted)}
+.top{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:var(--w);margin-inline:auto;padding:var(--s3) var(--s5);display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.top b{font-family:var(--mono);font-size:var(--t-1);color:var(--ink);white-space:nowrap}
+.top nav{display:flex;gap:var(--s4);margin-left:auto;flex-wrap:wrap;font-size:var(--t-1);font-weight:500}
+.top nav a{color:var(--ink-2);text-decoration:none;padding:var(--s1) 0} .top nav a:hover{color:var(--accent)}
+header.hero{padding:var(--s7) 0 var(--s5)}
+.chips{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s4) 0 0}
+.chip{font-family:var(--mono);font-size:var(--t-2);padding:.3em .6em;border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--ink-2);background:var(--panel)}
+.chip.ok{border-color:var(--accent);color:var(--accent)} .chip.warn{border-color:var(--amber);color:var(--amber)}
+section.blk{padding-top:var(--s8)} section.blk:last-of-type{padding-bottom:var(--s9)}
+section.band-sec{background:var(--band);margin-top:var(--s8);padding:var(--s7) 0}
+section.band-sec + section.blk{padding-top:var(--s7)}
+.hd{margin-bottom:var(--s5);max-width:80ch} .hd .label{margin-bottom:var(--s2)} .hd h2{margin-bottom:var(--s3)}
+.panel{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5)}
+.grid{display:grid;gap:var(--s4)} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.g3,.g2{grid-template-columns:minmax(0,1fr)}}
+.card h3{margin-bottom:var(--s2)} .card p{margin-bottom:var(--s2);font-size:var(--t-1)} .card p:last-child{margin:0}
+.card.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r);box-shadow:var(--shadow);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:var(--t-1)}
+caption{text-align:left;padding:var(--s4) var(--s5) var(--s2);color:var(--muted);font-size:var(--t-1);caption-side:top}
+th,td{text-align:left;padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}
+thead th{font-family:var(--mono);font-size:var(--t-2);font-weight:500;color:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase;border-bottom:1px solid var(--line-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.sub{font-weight:600;color:var(--ink);white-space:nowrap}
+td.num{font-family:var(--mono);font-size:var(--t-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+td .path{display:block;font-family:var(--mono);font-size:var(--t-2);color:var(--faint);font-weight:400;margin-top:2px}
+td.mono{font-family:var(--mono);font-size:var(--t-2)}
+tr.pro td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+tr.dim td{color:var(--muted)}
+.v-ok{color:var(--accent);font-weight:600} .v-no{color:var(--muted)} .v-warn{color:var(--amber);font-weight:600}
+blockquote{margin:0;padding:var(--s3) var(--s4);border-left:2px solid var(--accent);background:var(--band);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:var(--t-1)}
+blockquote.warn{border-left-color:var(--amber)}
+.fig{margin:var(--s5) 0 0}
+.fig-title{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0 0 var(--s3);text-wrap:balance}
+.dia-frame{background:var(--panel);border-radius:var(--r);padding:var(--s4);box-shadow:var(--shadow)}
+.fig figcaption{font-family:var(--sans);font-size:var(--t-1);color:var(--muted);line-height:1.5;margin-top:var(--s3)}
+.fig figcaption b{color:var(--ink);font-weight:600}
+.dia{display:block;width:100%;height:auto;color:var(--ink-2);overflow:visible}
+.dia .nd{fill:var(--bg);stroke:currentColor;stroke-width:1;vector-effect:non-scaling-stroke}
+.dia .nd.hi{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.4}
+.dia .nd.ext{fill:none;stroke:var(--line-3);stroke-dasharray:4 3}
+.dia .nd.warn{fill:var(--amber-soft);stroke:var(--amber)}
+.dia .rg{fill:none;stroke:var(--line-2);stroke-dasharray:5 4}
+.dia .tx{font-family:var(--mono);font-size:11.5px;fill:currentColor}
+.dia .tx.k{fill:var(--ink);font-weight:500;font-family:var(--sans);font-size:12.5px}
+.dia .tx.s{font-size:10.5px;fill:var(--faint)}
+.dia .cap{font-family:var(--mono);font-size:10.5px;fill:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase}
+.dia .ed{stroke:currentColor;stroke-width:1.25;vector-effect:non-scaling-stroke;fill:none;marker-end:url(#arr)}
+.dia .ed.hi{stroke:var(--accent);stroke-width:1.6}
+.dia .ed.dash{stroke:var(--line-3);stroke-dasharray:4 3}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:var(--s3)}
+.steps li{position:relative;padding-left:2.75rem;font-size:var(--t-1)}
+.steps li::before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:0;top:2px;font-family:var(--mono);color:var(--accent);font-weight:500}
+form.q{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5);display:grid;gap:var(--s3);margin-top:var(--s4)}
+form.q h3{margin:0} form.q .why{font-size:var(--t-1);color:var(--muted);margin:0}
+form.q label{display:grid;grid-template-columns:1.2rem minmax(0,1fr);gap:var(--s2);align-items:start;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;min-height:24px}
+form.q label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+form.q input[type=radio],form.q input[type=checkbox]{margin:3px 0 0;accent-color:var(--accent);width:16px;height:16px}
+form.q textarea{width:100%;font:inherit;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);color:var(--ink-2);min-height:3.2rem;resize:vertical}
+form.q .row{display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap}
+.btn{font:500 var(--t-1) var(--sans);background:var(--accent);color:var(--accent-ink);border:0;border-radius:var(--r-sm);padding:.55em 1em;cursor:pointer;min-height:24px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.08)} .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.queued{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);min-height:1.2em}
+.rec{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);margin-left:.4em}
+.tag{font-family:var(--mono);font-size:var(--t-2);padding:.15em .45em;border-radius:var(--r-sm);border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.tag.ok{border-color:var(--accent);color:var(--accent)} .tag.warn{border-color:var(--amber);color:var(--amber)} .tag.no{border-color:var(--line-3);color:var(--muted)}
+ul.tight{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.tight li{margin-bottom:var(--s1)}
+ul.qa{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.qa li{margin-bottom:var(--s2)}
+.code{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);margin-top:var(--s3);overflow-x:auto}
+.code .label{margin-bottom:var(--s2)}
+.code.band{background:var(--band)}
+
+/* the mock of the explorer page, in the explorer's own styles */
+.mock{background:var(--bg);border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin-top:var(--s4)}
+.mock-nav{display:flex;gap:var(--s1);align-items:center;padding:var(--s3) var(--s4);background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.mock-nav b{font-family:var(--serif);font-weight:500;margin-right:var(--s3);color:var(--ink)} .mock-nav b i{font-style:normal;color:var(--accent)}
+.mock-nav span{font:500 var(--t-1) var(--sans);color:var(--muted);padding:var(--s1) var(--s3);border-radius:var(--r-sm)}
+.mock-nav span.on{color:var(--accent);background:var(--accent-soft)}
+.mock-body{padding:var(--s5) var(--s4)}
+.mock h1{font-size:var(--t3)}
+.mock .lead{font-size:var(--t0)}
+.mock-top{display:flex;gap:var(--s2);flex-wrap:wrap;align-items:center;margin-top:var(--s3)}
+.sel{font:400 var(--t-1) var(--sans);color:var(--ink);background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:var(--s2) var(--s3);min-height:36px;display:inline-flex;align-items:center;gap:var(--s2)}
+.sel::after{content:'▾';color:var(--faint)}
+.sel .path{font-family:var(--mono);font-size:var(--t-2);color:var(--faint)}
+.mock-cols{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.mock-cols{grid-template-columns:minmax(0,1fr)}}
+.mock .panel{padding:var(--s4)}
+.mock .panel h3{font-size:var(--t0);margin-bottom:var(--s2)}
+.mock .kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--s1) var(--s3);font-size:var(--t-1);margin:0}
+.mock .kv dt{font-family:var(--mono);font-size:var(--t-2);color:var(--faint);text-transform:uppercase;letter-spacing:var(--track-label)} .mock .kv dd{margin:0}
+.mock textarea,.mock .ta{display:block;width:100%;font-family:var(--mono);font-size:var(--t-2);line-height:1.5;padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);color:var(--ink);min-height:4.6rem;resize:vertical;white-space:pre-wrap}
+.mock .row{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap;margin-top:var(--s2)}
+.mock .out{margin-top:var(--s3);background:var(--band);border-radius:var(--r-sm);padding:var(--s3);font-family:var(--mono);font-size:var(--t-2);white-space:pre-wrap}
+.mock .out.err{box-shadow:inset 3px 0 0 var(--amber)}
+.mock table{min-width:0;font-size:var(--t-2)}
+.mock .tw{margin-top:var(--s4)}
+.mock .tog{font:500 var(--t-2) var(--sans);color:var(--ink-2);background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:var(--s1) var(--s2);min-height:24px}
+.mock .tog.on{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.mock .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--s3);margin-top:var(--s3)}
+.mock .kpi{background:var(--panel);border-radius:var(--r);padding:var(--s3) var(--s4);box-shadow:var(--shadow)}
+.mock .kpi .n{font:500 var(--t2)/1.1 var(--mono);color:var(--ink)} .mock .kpi .b{font-size:var(--t-2);color:var(--muted);margin-top:var(--s1)}
+.mock .diff{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s2);margin-top:var(--s2)}
+@media (max-width:700px){.mock .diff{grid-template-columns:minmax(0,1fr)}}
+.mock .diff .out{margin:0}
+.mock .diff .label{margin-bottom:var(--s1)}
+.ms{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--s2) var(--s4);align-items:start}
+.ms .m{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);font-weight:500;white-space:nowrap;padding-top:.2em}
+
+/* s03 additions */
+.codehost{border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);background:var(--panel);min-height:3rem}
+.band-sec > .wrap > .hd:first-child{margin-top:0}
+.mock .ta{min-height:0}
+
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in">
+  <b>s03 · challenger loop</b>
+  <nav aria-label="Sections">
+    <a href="#goal">Goal</a><a href="#levers">Levers</a><a href="#agnews">agnews</a><a href="#extract">llm_extract</a><a href="#embed">Embeddings</a><a href="#tools">Tools</a><a href="#belt">Belt</a><a href="#top2">Top two</a><a href="#loop">Loop</a><a href="#challenger">Challenger</a><a href="#golden">Golden tab</a><a href="#compare">Trace vs golden</a><a href="#proposer">Proposer</a><a href="#rules">Rules</a><a href="#milestones">Milestones</a><a href="#risks">Risks</a><a href="#decide">Decide</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+<header class="hero">
+  <p class="label">plan · branch challenger_20260923 · 2026-09-23 · builds on s01 (blueprint) and s02 (Agent tab) · design source: DESIGN.md (Field Guide)</p>
+  <h1 style="margin-top:var(--s3)">A challenger is one change, screened on one dataset against the champion — and a golden set in the database is what turns each fail into <em>a reason</em></h1>
+  <p class="lead" style="margin-top:var(--s4)">You asked for three things: a challenger you can iterate on, starting with the hints on agnews; what the champion run says about the tools; a Golden tab where you curate golden traces, tied to an agent version's tools and re-runnable exactly, stored in the database; and a loop where an agent proposes the next edit to the prompt and pack. This page is the plan for all three, in the order you asked. Every claim marked <i>verified</i> was checked against the code, the champion's run folder or the live database this session.</p>
+  <div class="chips">
+    <span class="chip ok">verified: champion = v0, run 20260921T064521Z_v0_all_haiku — 27/54, agnews 0/4</span>
+    <span class="chip ok">verified: 3 of 4 agnews trials hit the 900 s timeout inside llm_extract — $2.31 of the $2.42 agnews spend</span>
+    <span class="chip warn">verified: agnews/3 needs 14,860 articles labelled and agnews/4 needs 6,696; llm_extract stops at 2,000 rows, 40 per sequential call (tools.py:36–37, 295)</span>
+    <span class="chip ok">verified: the agnews hint file is 2 lines — the four category names, and "read the title and description"</span>
+    <span class="chip warn">verified: a scoped champion run today would take the champion slot on the Runs board (app.py:465) — C1 fixes this first</span>
+    <span class="chip ok">verified: EXPLAIN (FORMAT JSON) as dab_agent lists the tables a SQL reads — the golden comparison needs no SQL parser</span>
+    <span class="chip ok">verified: a tidied golden for yelp/1 returns 3.5470085…, the gold (117 reviews)</span>
+    <span class="chip">decided earlier: gold lives in dataagentbench_meta, never granted to dab_agent</span>
+  </div>
+</header>
+
+<!-- 01 GOAL -->
+<section class="blk" id="goal">
+  <div class="hd">
+    <p class="label">01 · goal</p>
+    <h2>Done for C1 means two arms, same queries, same trials — and a verdict with its denominator, written down next to the challenger</h2>
+    <p>The champion's numbers today come from one trial per query. A challenger can only be judged against the champion when both are re-run on the same queries with the same number of trials. So every screen runs <b>two arms</b>: the champion again (the baseline) and the challenger. Each result is <code>passed/n</code> per query, and the verdict goes into the challenger's own folder, so the lineage of edits can be read in git.</p>
+  </div>
+  <div class="grid g3">
+    <div class="panel card"><p class="label">champion today</p><h3 style="font-family:var(--mono);font-size:var(--t2)">27/54 · macro 0.44</h3><p>v0, Haiku 4.5, effort medium, hints off, 54 × 1. The only full run; Runs board marks it champion.</p></div>
+    <div class="panel card"><p class="label">agnews in that run</p><h3 style="font-family:var(--mono);font-size:var(--t2)">0/4 · $2.42 · 3.85M tok</h3><p>q1, q3 and q4 timed out at 900 s while <code>llm_extract</code> was running. q2 finished and answered 11/111. The gold is 16/111 (0.1441).</p><p><b>Tokens excluding cache:</b> 3.58M input + 0.27M output. 3.49M of the input is the three timeouts, 1.12–1.25M each. For comparison, the whole of yelp used 0.24M across 7 trials. <span class="small">Caveat: a timed-out trial records only <code>llm_extract</code>'s usage, because it is cut off before its own totals arrive, and that usage adds its cache reads into "input" (<code>tools.py:311–315</code>). So for those three trials, "excluding cache" is an upper bound. C1 records extract tokens by kind so this can be split properly.</span></p></div>
+    <div class="panel card"><p class="label">field ceiling on agnews</p><h3 style="font-family:var(--mono);font-size:var(--t2)">0.40 – 0.55</h3><p>The best any top-10 leaderboard team reaches (s01 §3). q2–q4 need the dataset's own category labels, which the rules forbid fetching (issue #101).</p></div>
+  </div>
+</section>
+
+<!-- 02 LEVERS -->
+<section class="blk" id="levers">
+  <div class="hd">
+    <p class="label">02 · what moves the number — from the s01 research</p>
+    <h2>Six additions took the leaderboard from 0.56 to 0.95; v0 has four at least in part, hints are the fifth, and the one agnews depends on is too slow to work there</h2>
+    <p>This is s01 §3 re-read as a to-do list for the loop. Each row is something a leaderboard submission added, what it scored, where that lives in our repo, and whether v0 already has it. The loop edits the "surface" column. The last row is off-limits, and the proposer's guard (§8) enforces that.</p>
+  </div>
+  <div class="tw"><table>
+    <caption>Pass@1 = the leaderboard's score, averaged over the 12 datasets (5 trials × 54). Surface = the file or setting a challenger changes.</caption>
+    <thead><tr><th>Addition</th><th class="num">Row · Pass@1</th><th>Surface in this repo</th><th>v0 today</th><th>Where it enters the loop</th></tr></thead>
+    <tbody>
+      <tr class="pro"><td class="sub">Hints (the benchmark's own <code>--use_hints</code>)<span class="path">all but 3 leaderboard rows use them; Camber never read them but wrote the same facts into its prompts by hand</span></td><td class="num">every row ≥ 0.80</td><td class="mono">agents/&lt;v&gt;/agent.yaml · <b>hints: true</b></td><td><span class="tag no">off</span> — the curator saw them, the agent does not</td><td><b>C1</b> — the first challenger, c01-hints</td></tr>
+      <tr><td class="sub">Answer contract + literal-reading rules<span class="path">"above" is strict, "at least" is inclusive, EMA seeding, the exact answer format</span></td><td class="num">Alkera 0.841<span class="path">(+0.056 over best general-purpose row)</span></td><td class="mono">agents/&lt;v&gt;/system.md</td><td><span class="tag">partial</span> ANSWER step, no conventions block</td><td>A likely C5 proposal; s01 §7 has a draft</td></tr>
+      <tr><td class="sub">Checks before answering<span class="path">row counts, uniqueness, value range, then re-derive the answer a second way</span></td><td class="num">Sentinel 0.862 · Spacedock 0.785</td><td class="mono">system.md step 4 · a <code>verify</code> tool</td><td><span class="tag">in prompt</span> tool designed, never built</td><td>Changes the tool set — a proposal the loop can make but you approve</td></tr>
+      <tr><td class="sub">Per-dataset profile + pitfalls</td><td class="num">Camber 0.879</td><td class="mono">data/context/&lt;ds&gt;/pitfalls.md · agents/curator/system.md</td><td><span class="tag ok">has</span> curated, committed</td><td>Proposer may edit pitfalls (facts about the data only) or the curator prompt</td></tr>
+      <tr><td class="sub">Measured joins + LLM text extraction</td><td class="num">Scout 0.906</td><td class="mono">joins.md · <code>llm_extract</code></td><td><span class="tag warn">has, but slow</span> 40 rows per call, one call at a time, 2,000-row limit</td><td><b>The agnews bottleneck (§3)</b> — a code change to the tool, not a prompt edit</td></tr>
+      <tr class="dim"><td class="sub">Evidence prepared per question in advance</td><td class="num">Permute EQ 0.947</td><td class="mono">—</td><td><span class="tag no">excluded</span></td><td>Never. This is test-set tuning (s01 §3); the leak check in §8 rejects it</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 03 AGNEWS -->
+<section class="band-sec" id="agnews"><div class="wrap">
+  <div class="hd">
+    <p class="label">03 · what agnews can tell you</p>
+    <h2>On agnews, hints can move only q1 and q2: q3 and q4 need more articles labelled than llm_extract can handle, with or without hints</h2>
+    <p>Every agnews question asks about an article category that no table stores; <code>doc</code> holds only <code>article_id</code>, <code>title</code> and <code>description</code> (verified). So the agent has to label the articles with <code>llm_extract</code>. The hint file adds two lines: the four category names, and "determining a category requires understanding the title and description". The champion's traces already used those four names. Below is what each question needs, measured on the live database as <code>dab_agent</code>.</p>
+  </div>
+  <div class="tw"><table>
+    <caption>Rows to label = articles the question's filter selects (e.g. author = Amy Jones). llm_extract today: max 2,000 rows, 40 per Haiku call, calls run one after another (tools.py:36–37, 295).</caption>
+    <thead><tr><th>Query</th><th>Question (short)</th><th class="num">Rows to label</th><th>Champion t1</th><th>Can hints change it?</th><th>What would</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">agnews/1</td><td>title of the sports article with the longest description</td><td class="num">≤ 127,600<span class="path">but sorting by length and labelling the top 40 works; Opus 4.6 ReAct 5/5</span></td><td><span class="tag warn">timed out</span> labelling in length order</td><td><span class="tag ok">maybe</span> if it guides the plan to "label only until the first Sports hit"</td><td>A plan that stops at the first match; an llm_extract that can end early</td></tr>
+      <tr><td class="sub">agnews/2</td><td>Sci/Tech share of Amy Jones's articles</td><td class="num">111</td><td><span class="tag warn">fail</span> 11/111 vs gold 16/111</td><td><span class="tag ok">maybe</span> exact category names may shift a few labels</td><td>Labels that match the dataset's own. That is the wall in issue #101</td></tr>
+      <tr><td class="sub">agnews/3</td><td>business articles per year, Europe 2010–2020</td><td class="num">14,860</td><td><span class="tag warn">timed out</span></td><td><span class="tag no">no</span> 7.4 × the row limit</td><td>Probably nothing: <b>0/270 in every published file</b>. The count has to be exact, so every label must match the dataset's own (#101)</td></tr>
+      <tr><td class="sub">agnews/4</td><td>region with most World articles, 2015</td><td class="num">6,696</td><td><span class="tag warn">timed out</span></td><td><span class="tag no">no</span> 3.3 × the row limit</td><td>Same as q3, but approximate labels are enough: published 58/270, and plain ReAct Kimi-K2 got 25/50. Picking the top of 5 regions tolerates some wrong labels</td></tr>
+    </tbody>
+  </table></div>
+  <blockquote class="warn" style="margin-top:var(--s4)"><b>The honest expectation for C1 on agnews: roughly no change.</b> At most two queries can move, and the champion baseline is 0/4. A "no difference" result is still a useful first iteration: it tests the whole screen → compare → record path cheaply, and its traces point the next challenger at llm_extract's speed. But if you want to see <i>hints</i> move a number, yelp is the better test: its hints give the cross-store join key (<code>businessid_N ↔ businessref_N</code>), the champion got 4/7 there, and s01 found PromptQL's +0.40 on yelp came purely from context like this. D11 below asks which you want.</blockquote>
+  <form class="q" data-lavish-question="D11" onsubmit="return send(event,'D11','C1 screen dataset')">
+    <h3>D11 · Which dataset does C1 screen hints on? <span class="tag ok">decided · A · agnews</span></h3>
+    <p class="why">The run and the compare are the same code whichever you pick; only the query list and the cost change. Costs are per trial from the champion run: agnews $0.60 (mostly timeouts), yelp $0.08.</p>
+    <label><input type="radio" name="c" value="A · agnews, as asked"><span><b>A · agnews, as asked</b> — tests the loop's plumbing, expect ≈ no change; the traces should point C1b at llm_extract.</span></label>
+    <label><input type="radio" name="c" value="B · yelp instead"><span><b>B · yelp instead</b> — the dataset where hints carry a real fact (the join key); the best place to see hints move a number.</span></label>
+    <label><input type="radio" name="c" value="C · agnews and yelp, one run each"><span><b>C · both (recommended)</b> — agnews as you asked, yelp as the control where hints should matter; about $2 more than A at k = 3.</span></label>
+    <textarea name="note" placeholder="optional note"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D11</button><span class="queued"></span></div>
+  </form>
+</div></section>
+
+<!-- 03b EXTRACT AUDIT -->
+<section class="blk" id="extract">
+  <div class="hd">
+    <p class="label">03b · llm_extract, audited — you asked</p>
+    <h2>llm_extract was used in 11 of 54 trials and 3 passed; five of the eleven timed out mid-call, and nothing is ever reused</h2>
+    <p><span class="tag no">decided · remove llm_extract</span> Your call. This audit stays as the record of why; the redesign below won't be built. Bulk labelling moves to embeddings and a classifier later (§3e).</p>
+    <p>Every <code>llm_extract</code> call in the champion run (15 calls, 11 trials), read from the traces. The tool labels 40 rows per Haiku call. Each call is a new Agent SDK session, so nothing is cached between batches, trials, queries or arms, and the calls run one after another.</p>
+  </div>
+  <div class="panel" style="margin-bottom:var(--s4)" id="extract-origin">
+    <h3>Where llm_extract came from: my s01 blueprint, and the built version dropped the cache the design had</h3>
+    <div class="tw" style="box-shadow:none;margin-top:var(--s3)"><table style="min-width:0">
+      <thead><tr><th></th><th>s01 §7 design (reviewed, approved as M2)</th><th>What was built (tools.py, merged in PR #2)</th></tr></thead>
+      <tbody>
+        <tr><td class="sub">Why</td><td colspan="2">s01 §3's evidence: teams with an LLM extraction tool scored <b>1.00 on patents</b>, where every paper baseline scored 0/50; Scout's <code>extract_fields</code>. s01 also credited "LabRat's llm_extract", but LabRat's own leaderboard note describes <i>local-embedding classification</i>, so that part of the citation looks wrong.</td></tr>
+        <tr><td class="sub">Rows</td><td>up to 500</td><td>up to 2,000, 40 per call, calls one after another</td></tr>
+        <tr><td class="sub">Output</td><td>typed fields against a schema</td><td>one <code>label</code> string per row, from <b>one</b> column</td></tr>
+        <tr><td class="sub">Cache</td><td><b>"cached by hash"</b></td><td><span class="tag warn">none</span> — dropped in the build, and nobody noticed until this audit</td></tr>
+        <tr><td class="sub">Prompt rule</td><td>"Use llm_extract for free text; never regex over prose."</td><td><code>agents/v0/system.md:17</code> "…use <code>llm_extract</code> on a bounded query <b>rather than string matching</b>." This probably pushed the barcode, star and copyright jobs to the model</td></tr>
+      </tbody>
+    </table></div>
+    <p class="small" style="margin:var(--s3) 0 0">So the idea itself is sound: the leaderboard shows extraction is worth +1.00 on patents. What went wrong was the build: no cache, one column, one batch at a time, and a prompt rule that says "never use string matching" when it should say "string matching first". c02-extract fixes all four.</p>
+  </div>
+  <div class="tw"><table>
+    <caption>Trial = the champion's only trial for that query. "Rows" = what the call labelled before returning or being cut off.</caption>
+    <thead><tr><th>Trial</th><th>What it asked the model</th><th class="num">Rows</th><th>Verdict</th><th>What went wrong</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">pancancer_atlas/2</td><td>TCGA barcode + vital status from <code>Patient_description</code></td><td class="num">1,087</td><td><span class="tag ok">pass</span></td><td><b>Didn't need a model.</b> All 10,761 rows match <code>TCGA-[A-Z0-9]{2}-[A-Z0-9]{4}</code> in SQL (verified), and vital status is literal text ("vital status: Alive"). The first call also failed on column-name case</td></tr>
+      <tr><td class="sub">pancancer_atlas/3</td><td>TCGA barcode + gender, same column</td><td class="num">1,089</td><td><span class="tag ok">pass</span></td><td>The <b>same 1,089 rows labelled again</b> for a different question, with the same case error on the first call. A regex would have been instant</td></tr>
+      <tr><td class="sub">yelp/7</td><td>categories from business description</td><td class="num">150</td><td><span class="tag ok">pass</span></td><td>Appropriate use: real free-text reading, small n</td></tr>
+      <tr><td class="sub">yelp/4</td><td>primary category from description</td><td class="num">75</td><td><span class="tag warn">fail</span></td><td>Labels were plausible but the answer was wrong ("3.63" not found)</td></tr>
+      <tr><td class="sub">googlelocal/2</td><td>"is this a massage business? yes/no"</td><td class="num">79</td><td><span class="tag warn">fail</span></td><td>A yes/no filter the model had to be called for, when a keyword search would have found the candidates first</td></tr>
+      <tr><td class="sub">github_repos/1</td><td>does README contain copyright?</td><td class="num">160</td><td><span class="tag warn">fail</span></td><td>Mostly a text-pattern question: <code>©</code>, <code>(c)</code>, "Copyright"</td></tr>
+      <tr><td class="sub">deps_dev_v1/1</td><td>GitHub star count from <code>Project_Information</code> (×2)</td><td class="num">2,000 + cut</td><td><span class="tag warn">timed out</span></td><td>Hit the 2,000-row cap, called again on more rows, and timed out. A number after the word "stars" is a regex</td></tr>
+      <tr><td class="sub">agnews/1, 3, 4</td><td>classify into 4 categories</td><td class="num">cut off</td><td><span class="tag warn">timed out</span></td><td>Over the cap or too slow (§3). <b>All three passed <code>column=title</code>:</b> the tool accepts one column, so the description the instruction mentioned never reached the model</td></tr>
+      <tr><td class="sub">agnews/2</td><td>classify Amy Jones's 111 articles</td><td class="num">111</td><td><span class="tag warn">fail</span></td><td>11 vs 16 Sci/Tech, labelled from <b>titles only</b>, same one-column limit</td></tr>
+    </tbody>
+  </table></div>
+  <div class="grid g2" style="margin-top:var(--s5)">
+    <div class="panel card">
+      <h3>Where the redundancy comes from</h3>
+      <ul class="tight">
+        <li><b>No cache at any level.</b> Each 40-row batch starts a new SDK session. The same article gets labelled again for every query, every trial and every arm. A k = 3 agnews screen would label the same titles 6 times.</li>
+        <li><b>Same column, different questions.</b> pancancer/2 and /3 extracted the barcode from the same 1,088 rows twice.</li>
+        <li><b>A model where SQL suffices.</b> 5 of the 11 trials used it for a pattern or keyword job: the barcode (twice), star counts, copyright lines, a "massage" filter.</li>
+        <li><b>One column per call.</b> Classification that needs title <i>and</i> description got the title only.</li>
+        <li><b>One call at a time.</b> 50 sequential sessions for 2,000 rows is what uses up the 900 s.</li>
+      </ul>
+    </div>
+    <div class="panel card">
+      <h3>What the leaderboard did with text columns</h3>
+      <p class="small" style="margin-bottom:var(--s2)">From each row's maintainer note in <code>data/index/leaderboard.json</code> (verified this session):</p>
+      <ul class="tight">
+        <li><b>Scout 0.906</b>: LLM-backed <code>extract_fields</code> <i>and</i> <code>classify_aggregate</code>. The second labels and counts in one call, so the agent receives the counts, not 14,000 labels.</li>
+        <li><b>LabRat 0.802</b>: <i>local-embedding classification</i>, no LLM call per row, plus a result ledger so results are reused rather than recomputed.</li>
+        <li><b>Stela 0.811</b>: "model-backed semantic operators" (map, filter, classify as query operators).</li>
+        <li><b>DataTrail 0.820</b>: no extraction tool; a prompt rule to "extract entity names from prose description fields".</li>
+        <li><b>The agnews wall pushes agents to cheat</b>: Sentinel's traces show label-fetch attempts (blocked); fabric-rlm lost 8 agnews trials for loading the HuggingFace gold labels.</li>
+        <li><b>Published agnews</b>: q1 35/270 (Opus ReAct 5/5), q2 15/270, <b>q3 0/270</b>, q4 58/270.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:var(--s4)">
+    <h3>C1b becomes c02-extract: six changes, ordered by what the audit shows</h3>
+    <ol class="steps" style="margin-top:var(--s3)">
+      <li><b>SQL first.</b> Replace <code>system.md:17</code> ("rather than string matching") with the opposite order. The tool description and the rule then say: if the value follows a pattern (ids, numbers after a word, literal tokens), use <code>substring(… from 're')</code> in <code>query_db</code>; call <code>llm_extract</code> only when the answer depends on meaning. This covers 5 of the 11 trials.</li>
+      <li><b>Several columns in.</b> <code>columns: ["title","description"]</code> in place of <code>column</code>, with the instruction applied to all of them joined together.</li>
+      <li><b>Run batches concurrently.</b> Batches go out in parallel, capped (e.g. 8 at once), and are larger for short texts. Titles are ~10 words, so 200 per call is fine. Target: 15,000 rows well within 900 s.</li>
+      <li><b>Label and count in one call</b> (Scout's <code>classify_aggregate</code>): <code>group_by</code> and <code>stop_when</code> options. q4 gets counts per region; q1 labels in length order and stops at the first Sports article.</li>
+      <li><b>Cache within a trial</b>, keyed by (instruction, text hash), so a retry or a second call on overlapping rows reuses the labels. Whether the cache lasts <i>across</i> trials is D16.</li>
+      <li><b>Honest accounting.</b> Extract tokens are recorded by kind (the caveat on the agnews card), and every call records <code>rows · labelled · cached · seconds</code> on its tool span, so the replay shows the cost.</li>
+    </ol>
+  </div>
+  <form class="q" data-lavish-question="D16" onsubmit="return send(event,'D16','llm_extract cache scope')">
+    <h3>D16 · How far does the label cache reach? <span class="tag no">withdrawn · llm_extract is removed</span></h3>
+    <p class="why">The cheaper the cache, the less independent the trials are. The leaderboard's Pass@1 treats each of the 5 trials as an independent attempt.</p>
+    <label><input type="radio" name="c" value="A · within a trial"><span><b>A · within a trial only (recommended)</b> — trials stay independent and every screen measures what a fresh agent does; cost comes down from concurrency and SQL-first, not from reuse.</span></label>
+    <label><input type="radio" name="c" value="B · across trials of one run"><span><b>B · across the trials of one run</b> — the second trial of agnews/2 reuses the first trial's labels. Much cheaper at k = 3–5, but trials 2..k are no longer independent draws. The run is marked <i>shared-cache</i>.</span></label>
+    <label><input type="radio" name="c" value="C · a per-dataset label table built once"><span><b>C · a label table per dataset, built once</b> — like the context pack: every agnews article labelled once, stored where the agent can query it. Fast and free per trial, but it fixes one labelling into every run, is a model call at build time (a fourth model caller), and falls under the leaderboard's "tuned tools" flag.</span></label>
+    <label><input type="radio" name="c" value="D · local embeddings, no LLM per row"><span><b>D · local embedding classification</b> (LabRat) — a small embedding model baked into the sandbox image (network stays off), which classifies against the label names. No model bill and fast, but less accurate than Haiku on nuance, and it needs a bigger image.</span></label>
+    <textarea name="note" placeholder="optional note"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D16</button><span class="queued"></span></div>
+  </form>
+</section>
+
+<!-- 03e EMBEDDINGS -->
+<section class="blk" id="embed">
+  <div class="hd">
+    <p class="label">03e · embeddings for the text fields — your note on LabRat, the classifier later</p>
+    <h2>An embedding per prose row can be built locally in minutes for about 180k rows, with no model call per row at question time, but on its own it doesn't label anything: agnews/2 and /3 still need the classifier you've parked</h2>
+    <p>LabRat (0.802) classified text with local embeddings instead of an LLM call per row. Here, every prose column in <code>dataagentbench</code> gets a vector built once by <code>dab data embed</code>. It's code, it never sees a question, and the same model embeds the agent's search text inside a tool. That makes it the same kind of thing as the context pack: derived only from the sanctioned data and blind to the questions, so it's legitimate by construction.</p>
+  </div>
+  <div class="panel" style="margin-bottom:var(--s4)">
+    <h3>How Postgres fits in: it stores the vectors and does the retrieval; it doesn't make embeddings</h3>
+    <div class="tw" style="box-shadow:none;margin-top:var(--s3)"><table>
+      <thead><tr><th>Step</th><th>When</th><th>Who does it</th></tr></thead>
+      <tbody>
+        <tr><td class="sub">1 · encode every prose row</td><td>Offline, once: <code>dab data embed</code></td><td>The local encoder (bge-small) in Python reads the rows as <code>dab_owner</code> and writes <code>vector(384)</code> rows into <code>dab</code>. Postgres only stores them.</td></tr>
+        <tr><td class="sub">2 · index</td><td>Offline, once</td><td>Postgres: <code>CREATE INDEX … USING hnsw (emb vector_cosine_ops)</code>. pgvector 0.8.2 does this.</td></tr>
+        <tr><td class="sub">3 · encode the agent's search text</td><td>In the trial, per call</td><td>The same encoder, inside the <code>semantic_search</code> tool: one short string, a few milliseconds, no API.</td></tr>
+        <tr><td class="sub">4 · retrieve</td><td>In the trial, per call</td><td>Postgres: <code>ORDER BY emb &lt;=&gt; $1 LIMIT k</code> (cosine distance) through the HNSW index, as <code>dab_agent</code>, joinable to any other table in the same query.</td></tr>
+      </tbody>
+    </table></div>
+    <p class="small" style="margin:var(--s3) 0 0">That is your "embedding done in the database offline; the agent uses the encoder and does retrieval". pgvector is storage, distance operators and indexes only. Extensions that call a model from inside SQL (pgai, PostgresML) exist but aren't installed. They would put a model inside the database, which the platform doesn't need.</p>
+    <p class="small" style="margin:var(--s2) 0 0"><span class="tag">your note</span> The classifier waits. The golden SQL you curate for agnews/2–4 will show what labelling is actually needed, and the classifier gets designed from that.</p>
+  </div>
+
+
+  <div class="tw"><table>
+    <caption>The prose columns, from <code>information_schema</code> on <code>dab</code>. Structured text (hashes, links, CPC codes, JSON blobs, dates) is left out on purpose. pgvector 0.8.2 is already on <code>dab</code> (registry: <code>extensions: [vector]</code>).</caption>
+    <thead><tr><th>Dataset · table.column</th><th class="num">Rows</th><th class="num">Avg chars</th><th>In v1</th></tr></thead>
+    <tbody>
+      <tr class="pro"><td class="sub">agnews · articles.title + description</td><td class="num">127,600</td><td class="num">≈ 250</td><td><span class="tag ok">yes</span> the reason for doing this</td></tr>
+      <tr><td class="sub">github_repos · commits.message</td><td class="num">17,976</td><td class="num">539</td><td><span class="tag ok">yes</span></td></tr>
+      <tr><td class="sub">pancancer_atlas · clinical_info.Patient_description</td><td class="num">10,761</td><td class="num">163</td><td><span class="tag ok">yes</span></td></tr>
+      <tr><td class="sub">crmarenapro · emailmessage, voicecall, task, opportunity, quote, case, knowledge, livechat …</td><td class="num">≈ 17,000</td><td class="num">90–3,900</td><td><span class="tag ok">yes</span> long transcripts chunked at 512 tokens</td></tr>
+      <tr><td class="sub">stockmarket · stockinfo."Company Description"</td><td class="num">2,752</td><td class="num">201</td><td><span class="tag ok">yes</span></td></tr>
+      <tr><td class="sub">yelp · review.text · googlelocal · review.text · bookreview · review.text + books description</td><td class="num">6,033</td><td class="num">220–1,260</td><td><span class="tag ok">yes</span></td></tr>
+      <tr class="dim"><td class="sub">patents · publicationinfo.abstract_localized</td><td class="num">277,813</td><td class="num">1,061</td><td><span class="tag">later</span> hours on CPU; its queries turn on CPC codes and dates, not prose</td></tr>
+      <tr class="dim"><td class="sub">github_repos · contents.content · patents · description_html</td><td class="num">24k · 278k</td><td class="num">10k · 13k</td><td><span class="tag no">no</span> code and full-text HTML; chunking cost with no query that needs it</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="grid g2" style="margin-top:var(--s5)">
+    <div class="panel">
+      <h3>Measured, not guessed</h3>
+      <p class="small" style="margin:var(--s3) 0 0"><code>BAAI/bge-small-en-v1.5</code> (384 dimensions, ONNX via fastembed, CPU, no key) on 2,000 agnews <code>title || '. ' || description</code> rows on this Mac: <b>39 texts/s on one core</b>, 9 s to load. So agnews alone is <b>≈ 55 min on one core</b>, and all ≈ 180k v1 rows ≈ 77 min. Across the 10 cores I estimate 10–15 min, but I haven't measured it: my parallel probe hung without the <code>__main__</code> guard multiprocessing needs on macOS. It's a one-off build, re-run only when the data or the model changes.</p>
+    </div>
+    <div class="panel">
+      <h3>What the agent gets</h3>
+      <ul class="small" style="margin:var(--s3) 0 0;padding-left:1.1em">
+        <li><code>semantic_search(table, column, text, k, where?)</code> embeds <code>text</code> with the same model, then runs <code>ORDER BY emb &lt;=&gt; $1 LIMIT k</code> over an HNSW index as <code>dab_agent</code>. It returns keys, distances and a snippet.</li>
+        <li><code>similar_to(table, key, k)</code>: rows nearest to a given row, for spotting duplicates and near-duplicates.</li>
+        <li>SQL can join to the vectors directly (<code>&lt;=&gt;</code> between two stored rows) with no tool.</li>
+        <li>The table list in the prompt marks which columns have embeddings. <code>describe_table</code> and <code>sample_rows</code> never print a vector.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:var(--s5)">
+    <h3>What it changes elsewhere in the plan</h3>
+    <ul class="small" style="margin:var(--s3) 0 0;padding-left:1.1em">
+      <li><b>A fourth thing that runs a model.</b> CLAUDE.md says three things call a model, all through the Agent SDK. A local embedding model is a different kind (no key, no subscription, deterministic), but the rule should name it: "…and the local embedding model in <code>dab data embed</code> and <code>semantic_search</code>, pinned by name and revision."</li>
+      <li><b>Goldens can use it.</b> The same text and model give the same vector, so a <code>semantic_search</code> step replays exactly, unlike <code>llm_extract</code> (D18). The toolset fingerprint (C2) must hash the model name and revision.</li>
+      <li><b>A new challenger, c07-embed</b>: v0's belt plus the two tools, screened on agnews like any other. My honest expectation: it helps find rows by topic ("articles about football") and cuts <code>llm_extract</code> calls. It doesn't produce the category counts agnews/2 and /3 are graded on. That's the classifier, which comes later, per your note.</li>
+      <li><b>Downstream, parked</b>: a classifier over these vectors, either zero-shot against label descriptions or trained on labels the agent assigns to a sample. That's where agnews/2–3 could move. It isn't in this plan's milestones.</li>
+    </ul>
+  </div>
+
+  <form class="q" data-lavish-question="D19" onsubmit="return send(event,'D19','where the vectors live')">
+    <h3>D19 · Where do the vectors live? <span class="tag ok">decided · A, as &lt;table&gt;_embed (checked below)</span></h3>
+    <p class="why">You asked for "a column that is the embedding". In place, the loaded tables stop matching upstream byte for byte, and any <code>SELECT *</code> the agent writes pulls 384 floats per row into its context.</p>
+    <label><input type="radio" name="c" value="A · sibling table per column"><span><b>A · a sibling table per column (recommended)</b>: <code>agnews_articles__description_emb(article_id, emb vector(384))</code>, joined on the key. The loaded tables stay as upstream, and <code>SELECT *</code> stays small.</span></label>
+    <label><input type="radio" name="c" value="B · a column in the table"><span><b>B · a column in the table</b>: <code>agnews_articles.description_emb</code>, exactly as asked. The tools hide it, but SQL the agent writes by hand won't.</span></label>
+    <textarea name="note" placeholder="optional note"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D19</button><span class="queued"></span></div>
+  </form>
+  <form class="q" data-lavish-question="D20" onsubmit="return send(event,'D20','embedding model')">
+    <h3>D20 · Which model? <span class="tag ok">decided · A · bge-small-en-v1.5 (384)</span></h3>
+    <p class="why">All three are local. A hosted embedding API needs a per-token key, which <code>require_live()</code> refuses by design.</p>
+    <label><input type="radio" name="c" value="A · bge-small-en-v1.5 (384)"><span><b>A · bge-small-en-v1.5, 384 dimensions (recommended)</b>: measured above; the smallest index and the fastest build.</span></label>
+    <label><input type="radio" name="c" value="B · bge-base-en-v1.5 (768)"><span><b>B · bge-base-en-v1.5, 768 dimensions</b>: better retrieval, roughly 3× the build time and 2× the index size.</span></label>
+    <label><input type="radio" name="c" value="C · nomic-embed-text-v1.5 (768, 8k context)"><span><b>C · nomic-embed-text-v1.5</b>: an 8k-token window, so long transcripts need no chunking. Slower still.</span></label>
+    <textarea name="note" placeholder="optional note"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D20</button><span class="queued"></span></div>
+  </form>
+
+  <div class="panel" style="margin-top:var(--s5)" id="d19-check">
+    <h3>D19 decided: <code>&lt;table&gt;_embed</code> holds all of a table's vectors and joins back on a unique key; where no key exists, the vectors go in the table. Checked on <code>dab</code> today.</h3>
+    <p class="small" style="margin:var(--s2) 0 0">None of the loaded tables declares a primary key (they're copies of upstream), so I checked each one for a column that's non-null and distinct on every row.</p>
+    <div class="tw" style="box-shadow:none;margin-top:var(--s3)"><table>
+      <thead><tr><th>Table</th><th class="num">Rows</th><th>Join key (unique, non-null)</th><th>Vectors in</th></tr></thead>
+      <tbody>
+        <tr><td class="sub">agnews_articles</td><td class="num">127,600</td><td class="mono">article_id</td><td class="mono">agnews_articles_embed (title_emb, description_emb)</td></tr>
+        <tr><td class="sub">github_repos_commits</td><td class="num">17,976</td><td class="mono">commit</td><td class="mono">github_repos_commits_embed</td></tr>
+        <tr><td class="sub">pancancer_atlas_clinical_info</td><td class="num">10,761</td><td class="mono">patient_id</td><td class="mono">…_embed</td></tr>
+        <tr><td class="sub">yelp_review</td><td class="num">2,000</td><td class="mono">review_id</td><td class="mono">…_embed</td></tr>
+        <tr><td class="sub">bookreview_books_info</td><td class="num">200</td><td class="mono">book_id</td><td class="mono">…_embed</td></tr>
+        <tr><td class="sub">stockmarket_stockinfo</td><td class="num">2,752</td><td class="mono">"Symbol"</td><td class="mono">…_embed</td></tr>
+        <tr><td class="sub">crmarenapro × 10 (emailmessage, voicecalltranscript__c, task, opportunity, quote, case, knowledge__kav, livechattranscript, account, contract)</td><td class="num">≈ 17,000</td><td class="mono">id / "Id"</td><td class="mono">…_embed each</td></tr>
+        <tr class="dim"><td class="sub">bookreview_review</td><td class="num">1,833</td><td><span class="tag no">none</span> 22 rows are exact duplicates (1,811 distinct), so no key can exist</td><td class="mono">in the table: text_emb</td></tr>
+        <tr class="dim"><td class="sub">googlelocal_review</td><td class="num">2,000</td><td><span class="tag warn">only with the text</span>: unique on (gmap_id, name, time, text), on nothing shorter</td><td class="mono">in the table: text_emb</td></tr>
+      </tbody>
+    </table></div>
+    <p class="small" style="margin:var(--s3) 0 0">16 sibling tables and 2 in-table columns. For the two in-table ones, <code>describe_table</code> hides the vector and <code>sample_rows</code> is gone (the belt section), but a <code>SELECT *</code> the agent writes by hand would return 384 floats a row. <code>query_db</code> will drop <code>*_emb</code> columns from a <code>*</code> projection. <code>dab data load</code> rebuilds tables, so <code>dab data embed</code> runs after it.</p>
+  </div>
+
+</section>
+
+<!-- 03c TOOLS -->
+<section class="band-sec" id="tools"><div class="wrap">
+  <div class="hd">
+    <p class="label">03c · the tool belt — what the champion run says, and what I would change</p>
+    <h2>Most of the champion's tool errors come from two things the harness could prevent, and three of its nine tools were barely used</h2>
+    <p>These are all 627 tool calls in <code>20260921T064521Z_v0_all_haiku</code>, counted from the traces. "Pass" is the pass count among the trials that used the tool at least once. That shows where a tool was used, not that it caused the result.</p>
+  </div>
+  <div class="tw"><table>
+    <caption>Errors = a tool result that begins "Error". Median trial: 10 tool calls; max 30.</caption>
+    <thead><tr><th>Tool</th><th class="num">Calls</th><th class="num">Trials</th><th class="num">Errors</th><th class="num">Pass (trials using it)</th><th>What the traces show</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">query_db</td><td class="num">295</td><td class="num">54</td><td class="num">39 · 13 %</td><td class="num">27/54</td><td><b>30 of the 39 are <code>UndefinedColumn</code></b>. Tables loaded from SQLite and DuckDB keep mixed-case column names (<code>Id</code>, <code>LeadId__c</code>, <code>Patient_description</code>). Postgres lower-cases any name that isn't in double quotes, so <code>o.Id</code> becomes <code>o.id</code> and fails. Also 5 <code>UndefinedFunction</code>: dates stored as text compared with timestamps, <code>log(int, float)</code></td></tr>
+      <tr><td class="sub">execute_python</td><td class="num">137</td><td class="num">36</td><td class="num">11 · 8 %</td><td class="num">17/36</td><td><b>8 are <code>NameError: 'df'</code></b>. Each call is a fresh process (the tool description says so), but the agent writes the next call as if <code>df</code> still existed</td></tr>
+      <tr><td class="sub">sample_rows</td><td class="num">76</td><td class="num">40</td><td class="num">0</td><td class="num">20/40</td><td>The first tool called in 22 of 54 trials. <code>SELECT * … LIMIT n</code> with no <code>ORDER BY</code>, so which rows come back isn't guaranteed to be the same next time</td></tr>
+      <tr><td class="sub">describe_table</td><td class="num">40</td><td class="num">26</td><td class="num">0</td><td class="num">13/26</td><td>Overlaps sample_rows. Most trials call one after the other on the same table</td></tr>
+      <tr><td class="sub">llm_extract</td><td class="num">14</td><td class="num">11</td><td class="num">2</td><td class="num">3/11</td><td>§3b</td></tr>
+      <tr class="dim"><td class="sub">read_context</td><td class="num">6</td><td class="num">3</td><td class="num">0</td><td class="num">2/3</td><td rowspan="3">Together 15 calls, 2.4 % of all calls. The summary and pitfalls are already in the system prompt (D7), so these rarely add anything. But their descriptions and schemas are part of every call's prefix, on every turn</td></tr>
+      <tr class="dim"><td class="sub">search_context</td><td class="num">5</td><td class="num">5</td><td class="num">0</td><td class="num">2/5</td></tr>
+      <tr class="dim"><td class="sub">list_db</td><td class="num">4</td><td class="num">4</td><td class="num">0</td><td class="num">2/4</td></tr>
+      <tr><td class="sub">return_answer</td><td class="num">50</td><td class="num">50</td><td class="num">0</td><td class="num">27/50</td><td>The other 4 trials timed out before answering</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="panel" style="margin-top:var(--s5)">
+    <h3>The belt I first proposed <span class="tag no">superseded by the belt section below, your direction</span></h3>
+    <div class="tw" style="box-shadow:none;margin-top:var(--s3)"><table>
+      <thead><tr><th>Change</th><th>What it does</th><th>Evidence</th><th>Leaderboard precedent</th><th>Challenger</th></tr></thead>
+      <tbody>
+        <tr class="pro"><td class="sub">query_db repair hints</td><td>On <code>UndefinedColumn</code>, find the column case-insensitively and answer <i>"column "Id" exists — quote it: o."Id""</i>. Type errors get the matching cast hint. The query still fails; the agent just stops guessing</td><td>30 + 5 of 39 errors</td><td>LabRat: "SQL with error-category repair hints"</td><td class="mono">c03-sqlhints</td></tr>
+        <tr><td class="sub">Persistent Python kernel</td><td>One kernel per trial (Jupyter-style), so variables survive between calls. <code>/work</code> parquet files load as variables named after their <code>save_as</code></td><td>8 NameErrors; retries cost a turn each</td><td>Sentinel's REPL; Camber's per-dataset kernels; s01 §7 designed it this way</td><td class="mono">c04-kernel</td></tr>
+        <tr><td class="sub">llm_extract → the §3b redesign</td><td>SQL first, several columns, concurrent batches, label-and-count, a cache</td><td>5 of 11 trials timed out mid-call</td><td>Scout <code>classify_aggregate</code>; LabRat embeddings</td><td class="mono">c02-extract</td></tr>
+        <tr><td class="sub">Merge describe + sample</td><td><code>describe_table(table, sample=5)</code>: columns, types, null rates and N rows <b>in a fixed order</b> (<code>ORDER BY</code> the first key), so a replay returns the same rows. <code>sample_rows</code> is removed</td><td>40 + 76 calls, usually back to back</td><td>LabRat schema catalog + profiling in one tool</td><td class="mono" rowspan="2">c05-belt</td></tr>
+        <tr><td class="sub">Remove list_db, read_context, search_context → one <code>context(path | term)</code></td><td>The table list is already in the prompt; one tool reads or greps the pack</td><td>15 calls in 54 trials</td><td>Fewer tools means a shorter prefix on every turn (s01 §11: the prefix P is multiplied by the number of turns)</td></tr>
+        <tr><td class="sub">Add <code>verify(checks)</code></td><td>Deterministic checks on a saved result: row count, unique on, no nulls in, value range. Returns pass or fail for each</td><td>system.md asks for VERIFY but no tool does it; answer checks happen by eye in python</td><td>Sentinel <code>verify_step</code> (0.862)</td><td class="mono">c06-verify</td></tr>
+      </tbody>
+    </table></div>
+    <p class="small" style="margin:var(--s3) 0 0">Order I would screen them in: c03-sqlhints and c04-kernel first (cheap, and they remove error types without changing how the agent reasons), then c02-extract, then c05-belt and c06-verify. After each winning screen, the next challenger's <code>parent</code> is the winner. <b>These change tool code, which the version fingerprint does not include</b> (<code>versions.py:19–20</code> hashes <code>system.md</code>, <code>helper.py</code> and <code>agent.yaml</code> only). §6 adds a toolset fingerprint, which goldens depend on.</p>
+  </div>
+</div></section>
+
+<!-- 03c2 SQL-FIRST BELT -->
+<section class="band-sec" id="belt"><div class="wrap">
+  <div class="hd">
+    <p class="label">03c · the belt, your direction: SQL first, context in the prompt, llm_extract gone</p>
+    <h2>Every in-scope question can be answered in Postgres SQL, so the belt can shrink from nine tools to four, and with no model call left in any tool, every golden replays exactly</h2>
+    <p><b>The principle, in your words: "ideally the agent writes SQL to answer every question." The flow: the agent proposes SQL from its context, runs the SQL, and the result is the answer.</b> The golden SQL you write is the reference for that SQL.</p>
+    <p> From your notes: remove <code>llm_extract</code>; the context tools belong in the prompt; and is <code>execute_python</code> needed if every answer comes down to SQL? I checked the last question against the 54 questions and the champion's traces. The golden SQL you write will test the principle question by question.</p>
+  </div>
+
+  <div class="tw"><table>
+    <caption>The questions that looked like they need more than SQL, and how Postgres does each one. None asks for a p-value, a fitted model or a library function.</caption>
+    <thead><tr><th>Query</th><th>Needs</th><th>In Postgres</th><th>Champion used python</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">pancancer_atlas/3</td><td>chi-square <b>statistic</b> (gold 305.12), not a p-value</td><td>Marginal totals by window <code>sum() over</code>, then <code>sum((o-e)^2/e)</code>. One query.</td><td>scipy · <span class="tag ok">passed</span></td></tr>
+      <tr><td class="sub">patents/1, /2</td><td>EMA of yearly filings, α 0.2 / 0.1, per CPC group</td><td>A recursive CTE over the years per group, or a closed form: <code>sum(x_t · α(1-α)^(T-t))</code> by window. CPC JSON via <code>jsonb_array_elements</code>.</td><td>pandas ewm · 0/2 passed</td></tr>
+      <tr><td class="sub">stockindex/1, /3</td><td>intraday volatility; monthly-investment returns</td><td><code>avg((high-low)/open)</code>; <code>date_trunc('month')</code> + <code>first_value</code> over a window.</td><td>1 of 2 passed</td></tr>
+      <tr><td class="sub">bookreview/1 · googlelocal/3 · stockmarket</td><td>years, hours and codes buried in text</td><td><code>substring(… from 're')</code>, <code>regexp_matches</code>, <code>jsonb</code> operators.</td><td>regex in python</td></tr>
+      <tr class="dim"><td class="sub">agnews/1–4</td><td>a category the data doesn't have</td><td>Not SQL, not python either: /1 is SQL (longest description) + reading a few rows; /2 is 111 rows the agent can read itself; /3 and /4 need thousands of labels, the parked classifier (§3e)</td><td>0/4 with or without llm_extract</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">What python actually did in the 36 trials that used it (17 passed): nearly every call re-read a <code>/work</code> parquet file that <code>query_db</code> had just written, then printed or grouped it. Only pancancer_atlas/3 used a library (scipy), for a number SQL computes directly. Eight of the 11 python errors were a lost <code>df</code>. The honest risk: Haiku writing a recursive EMA CTE may slip more often than it does with <code>pandas.ewm</code>. That's why removing python is a screen, not an edit.</p>
+
+    <div class="panel" style="margin-top:var(--s5)" id="no-python">
+    <h3>"Python is never needed — tell me why I'm wrong." Mostly you're not, but there's one real gap, and it has a SQL fix.</h3>
+    <div class="tw" style="box-shadow:none;margin-top:var(--s3)"><table>
+      <thead><tr><th>The case for python</th><th>Does it hold here?</th></tr></thead>
+      <tbody>
+        <tr class="pro"><td class="sub">Fuzzy entity resolution</td><td><b>Yes, the one real gap.</b> music_brainz stores one song four ways across sources: "Street Hype" / "Street Hype - Groove City" / "StreetH ype (Groove City)" / "011-Street Hype", by "Brucqe Maginnis" and "Bruce Maginnis". Python has rapidfuzz. Permute EQ got music_brainz 15/15 with no python because DuckDB has <code>jaro_winkler_similarity</code> and <code>levenshtein</code> built in. Our Postgres ships the equivalents, <code>pg_trgm</code> (<code>similarity()</code>, <code>%</code>) and <code>fuzzystrmatch</code> (<code>levenshtein()</code>). Both are <b>available but not installed</b> on <code>dab</code>. <b>Fix:</b> add them to <code>dab</code>'s <code>extensions</code> in the platform registry and run <code>db-init</code>. It's a platform change, so I haven't done it.</td></tr>
+        <tr><td class="sub">Maths Haiku gets wrong in SQL</td><td><b>A risk, not a need.</b> A recursive EMA CTE is harder to write than <code>pandas.ewm</code>. The SQL-only entries ran Opus 5 at max reasoning, and Haiku is weaker. That's why c08-sqlonly is a screen. If the EMA queries break, the answer is a pitfall or a golden-SQL pattern, not a python tool.</td></tr>
+        <tr><td class="sub">Joining across database engines</td><td><b>Not here.</b> Upstream, the data sits in Postgres, SQLite, DuckDB and MongoDB, and python is the glue. We loaded all of it into one Postgres, which removes the main reason the reference agent had python.</td></tr>
+        <tr><td class="sub">Statistics libraries</td><td><b>Not in the 54.</b> pancancer/3 asks for the chi-square statistic, not a p-value; nothing asks for a fitted model or a test's p.</td></tr>
+        <tr><td class="sub">The classifier you parked</td><td><b>Not agent-side.</b> Nearest-centroid or zero-shot labelling is SQL over pgvector (<code>&lt;=&gt;</code> to label vectors). If you ever train a model, that's build-time code in <code>dab data</code>, like the embeddings, not a tool the agent calls.</td></tr>
+      </tbody>
+    </table></div>
+    <p class="small" style="margin:var(--s3) 0 0"><b>The leaderboard agrees with you:</b> #1 Permute EQ (0.947) had DuckDB and a calculator, and no python. #5 Permute Core (0.841) had a python tool that was broken for the whole run, so all 2,946 of its calls were SQL. Camber, Sentinel and Scout used python, and scored below Permute EQ. <b>Verdict:</b> remove it, install <code>pg_trgm</code> + <code>fuzzystrmatch</code> first, and let the c08 screen say whether Haiku copes.</p>
+  </div>
+
+
+  <div class="panel" style="margin-top:var(--s5)">
+    <h3>The belt: from nine tools to four</h3>
+    <div class="tw" style="box-shadow:none;margin-top:var(--s3)"><table>
+      <thead><tr><th>Tool</th><th>Status</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr class="pro"><td class="sub">query_db</td><td><span class="tag ok">keep</span> + repair hints</td><td>The belt's only way to compute. On <code>UndefinedColumn</code> it says <i>quote it: o."Id"</i> (30 of 39 errors). A golden is then a list of SQL statements.</td></tr>
+        <tr class="pro"><td class="sub">describe_table(table, sample=5)</td><td><span class="tag ok">keep</span>, absorbs sample_rows</td><td>Columns, types, null rates and N rows in a fixed order, so replays match.</td></tr>
+        <tr class="pro"><td class="sub">+ pg_trgm, fuzzystrmatch</td><td><span class="tag warn">prerequisite</span></td><td>Fuzzy matching in SQL (<code>similarity()</code>, <code>levenshtein()</code>) for music_brainz-style entity resolution. Installed through the platform registry.</td></tr>
+        <tr class="pro"><td class="sub">return_answer</td><td><span class="tag ok">keep</span></td><td>—</td></tr>
+        <tr class="pro"><td class="sub">semantic_search</td><td><span class="tag">after C1e</span></td><td>Encodes the text with the local model, then Postgres does the retrieval (§3e). Deterministic.</td></tr>
+        <tr><td class="sub">llm_extract</td><td><span class="tag no">decommission</span> · your call · how: D21</td><td>3/11 passes, 5 timeouts; bulk labelling moves to embeddings + the classifier later. Removes D16 and D18.</td></tr>
+        <tr><td class="sub">execute_python</td><td><span class="tag no">remove</span> · your call, screened in c08</td><td>Nothing in the 54 needs it once <code>pg_trgm</code> + <code>fuzzystrmatch</code> are installed (the panel above). The sandbox stays in the repo for the playground.</td></tr>
+        <tr><td class="sub">list_db · read_context · search_context</td><td><span class="tag no">remove</span> → prompt</td><td>15 calls in 54 trials. The prompt already has summary, pitfalls, description, hints and tables. Add <code>schema.md</code> + <code>joins.md</code>: +1.3k chars on agnews, +23.6k on crmarenapro (≈ 6k tokens, cached prefix).</td></tr>
+        <tr><td class="sub">sample_rows</td><td><span class="tag no">merged</span></td><td>Into describe_table.</td></tr>
+        <tr class="dim"><td class="sub">verify</td><td><span class="tag">dropped from the plan</span></td><td>A row-count or uniqueness check is one more SQL statement; no tool needed.</td></tr>
+      </tbody>
+    </table></div>
+    <p class="small" style="margin:var(--s3) 0 0"><b>What this does to goldens (§6):</b> with no model call inside any tool, every step replays byte for byte, so D18 goes away. A golden for most queries becomes 1–3 SQL statements plus the answer, which is the "golden SQL" you want to curate first.</p>
+  </div>
+
+  <div class="panel" style="margin-top:var(--s5)">
+    <h3>Challengers, re-ordered</h3>
+    <ol class="small" style="margin:var(--s3) 0 0;padding-left:1.2em">
+      <li><b>c01-hints</b> on agnews (C1, D11). Unchanged.</li>
+      <li><b>c03-sqlhints</b>: query_db repair hints. Cheap, removes an error type, and changes nothing else.</li>
+      <li><b>c08-sqlonly</b>: the four-tool belt with schema + joins in the prompt. The big one; screened on all 12 datasets at k = 3, because it touches every query.</li>
+      <li><b>c07-embed</b>: adds semantic_search once C1e is built.</li>
+    </ol>
+    <p class="small" style="margin:var(--s2) 0 0"><span class="tag no">withdrawn</span> c02-extract (llm_extract is gone), c04-kernel (no python), c05-belt and c06-verify (folded into c08).</p>
+  </div>
+
+  <div class="panel" style="margin-top:var(--s5)" id="isolation">
+    <h3>Isolation, checked live and fixed: a session sees its prompt and its dab tools, nothing else <span class="tag ok">done · eab5e33</span></h3>
+    <div class="tw" style="box-shadow:none;margin-top:var(--s3)"><table>
+      <thead><tr><th>Found</th><th>Now</th></tr></thead>
+      <tbody>
+        <tr><td>Sessions started in the repo root, the directory this project's Claude Code memory is keyed to</td><td>An empty directory outside the repo; <code>CLAUDE_CODE_DISABLE_AUTO_MEMORY</code> and <code>…_CLAUDE_MDS</code> set</td></tr>
+        <tr><td>A built-in plugin, <code>agents-md</code>, loads AGENTS.md wherever CLAUDE.md would (it found nothing)</td><td>Switched off in the session's only settings</td></tr>
+        <tr><td>The curator had no strict MCP config, so a connected server (Gmail, Drive …) could have reached it</td><td>An empty, strict MCP config, like the eval agent</td></tr>
+        <tr><td>All trials in a run shared one <code>/work</code>: trial 2 could read trial 1's saved results</td><td>One container per trial with only its own folder mounted; tested, network off</td></tr>
+        <tr class="dim"><td>The CLI adds the logged-in account's email as session context</td><td>No switch exists. It's on the allowlist, and it never reaches a trace or MLflow</td></tr>
+      </tbody>
+    </table></div>
+    <p class="small" style="margin:var(--s3) 0 0"><b>Enforced on every trial:</b> the CLI's <code>init</code> message is recorded on the trace, and any tool, MCP server or plugin beyond the version's own stops the run. <b>On demand:</b> <code>uv run dab isolation-check</code> starts one session exactly as a trial does (one short turn) and also reads its transcript against an allowlist of what the CLI may add. After the fixes it shows 9 dab tools, 1 server, 0 plugins, and nothing beyond the allowlist. The built-in skills and sub-agents are listed but unreachable, because the session has no Skill or Agent tool.</p>
+  </div>
+
+  <div class="panel" style="margin-top:var(--s5)" id="decommission">
+    <h3>Decommissioning llm_extract: one thing to settle first. The champion, v0, lists it.</h3>
+    <ul class="small" style="margin:var(--s3) 0 0;padding-left:1.1em">
+      <li><code>agents/v0/agent.yaml</code> names <code>mcp__dab__llm_extract</code>, and <code>system.md</code> points agnews-style questions at it. If the code goes now, the champion can no longer be re-run as it was recorded, and C6's 54 × 1 champion run has nothing to run.</li>
+      <li>If c01-hints both adds hints <i>and</i> drops llm_extract, its screen measures two changes at once, and you can't tell which one moved the number.</li>
+      <li>Everything else is mechanical and ready: the tool body, its spec, the playground's display-only entry, its cost fields on the trace, the <code>system.md</code> rule, the CLAUDE.md "three things call a model" rule (which becomes two), and D8-A.</li>
+    </ul>
+  </div>
+  <form class="q" data-lavish-question="D21" onsubmit="return send(event,'D21','how llm_extract is decommissioned')">
+    <h3>D21 · How is llm_extract decommissioned?</h3>
+    <p class="why">All three end with the code gone. They differ in what the champion is while it goes.</p>
+    <label><input type="radio" name="c" value="A · re-baseline first"><span><b>A · re-baseline first (recommended)</b>: make <code>v1</code> = v0 minus llm_extract (a new fingerprint), run it once on all 54, and promote it as champion if it holds (agnews was 0/4 with the tool anyway). Then delete the code. c01-hints then branches from v1, so it tests hints alone. Costs one full run (≈ $9).</span></label>
+    <label><input type="radio" name="c" value="B · new versions refuse it now; delete when v0 retires"><span><b>B · refuse it for new versions now</b>: loading any version other than v0 that lists it is an error, and no new challenger can use it. The code is deleted the day v0 stops being champion. No cost now; v0 stays re-runnable.</span></label>
+    <label><input type="radio" name="c" value="C · delete now"><span><b>C · delete now</b>: the code and v0's entry go today. v0's recorded runs stay as history, but v0 can't be re-run exactly, so the first challenger screens against a champion that no longer exists as code.</span></label>
+    <textarea name="note" placeholder="optional note"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D21</button><span class="queued"></span></div>
+  </form>
+
+</div></section>
+
+<!-- 03d TOP TWO -->
+<section class="blk" id="top2">
+  <div class="hd">
+    <p class="label">03d · the leaderboard's top two, rescored here and live on the Runs tab</p>
+    <h2>The top two pass 25 queries the champion never does, and neither ever passes agnews/2 or agnews/3, so an agnews screen can realistically move only two of its four queries</h2>
+    <p>Permute EQ (#1, <a href="https://github.com/ucbepic/DataAgentBench/pull/95">PR #95</a>) and Scout (#2, <a href="https://github.com/ucbepic/DataAgentBench/pull/96">PR #96</a>) never merged to main; their answer files sit on the PR branches. They are now pinned by commit, rescored with our validators, and selectable as focus or challenger on the Runs tab (<code>lb:permute_eq</code>, <code>lb:oceanbase_lab_scout</code>). Commit <code>186ef9a</code>.</p>
+  </div>
+  <div class="tw"><table>
+    <caption>Passed / trials per dataset on all 54 queries. The champion is <code>20260921T064521Z_v0_all_haiku</code> (1 trial a query); the two submissions ran 5 trials a query. The macro is the leaderboard's Pass@1.</caption>
+    <thead><tr><th>Dataset</th><th class="num">Champion v0 · Haiku</th><th class="num">#1 Permute EQ · Opus 5</th><th class="num">#2 Scout · GLM-5.2</th></tr></thead>
+    <tbody>
+      <tr class="pro"><td class="sub">agnews</td><td class="num">0/4</td><td class="num">10/20</td><td class="num">9/20</td></tr>
+      <tr><td class="sub">bookreview</td><td class="num">3/3</td><td class="num">15/15</td><td class="num">15/15</td></tr>
+      <tr><td class="sub">crmarenapro</td><td class="num">9/13</td><td class="num">65/65</td><td class="num">59/65</td></tr>
+      <tr><td class="sub">deps_dev_v1</td><td class="num">0/2</td><td class="num">7/10</td><td class="num">9/10</td></tr>
+      <tr><td class="sub">github_repos</td><td class="num">2/4</td><td class="num">20/20</td><td class="num">16/20</td></tr>
+      <tr><td class="sub">googlelocal</td><td class="num">1/4</td><td class="num">20/20</td><td class="num">20/20</td></tr>
+      <tr><td class="sub">music_brainz_20k</td><td class="num">1/3</td><td class="num">15/15</td><td class="num">15/15</td></tr>
+      <tr><td class="sub">pancancer_atlas</td><td class="num">2/3</td><td class="num">15/15</td><td class="num">15/15</td></tr>
+      <tr><td class="sub">patents</td><td class="num">0/3</td><td class="num">15/15</td><td class="num">15/15</td></tr>
+      <tr><td class="sub">stockindex</td><td class="num">2/3</td><td class="num">15/15</td><td class="num">15/15</td></tr>
+      <tr><td class="sub">stockmarket</td><td class="num">3/5</td><td class="num">24/25</td><td class="num">24/25</td></tr>
+      <tr><td class="sub">yelp</td><td class="num">4/7</td><td class="num">35/35</td><td class="num">30/35</td></tr>
+      <tr><td class="sub"><b>macro Pass@1</b></td><td class="num"><b>0.44</b> · 27/54</td><td class="num"><b>0.930</b> · 256/270<span class="path">site 0.9467</span></td><td class="num"><b>0.906</b> · 242/270<span class="path">site 0.9062, exact</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="grid g2" style="margin-top:var(--s5)">
+    <div class="panel">
+      <h3>agnews, query by query</h3>
+      <div class="tw" style="box-shadow:none;margin-top:var(--s3)"><table>
+        <thead><tr><th>Query</th><th class="num">Public pool</th><th class="num">Permute</th><th class="num">Scout</th></tr></thead>
+        <tbody>
+          <tr><td class="sub">agnews/1</td><td class="num">35/270</td><td class="num">5/5</td><td class="num">5/5</td></tr>
+          <tr class="dim"><td class="sub">agnews/2</td><td class="num">15/270</td><td class="num">0/5</td><td class="num">0/5</td></tr>
+          <tr class="dim"><td class="sub">agnews/3</td><td class="num">0/270</td><td class="num">0/5</td><td class="num">0/5</td></tr>
+          <tr><td class="sub">agnews/4</td><td class="num">58/270</td><td class="num">5/5</td><td class="num">4/5</td></tr>
+        </tbody>
+      </table></div>
+      <p class="small" style="margin:var(--s3) 0 0">The M1 hints screen on agnews should be read against a realistic ceiling of <b>2/4 queries</b>, not 4/4. Permute's agnews/2 answers land between 0.162 and 0.225 against a gold of 0.144, with 111 of Amy Jones's articles. The count is right; the category labels drift, the same row-labelling problem as §3b.</p>
+    </div>
+    <div class="panel">
+      <h3>What each did, and what a challenger may copy</h3>
+      <ul class="small" style="margin:var(--s3) 0 0;padding-left:1.1em">
+        <li><b>Scout</b>: a tool-using main agent with planner subagents, a data kernel, <code>extract_fields</code> and <code>classify_aggregate</code> LLM tools, and a network-off Python sandbox. <span class="tag ok">copy</span> the extract tools' shape (label-and-count; that is c02-extract). <span class="tag no">never</span> its tuned per-question-shape operators (<code>periodic_investment_return</code>, <code>versioned_entity_rank</code> …) or its per-query pre-analysis block: test-set tuning, which the §8 guard rejects.</li>
+        <li><b>Permute EQ</b>: a frozen per-query evidence JSON (column routing, previews, an execution plan) given to a fresh Opus 5 agent over DuckDB. <span class="tag no">never</span>, for the same reason (s01 §3).</li>
+        <li>Both use the hints file in full, which is what c01-hints tests.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:var(--s5)">
+    <h3>How they got in, and what they can't show</h3>
+    <ul class="small" style="margin:var(--s3) 0 0;padding-left:1.1em">
+      <li><b>Pinned</b>: <code>ANSWER_FILES</code> names each file with its PR and head commit (Permute <code>02918bb</code>, Scout <code>be58939</code>). <code>make upstream</code> fetches those commits depth-1, and the ingest reads the file with <code>git show</code>, so the clone stays at <code>0290945</code>.</li>
+      <li><b>Reference, not pooled</b>: they are rescored per file but kept out of each query's published rate, so the 35/270-style numbers in §3 and the "hardest first" order don't move.</li>
+      <li><b>Reproduces the site</b>: Scout 0.9062 exactly. Permute scores 0.930 (256/270) against the site's 0.9467 (258/270). The site scored its "## Answer" section plus two hand corrections from the PR; neither is mechanical, so the gap is recorded in <code>TOLERATED_OVERALL</code> with the reason.</li>
+      <li><b>No cost or trace profile</b>: a published answer file holds the answer only. The compare view shows "—" for cost, turns, tokens and time. Both PRs attach full trace zips (270 trials each). Those could be read later as <i>reference</i> traces for §6. They can't be goldens: they use tools our agent doesn't have, and rule 1 says a golden uses only the agent version's own tools.</li>
+      <li><b>More entries</b>: any other leaderboard row is one <code>ANSWER_FILES</code> entry (path, PR, commit) plus <code>make upstream ingest rescore</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 04 LOOP -->
+<section class="blk" id="loop">
+  <div class="hd">
+    <p class="label">04 · the loop</p>
+    <h2>Six steps round, kept light: a challenger is promoted after one 54 × 1 run if a one-sided McNemar test says it's better, or if it gains with no question lost</h2>
+    <p><span class="tag warn">deferred · your call</span> Golden SQL comes first. If goldens can be written in Postgres for the questions, the loop gets revisited with them in hand. The golden SQL stand-up is built (<code>42fedcb</code>, §6 and the Golden tab); nothing else in this section is.</p>
+    <p><b>The gate, as you set it:</b> champion and challenger each run all 54 once. Let <i>b</i> be the questions the challenger fixed and <i>c</i> the ones it broke. Promote if the one-sided exact McNemar p = P(X ≥ b | b + c, ½) &lt; 0.05, <b>or</b> if b &gt; 0 and c = 0. One caution from our own runs: the same v0 went 5/12 → 7/12 on 12 common questions from trial noise alone, so at k = 1 "no question lost" can happen by luck. The gate stays as you set it, and the Runs compare view shows <i>b</i> and <i>c</i> for every pair.</p>
+    <p>This is the loop s01 §6 described (after DABStep-loop), with two additions: a <b>golden set</b> that says which part of a failed trial went wrong, and a <b>leak check</b> between a proposal and the challenger it becomes. With the gate at 54 × 1, one full run uses about 17 % of a Max 5× window (s01 §11 measured 54 × 5 at about 83 %), so a gate costs about a third of a window.</p>
+  </div>
+  <figure class="fig">
+    <p class="fig-title">Fig 1 · one iteration — screen, score, diagnose, propose, check, new challenger; the full run and promotion sit above</p>
+    <div class="dia-frame">
+    <svg class="dia" viewBox="0 0 1040 300" role="img" aria-labelledby="f1t">
+      <title id="f1t">The challenger loop</title>
+      <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+      <g id="n-promote"><title>promote: move the champion pointer</title><rect class="nd hi" x="20" y="20" width="140" height="56" rx="6"/><text class="tx k" x="34" y="44">promote</text><text class="tx s" x="34" y="62">champion → cNN</text></g>
+      <g id="n-gate"><title>gate: 54 × 1 on both arms; McNemar one-sided, or a gain with none lost</title><rect class="nd" x="190" y="20" width="140" height="56" rx="6"/><text class="tx k" x="204" y="44">gate · 54 × 1</text><text class="tx s" x="204" y="62">compare · McNemar</text></g>
+      <g id="n-golden"><title>golden set, dataagentbench_meta</title><rect class="nd warn" x="360" y="20" width="140" height="56" rx="6"/><text class="tx k" x="374" y="44">golden set</text><text class="tx s" x="374" y="62">dataagentbench_meta</text></g>
+      <g id="n-explorer"><title>explorer: you author and verify goldens</title><rect class="nd ext" x="530" y="20" width="140" height="56" rx="6"/><text class="tx k" x="544" y="44">explorer</text><text class="tx s" x="544" y="62">you enter goldens</text></g>
+      <g id="n-screen"><title>1 screen</title><rect class="nd hi" x="20" y="140" width="140" height="56" rx="6"/><text class="tx k" x="34" y="164">1 · screen</text><text class="tx s" x="34" y="182">dataset × k, 2 arms</text></g>
+      <g id="n-score"><title>2 score</title><rect class="nd" x="190" y="140" width="140" height="56" rx="6"/><text class="tx k" x="204" y="164">2 · score</text><text class="tx s" x="204" y="182">passed/n per query</text></g>
+      <g id="n-diagnose"><title>3 diagnose</title><rect class="nd" x="360" y="140" width="140" height="56" rx="6"/><text class="tx k" x="374" y="164">3 · diagnose</text><text class="tx s" x="374" y="182">trace vs golden</text></g>
+      <g id="n-propose"><title>4 propose</title><rect class="nd" x="530" y="140" width="140" height="56" rx="6"/><text class="tx k" x="544" y="164">4 · propose</text><text class="tx s" x="544" y="182">one edit, one file</text></g>
+      <g id="n-leak"><title>5 leak check</title><rect class="nd warn" x="700" y="140" width="140" height="56" rx="6"/><text class="tx k" x="714" y="164">5 · leak check</text><text class="tx s" x="714" y="182">no question, no gold</text></g>
+      <g id="n-challenger"><title>6 challenger</title><rect class="nd hi" x="870" y="140" width="140" height="56" rx="6"/><text class="tx k" x="884" y="164">6 · challenger</text><text class="tx s" x="884" y="182">agents/cNN/</text></g>
+      <path id="e-12" class="ed" d="M160,168 L188,168"/>
+      <path id="e-23" class="ed" d="M330,168 L358,168"/>
+      <path id="e-34" class="ed" d="M500,168 L528,168"/>
+      <path id="e-45" class="ed" d="M670,168 L698,168"/>
+      <path id="e-56" class="ed" d="M840,168 L868,168"/>
+      <path id="e-61" class="ed hi" d="M940,196 L940,250 L90,250 L90,198"/>
+      <text class="tx s" x="360" y="270">the next challenger is screened against the same champion baseline</text>
+      <path id="e-gate" class="ed dash" d="M260,140 L260,78"/>
+      <text class="tx s" x="268" y="112">after screens win</text>
+      <path id="e-prom" class="ed" d="M190,48 L162,48"/>
+      <path id="e-base" class="ed dash" d="M90,76 L90,138"/>
+      <text class="tx s" x="98" y="112">new baseline</text>
+      <path id="e-gold" class="ed dash" d="M430,76 L430,138"/>
+      <path id="e-expl" class="ed" d="M530,48 L502,48"/>
+    </svg>
+    </div>
+    <figcaption><b>Solid edges run every iteration; dashed ones only sometimes.</b> The golden set only affects step 3. It never reaches the agent (it lives in the schema <code>dab_agent</code> cannot read), and the proposer sees only what kind of step differed, never the gold values (D15).</figcaption>
+  </figure>
+  <ol class="steps" style="margin-top:var(--s5)">
+    <li><b>Screen.</b> <code>dab eval --agent champion --datasets agnews --trials k</code> and the same with <code>--agent c01-hints --challenger-of &lt;that run&gt;</code>. Same queries, same k. Both runs are labelled <i>screen</i> on the Runs board and never become champion.</li>
+    <li><b>Score.</b> <code>dab compare &lt;baseline&gt; &lt;challenger&gt;</code>: passed/n per query for each arm, which queries the challenger fixed and which it broke, and the difference in pass rate with a 95 % confidence interval. On 4–7 queries that interval is wide, so a screen can rank candidates but never promote one.</li>
+    <li><b>Diagnose.</b> <code>dab runs golden &lt;run&gt;</code> compares each trial with its query's verified golden and puts every failure in one class (§7). Written to <code>runs/&lt;id&gt;/golden.jsonl</code>, so the run folder stays the record.</li>
+    <li><b>Propose.</b> A proposer reads the failure classes and the current files and writes <b>one</b> edit to <b>one</b> file, with a one-paragraph reason (§8).</li>
+    <li><b>Leak check.</b> Rejects any edit that contains 5+ consecutive words from a question, a gold value, or a literal from a golden's SQL. Same idea as <code>tests/test_context.py</code>, which already does this for the curated files.</li>
+    <li><b>Challenger.</b> <code>agents/cNN/</code> = the parent version plus the edit; <code>parent</code> and <code>change</code> in <code>agent.yaml</code> record where it came from; <code>NOTES.md</code> records the screens and their verdicts.</li>
+  </ol>
+</section>
+
+<!-- 05 CHALLENGER -->
+<section class="blk" id="challenger">
+  <div class="hd">
+    <p class="label">05 · a challenger in the repo</p>
+    <h2>c01-hints is a copy of v0 with one setting changed, so its fingerprint differs and the Runs board can tell the two apart</h2>
+    <p><code>dab eval --hints</code> already works, but a command-line flag cannot be promoted, and the run's fingerprint would still say v0. A challenger folder can be promoted. The fingerprint hashes <code>system.md + helper.py + agent.yaml</code>, so changing <code>hints</code> changes it. <code>parent</code> and <code>change</code> are new keys the harness ignores and the explorer shows.</p>
+  </div>
+  <p class="label" style="margin-bottom:var(--s2)">agents/v0/agent.yaml → agents/c01-hints/agent.yaml — system.md and helper.py are byte-identical copies</p>
+  <div id="diff-yaml" class="codehost"></div>
+  <div class="grid g2" style="margin-top:var(--s5)">
+    <div class="panel card">
+      <h3>What C1 builds (code, no model)</h3>
+      <ul class="tight">
+        <li><code>dab eval --datasets agnews,yelp</code> expands to those datasets' query ids; the run id reads <code>…_c01-hints_agnews_haiku_hints</code>, not <code>_all_</code>.</li>
+        <li><b>Runs board fix</b>: a run with a query subset is a <i>screen</i> and can never be champion (<code>app.py:465</code> checks only <code>split == "all"</code> today, so a 4-query champion re-run named <code>_all_</code> would take the slot).</li>
+        <li><code>dab compare a b</code>: paired per query (passed/n for each arm, fixed, broken, Δ with a 95 % bootstrap CI); on the full 54 it adds the McNemar p-value, as s01 M5 specified.</li>
+        <li><code>dab challenger new c01-hints --from v0 --set hints=true --why "…"</code> writes the folder so no one copies files by hand.</li>
+        <li>The Run page shows a Δ-against-baseline panel when <code>challenger_of</code> is set (the <code>versus</code> field already exists).</li>
+        <li>Record <code>llm_extract</code> tokens by kind (uncached input, cache read, cache write, output) instead of adding them all into input; a timed-out trial keeps the main session's usage up to the cutoff.</li>
+      </ul>
+    </div>
+    <div class="panel card">
+      <h3>What C1 runs</h3>
+      <div class="tw" style="box-shadow:none"><table style="min-width:0">
+        <thead><tr><th>Screen</th><th class="num">Trials</th><th class="num">≈ $</th><th class="num">% window</th></tr></thead>
+        <tbody>
+          <tr><td>agnews, k = 3, both arms</td><td class="num">24</td><td class="num">$14.5</td><td class="num">35 %</td></tr>
+          <tr><td>agnews, k = 5, both arms</td><td class="num">40</td><td class="num">$24</td><td class="num">58 %</td></tr>
+          <tr><td>yelp, k = 3, both arms</td><td class="num">42</td><td class="num">$3.2</td><td class="num">8 %</td></tr>
+          <tr class="pro"><td>agnews + yelp, k = 3</td><td class="num">66</td><td class="num">$17.7</td><td class="num">42 %</td></tr>
+        </tbody>
+      </table></div>
+      <p class="small" style="margin-top:var(--s3)">Per-trial cost is from the champion run: agnews $0.605 (3 of 4 trials were 900 s timeouts), yelp $0.076. The window is Haiku's measured ≈ $42 (s01 §11). If C1b makes llm_extract fast, agnews trials get <i>cheaper</i>, because the cost comes from timeouts.</p>
+    </div>
+  </div>
+  <form class="q" data-lavish-question="D12" onsubmit="return send(event,'D12','trials per arm in a screen')">
+    <h3>D12 · How many trials per query in a screen? <span class="tag ok">decided · C · k = 1</span></h3>
+    <p class="why">More trials narrow the interval but cost more; 4 queries × 1 trial cannot tell a real change from chance.</p>
+    <label><input type="radio" name="c" value="A · k = 3"><span><b>A · k = 3 (recommended)</b> — 12 trials per arm on agnews, 21 on yelp. Enough to rank candidates, and a third of a window.</span></label>
+    <label><input type="radio" name="c" value="B · k = 5"><span><b>B · k = 5</b> — the leaderboard's own trial count. Comparable to published per-query rates; agnews alone costs 58 % of a window.</span></label>
+    <label><input type="radio" name="c" value="C · k = 1"><span><b>C · k = 1</b> — a smoke test only: checks the plumbing and gives no verdict.</span></label>
+    <textarea name="note" placeholder="optional note"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D12</button><span class="queued"></span></div>
+  </form>
+</section>
+
+<!-- 06 GOLDEN -->
+<section class="band-sec" id="golden"><div class="wrap">
+  <div class="hd">
+    <p class="label">06 · the Golden tab</p>
+    <h2>A Golden tab where you build each golden trace step by step, using only one agent version's tools, and every golden can be re-run exactly</h2>
+    <p><span class="tag ok">pivoted · built · 42fedcb, d32d602</span> <b>A golden is now the SQL on the Postgres DB that recreates the answer, and you write each one.</b> The Golden tab is live. Per question: write SQL, run it as <code>dab_agent</code> (read-only, 60 s, only the agent's tables), then see two checks. One is the question's validator. The other is whether the result recreates the gold text itself (exact, or the same rows with different column names or order). Saves are kept in <code>dataagentbench_meta.golden_sql</code>, which the agent can't read, and the tab starts at 0/54. <b>Superseded below:</b> step-by-step golden traces, per-version tool lists, replay digests, D17 and D18. The rest of this section is kept only as the record of the earlier design.</p>
+    <p>You have the gold answer for all 54 questions but not the tool calls that reach it. A <b>golden trace</b> is those calls: an ordered list of steps, each a real tool call with its input and recorded output, ending in an answer that the question's own validator passes. You curate them in a new <b>Golden</b> tab. The rules below are the ones you set:</p>
+  </div>
+  <div class="grid g2">
+    <div class="panel card">
+      <h3>The four rules</h3>
+      <ol class="steps" style="margin-top:var(--s2)">
+        <li><b>Starts empty.</b> 0/54. Nothing is seeded automatically. "Start from a trial" is a button that pre-fills the builder when you choose to use it; nothing is saved until you save.</li>
+        <li><b>Only that version's tools.</b> You pick an agent version first. The step's tool list is exactly that version's <code>agent.yaml</code> tools, with the same schemas. A golden for v0 can't use a tool v0 doesn't have.</li>
+        <li><b>Re-runnable exactly.</b> <code>dab golden replay &lt;query&gt; --version v0</code> runs every step through <code>call_tool</code>, the same code path a trial and the playground use, with the recorded inputs, and checks each output against its recorded digest. The replay passes when every step matches and the answer passes the validator.</li>
+        <li><b>Changes as the tools change.</b> Each golden records the version, model and <b>toolset fingerprint</b> it was built with. When a later version changes a tool, the goldens that use that tool are flagged as out of date <i>for that version</i>, naming the step. Goldens that don't use it still apply (D17).</li>
+      </ol>
+    </div>
+    <div class="panel card">
+      <h3>The toolset fingerprint — this has to exist first</h3>
+      <p class="small">Today a version's fingerprint hashes <code>system.md</code>, <code>helper.py</code> and <code>agent.yaml</code> (<code>versions.py:19–20</code>). Tool <i>code</i> lives in <code>src/</code>, so c02-extract could change llm_extract and every version would keep the same fingerprint. The golden needs a hash that changes when a tool's code does:</p>
+      <ul class="tight">
+        <li><b>per tool</b>: sha256 of its name, description, JSON schema, the source of its body function, the module constants it reads (e.g. <code>EXTRACT_BATCH</code>) and, for a tool that calls a model, the model id</li>
+        <li><b>per version</b>: the hash of its tools' hashes, in <code>agent.yaml</code> order → <code>toolset_sha</code></li>
+        <li>written on every run (<code>run.json</code>) as well as every golden, so two runs can be compared tool for tool</li>
+      </ul>
+      <p class="small" style="margin:var(--s2) 0 0"><b>What "exactly" can mean for a model step:</b> <code>query_db</code>, <code>describe_table</code>, <code>context</code>, <code>execute_python</code> and <code>verify</code> are deterministic, given the fixed row order from c05-belt. <code>llm_extract</code> is not: the same prompt to Haiku can give different labels. D18 decides how a golden handles that.</p>
+    </div>
+  </div>
+
+  <p class="label" style="margin:var(--s6) 0 var(--s2)">Mock · the Golden tab — how it looks on day one (empty), with a draft open for yelp/1 to show the builder</p>
+  <div class="mock">
+    <div class="mock-nav"><b>DAB <i>explorer</i></b><span>Overview</span><span>Datasets &amp; queries</span><span>Validators</span><span>Leaderboard</span><span>Runs</span><span>Agent</span><span class="on">Golden</span></div>
+    <div class="mock-body">
+      <p class="label">golden · 0/54 curated · agent version v0 · toolset 7c1e…</p>
+      <h1>No golden traces yet — pick a question and build its first step</h1>
+      <div class="mock-top">
+        <span class="chip">crmarenapro 0/13</span><span class="chip ok">yelp 0/7</span><span class="chip">stockmarket 0/5</span><span class="chip">agnews 0/4</span><span class="chip">github_repos 0/4</span><span class="chip">googlelocal 0/4</span><span class="chip">…</span>
+      </div>
+      <div class="mock-cols">
+        <div class="panel">
+          <h3>yelp/1 · draft <span class="tag">not saved</span></h3>
+          <p class="small" style="margin:0 0 var(--s2)">What is the average rating of all businesses located in Indianapolis, Indiana? · <span class="mono">gold 3.547008547008547</span></p>
+          <div class="row"><span class="sel">agent version <span class="path">v0 · toolset 7c1e…</span></span><span class="sel">start from a trial <span class="path">optional</span></span></div>
+          <p class="label" style="margin:var(--s3) 0 var(--s1)">step 1 · checkpoint</p>
+          <div class="row"><span class="sel">tool <span class="path">query_db</span></span><span class="small">only v0's tools: describe_table · sample_rows · query_db · execute_python · read_context · search_context · list_db · llm_extract · return_answer</span></div>
+          <div class="ta">select count(*) as reviews, avg(r.rating) as avg_rating
+from yelp_review r
+join yelp_business b
+  on replace(r.business_ref,'businessref_','')
+   = replace(b.business_id,'businessid_','')
+where b.description ilike '%Indianapolis%'</div>
+          <div class="row"><span class="tog on">Run step</span><span class="small">why:</span><span class="sel" style="flex:1"><span class="path">join the two stores on the hinted key, filter to the city</span></span></div>
+          <div class="out">reviews  avg_rating
+117      3.5470085470085470      digest 9b04…  · deterministic</div>
+          <div class="row"><span class="tog">+ step</span><span class="small">answer</span><span class="sel" style="flex:1"><span class="mono">3.5470085470085470</span></span><span class="tog on">Validate ✓</span><span class="tog">Save</span><span class="tog">Replay</span></div>
+        </div>
+        <div class="panel">
+          <h3>Compare with a trial</h3>
+          <div class="row"><span class="sel">run <span class="path">20260921T064521Z_v0_all_haiku</span></span><span class="sel">trial <span class="path">yelp/1 t1</span></span></div>
+          <div class="tw" style="margin-top:var(--s3)"><table>
+            <thead><tr><th>Checkpoint</th><th>Agent</th><th>Match</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">1 · query_db</td><td>calls 3 + 4: filter to 8 ids, then average on those ids</td><td><span class="v-ok">✓</span> same result (EX)</td></tr>
+              <tr><td class="mono">answer</td><td class="mono">3.55</td><td><span class="v-ok">✓</span> validator</td></tr>
+            </tbody>
+          </table></div>
+          <p class="small" style="margin-top:var(--s3)">For a failed trial, the first ✗ row is <b>where the agent broke</b>. That row is what the Run page's "vs golden" column shows (§7).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="small" style="margin-top:var(--s2)">The draft SQL and its result are real: I ran them as <code>dab_agent</code> this session, and the validator's reason is its actual output on that answer. The digest and toolset values are placeholders.</p>
+
+  <p class="label" style="margin:var(--s6) 0 var(--s2)">If you use "start from a trial": the champion's yelp/1 calls 3–4 on the left, the tidied single step on the right</p>
+  <div id="diff-golden" class="codehost"></div>
+
+  <p class="label" style="margin:var(--s6) 0 var(--s2)">infra/golden.sql — created by <code>dab data init</code> (superuser); written only by <code>dab_golden</code> and <code>dab_owner</code>; <code>dab_agent</code> refused</p>
+  <div id="file-ddl" class="codehost"></div>
+
+  <form class="q" data-lavish-question="D17" onsubmit="return send(event,'D17','how a golden follows tool changes')">
+    <h3>D17 · When a new agent version changes its tools, what happens to existing goldens? <span class="tag no">withdrawn · goldens are SQL now, not traces</span></h3>
+    <p class="why">This decides whether goldens have to be rebuilt for every challenger or only when a tool they use changes. A trial can only be compared with a golden that's valid for its version.</p>
+    <label><input type="radio" name="c" value="A · carry forward when every tool it uses is unchanged"><span><b>A · carry it forward if every tool it uses is unchanged (recommended)</b> — compares per-tool hashes. A c03-sqlhints change to <code>query_db</code> flags every golden with a <code>query_db</code> step, and <code>dab golden replay --version c03</code> shows which ones still reproduce. Prompt-only challengers keep all goldens.</span></label>
+    <label><input type="radio" name="c" value="B · pinned to the exact version"><span><b>B · tied to exactly one version</b> — the simplest rule: every new version starts with 0 goldens. You rebuild them for every challenger, even a prompt-only one.</span></label>
+    <label><input type="radio" name="c" value="C · carry forward if replay reproduces"><span><b>C · carry it forward if the replay still reproduces</b> — ignore hashes; re-run each golden under the new version and keep the ones whose digests still match. More permissive: a changed tool that returns the same output keeps the golden.</span></label>
+    <textarea name="note" placeholder="optional note"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D17</button><span class="queued"></span></div>
+  </form>
+  <form class="q" data-lavish-question="D18" onsubmit="return send(event,'D18','model steps in a golden')">
+    <h3>D18 · How does a golden handle a step that calls a model (llm_extract)? <span class="tag no">withdrawn · no tool calls a model any more, so every golden step replays exactly</span></h3>
+    <p class="why">Every other tool is deterministic. The model step is the only thing standing between a golden and "re-runnable exactly", and agnews can't be done without it.</p>
+    <label><input type="radio" name="c" value="A · recorded output + live agreement"><span><b>A · record the output, and report agreement on a live re-run (recommended)</b> — the golden stores the labels the model returned. A replay uses the recorded labels, so later steps reproduce exactly. <code>--live</code> also re-runs the model and reports the agreement rate (e.g. "97 % of 111 labels agree").</span></label>
+    <label><input type="radio" name="c" value="B · live only, agreement threshold"><span><b>B · always re-run the model</b> — the replay calls the model and passes if agreement is at least a threshold (e.g. 95 %). More honest about drift, but later steps may not reproduce exactly and every replay costs a little.</span></label>
+    <label><input type="radio" name="c" value="C · no model steps in goldens"><span><b>C · no model steps in goldens</b> — every golden is fully deterministic; questions that need a model (agnews, some yelp and pancancer) stay without a golden.</span></label>
+    <textarea name="note" placeholder="optional note"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D18</button><span class="queued"></span></div>
+  </form>
+  <form class="q" data-lavish-question="D13" onsubmit="return send(event,'D13','where the golden set is the record')">
+    <h3>D13 · Is the database the record for goldens, or a copy of committed files?</h3>
+    <p class="why">You asked for the database and for entry in the app. The catch: CI has no database, and today the rule is that the explorer reads only committed files (CLAUDE.md, "the index is the contract").</p>
+    <label><input type="radio" name="c" value="A · DB is the record + committed export"><span><b>A · the database is the record, and <code>dab golden export</code> commits a copy (recommended)</b> — the tab writes the database; <code>data/golden/goldens.jsonl</code> is regenerated and committed when you choose, so goldens show up in git and CI can replay the deterministic ones.</span></label>
+    <label><input type="radio" name="c" value="B · DB only"><span><b>B · database only</b> — simplest; goldens never appear in git, CI cannot replay them, and a database backup is the only copy.</span></label>
+    <label><input type="radio" name="c" value="C · files are the record, DB a copy"><span><b>C · committed files are the record</b> — the tab writes <code>data/golden/</code>, and a loader copies it into the database, like the question table.</span></label>
+    <textarea name="note" placeholder="optional note"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D13</button><span class="queued"></span></div>
+  </form>
+</div></section>
+
+<!-- 07 COMPARE -->
+<section class="blk" id="compare">
+  <div class="hd">
+    <p class="label">07 · agent vs golden, checkpoint by checkpoint</p>
+    <h2>Each golden step is a checkpoint; the first one a trial fails shows where the agent broke, and which of the paper's failure types it was</h2>
+    <p><span class="tag no">dropped · your call</span> No checkpoint comparison. Golden SQL is the reference: a trial is compared with the golden by its answer, and later, if you want, by the SQL it ran.</p>
+    <p>The agent's trace won't match the golden call for call: it explores, retries, and splits one query into two. So the comparison doesn't align calls one-to-one. For each <b>required</b> golden step, it asks whether any agent call of the same tool reached the same result before the answer. Orientation steps (describe, context) are marked not required and are never checkpoints. The first failed checkpoint gives the class, using the benchmark paper's failure types: <b>wrong implementation 45 %</b> (FM4), <b>wrong plan 40 %</b> (FM2), <b>wrong data selection 15 %</b> (FM3).</p>
+  </div>
+  <div class="tw"><table>
+    <caption>How a checkpoint is matched, by tool. "Tables read" comes from EXPLAIN (FORMAT JSON) as dab_agent, verified this session.</caption>
+    <thead><tr><th>Golden step</th><th>Checkpoint passes when an agent call…</th><th>If none does, the class is</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">query_db</td><td>returns the same rows (unordered, numbers within 1e-6), or reads the same tables and its result contains the golden's</td><td><b>FM3</b> if the golden's tables were never read; otherwise <b>FM4</b></td></tr>
+      <tr><td class="sub">llm_extract</td><td>labels the same rows with ≥ 90 % agreement with the golden's recorded labels</td><td><b>FM2</b> if never called; <b>FM4</b> if called with low agreement (agnews/2's 11 vs 16)</td></tr>
+      <tr><td class="sub">execute_python</td><td>prints output with the same digest (numbers within tolerance)</td><td><b>FM4</b></td></tr>
+      <tr><td class="sub">verify</td><td>runs the same checks and they pass</td><td><b>FM2</b> (it didn't check)</td></tr>
+      <tr><td class="sub">answer</td><td>the validator passes</td><td><b>answer format</b> if every checkpoint passed; otherwise the first failed checkpoint's class</td></tr>
+      <tr class="dim"><td class="sub">— harness</td><td>the trial timed out, hit max turns or errored before the checkpoint</td><td><b>harness</b>, naming the step the trial was on</td></tr>
+    </tbody>
+  </table></div>
+  <p class="label" style="margin:var(--s5) 0 var(--s2)">Mock · the Run page gains a "vs golden" column — the rows are the champion's real trials, shown as if their goldens existed</p>
+  <div class="mock"><div class="mock-body" style="padding:var(--s3)">
+    <div class="tw" style="margin:0"><table>
+      <thead><tr><th>Query</th><th>Verdict</th><th>vs golden</th><th>First broken checkpoint</th><th class="num">Turns</th><th class="num">Cost</th></tr></thead>
+      <tbody>
+        <tr><td class="sub">yelp/1 <span class="path">t1</span></td><td><span class="tag ok">pass</span></td><td>match · 1/1 checkpoints</td><td>—</td><td class="num">8</td><td class="num">$0.046</td></tr>
+        <tr><td class="sub">agnews/2 <span class="path">t1</span></td><td><span class="tag warn">fail</span></td><td>FM4 · 1/2 checkpoints</td><td>2 · <code>llm_extract</code>: 11 vs 16 Sci/Tech of 111 (titles only)</td><td class="num">9</td><td class="num">$0.105</td></tr>
+        <tr><td class="sub">agnews/3 <span class="path">t1</span></td><td><span class="tag warn">fail · timed out</span></td><td>harness · 1/3</td><td>2 · <code>llm_extract</code> on 14,860 rows, over the 2,000 limit</td><td class="num">—</td><td class="num">$0.772</td></tr>
+        <tr><td class="sub">crmarenapro/12 <span class="path">t1</span></td><td>—</td><td>no golden</td><td>0/54 curated; the column reads "no golden" until you add one</td><td class="num">—</td><td class="num">—</td></tr>
+      </tbody>
+    </table></div>
+  </div></div>
+</section>
+
+<!-- 08 PROPOSER -->
+<section class="band-sec" id="proposer"><div class="wrap">
+  <div class="hd">
+    <p class="label">08 · the proposer</p>
+    <h2>The proposer can edit five surfaces, sees failure classes rather than answers, and every edit passes a leak check before it becomes a challenger</h2>
+    <p><span class="tag no">paused · your call</span> Nothing here gets built until golden SQL has been written and you've refreshed the plan.</p>
+    <p>This is the part that "gets the agent to propose updated prompts and files". It is the easiest place to fool yourself: a proposer that sees the gold answers will write rules that fit the test set, which is the "tuned prompt" pattern s01 §3 excludes. So the design limits what the proposer <i>reads</i> as well as what it <i>writes</i>.</p>
+  </div>
+  <div class="grid g3">
+    <div class="panel card"><p class="label">reads</p><ul class="tight">
+      <li>the screen's <code>dab compare</code> output: pass/n per query, fixed, broken</li>
+      <li><code>golden.jsonl</code>: each failure's class, the tables it read vs the golden's, and where it first diverged</li>
+      <li>the failed trials' own traces (the agent's plan, SQL and errors)</li>
+      <li>the current files it is allowed to edit and their edit history in <code>NOTES.md</code></li>
+      <li><b>not</b> gold values, golden SQL text, or validator source code (D15)</li>
+    </ul></div>
+    <div class="panel card"><p class="label">may edit — one per challenger</p><ul class="tight">
+      <li><code>system.md</code> — how the agent works (answer rules, checks before answering)</li>
+      <li><code>data/context/&lt;ds&gt;/pitfalls.md</code> — facts about the data only</li>
+      <li><code>agents/curator/system.md</code> → re-curate one dataset</li>
+      <li><code>agent.yaml</code> settings: hints, max_turns, effort</li>
+      <li>a tool change (e.g. llm_extract limits) <b>only as a proposal</b> — you approve code changes</li>
+    </ul></div>
+    <div class="panel card"><p class="label">rejected by the leak check</p><ul class="tight">
+      <li>5+ consecutive words from any of the 54 questions</li>
+      <li>any gold value (numbers matched with tolerance, strings case-insensitively)</li>
+      <li>any literal from a golden's SQL (<code>'Indianapolis'</code>, <code>'Amy Jones'</code>)</li>
+      <li>more than one file changed</li>
+      <li>Runs in <code>dab challenger new</code> and in CI, like <code>tests/test_context.py</code></li>
+    </ul></div>
+  </div>
+  <form class="q" data-lavish-question="D14" onsubmit="return send(event,'D14','who runs the proposer')">
+    <h3>D14 · Who runs the proposer?</h3>
+    <p class="why">CLAUDE.md allows exactly three things to call a model (eval agent, curator, llm_extract). A proposer inside <code>dab</code> would be a fourth.</p>
+    <label><input type="radio" name="c" value="A · a Claude Code skill first"><span><b>A · a Claude Code skill first (recommended)</b> — <code>/propose-challenger &lt;screen run&gt;</code> in this repo: you run it, read the reasoning, accept or edit. No new model call in the code. Change to B once the loop should run on its own.</span></label>
+    <label><input type="radio" name="c" value="B · dab propose (Agent SDK, subscription)"><span><b>B · <code>dab propose</code></b> — an Agent SDK session (Sonnet 5, on the subscription) that writes <code>agents/cNN/</code> itself. Can run unattended; the model rule becomes four callers.</span></label>
+    <label><input type="radio" name="c" value="C · both, same inputs and leak check"><span><b>C · both</b> — one inputs file, one leak check, two front ends.</span></label>
+    <textarea name="note" placeholder="optional note"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D14</button><span class="queued"></span></div>
+  </form>
+  <form class="q" data-lavish-question="D15" onsubmit="return send(event,'D15','what the proposer sees of a golden')">
+    <h3>D15 · How much of a golden does the proposer see?</h3>
+    <p class="why">This decides whether a promoted challenger is a general-purpose row or a "tuned prompt ✓" row on the leaderboard's terms.</p>
+    <label><input type="radio" name="c" value="A · structure only"><span><b>A · structure only (recommended)</b> — class, tables read, kinds of steps, where it diverged. A fix has to be general to be written at all.</span></label>
+    <label><input type="radio" name="c" value="B · full golden SQL"><span><b>B · the full golden SQL</b> — faster, more specific fixes; every challenger from it is labelled <i>tuned</i> on the Runs board, and the leak check is the only guard.</span></label>
+    <textarea name="note" placeholder="optional note"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue D15</button><span class="queued"></span></div>
+  </form>
+</div></section>
+
+<!-- 09 RULES -->
+<section class="blk" id="rules">
+  <div class="hd">
+    <p class="label">09 · rules that change</p>
+    <h2>Three CLAUDE.md rules change, each by one named exception; nothing else in the project's rules moves</h2>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th>Rule today</th><th>After this plan</th><th>Why it holds</th></tr></thead>
+    <tbody>
+      <tr><td><b>The index is the contract</b>: the API reads only committed files, and the playground is the one executing route</td><td>+ <code>GET/POST /api/golden/&lt;query&gt;</code> reads and writes <code>dataagentbench_meta.golden*</code> as <code>dab_golden</code>, and <code>POST …/validate</code> runs the question's validator</td><td>Goldens are data you author, not derived from upstream; with D13-A a committed export keeps them in git</td></tr>
+      <tr><td><b>Only three things call a model</b></td><td>Unchanged with D14-A. With B or C, a fourth: <code>dab propose</code>, on the subscription, <code>require_live()</code> guarded</td><td>—</td></tr>
+      <tr><td><b>MLflow is linked, never read back</b>. s01 §6 had the optimiser reading failures via <code>mlflow.search_traces</code></td><td>Stays. The proposer reads run folders and <code>golden.jsonl</code>; s01's MLflow idea is dropped</td><td>The run folder is the record; one reader, not two</td></tr>
+      <tr><td>Roles: <code>dab_owner</code>, <code>dab_agent</code> (registry P6)</td><td>+ <code>dab_golden</code>: read and write on <code>dataagentbench_meta</code>, nothing else. Needs a one-line registry change in nmp-central-ai (platform rule: roles are declared there)</td><td>The API never holds the owner password that can drop benchmark tables</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 10 MILESTONES -->
+<section class="blk" id="milestones">
+  <div class="hd">
+    <p class="label">10 · milestones</p>
+    <h2>C0 is built; the rest wait until you have written golden SQL. Nine milestones in the order you asked; only the screens (C1, C1b, C1e, C5) and the gate (C6) cost money, and each one ends with a result you can check</h2>
+  </div>
+  <div class="ms">
+    <span class="m">C0</span><div><b>Golden SQL, stood up <span class="tag ok">done · 42fedcb</span>.</b> The Golden tab: per question, write SQL, run it as <code>dab_agent</code> (read-only, 60 s, only the agent's tables), see the validator's verdict and the text it read, and save. Every save is kept in <code>dataagentbench_meta.golden_sql</code>, which the agent's role can't read. It starts at 0/54. <b>Next is yours:</b> write goldens; then we revisit C1 onward with them in hand.</div>
+    <span class="m">C1</span><div><b>First challenger: hints on agnews (D11 decided).</b> Read it against the 2/4 ceiling in §3d. <code>--datasets</code>, the screen role and board fix, <code>dab challenger new</code>, a minimal <code>dab compare</code>; create <code>agents/c01-hints</code>; run both arms at k from D12. <i>Accepted when</i> <code>dab compare</code> prints passed/n per query for both arms, the champion row on the Runs board is unchanged, and <code>agents/c01-hints/NOTES.md</code> records the verdict. <i>Spend</i> ≈ $3–24 (D11 × D12).</div>
+    <span class="m">C1b</span><div><b>c03-sqlhints, then c08-sqlonly (the belt section).</b> First add <code>pg_trgm</code> + <code>fuzzystrmatch</code> to <code>dab</code>'s extensions in <code>nmp-central-ai/registry/projects.yaml</code> and run <code>db-init</code> (a platform change). Repair hints on <code>query_db</code>; then the four-tool belt (query_db, describe_table with sample, return_answer, and semantic_search after C1e), with <code>schema.md</code> + <code>joins.md</code> in the prompt, and <code>llm_extract</code>, <code>execute_python</code>, <code>list_db</code>, <code>read_context</code>, <code>search_context</code> and <code>sample_rows</code> removed. <i>Accepted when</i> each screen reports passed/n per query for both arms (c08 on all 12 datasets at k = 3), and the toolset fingerprint (C2) differs between the arms. <i>Spend</i> ≈ one agnews screen + one full screen.</div>
+    <span class="m">C1e</span><div><b>Embeddings (§3e).</b> <code>dab data embed</code> for the v1 prose columns (D19 layout, D20 model), with an HNSW index each and the model's name and revision recorded; the tools <code>semantic_search</code> and <code>similar_to</code>; the CLAUDE.md model rule widened; challenger <code>c07-embed</code> screened on agnews. <i>Accepted when</i> a rebuild gives identical vectors, <code>dab_agent</code> can read the vectors but no tool prints one, and the screen reports passed/n per query for both arms. The classifier is not in scope. <i>Spend</i> $0 to build, ≈ one screen to test.</div>
+    <span class="m">C2</span><div><b>Toolset fingerprint.</b> A per-tool hash (spec + body source + the constants it reads + model) and <code>toolset_sha</code> per version, written into <code>run.json</code> and shown on the Runs board. This has to come before any golden or tool challenger. <i>Accepted when</i> a test shows changing <code>MAX_LIMIT</code> changes <code>query_db</code>'s hash and v0's <code>toolset_sha</code>, and nothing else's, and that changing the embedding model's revision changes <code>semantic_search</code>'s. <i>Spend</i> $0.</div>
+    <span class="m">C3</span><div><b>The Golden tab and its store, empty.</b> <code>infra/golden.sql</code> + the <code>dab_golden</code> role (+ registry line); <code>/api/golden</code> read, write, run-step (through <code>call_tool</code>, limited to the chosen version's tools) and validate; the tab (coverage 0/54 per dataset, the builder, the optional "start from a trial" pre-fill); <code>dab golden replay</code> and <code>dab golden export</code>; D17's carry-forward rule and D18's model-step rule. <i>Accepted when</i> the tab opens at 0/54, a test golden made from a fixture replays with identical digests, a step using a tool outside its version is rejected, <code>dab_agent</code> is refused, and <b>no real goldens are committed. Curating them is your job.</b> <i>Spend</i> $0.</div>
+    <span class="m">C4</span><div><b>Checkpoint comparison.</b> <code>dab runs golden &lt;run&gt;</code> → <code>runs/&lt;id&gt;/golden.jsonl</code> (the §7 classes, first broken checkpoint); the "vs golden" column on the Run page; the compare panel in the Golden tab; the broken step highlighted in the Agent tab's replay. Trials with no golden read "no golden". <i>Accepted when</i> it runs cleanly on the champion run with 0 goldens (every row "no golden") and on a test golden. <i>Spend</i> $0.</div>
+    <span class="m">C5</span><div><b>The proposer and the loop.</b> D14's front end, the leak check (+ test), one full iteration: champion screen → golden diagnosis → proposal → challenger → screen → verdict. <i>Accepted when</i> one proposal-generated challenger has been screened and its NOTES.md shows the chain from failure class to edit to verdict. <i>Spend</i> ≈ one screen.</div>
+    <span class="m">C6</span><div><b>Gate and promote (54 × 1).</b> Champion and challenger each run all 54 once; <code>dab compare</code> prints b (fixed) and c (broken) and the one-sided exact McNemar p; promote if p &lt; 0.05 or (b &gt; 0 and c = 0); <code>dab promote</code> moves <code>agents/champion</code>. <i>Accepted when</i> the verdict can be reproduced from the two run folders. <i>Spend</i> ≈ $18, two 54 × 1 runs.</div>
+  </div>
+</section>
+
+<!-- 11 RISKS -->
+<section class="blk" id="risks">
+  <div class="hd">
+    <p class="label">11 · risks</p>
+    <h2>Each risk has a specific mechanism that deals with it, not just a hope</h2>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th>Risk</th><th>Evidence</th><th>Mechanism</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">C1 on agnews shows nothing</td><td>q3/q4 are over the row limit; q2 is a label wall (#101)</td><td>Expected and stated in advance (§3); D11-C adds yelp as the dataset where hints should matter; the traces route the next challenger to C1b</td></tr>
+      <tr><td class="sub">A 4-query champion re-run becomes champion</td><td><code>_board</code> only checks <code>split == "all"</code> (app.py:465)</td><td>Fixed in C1 before anything runs: a query subset marks the run as a <i>screen</i>; a test covers it</td></tr>
+      <tr><td class="sub">Small n reads as a result</td><td>4 queries × 3 trials per arm</td><td><code>dab compare</code> always prints the CI; the board says "screen · ranks, never promotes"; only C6 promotes</td></tr>
+      <tr><td class="sub">Goldens leak into the agent</td><td><code>dataagentbench</code> grants SELECT to <code>dab_agent</code> by default</td><td>Goldens live in <code>dataagentbench_meta</code>, which <code>dab_agent</code> is refused (the same test as the question table), and are never in the pack, the curator's input or the system prompt</td></tr>
+      <tr><td class="sub">Goldens leak into the prompt through the proposer</td><td>The tuned-prompt line (s01 §3)</td><td>D15-A structure-only inputs; leak check on every edit; one file per challenger so each edit's cause is visible</td></tr>
+      <tr><td class="sub">A golden is wrong, or goes stale without anyone noticing</td><td>Hand-built; tools and data change underneath it</td><td>Only verified once the question's own validator passes its answer; tied to one toolset; <code>dab golden replay</code> logs every re-run, so "still reproduces under c03" is recorded, not remembered</td></tr>
+      <tr><td class="sub">Golden execution depends on the database's current state</td><td>A re-load or upstream bump can change rows</td><td>Each golden stores the upstream commit and its output digest; <code>dab golden check</code> re-runs all of them and lists any that drifted</td></tr>
+      <tr><td class="sub">The window, not the dollar, is the limit</td><td>Haiku 54 × 1 ≈ 17 % of a Max 5× window (s01 §11: 54 × 5 ≈ 83 %)</td><td>Screens are dataset-sized; C6 is two 54 × 1 runs (≈ 35 % of a window)</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 12 DECIDE -->
+<section class="blk" id="decide">
+  <div class="hd">
+    <p class="label">12 · decide</p>
+    <h2>Five decisions above, and one approval here for how far to build before you review again</h2>
+    <p>D11 (agnews) and D19 (<code>&lt;table&gt;_embed</code>) are decided. D20 (bge-small) is decided too. D12–D15, D17 and D21 are each queued from their own form. This form sets the scope. Everything else on the page is the plan as I would build it.</p>
+  </div>
+  <form class="q" data-lavish-question="scope" onsubmit="return send(event,'Scope','build scope')">
+    <h3>Approve the build scope</h3>
+    <label><input type="radio" name="c" value="C1 only"><span><b>C1 only</b> — the first challenger screened and compared; you review the verdict before any golden work.</span></label>
+    <label><input type="radio" name="c" value="C1 → C4"><span><b>C1 → C4 (recommended)</b> — the hints screen, the toolset fingerprint, the empty Golden tab with replay, and the checkpoint comparison. One paid screen; the rest costs nothing. You curate goldens, then review with real checkpoints before the proposer exists.</span></label>
+    <label><input type="radio" name="c" value="C1 → C5"><span><b>C1 → C5</b> — through the first proposal-generated challenger. Stops before the $70 gate.</span></label>
+    <textarea name="note" placeholder="optional note"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue approval</button><span class="queued"></span></div>
+  </form>
+  <p class="small" style="margin-top:var(--s6)">s03 · sources: runs/20260921T064521Z_v0_all_haiku (results.jsonl, traces/agnews_*, traces/yelp_1_t1), src/dab_bench/agent/tools.py:36–37, 248–320, src/dab_bench/serving/app.py:455–480, src/dab_bench/eval/runner.py:143–175, data/context/{agnews,yelp}/hints.txt, data/index/queries.json, live queries as dab_agent on database dab (agnews row counts, doc keys, EXPLAIN, the yelp/1 golden), .lavish/s01_agent-blueprint.html §3 §6 §7 §11 §13.</p>
+</section>
+</div>
+
+<script>
+function send(e,id,title){
+  e.preventDefault();
+  const f=e.currentTarget, fd=new FormData(f);
+  const choice=fd.get('c'), note=(fd.get('note')||'').trim();
+  if(!choice && !note) return false;
+  const txt=id+' · '+title+': '+(choice||'(no option)')+(note?' — note: '+note:'');
+  if(window.lavish) window.lavish.queuePrompt(txt,{tag:'decision',text:txt,element:f,queueKey:id,data:{question:id,answer:choice,note:note}});
+  f.querySelector('.queued').textContent='queued: '+(choice||'note');
+  return false;
+}
+</script>
+<script type="module">
+import { File, FileDiff } from "https://esm.sh/@pierre/diffs@1.2.10?bundle";
+const dark = matchMedia('(prefers-color-scheme: dark)').matches || document.documentElement.dataset.theme === 'dark';
+const base = { theme: { light: "vitesse-light", dark: "vitesse-dark" }, themeType: dark ? "dark" : "light", overflow: "wrap" };
+
+const v0 = `# v0 — the general-purpose analyst. Frozen across a comparison: only system.md and helper.py move.
+model: haiku
+effort: medium
+max_turns: 60
+timeout_s: 900
+exec_timeout_s: 600
+hints: false          # \`dab eval --hints\` is the benchmark's own switch (--use_hints upstream)
+tools:
+  - mcp__dab__list_db
+  - mcp__dab__query_db
+  # … the same nine tools
+`;
+const c01 = `# c01-hints — v0 with the benchmark's hint file appended to the system prompt.
+parent: v0
+change: "hints on — the upstream hint file, verbatim, as the reference's --use_hints"
+model: haiku
+effort: medium
+max_turns: 60
+timeout_s: 900
+exec_timeout_s: 600
+hints: true
+tools:
+  - mcp__dab__list_db
+  - mcp__dab__query_db
+  # … the same nine tools
+`;
+new FileDiff({ ...base, diffStyle: "split" }).render({
+  containerWrapper: document.querySelector("#diff-yaml"),
+  oldFile: { name: "agents/v0/agent.yaml", contents: v0 },
+  newFile: { name: "agents/c01-hints/agent.yaml", contents: c01 },
+});
+
+const seed = `-- step 3: find the businesses
+SELECT business_id, name, description FROM yelp_business
+WHERE description ILIKE '%Indianapolis%' OR description ILIKE '%Indianapolis, IN%';
+-- step 4: ids pasted in from step 3's result
+SELECT COUNT(*) as review_count, AVG(r.rating) as average_rating
+FROM yelp_review r
+WHERE r.business_ref IN ('businessref_52', 'businessref_84', 'businessref_76', 'businessref_87',
+                         'businessref_65', 'businessref_94', 'businessref_90', 'businessref_16');
+`;
+const gold = `-- one step: the join the hint file names (businessid_N <-> businessref_N)
+select count(*) as reviews, avg(r.rating) as avg_rating
+from yelp_review r
+join yelp_business b
+  on replace(r.business_ref, 'businessref_', '') = replace(b.business_id, 'businessid_', '')
+where b.description ilike '%Indianapolis%';
+`;
+new FileDiff({ ...base, diffStyle: "unified" }).render({
+  containerWrapper: document.querySelector("#diff-golden"),
+  oldFile: { name: "yelp/1 · champion t1, calls 3–4 (pre-fill)", contents: seed },
+  newFile: { name: "yelp/1 · golden step 1 (v0)", contents: gold },
+});
+
+const ddl = `-- Golden traces: the tool calls that reach each gold answer, one agent version's tools only.
+-- In dataagentbench_meta, which dab_agent is refused. Versions are appended, never overwritten.
+create table if not exists dataagentbench_meta.golden (
+  id               bigserial primary key,
+  query_id         text not null,                -- 'yelp/1'
+  version          integer not null,             -- 1, 2, … per (query, agent_version)
+  agent_version    text not null,                -- 'v0' — the tools this golden may use
+  toolset_sha      text not null,                -- hash of that version's per-tool hashes
+  model            text not null,                -- model id behind any model step
+  status           text not null check (status in ('draft','verified','stale','wall','retired')),
+  answer           text not null,                -- what return_answer sends
+  validator_passed boolean,                      -- the benchmark's own judge()
+  validator_reason text,
+  started_from     text,                         -- null | 'trial:<run_id>/<key>' (the optional pre-fill)
+  upstream_commit  text not null,                -- source.json when built
+  author           text not null,
+  note             text,
+  created_at       timestamptz not null default now(),
+  verified_at      timestamptz,
+  unique (query_id, agent_version, version)
+);
+
+create table if not exists dataagentbench_meta.golden_step (
+  golden_id      bigint not null references dataagentbench_meta.golden(id) on delete cascade,
+  ord            integer not null,               -- 1-based order
+  tool           text not null,                  -- must be in agent_version's agent.yaml tools
+  tool_sha       text not null,                  -- per-tool hash when built (D17 compares these)
+  input          jsonb not null,                 -- exactly what call_tool receives
+  output         text not null,                  -- recorded output (the replay source for model steps, D18)
+  output_digest  text not null,                  -- sha256 of the canonical output
+  deterministic  boolean not null,               -- false for llm_extract
+  relations      text[],                         -- query_db: tables read, from EXPLAIN (FORMAT JSON)
+  checkpoint     boolean not null default true,  -- false = orientation (describe, context)
+  why            text,                           -- one line: what this step establishes
+  primary key (golden_id, ord)
+);
+
+-- the replay log: every \`dab golden replay\`, so "still reproduces under c03" is a row, not a memory
+create table if not exists dataagentbench_meta.golden_replay (
+  golden_id      bigint not null references dataagentbench_meta.golden(id) on delete cascade,
+  agent_version  text not null,
+  toolset_sha    text not null,
+  reproduced     boolean not null,
+  first_diff_ord integer,                        -- the step whose digest changed
+  agreement      real,                           -- model steps, --live (D18 A)
+  ran_at         timestamptz not null default now()
+);
+
+grant usage on schema dataagentbench_meta to dab_golden;
+grant select, insert, update on all tables in schema dataagentbench_meta to dab_golden;
+`;
+new File(base).render({
+  containerWrapper: document.querySelector("#file-ddl"),
+  file: { name: "infra/golden.sql", contents: ddl },
+});
+</script>
+</body>
+
+</html>

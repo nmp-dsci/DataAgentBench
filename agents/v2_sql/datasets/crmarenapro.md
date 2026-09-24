@@ -1,0 +1,8 @@
+- ID fields (Id, AccountId, ContactId, OwnerId, Product2Id, ContractID__c...) may have a leading '#'/whitespace. Join with `ltrim(trim(x),'#')` on both sides, never raw equality.
+- Timestamp text columns (createddate, CreatedDate, closeddate, ActivityDate, messagedate) are ISO 'YYYY-MM-DDTHH:MI:SS.000+0000'; cast `::timestamptz` or `left(x,10)::date`. Contract/order dates (StartDate, CompanySignedDate, EffectiveDate) are plain 'YYYY-MM-DD'.
+- "Past N months/quarters" from "today": use the N complete calendar periods before today's current one, i.e. [trunc(today,'month/quarter') - N periods, trunc(today,'month/quarter')), not today minus N months.
+- Opportunity.ContractID__c -> contract.Id is the correct link for sales-cycle questions; never join via AccountId.
+- casehistory__c rows with field__c='Owner Assignment' log ownership: oldvalue__c NULL = first assignment (newvalue__c=initial owner); oldvalue__c NOT NULL = a transfer, counted for the agent in oldvalue__c, newvalue__c is receiver. One such row per case = never transferred. Other field__c: 'Case Creation','Case Closed'.
+- Handle time = closeddate - createddate; exclude transferred cases (>1 Owner Assignment row) unless told otherwise.
+- knowledge__kav "policy" articles: summary repeats title or starts "Policy"; rules in faq_answer__c naming a product apply only then, general ones apply to all.
+- Ranking questions need a tie-break (id ascending) and must exclude entities with zero qualifying rows.

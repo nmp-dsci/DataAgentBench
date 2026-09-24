@@ -66,6 +66,8 @@ def log_trial_trace(
         "effort": meta.effort,
         "kind": "trial",
     }
+    if result.mode:
+        tags["mode"] = result.mode  # the SQL-answer contract: pass_through | derived
     root = client.start_trace(
         name=f"{result.query_id} t{result.trial}",
         span_type="AGENT",
@@ -143,7 +145,17 @@ def log_trial_trace(
         )
     client.end_trace(
         trace_id=trace_id,
-        outputs={"answer": _cut(result.answer), "passed": result.passed, "reason": result.reason},
+        outputs={"answer": _cut(result.answer), "passed": result.passed, "reason": result.reason}
+        | (
+            {
+                "agent_sql": _cut(result.agent_sql or ""),
+                "agent_result": _cut(result.agent_result or ""),
+                "mode": result.mode,
+                "step": result.step or "",
+            }
+            if result.mode
+            else {}
+        ),
         attributes={
             # the standard key the Traces tab reads for its Tokens column (what autologgers set)
             "mlflow.chat.tokenUsage": {

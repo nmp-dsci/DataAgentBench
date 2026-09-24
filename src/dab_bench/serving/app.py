@@ -166,9 +166,15 @@ def create_app(index: Index | None = None) -> FastAPI:
         meta, results = load_run(run_id)
         d = asdict(meta) | (row or _run_summary(asdict(meta)))
         d["results"] = [r.as_dict() for r in results]
+        from dab_bench.eval.scorecard import load_scorecard
+
+        card = load_scorecard(run_id)
+        scores = {(q["query_id"], q["trial"]): q for q in (card or {}).get("questions", [])}
         for r in d["results"]:
             r["mlflow_trace_url"] = _mlflow_trace_url(r.get("mlflow_trace_id"))
             r["gold"] = _gold(ix, r["query_id"])
+            sc = scores.get((r["query_id"], r["trial"]))
+            r["score"] = None if sc is None else {k: v for k, v in sc.items() if k != "result_diff"}
         champ = board["champion_run_id"]
         d["versus"] = (
             next((r for r in board["runs"] if r["run_id"] == champ), None)
@@ -187,6 +193,8 @@ def create_app(index: Index | None = None) -> FastAPI:
         t["mlflow_embeddable"] = _mlflow_embeddable()
         t["gold"] = _gold(ix, t.get("query_id", ""))
         t["spans"] = _spans(t)
+        t["score"] = _trial_score(run_id, t.get("query_id", ""), int(t.get("trial") or 0))
+        t["golden"] = _golden_brief(t.get("query_id", "")) if t["score"] else None
         return t
 
     @app.get("/api/runs/{run_id}/traces/{key}")
@@ -378,6 +386,9 @@ def create_app(index: Index | None = None) -> FastAPI:
                     "timeout_s": v.config.timeout_s,
                     "exec_timeout_s": v.config.exec_timeout_s,
                     "hints": v.config.hints,
+                    "pack": v.config.pack,
+                    "challenger_of": v.config.challenger_of,
+                    "notes": sorted(v.notes),
                     "tools": [t.replace("mcp__dab__", "") for t in v.config.tools],
                 }
             )
@@ -386,11 +397,10 @@ def create_app(index: Index | None = None) -> FastAPI:
     @app.get("/api/agents/{name}")
     def agent_detail(name: str) -> dict[str, Any]:
         from dab_bench.agent.sandbox import image_exists
-        from dab_bench.agent.tools import TOOL_SPECS
+        from dab_bench.agent.tools import specs_for
         from dab_bench.agent.versions import champion_name
 
         v = _version(name)
-        allowed = [t.replace("mcp__dab__", "") for t in v.config.tools]
         return {
             "name": v.name,
             "champion": v.name == champion_name(),
@@ -410,11 +420,11 @@ def create_app(index: Index | None = None) -> FastAPI:
                     if t.name == "return_answer"
                     else "on",
                 }
-                for t in TOOL_SPECS.values()
-                if t.name in allowed
+                for t in specs_for(list(v.config.tools))
             ],
             "sandbox_built": image_exists(),
             "playground_llm": s.playground_llm,
+            "lineage": _lineage(v),
             "datasets": sorted(
                 p.name for p in CONTEXT_DIR.iterdir() if (p / "tables.json").exists()
             )
@@ -423,18 +433,24 @@ def create_app(index: Index | None = None) -> FastAPI:
         }
 
     @app.get("/api/agents/{name}/prompt")
-    def agent_prompt(name: str, dataset: str, hints: bool = False) -> dict[str, Any]:
-        from dab_bench.agent.prompt import compose_system_prompt, load_context
+    def agent_prompt(name: str, dataset: str, hints: bool | None = None) -> dict[str, Any]:
+        """The system prompt a trial of this version gets on `dataset`: its own hints, pack
+        and notes settings unless `hints` overrides the first."""
+        from dab_bench.agent.prompt import load_context
 
         v = _version(name)
         try:
             ctx = load_context(dataset)
         except FileNotFoundError as e:
             raise HTTPException(404, str(e)) from e
-        prompt = compose_system_prompt(v.system_prompt, ctx, hints=hints)
+        use_hints = v.config.hints if hints is None else hints
+        prompt = v.prompt_for(ctx, use_hints)
         return {
             "agent": v.name,
             "dataset": dataset,
+            "hints": use_hints,
+            "pack": v.config.pack,
+            "notes": v.notes.get(dataset, ""),
             "context_sha": ctx.context_sha,
             "chars": len(prompt),
             "prompt": prompt,
@@ -527,6 +543,47 @@ def _playground_sandbox() -> Any:
     if _PLAYGROUND.get("sandbox") is None:
         _PLAYGROUND["sandbox"] = Sandbox.start("playground", WORKSPACE_DIR / "playground")
     return _PLAYGROUND["sandbox"]
+
+
+def _line_diff(a: str, b: str) -> list[dict[str, Any]]:
+    """Two texts as the explorer's diff lines (eq / del / add, with line numbers each side)."""
+    from difflib import SequenceMatcher
+
+    xs, ys = a.splitlines(), b.splitlines()
+    out: list[dict[str, Any]] = []
+    for op, i1, i2, j1, j2 in SequenceMatcher(None, xs, ys, autojunk=False).get_opcodes():
+        if op == "equal":
+            out += [
+                {"op": "eq", "gold": i + 1, "result": j + 1, "text": xs[i]}
+                for i, j in zip(range(i1, i2), range(j1, j2), strict=True)
+            ]
+            continue
+        out += [{"op": "del", "gold": i + 1, "result": None, "text": xs[i]} for i in range(i1, i2)]
+        out += [{"op": "add", "gold": None, "result": j + 1, "text": ys[j]} for j in range(j1, j2)]
+    return out
+
+
+def _lineage(v: Any) -> dict[str, Any] | None:
+    """For a version an optimisation round wrote: its parent, the round's record
+    (agents/<v>/optimise.json) and what changed in each editable file."""
+    parent_name = v.config.challenger_of
+    if not parent_name:
+        return None
+    rec_path = v.path / "optimise.json"
+    rec = json.loads(rec_path.read_text()) if rec_path.exists() else None
+    try:
+        parent = _version(parent_name)
+    except HTTPException:
+        return {"parent": parent_name, "optimise": rec, "files": []}
+    names = sorted(set(parent.files()) | set(v.files()))
+    files = []
+    for name in names:
+        if name == "agent.yaml":
+            continue
+        a, b = parent.files().get(name, ""), v.files().get(name, "")
+        if a != b:
+            files.append({"name": name, "diff": _line_diff(a, b), "added": not a})
+    return {"parent": parent_name, "optimise": rec, "files": files}
 
 
 def _version(name: str) -> Any:
@@ -726,6 +783,30 @@ def _compare(ix: Index, ids: list[str], group: str, scope: str) -> dict[str, Any
     }
 
 
+def _trial_score(run_id: str, query_id: str, trial: int) -> dict[str, Any] | None:
+    from dab_bench.eval.scorecard import load_scorecard
+
+    card = load_scorecard(run_id) or {}
+    return next(
+        (q for q in card.get("questions", []) if q["query_id"] == query_id and q["trial"] == trial),
+        None,
+    )
+
+
+def _golden_brief(query_id: str) -> dict[str, Any] | None:
+    """The question's current golden, for the explorer's side-by-side; None when the database
+    is down (the page still shows the scorecard)."""
+    from dab_bench.data.pg import reachable
+    from dab_bench.eval import golden
+
+    if not reachable():
+        return None
+    g = golden.current().get(query_id)
+    if g is None:
+        return None
+    return {k: g[k] for k in ("id", "kind", "sql", "passed", "gold_match", "created_at")}
+
+
 def _run_summary(d: dict[str, Any]) -> dict[str, Any]:
     s = d.get("summary") or {}
     return {
@@ -761,12 +842,27 @@ def _run_summary(d: dict[str, Any]) -> dict[str, Any]:
         "timeouts": s.get("timeouts"),
         "per_dataset": s.get("per_dataset"),
         "mlflow_url": _mlflow_run_url(d.get("mlflow_run_id")),
+        "scorecard": _scorecard_totals(str(d.get("run_id"))),
+    }
+
+
+def _scorecard_totals(run_id: str) -> dict[str, Any] | None:
+    """The three totals (answer / SQL / decision, each passed of n) and the split, when the run
+    has a scorecard (`dab diagnose`)."""
+    from dab_bench.eval.scorecard import load_scorecard
+
+    card = load_scorecard(run_id)
+    if card is None:
+        return None
+    return {
+        k: card.get(k) for k in ("totals", "by_split", "goldens", "optimise_first", "submits_sql")
     }
 
 
 def _board() -> dict[str, Any]:
     """The runs list with roles. Read from disk on every call: five folders, tiny files."""
     from dab_bench.agent.versions import champion_name
+    from dab_bench.eval.promote import history
     from dab_bench.eval.runner import list_runs, load_run
     from dab_bench.eval.score import profile
 
@@ -776,7 +872,14 @@ def _board() -> dict[str, Any]:
         _, results = load_run(m.run_id)
         rows.append(_run_summary(asdict(m)) | {"profile": profile(results)})
     full = [r for r in rows if r["split"] == "all" and not r["dry_run"] and (r["scored"] or 0) > 0]
+    promotions = history()
+    # a version that once held the title and lost it: its full runs are superseded, not challengers
+    former = {p["incumbent"] for p in promotions if p.get("changed")} - {champion}
+    crowned = promotions[-1] if promotions and promotions[-1]["winner"] == champion else None
+    # the run `dab promote` crowned, else the newest full run of the champion that is not a challenger
     champ = next(
+        (r for r in full if crowned and r["run_id"] == crowned.get("champion_run_id")), None
+    ) or next(
         (r for r in full if r["agent"] == champion and not r["challenger_of"]), None
     )  # rows are newest first
     for r in rows:
@@ -786,7 +889,7 @@ def _board() -> dict[str, Any]:
             r["role"] = "smoke"
         elif champ and r["run_id"] == champ["run_id"]:
             r["role"] = "champion"
-        elif r["agent"] == champion and not r["challenger_of"]:
+        elif (r["agent"] == champion and not r["challenger_of"]) or r["agent"] in former:
             r["role"] = "superseded"
         else:
             r["role"] = "challenger"
@@ -794,6 +897,7 @@ def _board() -> dict[str, Any]:
         "champion": champion,
         "champion_run_id": champ["run_id"] if champ else None,
         "runs": rows,
+        "promotion": promotions[-1] if promotions else None,
     }
 
 

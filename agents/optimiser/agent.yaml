@@ -1,0 +1,9 @@
+# The optimiser runs in `dab optimise <run> --into <version>`, never inside an eval (plan s06, B9).
+# One session per dataset with failed train questions, plus one cross-dataset pass (D31 A).
+model: sonnet
+effort: medium
+max_turns: 20
+timeout_s: 600
+tools:
+  - mcp__dab__query_db
+  - mcp__dab__write_notes

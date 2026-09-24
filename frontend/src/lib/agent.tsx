@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { type Span, type SpanTokens, fmtInt, fmtTok, fmtUsd } from './api';
+import { type GoldDiffLine, type ScoreTotals, type Span, type SpanTokens, fmtInt, fmtTok, fmtUsd } from './api';
 import { questionPath, trialId, trialPath } from './url';
 
 // ── shapes served by /api/agents* and /api/agent/tools ────────────────────────
-export type AgentRow = { name: string; fingerprint: string; model: string; effort: string | null; max_turns: number; timeout_s: number; exec_timeout_s: number; hints: boolean; tools: string[] };
+export type AgentRow = { name: string; fingerprint: string; model: string; effort: string | null; max_turns: number; timeout_s: number; exec_timeout_s: number; hints: boolean; pack: boolean; challenger_of: string | null; notes: string[]; tools: string[] };
 export type AgentsBoard = { champion: string; versions: AgentRow[] };
 export type ToolSpec = { name: string; description: string; schema: { type: string; properties: Record<string, { type: string; description?: string; items?: { type: string } }>; required: string[] }; backend: 'pack' | 'postgres' | 'sandbox' | 'model' | 'state'; calls_model: boolean; playground: 'on' | 'off' | 'echo' };
-export type AgentDetail = { name: string; champion: boolean; fingerprint: string; config: Record<string, unknown>; files: Record<string, string>; tools: ToolSpec[]; sandbox_built: boolean; playground_llm: boolean; datasets: string[] };
-export type PromptResp = { agent: string; dataset: string; context_sha: string; chars: number; prompt: string };
+export type OptimiseSession = { scope: string; notes: string | null; rationale: string; refusals: { notes: string; problems: string[] }[]; questions: string[]; n_turns: number; cost_usd: number | null; error: string | null };
+export type OptimiseRecord = { version: string; challenger_of: string; source_run: string; optimiser: { model: string; effort: string }; split: { train: number; heldout: number }; source_scorecard: ScoreTotals; cost_usd: number; sessions: OptimiseSession[]; system_md_changed: boolean };
+/** An optimised version's parent, the round that wrote it (agents/<v>/optimise.json) and each changed file. */
+export type Lineage = { parent: string; optimise: OptimiseRecord | null; files: { name: string; added: boolean; diff: GoldDiffLine[] }[] };
+export type AgentDetail = { name: string; champion: boolean; fingerprint: string; config: Record<string, unknown>; files: Record<string, string>; tools: ToolSpec[]; sandbox_built: boolean; playground_llm: boolean; datasets: string[]; lineage: Lineage | null };
+export type PromptResp = { agent: string; dataset: string; hints: boolean; pack: boolean; notes: string; context_sha: string; chars: number; prompt: string };
 export type PlayResult = { tool: string; dataset: string; input: Record<string, unknown>; output: string; chars: number; cut: boolean; elapsed_s: number; error: boolean };
 
 export type NodeId = 'question' | 'sdk' | 'prompt' | 'mcp' | 'postgres' | 'sandbox' | 'model' | 'pack' | 'judge' | 'runs' | 'mlflow' | `tool:${string}`;
@@ -41,12 +45,13 @@ export function AgentGraph({ detail, counts, selected, onSelect, question }: { d
   const H = Math.max(toolsTop + toolsH + 60, 330);
   const W = 1000;
   const x = { q: 10, sdk: 175, mcp: 435, tool: 585, back: 855 };
-  const backends: { id: NodeId; label: string; sub: string; ext?: boolean }[] = [
+  type Backend = { id: NodeId; label: string; sub: string; ext?: boolean };
+  const backends = ([
     { id: 'postgres', label: 'Postgres', sub: 'dab_agent · read-only' },
     { id: 'sandbox', label: 'sandbox', sub: detail.sandbox_built ? 'docker · --network none' : 'image not built' },
     { id: 'model', label: 'haiku 4.5', sub: 'llm_extract only', ext: true },
     { id: 'pack', label: 'pack files', sub: 'data/context/' },
-  ];
+  ] as Backend[]).filter((b) => tools.some((t) => BACKEND_NODE[t.backend] === b.id)); // only what this version's tools reach
   const backY: Record<string, number> = {};
   backends.forEach((b, i) => {
     backY[b.id] = toolsTop + 20 + i * 62;

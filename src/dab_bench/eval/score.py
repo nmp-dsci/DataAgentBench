@@ -37,6 +37,12 @@ class TrialResult:
     trace_file: str | None = None
     mlflow_trace_id: str | None = None
     session_id: str | None = None
+    # the SQL-answer contract (s06): what submit_answer recorded; None for a version without it
+    agent_sql: str | None = None
+    agent_result: str | None = None  # the harness's rendered re-run of agent_sql
+    mode: str | None = None  # pass_through | derived
+    step: str | None = None  # derived: the one-line step after the SQL
+    result_rows: int | None = None
 
     def as_dict(self) -> dict[str, Any]:
         return asdict(self)

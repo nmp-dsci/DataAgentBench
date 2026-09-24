@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { type Trace, type TraceBlock, fmtDur, fmtInt, fmtUsd, useGet } from '../lib/api';
 import { Waterfall } from '../lib/runs';
+import { SqlVersus } from '../lib/scorecard';
 import { Loading } from '../lib/ui';
 import { apiTrialPath, questionPath, runPath } from '../lib/url';
 
@@ -65,7 +66,7 @@ export function TracePage() {
         {t.error && ` — ${t.error}`}
       </h1>
       <p className="lead">
-        <code>{t.model}</code> at effort <code>{t.effort}</code>; the system prompt is {fmtInt(t.system_prompt_chars)} characters (behaviour + the <code>{t.dataset}</code> pack at <code>{t.context_sha}</code>). Tokens:{' '}
+        <code>{t.model}</code> at effort <code>{t.effort}</code>; the system prompt is {fmtInt(t.system_prompt_chars)} characters (behaviour + the <code>{t.dataset}</code> facts; context <code>{t.context_sha}</code>). Tokens:{' '}
         {fmtInt(t.input_tokens + t.cache_creation_tokens)} fresh input, {fmtInt(t.cache_read_tokens)} cache read, {fmtInt(t.output_tokens)} output.{' '}
         {errors > 0 && `${errors} tool call${errors === 1 ? '' : 's'} returned an error. `}
         {t.mlflow_trace_url ? (
@@ -87,6 +88,20 @@ export function TracePage() {
           <pre className="wrap-any">{t.gold?.text ?? '—'}</pre>
         </div>
       </div>
+
+      {t.score && (
+        <>
+          <h2>
+            00 · The SQL against the golden —{' '}
+            {t.score.category === 'solved' ? 'it recreates the golden result' : t.score.category === 'no golden' ? 'this question has no golden yet, so only the answer is scored' : `${t.score.category}`}
+          </h2>
+          <p>
+            The scorecard reads each trial three ways after the run: the answer (the validator), the SQL (does its result recreate the golden's, in any row or column order) and the decision (pass the result through, or derive the answer from it). It is computed by{' '}
+            <code>dab diagnose {id}</code> and never reaches the agent.
+          </p>
+          <SqlVersus score={t.score} agentSql={t.submission?.sql} golden={t.golden} mode={t.submission?.mode} step={t.submission?.step} />
+        </>
+      )}
 
       <h2>
         01 · Timeline — {toolS > 0 && t.duration_ms > 0 ? `${Math.round((toolS * 1000 * 100) / t.duration_ms)}% of the ${fmtDur(t.duration_ms)} was inside tools` : 'no tool time recorded'}

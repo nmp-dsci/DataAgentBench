@@ -1,0 +1,6 @@
+- Output formatting: for "list the titles" questions, gold answers CSV-encode titles: if a title contains a comma, it is wrapped in double quotes (and any existing quote in it doubled), like standard CSV field quoting. ~34/200 titles contain a comma. Apply this transform to the returned title column, don't return raw text.
+- Join key: `books_info.book_id` is `bookid_N`, `review.purchase_id` is `purchaseid_N`. Join by extracting the trailing integer from each side and casting to int, rather than concatenating a prefix onto one id to compare with the other.
+- `categories` is a string-encoded list, e.g. `["Books", "Literature & Fiction", "Poetry"]`. Match a category as a quoted element via regex, not a loose substring, since names can be substrings of each other.
+- Book language lives only in the templated `details` text, with many phrasings ("written in English", "available in English", "is in English", "this English-language ...", bilingual mentions). Use a word-bounded regex on the language name so all phrasings match, not one fixed phrase.
+- `review_time` is text in one consistent date-time format across all rows (1997-2023); cast directly with `::timestamp`.
+- Compute average rating per book from individual joined review rows, not from any pre-aggregated field.

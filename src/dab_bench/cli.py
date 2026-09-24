@@ -389,6 +389,150 @@ def runs_log(run_id: str) -> None:
     console.print(f"logged {run_id} → mlflow run {meta.mlflow_run_id}")
 
 
+@app.command()
+def diagnose(run_id: str, refresh: bool = False, show: int = 60) -> None:
+    """The scorecard of a run: answer / SQL / decision per question, a category per failure,
+    and what to optimise first. Computed after the run (goldens re-run as dab_agent) and kept
+    in runs/<id>/scorecard.json; --refresh recomputes it."""
+    from dab_bench.eval.scorecard import load_scorecard, score_run
+
+    card = None if refresh else load_scorecard(run_id)
+    if card is None:
+        card = score_run(run_id)
+        from dab_bench.config import RUNS_DIR
+        from dab_bench.eval.runner import load_run
+
+        meta, _ = load_run(run_id)
+        if meta.mlflow_run_id:
+            try:
+                from dab_bench.tracking.mlflow_log import log_scorecard
+
+                log_scorecard(meta.mlflow_run_id, RUNS_DIR / run_id)
+            except Exception as e:  # noqa: BLE001 - the folder is the record
+                console.print(f"[yellow]mlflow: scorecard not re-logged ({e})[/]")
+    tot = card["totals"]
+    head = "   ".join(f"{k} {v['passed']}/{v['n']}" for k, v in tot.items())
+    console.print(f"[bold]{run_id}[/]   {head}")
+    for split, st in (card.get("by_split") or {}).items():
+        console.print(
+            f"  {split:<8} " + "   ".join(f"{k} {v['passed']}/{v['n']}" for k, v in st.items())
+        )
+    if card["optimise_first"]:
+        console.print("optimise first:")
+        for o in card["optimise_first"]:
+            qs = ", ".join(o["queries"][:4]) + (", …" if len(o["queries"]) > 4 else "")
+            console.print(f"  {o['category']:<26} {o['n']:>3}   {qs}")
+    t = Table(box=None)
+    for c in ("question", "split", "answer", "SQL", "decision", "category", "detail"):
+        t.add_column(c)
+
+    def mark(v: bool | None) -> str:
+        return "—" if v is None else "[green]pass[/]" if v else "[red]fail[/]"
+
+    for q in card["questions"][:show]:
+        t.add_row(
+            q["query_id"],
+            q.get("split") or "",
+            mark(q["answer"]),
+            mark(q["sql"]),
+            mark(q["decision"]),
+            q["category"] if q["category"] != "solved" else "—",
+            q["detail"][:70],
+        )
+    console.print(t)
+
+
+@app.command()
+def optimise(
+    run_id: str,
+    into: str = typer.Option(..., help="the new version's name, e.g. v2_sql"),
+    workers: int = 4,
+    system_pass_only: bool = typer.Option(
+        False, help="re-run only the cross-dataset system.md pass for an existing INTO"
+    ),
+) -> None:
+    """One optimisation round: the optimiser (Sonnet 5, medium) reads RUN's failed train
+    questions per dataset and writes agents/INTO/ = the run's version + dataset notes (+ a
+    guarded system.md pass). Every edit is checked for question text, gold values and golden
+    SQL; the held-out questions are never shown."""
+    import asyncio
+
+    from dab_bench.agent.optimise import optimise as _optimise
+    from dab_bench.tracking.mlflow_log import TrackingDownError, preflight
+
+    try:
+        preflight()
+    except TrackingDownError as e:
+        console.print(f"[red]{e}[/]")
+        raise typer.Exit(1) from None
+    if system_pass_only:
+        from dab_bench.agent.optimise import rerun_system_pass
+
+        rec = asyncio.run(rerun_system_pass(into))
+    else:
+        rec = asyncio.run(_optimise(run_id, into, workers=workers))
+    for s in rec["sessions"]:
+        state = (
+            "[red]error[/] " + s["error"]
+            if s["error"]
+            else "accepted"
+            if s["notes"] is not None
+            else "[yellow]dropped[/]"
+        )
+        console.print(
+            f"  {s['scope']:<18} {state}  {len(s['notes'] or ''):>5} chars  "
+            f"{len(s['refusals'])} refusal(s)  {s['n_turns']} turns  ${s['cost_usd'] or 0:.3f}"
+        )
+    console.print(
+        f"agents/{into} · fingerprint {rec['fingerprint']} · system.md "
+        f"{'changed' if rec['system_md_changed'] else 'unchanged'} · ${rec['cost_usd']:.2f}"
+    )
+
+
+@app.command()
+def promote(candidates: str | None = None, dry_run: bool = False) -> None:
+    """Crown the version with the most answers passed on the 54 (D30; a tie keeps the
+    incumbent). Each candidate is its newest complete full-split run. Moves agents/champion,
+    sets the MLflow prompt alias `champion` and appends the verdict to agents/promotions.jsonl."""
+    from dab_bench.eval.promote import promote as _promote
+
+    rec = _promote(_datasets_arg(candidates), dry_run=dry_run)
+    t = Table(box=None)
+    for c in ("version", "run", "answer", "SQL", "decision", "held-out answer", "note"):
+        t.add_column(c)
+    for c in rec["candidates"]:
+        sc = c.get("scorecard") or {}
+        ho = (c.get("heldout") or {}).get("answer")
+        t.add_row(
+            c["version"] + (" ★" if c["version"] == rec["winner"] else ""),
+            c["run_id"] or "—",
+            f"{c['passed']}/{c['scored']}" if c["passed"] is not None else "—",
+            f"{sc['sql']['passed']}/{sc['sql']['n']}" if sc.get("sql", {}).get("n") else "—",
+            f"{sc['decision']['passed']}/{sc['decision']['n']}"
+            if sc.get("decision", {}).get("n")
+            else "—",
+            f"{ho['passed']}/{ho['n']}" if ho else "—",
+            c["why_not"],
+        )
+    console.print(t)
+    console.print(("[dim]dry run[/] " if dry_run else "") + rec["reason"])
+
+
+@app.command("split-optimise")
+def split_optimise(force: bool = False) -> None:
+    """Write data/splits/train.json + heldout.json from today's goldens (2/3 per dataset,
+    seeded). Written once: every version is measured on the same split; --force re-draws it."""
+    from dab_bench.config import SPLITS_DIR
+    from dab_bench.eval import golden
+    from dab_bench.eval.scorecard import write_split
+
+    if (SPLITS_DIR / "train.json").exists() and not force:
+        console.print("[yellow]the split exists[/]; --force re-draws it (and breaks comparability)")
+        raise typer.Exit(1)
+    s = write_split(sorted(golden.current()))
+    console.print(f"train {len(s['train'])} · held-out {len(s['heldout'])}")
+
+
 @app.command("isolation-check")
 def isolation_check_cmd(agent: str = "champion", dataset: str = "yelp") -> None:
     """Start one session exactly as a trial would and show what the CLI gave it (one short turn)."""

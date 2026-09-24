@@ -1,10 +1,12 @@
 """One (query, trial), one Agent SDK session, one trace.
 
-The system prompt is `system.md` plus the dataset's curated facts (D7 A); the
-user message is the question. The `dab` MCP server is the whole toolbox. The
-answer is what `return_answer` recorded, else the last plain text (the
-reference scaffold's rule). Everything the model saw and did is the trace the
-run keeps and MLflow indexes.
+The system prompt is `system.md` plus the dataset's facts (D7 A); the user
+message is the question. The `dab` MCP server, holding only the version's own
+tools, is the whole toolbox. The answer is what `submit_answer` or
+`return_answer` recorded, else the last plain text (the reference scaffold's
+rule). A version that answers with SQL also leaves its submission on the trace:
+the SQL, the harness's re-run of it, the mode and the step. Everything the model
+saw and did is the trace the run keeps and MLflow indexes.
 """
 
 from __future__ import annotations
@@ -38,7 +40,7 @@ from dab_bench.agent.isolation import (
     isolated_cwd,
 )
 from dab_bench.agent.llm import EFFORT, require_live, resolve_model, subscription_env
-from dab_bench.agent.prompt import DatasetContext, compose_system_prompt, user_message
+from dab_bench.agent.prompt import DatasetContext, user_message
 from dab_bench.agent.sandbox import Sandbox
 from dab_bench.agent.tools import ToolState, make_tool_server
 from dab_bench.agent.versions import AgentVersion
@@ -71,6 +73,9 @@ class Solve:
     effort: str = EFFORT
     context_sha: str = ""
     system_prompt_chars: int = 0
+    submission: dict[str, Any] | None = (
+        None  # submit_answer: sql, mode, step, columns, rows, result
+    )
 
     def as_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -135,7 +140,7 @@ async def solve(
     model_id = resolve_model(model or cfg.model)
     eff = effort or cfg.effort or EFFORT
     use_hints = cfg.hints if hints is None else hints
-    system_prompt = compose_system_prompt(version.system_prompt, ctx, hints=use_hints)
+    system_prompt = version.prompt_for(ctx, use_hints)
     key = trial_key(query, trial)
     state = ToolState(
         dataset=query.dataset,
@@ -144,7 +149,7 @@ async def solve(
         sandbox=sandbox,
         exec_timeout_s=cfg.exec_timeout_s,
     )
-    server = make_tool_server(state)
+    server = make_tool_server(state, list(cfg.tools))
     cwd = isolated_cwd()
     options = session_options(version, system_prompt, server, cwd, model_id, eff)
     prompt = user_message(query.question)
@@ -234,6 +239,7 @@ async def solve(
         final_text = ""
     s.final_text = final_text
     s.answer = state.answer if state.answer is not None else final_text.strip()
+    s.submission = state.submission
     s.tool_calls = state.calls
     if state.extract_cost_usd:
         s.cost_usd = (s.cost_usd or 0.0) + state.extract_cost_usd
@@ -280,11 +286,11 @@ async def isolation_check(version: AgentVersion, ctx: DatasetContext) -> dict[st
     cfg = version.config
     state = ToolState(dataset=ctx.dataset, ctx=ctx, trial_key="isolation_check", sandbox=None)
     cwd = isolated_cwd()
-    system_prompt = compose_system_prompt(version.system_prompt, ctx, hints=cfg.hints)
+    system_prompt = version.prompt_for(ctx)
     options = session_options(
         version,
         system_prompt,
-        make_tool_server(state),
+        make_tool_server(state, list(cfg.tools)),
         cwd,
         resolve_model(cfg.model),
         cfg.effort or EFFORT,

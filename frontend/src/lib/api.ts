@@ -239,7 +239,36 @@ export type RunSummary = {
   per_dataset: Record<string, DatasetRate> | null;
   role: RunRole;
   profile: Profile;
+  scorecard: ScorecardTotals | null;
 };
+/** The scorecard (s06): each question scored three ways, with a category per failure. */
+export type Rate = { passed: number; n: number };
+export type ScoreTotals = { answer: Rate; sql: Rate; decision: Rate };
+export type ScorecardTotals = {
+  totals: ScoreTotals;
+  by_split: Record<string, ScoreTotals> | null;
+  goldens: number;
+  optimise_first: { category: string; n: number; queries: string[] }[];
+  submits_sql: boolean;
+};
+export type ScoreRow = {
+  query_id: string;
+  trial: number;
+  answer: boolean | null;
+  sql: boolean | null;
+  decision: boolean | null;
+  mode: string | null;
+  step: string | null;
+  golden_id: number | null;
+  golden_kind: GoldenKind | null;
+  category: string;
+  detail: string;
+  structure: Record<string, { golden: unknown; agent: unknown } | string>;
+  result_diff?: GoldDiffLine[];
+  split?: string | null;
+};
+export type GoldenBriefSql = { id: number; kind: GoldenKind; sql: string; passed: boolean | null; gold_match: string; created_at: string };
+export type AgentSubmission = { sql: string; mode: string; step: string; model_answer: string; columns: string[]; row_count: number; truncated: boolean; result: string };
 /** GET /api/runs/compare: two runs on the same queries, grouped by dataset, validator style or query. */
 export type CompareGroup = 'dataset' | 'style' | 'query';
 export type CompareRate = { passed: number; n: number; rate: number; queries: number };
@@ -284,7 +313,10 @@ export type CompareResp = {
   broken: string[];
 };
 export type RunRole = 'champion' | 'challenger' | 'superseded' | 'smoke' | 'dry';
-export type Board = { champion: string; champion_run_id: string | null; runs: RunSummary[]; submissions: Submission[] };
+export type PromotionCandidate = { version: string; run_id: string | null; passed: number | null; scored: number | null; n: number | null; heldout: ScoreTotals | null; scorecard: ScoreTotals | null; why_not: string };
+/** `dab promote`'s latest verdict (agents/promotions.jsonl): D30, the most answers passed of the 54 wins. */
+export type Promotion = { at: string; rule: string; incumbent: string; winner: string; changed: boolean; reason: string; candidates: PromotionCandidate[]; champion_run_id: string | null; prompt_version?: number };
+export type Board = { champion: string; champion_run_id: string | null; runs: RunSummary[]; submissions: Submission[]; promotion: Promotion | null };
 export type Stat = { mean: number; p50: number; p95: number; max: number; sum: number };
 export type ProfileKey = 'turns' | 'tool_calls' | 'wall_s' | 'fresh_in' | 'cache_read' | 'output' | 'total' | 'cost_usd';
 export type Profile = {
@@ -323,6 +355,11 @@ export type TrialRow = {
   mlflow_trace_id: string | null;
   mlflow_trace_url: string | null;
   gold: GoldRef | null;
+  agent_sql?: string | null;
+  agent_result?: string | null;
+  mode?: string | null;
+  step?: string | null;
+  score?: ScoreRow | null;
 };
 export type GoldRef = { preview: string; lines: number; text: string };
 export type RunDetail = RunSummary & { max_turns: number; workers: number; code_sha: string; upstream_commit: string; query_ids: string[]; results: TrialRow[]; versus: RunSummary | null };
@@ -359,6 +396,9 @@ export type Trace = {
   mlflow_embeddable: boolean;
   gold: GoldRef | null;
   spans: Span[];
+  submission?: AgentSubmission | null;
+  score?: ScoreRow | null;
+  golden?: GoldenBriefSql | null;
 };
 export type ContextPack = { dataset: string; files: Record<string, string>; curation: { model: string; cost_usd: number | null; input_tokens: number; output_tokens: number; duration_ms: number } | null };
 

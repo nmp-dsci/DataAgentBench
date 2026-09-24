@@ -303,3 +303,10 @@ ol.sqlcalls pre{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:var(--s2)
 .linkish{font:inherit;color:var(--accent);background:none;border:0;padding:0;cursor:pointer;text-align:left}
 .linkish:hover{text-decoration:underline;text-underline-offset:.2em}
 .linkish:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+/* the scorecard: agent SQL beside golden SQL (lib/scorecard.tsx) */
+.versus{margin-top:var(--s3);min-width:0}
+.versus .verdicts{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center;margin:0 0 var(--s2)}
+.versus .compare{margin-top:var(--s3)}
+.versus pre{white-space:pre-wrap;overflow-wrap:anywhere}
+table.structure td.mono{font:400 var(--t-1)/1.4 var(--mono);overflow-wrap:anywhere}
+.note-cell{min-width:18rem;overflow-wrap:anywhere}

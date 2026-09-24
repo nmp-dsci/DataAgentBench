@@ -80,6 +80,7 @@ def log_run(run_dir: Path, meta: RunMeta, results: list[TrialResult]) -> str:
                 "kind": "eval",
                 "challenger_of": meta.challenger_of or "",
                 "hints": str(meta.hints).lower(),
+                "prompt_version": str(meta.prompt_version or ""),
             }
         )
         mlflow.log_params(
@@ -121,6 +122,9 @@ def log_run(run_dir: Path, meta: RunMeta, results: list[TrialResult]) -> str:
             for ds, rate in (s.get("per_dataset") or {}).items():
                 if rate.get("rate") is not None:
                     metrics[f"ds_{ds}_pass_rate"] = float(rate["rate"])
+        card_path = run_dir / "scorecard.json"
+        if card_path.exists():
+            metrics.update(scorecard_metrics(json.loads(card_path.read_text())))
         mlflow.log_metrics(metrics)
         # per trial: pass, tokens, turns, cost; per query (mean over its trials): the same
         per_trial: dict[str, float] = {}
@@ -149,13 +153,53 @@ def log_run(run_dir: Path, meta: RunMeta, results: list[TrialResult]) -> str:
             if scored:
                 per_trial[f"query_{q}_pass_rate"] = sum(1 for r in scored if r.passed) / len(scored)
         mlflow.log_metrics(per_trial)
-        for name in ("run.json", "results.jsonl"):
+        # the SQL-answer contract: every trial's submitted SQL, result, mode and step, as a table
+        submitted = [r for r in results if r.mode]
+        if submitted:
+            mlflow.log_table(
+                {
+                    "query_id": [r.query_id for r in submitted],
+                    "trial": [r.trial for r in submitted],
+                    "mode": [r.mode for r in submitted],
+                    "step": [r.step or "" for r in submitted],
+                    "agent_sql": [r.agent_sql or "" for r in submitted],
+                    "agent_result": [(r.agent_result or "")[:2000] for r in submitted],
+                    "answer": [r.answer[:2000] for r in submitted],
+                    "passed": [r.passed for r in submitted],
+                },
+                "submissions.json",
+            )
+        for name in ("run.json", "results.jsonl", "scorecard.json"):
             if (run_dir / name).exists():
                 mlflow.log_artifact(str(run_dir / name))
         for sub in ("agent", "traces", "context"):
             if (run_dir / sub).is_dir():
                 mlflow.log_artifacts(str(run_dir / sub), artifact_path=sub)
         return str(run.info.run_id)
+
+
+def scorecard_metrics(card: dict[str, Any]) -> dict[str, float]:
+    metrics: dict[str, float] = {}
+    for col, v in (card.get("totals") or {}).items():
+        metrics[f"scorecard_{col}_passed"] = float(v["passed"])
+        metrics[f"scorecard_{col}_n"] = float(v["n"])
+    for split, tot in (card.get("by_split") or {}).items():
+        for col, v in tot.items():
+            metrics[f"scorecard_{split}_{col}_passed"] = float(v["passed"])
+            metrics[f"scorecard_{split}_{col}_n"] = float(v["n"])
+    return metrics
+
+
+def log_scorecard(mlflow_run_id: str, run_dir: Path) -> None:
+    """Re-log a recomputed scorecard onto the run's existing MLflow run (`dab diagnose --refresh`)."""
+    from mlflow import MlflowClient
+
+    _client_setup()
+    card = json.loads((run_dir / "scorecard.json").read_text())
+    client = MlflowClient()
+    for k, v in scorecard_metrics(card).items():
+        client.log_metric(mlflow_run_id, k, v)
+    client.log_artifact(mlflow_run_id, str(run_dir / "scorecard.json"))
 
 
 def _total_tokens(r: TrialResult) -> int:

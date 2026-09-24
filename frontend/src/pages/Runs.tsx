@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { type Board, type CompareGroup, type CompareRate, type CompareResp, type CompareSide, type Leaderboard, type RunSummary, type Submission, ROLE_LABEL, STYLE_LABEL, fmtDur, fmtPct, fmtSec, fmtTok, fmtUsd, useGet } from '../lib/api';
+import { type Board, type CompareGroup, type CompareRate, type CompareResp, type CompareSide, type Leaderboard, type Promotion, type RunSummary, type Submission, ROLE_LABEL, STYLE_LABEL, fmtDur, fmtPct, fmtSec, fmtTok, fmtUsd, useGet } from '../lib/api';
 import { Delta, ProfileTable, Ratios, Role } from '../lib/runs';
+import { Totals, rate } from '../lib/scorecard';
 import { Loading, Rate } from '../lib/ui';
-import { questionPath, runPath, runsPath, useLens } from '../lib/url';
+import { agentPath, questionPath, runPath, runsPath, useLens } from '../lib/url';
 
 /** The best plain-ReAct baseline column on the leaderboard's stratified table: the honest bar for a Haiku agent. */
 function bestBaseline(lb: Leaderboard | null): { key: string; label: string; overall: number; perDataset: Record<string, number> } | null {
@@ -375,6 +376,8 @@ export function Runs() {
         a smoke run screens one query per dataset and never holds the title. The same runs are logged to the central MLflow (<code>dataagentbench/evals</code>) and linked from each page.
       </p>
 
+      {board.promotion && <PromotionVerdict p={board.promotion} />}
+
       <Compare board={board} base={base} />
 
       <h2>
@@ -395,6 +398,7 @@ export function Runs() {
                 <th className="num">Macro</th>
                 <th className="num">Δ macro</th>
                 <th>Pass (micro)</th>
+                <th title="the scorecard: the answer (validator), the SQL (its result against the golden's) and the decision (pass-through or derived), each passed of scored">Answer · SQL · decision</th>
                 <th className="num">Cost p50</th>
                 <th className="num">Δ</th>
                 <th className="num">Turns p50 / p95</th>
@@ -428,6 +432,7 @@ export function Runs() {
                   <td>
                     <Rate passed={r.passed} n={r.scored} />
                   </td>
+                  <td className="small">{r.scorecard?.submits_sql ? <Totals t={r.scorecard.totals} /> : <span className="muted">answer only</span>}</td>
                   <td className="num">{fmtUsd(r.profile.metrics.cost_usd.p50, 3)}</td>
                   <td className="num">
                     <Delta v={r.profile.metrics.cost_usd.p50} base={cp?.metrics.cost_usd.p50} fmt="usd" lowerIsBetter digits={3} />
@@ -499,13 +504,54 @@ export function Runs() {
                 <td className="num">{fmtUsd(r.cost_usd)}</td>
                 <td className="num">{fmtDur(r.duration_ms)}</td>
                 <td className="num">{r.timeouts ?? 0}</td>
-                <td className="wrap-any small">{r.note}</td>
+                <td className="small note-cell">{r.note}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
       {runs.length === 0 && <p className="empty">No runs yet. `make eval` writes the first one; a dry run (`dab eval --dry-run --no-mlflow`) needs no model.</p>}
+    </>
+  );
+}
+
+/** The latest `dab promote` verdict: every candidate's top line, its scorecard and its held-out answers. */
+function PromotionVerdict({ p }: { p: Promotion }) {
+  return (
+    <>
+      <h2>
+        00 · Promotion — {p.changed ? `${p.winner} took the title from ${p.incumbent}` : `${p.winner} kept the title`} on {p.at.slice(0, 10)}
+      </h2>
+      <p>
+        {p.rule}. {p.reason}.{p.prompt_version != null && <> Its prompt is version {p.prompt_version} of <code>dataagentbench.system</code>, alias <code>champion</code>.</>}
+      </p>
+      <div className="tw">
+        <table>
+          <thead>
+            <tr>
+              <th>Version</th>
+              <th>Run</th>
+              <th>Answer (the top line)</th>
+              <th>SQL · decision</th>
+              <th>Held-out answer</th>
+            </tr>
+          </thead>
+          <tbody>
+            {p.candidates.map((c) => (
+              <tr key={c.version}>
+                <td className="sub">
+                  <Link to={agentPath(c.version)}>{c.version}</Link>
+                  {c.version === p.winner && <span className="chip ok">champion</span>}
+                </td>
+                <td className="mono small">{c.run_id ? <Link to={runPath(c.run_id)}>{c.run_id}</Link> : c.why_not}</td>
+                <td>{c.passed != null ? <Rate passed={c.passed} n={c.scored} /> : '—'}</td>
+                <td className="small">{c.scorecard && c.scorecard.sql.n > 0 ? `SQL ${rate(c.scorecard.sql)} · decision ${rate(c.scorecard.decision)}` : 'answer only'}</td>
+                <td className="small">{c.heldout ? rate(c.heldout.answer) : '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }

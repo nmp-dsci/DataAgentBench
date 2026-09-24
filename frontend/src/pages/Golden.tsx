@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate, useOutletContext, useParams } from 'react-router-dom';
-import { type Board, type GoldDiffLine, type GoldMatch, type GoldenAttempt, type GoldenKind, type GoldenList, type GoldenOne, type ProposalBrief, type RunDetail, type RunSummary, type ToolCall, type Trace, type TrialRow, ROLE_LABEL, STYLE_LABEL, fmtInt, post, useGet } from '../lib/api';
+import { type Board, type GoldMatch, type GoldenAttempt, type GoldenKind, type GoldenList, type GoldenOne, type ProposalBrief, type RunDetail, type RunSummary, type ToolCall, type Trace, type TrialRow, ROLE_LABEL, STYLE_LABEL, fmtInt, post, useGet } from '../lib/api';
 import { Clip, Gold, Loading } from '../lib/ui';
-import { diffStat, foldDiff, splitRows } from '../lib/diff';
+import { GoldDiff } from '../lib/golddiff';
+import { SqlVersus } from '../lib/scorecard';
 import { apiTrialPath, datasetPath, goldenPath, questionPath, trialId, trialPath, useLens } from '../lib/url';
 
 function Status({ g, kind }: { g: { passed: boolean | null; kind?: GoldenKind } | null; kind?: GoldenKind }) {
@@ -23,110 +24,6 @@ const MATCH_LABEL: Record<GoldMatch, string> = {
 function Match({ m }: { m: GoldMatch | '' | undefined }) {
   if (!m) return <span className="small muted">—</span>;
   return <span className={`chip ${m === 'exact' || m === 'exact_values' ? 'ok' : 'warn'}`}>{MATCH_LABEL[m]}</span>;
-}
-
-/** A line's cells, the differing ones marked (cells are the comma-separated values the gold match compares). */
-function Cells({ l }: { l: GoldDiffLine }) {
-  if (!l.changed?.length) return <>{l.text}</>;
-  const changed = new Set(l.changed);
-  return (
-    <>
-      {l.text.split(',').map((c, i) => (
-        <span key={i}>
-          {i > 0 && ','}
-          {changed.has(i) ? <mark>{c}</mark> : c}
-        </span>
-      ))}
-    </>
-  );
-}
-
-const MARK = { eq: ' ', del: '−', add: '+' } as const;
-
-/** The result against the gold, like a code review: gold lines the result lacks (−), result lines the gold lacks (+). */
-function GoldDiff({ lines }: { lines: GoldDiffLine[] }) {
-  const [split, setSplit] = useState(false);
-  const [open, setOpen] = useState<Set<number>>(new Set());
-  const { added, removed } = diffStat(lines);
-  const unified = (ls: GoldDiffLine[]) =>
-    ls.map((l, i) => (
-      <tr key={`u${l.gold}-${l.result}-${i}`} className={l.op}>
-        <td className="ln">{l.gold ?? ''}</td>
-        <td className="ln">{l.result ?? ''}</td>
-        <td className="mk">{MARK[l.op]}</td>
-        <td className="tx">
-          <Cells l={l} />
-        </td>
-      </tr>
-    ));
-  const side = (ls: GoldDiffLine[]) =>
-    splitRows(ls).map((r, i) => (
-      <tr key={`s${r.gold?.gold}-${r.result?.result}-${i}`}>
-        <td className="ln">{r.gold?.gold ?? ''}</td>
-        <td className={`tx ${!r.gold ? 'blank' : r.gold.op === 'eq' ? '' : 'del'}`}>{r.gold && <Cells l={r.gold} />}</td>
-        <td className="ln">{r.result?.result ?? ''}</td>
-        <td className={`tx ${!r.result ? 'blank' : r.result.op === 'eq' ? '' : 'add'}`}>{r.result && <Cells l={r.result} />}</td>
-      </tr>
-    ));
-  // runs of shown lines between folds; a fold is one row until it is opened (folds hold only unchanged lines, so no hunk is cut)
-  const body = (render: (ls: GoldDiffLine[]) => JSX.Element[]) => {
-    const out: JSX.Element[] = [];
-    let run: GoldDiffLine[] = [];
-    const flush = () => {
-      out.push(...render(run));
-      run = [];
-    };
-    foldDiff(lines).forEach((it, k) => {
-      if (it.kind === 'line') run.push(it.line);
-      else if (open.has(k)) run.push(...it.lines);
-      else {
-        flush();
-        out.push(
-          <tr key={`f${k}`} className="fold">
-            <td colSpan={4}>
-              <button type="button" className="linkish" onClick={() => setOpen((o) => new Set(o).add(k))}>
-                ⋯ {it.lines.length} unchanged line{it.lines.length === 1 ? '' : 's'}
-              </button>
-            </td>
-          </tr>,
-        );
-      }
-    });
-    flush();
-    return out;
-  };
-  return (
-    <div className="code golddiff">
-      <div className="golddiff-head">
-        <p className="label">diff against the gold</p>
-        <span className="stat">
-          <span className="add">+{added}</span> <span className="del">−{removed}</span>
-        </span>
-        <span className="small muted">− in the gold, not in the result · + in the result, not in the gold · changed cells marked</span>
-        <span className="seg" role="group" aria-label="diff layout">
-          <button type="button" className={split ? '' : 'on'} aria-pressed={!split} onClick={() => setSplit(false)}>
-            Unified
-          </button>
-          <button type="button" className={split ? 'on' : ''} aria-pressed={split} onClick={() => setSplit(true)}>
-            Split
-          </button>
-        </span>
-      </div>
-      <div className="golddiff-scroll">
-        <table className={split ? 'split' : 'unified'}>
-          {split && (
-            <thead>
-              <tr>
-                <th colSpan={2}>gold</th>
-                <th colSpan={2}>result</th>
-              </tr>
-            </thead>
-          )}
-          <tbody>{body(split ? side : unified)}</tbody>
-        </table>
-      </div>
-    </div>
-  );
 }
 
 /** What the editor holds for a question: the SQL, where it started, and its kind. */
@@ -543,8 +440,10 @@ export function GoldenEditor() {
   const { data: rawTrace } = useGet<Trace>(run && trial?.trace_file ? apiTrialPath(run.id, trialId(trial)) : null);
   const trace = rawTrace && trial && rawTrace.query_id === id && rawTrace.trial === trial.trial ? rawTrace : null;
   const calls = sqlCalls(trace);
-  const seed = seedCall(calls, trial?.answer ?? '');
-  const from = (c: { k: number }) => (run && trial ? `run ${run.id} · ${trialId(trial)} · query_db #${c.k}` : '');
+  // a version that answers with SQL submitted one statement: that is the seed; else guess from its query_db calls
+  const submitted = trace?.submission?.sql ? { sql: trace.submission.sql, k: 0 } : null;
+  const seed = submitted ?? seedCall(calls, trial?.answer ?? '');
+  const from = (c: { k: number }) => (run && trial ? `run ${run.id} · ${trialId(trial)} · ${c.k === 0 ? 'submitted SQL' : `query_db #${c.k}`}` : '');
   const [note, setNote] = useState('');
   const [res, setRes] = useState<GoldenAttempt | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -655,8 +554,10 @@ export function GoldenEditor() {
             </p>
             <pre className="wrap-any">{trial.answer || '(no answer)'}</pre>
             {!trial.passed && trial.reason && <p className="reason">{trial.reason}</p>}
+            {trace?.score && trace.score.golden_id != null && <SqlVersus score={trace.score} agentSql={trace.submission?.sql} golden={trace.golden} mode={trace.submission?.mode} step={trace.submission?.step} />}
             <p className="small">
               {trace ? `${calls.length} query_db call${calls.length === 1 ? '' : 's'}` : 'loading its SQL…'}
+              {submitted && ', then one submitted statement (the editor starts from it)'}
               {trace && trace.tool_calls.some((c) => c.tool === 'execute_python') && ' and some execute_python: the answer may have been finished in Python, so the SQL alone may not reproduce it'}
               {' · '}
               <Link to={trialPath(run.id, trialId(trial))}>the full trace</Link>

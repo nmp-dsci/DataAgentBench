@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>s07 · v2_sql takes the title</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Design source (2): the project's own system — DESIGN.md ("Field Guide"), tokens verbatim,
+   the same block s00–s03 and frontend/src/tokens.css carry. */
+:root{
+  --bg:#F7F6F2; --panel:#FFFFFF; --band:#EFEEE8;
+  --ink:#1A1D1B; --ink-2:#3B403D; --muted:#4A514D; --faint:#5C635E;
+  --line:#DCDAD2; --line-2:#C7C5BC; --line-3:#8A8880;
+  --accent:#0A6552; --accent-ink:#FFFFFF; --accent-soft:#DFEFE8;
+  --amber:#8A5006; --amber-soft:#F6E6CF;
+  --red:#A2342B; --red-soft:#F6DEDB;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --t-2:0.8rem; --t-1:0.875rem; --t0:1rem; --t1:1.125rem; --t2:1.406rem; --t3:1.758rem; --t4:2.197rem;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --r:10px; --r-sm:6px;
+  --shadow:0 1px 2px rgb(20 25 22 / .05), 0 12px 28px -18px rgb(20 25 22 / .22);
+  --dur:300ms; --ease:cubic-bezier(.2,.7,.2,1); --focus:var(--accent);
+  --w:1140px; --measure:68ch; --track-label:.08em;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121614; --panel:#191E1B; --band:#161A18;
+    --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+    --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+    --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+    --amber:#D99A4E; --amber-soft:#3A2A14;
+    --red:#E8776B; --red-soft:#3D1D1A;
+    --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121614; --panel:#191E1B; --band:#161A18;
+  --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+  --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+  --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+  --amber:#D99A4E; --amber-soft:#3A2A14;
+  --red:#E8776B; --red-soft:#3D1D1A;
+  --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+}
+@media (prefers-reduced-motion: reduce){ :root{ --dur:0.01ms; } }
+*,*::before,*::after{box-sizing:border-box}
+:where(.grid,.flex,.kpi,.cards,.mock-body,.mock-cols,.mock-top,.ladder)>*{min-width:0}
+:where(p,h1,h2,h3,h4,li,dd,figcaption,td,th,.chip,.label){overflow-wrap:anywhere}
+:where(img,svg,video,iframe){max-width:100%;height:auto}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink-2);font-family:var(--sans);font-size:var(--t0);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{color:var(--ink);margin:0;line-height:1.15;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+h1{font-size:var(--t4);font-family:var(--serif);font-weight:400} h1 em{font-style:italic;font-weight:400;color:var(--accent)}
+h2{font-size:var(--t3)} h3{font-size:var(--t1)} h4{font-size:var(--t0)}
+p{margin:0 0 var(--s4);text-wrap:pretty}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:.2em} a:hover{text-decoration-thickness:2px}
+strong,b{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:max(var(--t-2),.86em);background:var(--band);padding:.08em .32em;border-radius:var(--r-sm);color:var(--ink-2)}
+pre{margin:0;font-family:var(--mono);font-size:var(--t-2);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.wrap{max-width:var(--w);margin-inline:auto;padding-inline:var(--s5)}
+.label{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0}
+.lead{font-family:var(--serif);font-size:var(--t1);line-height:1.5;color:var(--ink-2);max-width:72ch}
+.small{font-size:var(--t-1);color:var(--muted)}
+.top{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:var(--w);margin-inline:auto;padding:var(--s3) var(--s5);display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.top b{font-family:var(--mono);font-size:var(--t-1);color:var(--ink);white-space:nowrap}
+.top nav{display:flex;gap:var(--s4);margin-left:auto;flex-wrap:wrap;font-size:var(--t-1);font-weight:500}
+.top nav a{color:var(--ink-2);text-decoration:none;padding:var(--s1) 0} .top nav a:hover{color:var(--accent)}
+header.hero{padding:var(--s7) 0 var(--s5)}
+.chips{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s4) 0 0}
+.chip{font-family:var(--mono);font-size:var(--t-2);padding:.3em .6em;border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--ink-2);background:var(--panel)}
+.chip.ok{border-color:var(--accent);color:var(--accent)} .chip.warn{border-color:var(--amber);color:var(--amber)}
+section.blk{padding-top:var(--s8)} section.blk:last-of-type{padding-bottom:var(--s9)}
+section.band-sec{background:var(--band);margin-top:var(--s8);padding:var(--s7) 0}
+section.band-sec + section.blk{padding-top:var(--s7)}
+.hd{margin-bottom:var(--s5);max-width:80ch} .hd .label{margin-bottom:var(--s2)} .hd h2{margin-bottom:var(--s3)}
+.panel{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5)}
+.grid{display:grid;gap:var(--s4)} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.g3,.g2{grid-template-columns:minmax(0,1fr)}}
+.card h3{margin-bottom:var(--s2)} .card p{margin-bottom:var(--s2);font-size:var(--t-1)} .card p:last-child{margin:0}
+.card.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r);box-shadow:var(--shadow);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:var(--t-1)}
+caption{text-align:left;padding:var(--s4) var(--s5) var(--s2);color:var(--muted);font-size:var(--t-1);caption-side:top}
+th,td{text-align:left;padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}
+thead th{font-family:var(--mono);font-size:var(--t-2);font-weight:500;color:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase;border-bottom:1px solid var(--line-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.sub{font-weight:600;color:var(--ink);white-space:nowrap}
+td.num{font-family:var(--mono);font-size:var(--t-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+td .path{display:block;font-family:var(--mono);font-size:var(--t-2);color:var(--faint);font-weight:400;margin-top:2px}
+td.mono,td code.u{font-family:var(--mono);font-size:var(--t-2)}
+code.u{background:none;padding:0;color:var(--ink)} code.u s{color:var(--faint);text-decoration:line-through}
+tr.pro td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+tr.dim td{color:var(--muted)}
+.v-ok{color:var(--accent);font-weight:600} .v-no{color:var(--muted)} .v-warn{color:var(--amber);font-weight:600}
+blockquote{margin:0;padding:var(--s3) var(--s4);border-left:2px solid var(--accent);background:var(--band);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:var(--t-1)}
+blockquote.warn{border-left-color:var(--amber)}
+.fig{margin:var(--s5) 0 0}
+.fig-title{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0 0 var(--s3);text-wrap:balance}
+.fig figcaption{font-family:var(--sans);font-size:var(--t-1);color:var(--muted);line-height:1.5;margin-top:var(--s3)}
+.fig figcaption b{color:var(--ink);font-weight:600}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:var(--s3)}
+.steps li{position:relative;padding-left:2.75rem;font-size:var(--t-1)}
+.steps li::before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:0;top:2px;font-family:var(--mono);color:var(--accent);font-weight:500}
+form.q{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5);display:grid;gap:var(--s3);margin-top:var(--s4)}
+form.q h3{margin:0} form.q .why{font-size:var(--t-1);color:var(--muted);margin:0}
+form.q label{display:grid;grid-template-columns:1.2rem minmax(0,1fr);gap:var(--s2);align-items:start;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;min-height:24px}
+form.q label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+form.q input[type=radio],form.q input[type=checkbox]{margin:3px 0 0;accent-color:var(--accent);width:16px;height:16px}
+form.q textarea{width:100%;font:inherit;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);color:var(--ink-2);min-height:3.2rem;resize:vertical}
+form.q .row{display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap}
+.btn{font:500 var(--t-1) var(--sans);background:var(--accent);color:var(--accent-ink);border:0;border-radius:var(--r-sm);padding:.55em 1em;cursor:pointer;min-height:24px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.08)} .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.queued{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);min-height:1.2em}
+.rec{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);margin-left:.4em}
+.tag{font-family:var(--mono);font-size:var(--t-2);padding:.15em .45em;border-radius:var(--r-sm);border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.tag.ok{border-color:var(--accent);color:var(--accent)} .tag.warn{border-color:var(--amber);color:var(--amber)} .tag.no{border-color:var(--line-3);color:var(--muted)}
+ul.tight{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.tight li{margin-bottom:var(--s1)}
+ul.qa{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.qa li{margin-bottom:var(--s2)}
+.code{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);margin-top:var(--s3);overflow-x:auto}
+.code .label{margin-bottom:var(--s2)}
+.code.band{background:var(--band)}
+.kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4);margin-top:var(--s5)}
+@media (max-width:900px){.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi .n{font-family:var(--serif);font-size:var(--t3);color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:var(--t-1);color:var(--muted);margin-top:var(--s1)}
+
+/* the hackable-address ladder */
+.ladder{display:grid;gap:var(--s2);margin-top:var(--s3)}
+.ladder .rung{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--s3);align-items:baseline;padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel);font-family:var(--mono);font-size:var(--t-2)}
+.ladder .rung .u{color:var(--ink)} .ladder .rung .u b{color:var(--accent);font-weight:500}
+.ladder .rung .w{font-family:var(--sans);color:var(--muted);font-size:var(--t-2);text-align:right;white-space:nowrap}
+@media (max-width:640px){.ladder .rung{grid-template-columns:minmax(0,1fr)} .ladder .rung .w{text-align:left;white-space:normal}}
+
+/* the mock of the explorer page, in the explorer's own styles */
+.addr{font-family:var(--mono);font-size:var(--t-2);color:var(--ink);background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:var(--s2) var(--s3);margin-top:var(--s4);display:flex;gap:var(--s2);align-items:center}
+.addr .lock{color:var(--faint)} .addr b{color:var(--accent);font-weight:500}
+.mock{background:var(--bg);border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin-top:var(--s2)}
+.mock-top{display:flex;gap:var(--s4);align-items:center;padding:var(--s2) var(--s4);border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 88%,transparent);font-size:var(--t-2);flex-wrap:wrap}
+.mock-top .brand{font-family:var(--mono);color:var(--ink);font-weight:500}
+.mock-top nav{display:flex;gap:var(--s3);flex-wrap:wrap} .mock-top nav span{color:var(--ink-2)} .mock-top nav span.on{color:var(--accent);border-bottom:2px solid var(--accent)}
+.mock-body{padding:var(--s4)}
+.mock h1{font-size:var(--t2)} .mock .label{font-size:.7rem}
+.mock .ed{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent);padding:var(--s4);margin:var(--s3) 0 var(--s4);display:grid;gap:var(--s2)}
+.mock .ed .hdr{display:flex;gap:var(--s3);align-items:baseline;flex-wrap:wrap;font-size:var(--t-1)}
+.mock .ed .hdr b{font-family:var(--mono);font-weight:500;color:var(--ink)} .mock .ed .hdr .nav{margin-left:auto;display:flex;gap:var(--s3);font-size:var(--t-2)}
+.mock .ed .hdr .nav a{text-decoration:underline}
+.mock .ed .qtext{font-size:var(--t-1);color:var(--ink-2);margin:0}
+.mock .ed .ta{font-family:var(--mono);font-size:var(--t-2);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);padding:var(--s2) var(--s3);min-height:4.4rem;color:var(--ink-2);white-space:pre-wrap}
+.mock .ed .row{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}
+.mock .ed .btn{font-size:var(--t-2);padding:.4em .8em} .mock .ed .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.mock table{min-width:0;font-size:var(--t-2)} .mock th,.mock td{padding:var(--s2) var(--s3)}
+.mock tr.cur td{background:var(--accent-soft)} .mock tr.cur td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.mock .tw{box-shadow:none;border:1px solid var(--line)}
+.cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.cmp{grid-template-columns:minmax(0,1fr)}}
+.cmp .side{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s4)}
+.cmp .side h4{margin-bottom:var(--s2)} .cmp .side .label{margin-bottom:var(--s2)}
+.cmp .side pre{background:var(--band);border-radius:var(--r-sm);padding:var(--s3)}
+.cmp .side.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.src{font-size:var(--t-1);color:var(--muted)} .src li{margin-bottom:var(--s1)}
+
+.bar{display:flex;height:34px;border-radius:var(--r-sm);overflow:hidden;margin-top:var(--s3);box-shadow:var(--shadow)}
+.bar span{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:var(--t-2);color:var(--ink);min-width:0;white-space:nowrap;overflow:hidden}
+.bar .a{background:var(--accent-soft)} .bar .b{background:color-mix(in srgb,var(--accent-soft) 45%,var(--panel))} .bar .c{background:var(--amber-soft)}
+.legend{display:flex;gap:var(--s4);flex-wrap:wrap;font-size:var(--t-1);color:var(--muted);margin-top:var(--s2)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+pre.sql{background:var(--band);border-radius:var(--r-sm);padding:var(--s4);font-size:var(--t-2);white-space:pre;overflow-x:auto}
+.copyrow{display:flex;gap:var(--s3);align-items:center;margin-top:var(--s2);flex-wrap:wrap}
+
+/* impact chart: the .dia contract, green / amber / red composition (DESIGN.md §2 Colour) */
+.dia{width:100%;height:auto;display:block;background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow)}
+.dia .ax{stroke:var(--line-2);stroke-width:1}
+.dia .tx{font:500 13px var(--sans);fill:var(--ink)} .dia .tx.all{font-weight:600}
+.dia .tx.k{font:500 13px var(--mono);fill:var(--faint)} .dia .tx.k.strong{fill:var(--ink)}
+.dia .tx.in{font:600 12.8px var(--mono);fill:var(--accent-ink)}
+.dia .trk{fill:var(--line-2)} .dia .agt{fill:var(--ink-2)}
+.dia .seg.ok{fill:var(--accent)} .dia .seg.mid{fill:var(--amber)} .dia .seg.bad{fill:var(--red)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+.sw.b{background:var(--ink-2)} .sw.ok{background:var(--accent)} .sw.mid{background:var(--amber)} .sw.bad{background:var(--red)}
+.lg{white-space:nowrap;margin-right:var(--s3)}
+
+/* the challenger flow figure (.dia contract; nodes follow the page tokens) */
+.dia.flow .nd{fill:var(--panel);stroke:var(--line-3);stroke-width:1}
+.dia.flow .nd.in{fill:var(--band)}
+.dia.flow .nd.hi{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.dia.flow .nd.gold{fill:var(--amber-soft);stroke:var(--amber)}
+.dia.flow .ed{stroke:var(--ink-2);stroke-width:1.25;fill:none;marker-end:url(#arr)}
+.dia.flow .ed.both{marker-start:url(#arr)}
+.dia.flow .ed.dash{stroke-dasharray:5 4}
+.dia.flow .tx.s{font:400 12.8px var(--sans);fill:var(--muted)}
+td.nw{white-space:nowrap}
+.dia.flow .cap{font:500 12.8px var(--mono);fill:var(--faint);letter-spacing:.08em;text-transform:uppercase}
+</style>
+<style>
+.shot{margin:var(--s5) 0 0}
+.shot img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+.shot figcaption{font-size:var(--t-1);color:var(--muted);margin-top:var(--s2);max-width:var(--measure)}
+.shot .src{font-family:var(--mono);font-size:var(--t-2);color:var(--faint)}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4)}
+@media (max-width:760px){.pair{grid-template-columns:minmax(0,1fr)}}
+td.up{color:var(--accent);font-weight:600}
+td.down{color:var(--amber);font-weight:600}
+.top b{min-width:0;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in">
+  <b>s07 · the loop, once</b>
+  <nav aria-label="Sections"><a href="#verdict">Verdict</a><a href="#flips">What moved</a><a href="#scorecard">Scorecard</a><a href="#trial">One trial</a><a href="#optimiser">Optimiser</a><a href="#heldout">Held out</a><a href="#receipt">Receipt</a><a href="#open">Open items</a></nav>
+</div></div>
+<div class="wrap">
+<header class="hero">
+  <p class="label">DataAgentBench · build receipt + walkthrough · 2026-09-24 · plan s06 (B1–B11, D26–D31) · branch challenger_20260923 · every figure is a screenshot of the explorer on :8091</p>
+  <h1>One optimisation round took the SQL challenger from 24 to 30 of 54 answers, and v2_sql took the title from v0 (27 of 54): <em>a lead one trial per question cannot yet separate from noise</em></h1>
+  <p class="lead">The build ran end to end as decided: register v1_sql, run and score it on all 54 three ways (answer, SQL, decision), one guarded optimiser round writing per-dataset notes and a <code>system.md</code> edit, run v2_sql on the same 54, promote by the top line (D30). Model spend: v1_sql $4.60 + optimiser $1.24 + v2_sql $4.51 ≈ <b>$10.35</b>, about a quarter of one Haiku-heavy 5-hour window, half the ≈ $21 estimate (the SQL agent costs half what v0 did per run).</p>
+</header>
+
+<section class="blk" id="verdict">
+  <div class="hd"><p class="label">01 · verdict · dab promote · agents/promotions.jsonl</p>
+  <h2>v2_sql has the most answers passed of the 54 and is champion; v1_sql alone fell 3 short of v0</h2></div>
+  <div class="kpi" style="margin-top:0">
+    <div><div class="n">27 → 24 → 30</div><div class="d">answers passed of 54: v0 (existing run, never re-run) → v1_sql → v2_sql</div></div>
+    <div><div class="n">13 → 18 of 49</div><div class="d">SQL that recreates the golden's result, v1_sql → v2_sql (v0 has no submitted SQL)</div></div>
+    <div><div class="n">40/41 → 44/48</div><div class="d">decision right (pass-through vs derived) where a golden exists and the agent submitted</div></div>
+    <div><div class="n">$4.60 · $4.51</div><div class="d">per 54-question run, v1_sql · v2_sql, against v0's $8.96: three tools, no Python sandbox</div></div>
+  </div>
+  <figure class="shot"><p class="fig-title">Runs tab · 00 Promotion</p><img src="s07_1_promotion.png" alt="Runs tab · 00 Promotion" loading="lazy"><figcaption>The verdict <code>dab promote</code> recorded: every candidate's newest complete full-split run, its scorecard and its held-out answers. v2_sql's prompt is version 3 of <code>dataagentbench.system</code> and carries the <code>champion</code> alias; <code>agents/champion</code> now reads v2_sql. <span class="src">/runs</span></figcaption></figure>
+  <div class="tw" style="margin-top:var(--s5)"><table>
+    <caption>Answers passed per dataset (validator), each run 54 × 1</caption>
+    <thead><tr><th>Dataset</th><th class="num">Questions</th><th class="num">v0</th><th class="num">v1_sql</th><th class="num">v2_sql</th><th class="num">v2 − v0</th></tr></thead>
+    <tbody><tr><td class="sub">agnews</td><td class="num">4</td><td class="num">0/4</td><td class="num">1/4</td><td class="num ">1/4</td><td class="num up">+1</td></tr><tr><td class="sub">bookreview</td><td class="num">3</td><td class="num">3/3</td><td class="num">3/3</td><td class="num ">3/3</td><td class="num ">+0</td></tr><tr><td class="sub">crmarenapro</td><td class="num">13</td><td class="num">9/13</td><td class="num">6/13</td><td class="num up">7/13</td><td class="num down">-2</td></tr><tr><td class="sub">deps_dev_v1</td><td class="num">2</td><td class="num">0/2</td><td class="num">0/2</td><td class="num up">1/2</td><td class="num up">+1</td></tr><tr><td class="sub">github_repos</td><td class="num">4</td><td class="num">2/4</td><td class="num">1/4</td><td class="num up">3/4</td><td class="num up">+1</td></tr><tr><td class="sub">googlelocal</td><td class="num">4</td><td class="num">1/4</td><td class="num">2/4</td><td class="num ">2/4</td><td class="num up">+1</td></tr><tr><td class="sub">music_brainz_20k</td><td class="num">3</td><td class="num">1/3</td><td class="num">1/3</td><td class="num ">1/3</td><td class="num ">+0</td></tr><tr><td class="sub">pancancer_atlas</td><td class="num">3</td><td class="num">2/3</td><td class="num">1/3</td><td class="num ">1/3</td><td class="num down">-1</td></tr><tr><td class="sub">patents</td><td class="num">3</td><td class="num">0/3</td><td class="num">0/3</td><td class="num up">1/3</td><td class="num up">+1</td></tr><tr><td class="sub">stockindex</td><td class="num">3</td><td class="num">2/3</td><td class="num">3/3</td><td class="num ">3/3</td><td class="num up">+1</td></tr><tr><td class="sub">stockmarket</td><td class="num">5</td><td class="num">3/5</td><td class="num">2/5</td><td class="num up">3/5</td><td class="num ">+0</td></tr><tr><td class="sub">yelp</td><td class="num">7</td><td class="num">4/7</td><td class="num">4/7</td><td class="num ">4/7</td><td class="num ">+0</td></tr><tr><td class="sub"><b>all</b></td><td class="num">54</td><td class="num"><b>27/54</b></td><td class="num"><b>24/54</b></td><td class="num up"><b>30/54</b></td><td class="num up">+3</td></tr></tbody>
+  </table></div>
+</section>
+
+<section class="blk" id="flips">
+  <div class="hd"><p class="label">02 · what moved · Runs tab compare, focus v1_sql, challenger v2_sql, by query</p>
+  <h2>The round fixed 10 questions and broke 4; against v0 the champion is 9 up and 6 down</h2>
+  <p class="small">Fixed by v2_sql over v1_sql: deps_dev_v1/2, github_repos/2, github_repos/3, pancancer_atlas/1, patents/3, crmarenapro/5, 6, 10, music_brainz_20k/3, stockmarket/4. Broken: pancancer_atlas/2, crmarenapro/3, crmarenapro/9, music_brainz_20k/2. With one trial per question these are single draws: an exact McNemar test gives p = 0.18 for v2 against v1 (10 vs 4) and p = 0.61 for v2 against v0 (9 vs 6). D30 promotes on the top line, as decided; the lead is real in this run and unproven beyond it.</p></div>
+  <figure class="shot"><p class="fig-title">Runs tab · 01 Compare on the 54 both scored</p><img src="s07_2_compare.png" alt="Runs tab · 01 Compare on the 54 both scored" loading="lazy"><figcaption>v1_sql (focus) against v2_sql (challenger): +11.1 points micro, cost per trial p50 +$0.003, turns p50 +2. The chips list every question fixed (green) and broken (amber). <span class="src">/runs?focus=20260924T050324Z_v1_sql_all_haiku_hints&amp;challenger=20260924T053026Z_v2_sql_all_haiku_hints&amp;group=query</span></figcaption></figure>
+</section>
+
+<section class="blk" id="scorecard">
+  <div class="hd"><p class="label">03 · the scorecard · dab diagnose · runs/&lt;id&gt;/scorecard.json</p>
+  <h2>Every question is scored three times, and the failure categories are what the optimiser worked down</h2>
+  <p class="small">Answer: the validator, over 54. SQL: does the agent's re-run result recreate the golden's result (any row or column order, numbers at the coarser rounding of the two), over the 49 with a golden. Decision: pass-through where the golden is an answer, derived where it is evidence. Each failure then gets one category from the result diff and a <code>sqlglot</code> structure diff.</p></div>
+  <figure class="shot"><p class="fig-title">Run page · v1_sql · 00 Scorecard</p><img src="s07_3_scorecard.png" alt="Run page · v1_sql · 00 Scorecard" loading="lazy"><figcaption>The source of the optimisation round: join differs 11, no SQL 8 (6 ran out of the 30-turn cap, 2 answered without submitting), wrong tables 6, parse differs 3. <span class="src">/runs/20260924T050324Z_v1_sql_all_haiku_hints</span></figcaption></figure>
+  <div class="tw" style="margin-top:var(--s5)"><table>
+    <caption>Categories, v1_sql → v2_sql (54 questions each)</caption>
+    <thead><tr><th>Category</th><th class="num">v1_sql</th><th class="num">v2_sql</th><th>Reading</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">solved the golden way</td><td class="num">13</td><td class="num up">17</td><td>answer, SQL and decision all pass</td></tr>
+      <tr><td class="sub">right answer another way</td><td class="num">8</td><td class="num">12</td><td>answer passes, result differs from the golden's (extra rows or columns, "2020s" for 2020); outside the loop</td></tr>
+      <tr><td class="sub">no SQL</td><td class="num">8</td><td class="num up">1</td><td>ran out of turns or never called submit_answer; the notes cut exploration</td></tr>
+      <tr><td class="sub">join differs</td><td class="num">11</td><td class="num">10</td><td>the first structural difference; often only the first of several (see open items)</td></tr>
+      <tr><td class="sub">wrong tables</td><td class="num">6</td><td class="num up">4</td><td>read a different table set from the golden</td></tr>
+      <tr><td class="sub">parse differs</td><td class="num">3</td><td class="num up">2</td><td>text pattern differs (the templated-prose fields)</td></tr>
+      <tr><td class="sub">filter · order / tie · format</td><td class="num">0</td><td class="num down">3</td><td>one each in v2_sql</td></tr>
+      <tr><td class="sub">no golden</td><td class="num">5</td><td class="num">5</td><td>agnews/1–4, crmarenapro/7: answer-scored only</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="blk" id="trial">
+  <div class="hd"><p class="label">04 · one trial, before and after · github_repos/3 (a training question)</p>
+  <h2>v1_sql matched the language with a pattern that read nothing; with the notes, v2_sql's SQL recreates the golden's result</h2>
+  <p class="small">The trial page now opens with the SQL against the golden: the three verdicts, the category, the agent's submitted statement beside golden #16, what differs in the statements, and the diff of the two results.</p></div>
+  <div class="pair">
+    <figure class="shot"><p class="fig-title">v1_sql · github_repos/3 t1 · parse differs</p><img src="s07_4a_trial_v1.png" alt="v1_sql · github_repos/3 t1 · parse differs" loading="lazy"><figcaption>The agent's ILIKE on the language text returned 0 commits; the golden reads the language with a different pattern. SQL fail, decision pass. <span class="src">/runs/20260924T050324Z_v1_sql_all_haiku_hints/github_repos/3/t1</span></figcaption></figure>
+    <figure class="shot"><p class="fig-title">v2_sql · github_repos/3 t1 · solved</p><img src="s07_4b_trial_v2.png" alt="v2_sql · github_repos/3 t1 · solved" loading="lazy"><figcaption>Same question after the round: 1077, the golden's one row. The github_repos notes describe the language field's templates in words, not SQL. <span class="src">/runs/20260924T053026Z_v2_sql_all_haiku_hints/github_repos/3/t1</span></figcaption></figure>
+  </div>
+  <figure class="shot"><p class="fig-title">Golden tab · editor seeded from the run</p><img src="s07_5_golden_editor.png" alt="Golden tab · editor seeded from the run" loading="lazy"><figcaption>With a run picked, the editor shows the same side-by-side and starts from the agent's <i>submitted</i> statement (source "submitted SQL"), no longer a guess among its query_db calls. <span class="src">/golden/github_repos/3?run=20260924T053026Z_v2_sql_all_haiku_hints</span></figcaption></figure>
+</section>
+
+<section class="blk" id="optimiser">
+  <div class="hd"><p class="label">05 · what the optimiser wrote · Agent tab, v2_sql · agents/v2_sql/optimise.json</p>
+  <h2>Ten datasets got notes, every one past the leak guards, and four general lessons moved into system.md</h2>
+  <p class="small">Sonnet 5 at medium effort, one isolated session per dataset with a failed training question (10 sessions, 5–11 turns; $1.24 in all, counting the first system pass, which a guard false positive refused). 26 writes were refused and sent back: 17 for length only, 9 for a leak (a gold value written literally, or 6+ tokens of golden SQL), each fixed on the next write; no session was refused twice for a leak, so none was dropped. The cross-dataset pass added: tie-breaks, join keys that need normalising, text dates in mixed formats, and returning the attribute columns a question names.</p></div>
+  <figure class="shot"><p class="fig-title">Agent tab · Optimised from v1_sql</p><img src="s07_6_optimiser.png" alt="Agent tab · Optimised from v1_sql" loading="lazy"><figcaption>Per session: the failed train questions it read, the outcome, the characters written, every refusal and the rationale. Held-out questions never appear. <span class="src">/agent/v2_sql</span></figcaption></figure>
+  <figure class="shot"><p class="fig-title">Agent tab · v2_sql against v1_sql</p><img src="s07_7_diff.png" alt="Agent tab · v2_sql against v1_sql" loading="lazy"><figcaption>Each editable file against the parent: the per-dataset notes (new) and system.md (+5 −2). <span class="src">/agent/v2_sql</span></figcaption></figure>
+</section>
+
+<section class="blk" id="heldout">
+  <div class="hd"><p class="label">06 · held out · 33 train / 16 held-out, seeded, stratified (data/splits/)</p>
+  <h2>The gain is mostly on the questions the optimiser read; on the 16 it never saw, v2_sql is 2 up on v1_sql and 2 below v0</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>Answers passed</th><th class="num">v0</th><th class="num">v1_sql</th><th class="num">v2_sql</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">train (33, with a golden)</td><td class="num">17/33</td><td class="num">17/33</td><td class="num up">21/33</td></tr>
+      <tr><td class="sub">held out (16, with a golden)</td><td class="num">10/16</td><td class="num">6/16</td><td class="num">8/16</td></tr>
+      <tr><td class="sub">no golden (5)</td><td class="num">0/5</td><td class="num">1/5</td><td class="num">1/5</td></tr>
+    </tbody>
+  </table></div>
+  <blockquote class="warn" style="margin-top:var(--s4)">Train rose 4 and held-out rose 2, so the notes partly generalise, but the held-out 16 are where v0 is still ahead. Per D30 this does not gate the promotion; it is the check to watch in the next round.</blockquote>
+</section>
+
+<section class="blk" id="receipt">
+  <div class="hd"><p class="label">07 · receipt · every build item, 11 of 11 ticked</p>
+  <h2>All eleven items are built; nothing is committed yet</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>Item</th><th>Status</th><th>What exists</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">B1 register v1_sql</td><td class="v-ok">built</td><td><code>agents/v1_sql/</code> (3 tools, hints on, pack off, max_turns 30, the s06 system.md); <code>tracking/prompts.py</code> registers each fingerprint as a version of <code>dataagentbench.system</code> (v1 = v1_sql, v3 = v2_sql, alias champion); the name added to nmp-central-ai's registry P6</td></tr>
+      <tr><td class="sub">B2 prompt pack switch</td><td class="v-ok">built</td><td><code>pack</code> and per-dataset notes in <code>compose_system_prompt</code>; description and hints verbatim; <code>AgentVersion.prompt_for</code>; the Agent tab shows the composed prompt with the version's own hints / pack / notes</td></tr>
+      <tr><td class="sub">B3 submit_answer</td><td class="v-ok">built</td><td>re-runs the SQL as dab_agent, pass_through renders it, derived keeps the answer and step; a SQL error or empty result is sent back; <code>query_db</code> without save_as; the MCP server registers only the version's tools; no sandbox without Python</td></tr>
+      <tr><td class="sub">B4 recording</td><td class="v-ok">built</td><td><code>agent_sql · agent_result · mode · step · result_rows</code> in results.jsonl, the submission on the trace, on the MLflow trace outputs, and a <code>submissions.json</code> table plus scorecard metrics on the MLflow run</td></tr>
+      <tr><td class="sub">B5 tests + isolation</td><td class="v-ok">built</td><td><code>tests/test_v1_sql.py</code>, <code>tests/test_scorecard.py</code> (prompt verbatim, submit contract, pass-through = render, tool registration, scorecard, split, guards, promotion); live <code>dab isolation-check --agent v1_sql</code>: three tools, no plugins, "isolated"</td></tr>
+      <tr><td class="sub">B6 scorecard</td><td class="v-ok">built</td><td><code>eval/scorecard.py</code>, <code>dab diagnose</code> (auto after every run; <code>--refresh</code> re-logs to MLflow); Runs tab and run page show the three totals with denominators and "optimise first"</td></tr>
+      <tr><td class="sub">B7 explorer</td><td class="v-ok">built</td><td>trial page §00 and the Golden editor: agent SQL beside golden SQL, three verdicts, category, structure diff, result diff</td></tr>
+      <tr><td class="sub">B8 dry run → 54 × 1</td><td class="v-ok">ran</td><td>dry run <code>20260924T050147Z…</code> (no model); live <code>20260924T050324Z_v1_sql_all_haiku_hints</code>: 24/54, $4.60, 20 min</td></tr>
+      <tr><td class="sub">B9 optimiser + v2_sql</td><td class="v-ok">ran</td><td><code>agents/optimiser/</code>, <code>agent/optimise.py</code>, <code>eval/guards.py</code>, <code>dab optimise</code>; <code>agents/v2_sql/</code>; live <code>20260924T053026Z_v2_sql_all_haiku_hints</code>: 30/54, $4.51; CLAUDE.md's model and golden rules updated, AGENTS.md §7 rewritten</td></tr>
+      <tr><td class="sub">B10 promote</td><td class="v-ok">ran</td><td><code>eval/promote.py</code>, <code>dab promote</code>; v2_sql crowned; the Runs tab shows the verdict and v0 as superseded</td></tr>
+      <tr><td class="sub">B11 this walkthrough</td><td class="v-ok">built</td><td>added for it: the Agent tab's lineage (round record + file diffs), the promotion panel, the graph drawing only the backends a version's tools reach</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="blk" id="open">
+  <div class="hd"><p class="label">08 · deviations and open items</p><h2>Five things I changed or found on the way, and what is still open</h2></div>
+  <ul class="tight">
+    <li><b>D31 was never answered</b>: built A (per-dataset notes + one system.md pass), as recommended and as B9's label said.</li>
+    <li><b>The drop rule</b>: the first round let a session keep writing after a second refusal. Fixed so that only a second <i>leak</i> refusal drops the notes (a length overrun is a format fix); under the fixed rule this round's outcome is identical.</li>
+    <li><b>The system.md pass ran twice</b>: its first run was refused for writing "keys", a false positive (one word of a CPC title in a gold answer). Single bare words split out of a gold cell no longer count; the pass was re-run alone (<code>--system-pass-only</code>, $0.04).</li>
+    <li><b>SQL scoring rounding</b>: v1_sql's first scorecard read SQL 11/49; an agent's 3.55 against a golden's 3.547… now compares at the coarser rounding (13/49). The MLflow run was re-logged.</li>
+    <li><b>"join differs" is coarse</b>: it names the first differing aspect; nearly every CTE-heavy pair differs on joins, so the category over-counts. A finer diff (which join key, which side) is the next scorecard change.</li>
+    <li><b>Not committed</b>: everything since 175ca4e, including s06/s07 and <code>.lavish/s03_challenger-loop.html</code>; the nmp-central-ai registry edit (one line, P6 prompts) is uncommitted in that repo.</li>
+    <li><b>Still open from s06</b>: D25 (stockmarket loader), P1 (the guard now exists as <code>eval/guards.py</code>; wiring it into <code>golden-propose</code> is small), P4 (draft upstream issues), crmarenapro/7's evidence golden.</li>
+  </ul>
+</section>
+</div>
+</body>
+</html>

@@ -10,20 +10,23 @@
 - `make dev` + `cd frontend && npm run dev` (explorer on :5173, API on :8091)
 - agent build: `make platform-up` · `make db-roles` · `make data` · `make context` ·
   `make curate` · `make sandbox` · `make eval SPLIT=smoke|all TRIALS=n`
+- the loop (s06): `dab eval --agent v1_sql --split all` · `dab diagnose <run>` ·
+  `dab optimise <run> --into <version>` · `dab promote`
 - `uv run pytest -q` · `make lint` · `make fmt` (`DAB_TEST_PG=1` adds the live role test)
 
 ## Rules
 
-- **Only three things call a model**, all through the Agent SDK on the
-  subscription: the eval agent (`dab eval`), the curator (`dab context curate`)
-  and `llm_extract` inside a trial. `agent/llm.py` is the one place a model is
+- **Only four things call a model**, all through the Agent SDK on the
+  subscription: the eval agent (`dab eval`), the curator (`dab context curate`),
+  the optimiser (`dab optimise`, s06) and `llm_extract` inside a v0 trial (the SQL
+  versions have no `llm_extract`). `agent/llm.py` is the one place a model is
   named; `require_live()` refuses to start with a per-token key present.
   The explorer, the ingest, the rescore and the context *build* never do —
   the Agent tab's playground runs every tool *except* `llm_extract`, which
   stays display-only (decision D8-A; `DAB_PLAYGROUND_LLM=1` is the only way
   to change that, and it is not wired).
 - **A session sees its prompt and its `dab` tools, nothing else.**
-  `agent/isolation.py`: every eval and curator session starts in an empty
+  `agent/isolation.py`: every eval, curator and optimiser session starts in an empty
   directory outside the repo, with auto-memory, CLAUDE.md and the `agents-md`
   plugin off, no settings sources, no built-in tools and a strict MCP config.
   The CLI's `init` message is recorded on each trace, and any tool, server or
@@ -76,7 +79,13 @@
   the validator is not applied. A golden is one SQL statement: no Python. Saves append to `dataagentbench_meta.golden_sql` (the
   newest is current, and nothing is ever dropped; `make db-reset` leaves the
   meta schema alone). `dab_agent` is refused there (`tests/test_golden.py`).
-  A golden never reaches a prompt, the pack, the curator or a proposer.
+  A golden never reaches a trial's prompt, the pack, the curator or a proposer.
+  The one exception is the optimiser (s06, D29 A): it sees the golden SQL and the
+  result diff of the *train* questions (`data/splits/train.json`), never a held-out
+  one, and every note it writes passes `eval/guards.py` (no run of 8 question words,
+  no gold value written literally, no run of 6 golden SQL tokens, ≤ 1,500
+  characters) or is refused. The scorecard (`dab diagnose`) reads goldens after a
+  run; nothing it computes reaches a trial.
 - **One address per thing** (`frontend/src/lib/url.ts`; test
   `frontend/src/routes.test.tsx`). One id, spelled the same everywhere:
   question `deps_dev_v1/1`, trial `deps_dev_v1/1/t1`; the trace file's flat

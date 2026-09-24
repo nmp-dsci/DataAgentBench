@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { type AgentDetail, AgentGraph, type AgentsBoard, type NodeId, type PlayResult, type PromptResp, Replay, ToolForm, TraceLine, toolCounts } from '../lib/agent';
-import { type Board, type RunDetail, type Span, type Trace, fmtInt, useGet } from '../lib/api';
+import { type AgentDetail, AgentGraph, type Lineage as Lineage_, type AgentsBoard, type NodeId, type PlayResult, type PromptResp, Replay, ToolForm, TraceLine, toolCounts } from '../lib/agent';
+import { type Board, type RunDetail, type Span, type Trace, fmtInt, fmtUsd, useGet } from '../lib/api';
+import { GoldDiff } from '../lib/golddiff';
+import { rate } from '../lib/scorecard';
 import { Gold, Loading } from '../lib/ui';
 import { agentPath, apiTrialPath, datasetPath, questionPath, runPath, trialId, useLens } from '../lib/url';
 
@@ -65,7 +67,7 @@ export function Agent() {
         agent · {detail.name}@{detail.fingerprint} · {detail.champion ? 'champion' : 'challenger'} · {detail.tools.length} tools · {String(detail.config.model)} @ {String(detail.config.effort ?? 'medium')} · max {String(detail.config.max_turns)} turns
       </p>
       <h1>
-        {detail.name} is one agent, one system prompt and {detail.tools.length} tools: the pack is what it knows, <em>{detail.tools.some((t) => t.name === 'query_db') ? 'query_db' : detail.tools[0]?.name}</em> is what it does
+        {detail.name} is one agent, one system prompt and {detail.tools.length} tools: {detail.config.pack === false ? 'the prompt' : 'the pack'} is what it knows, <em>{detail.tools.some((t) => t.name === 'query_db') ? 'query_db' : detail.tools[0]?.name}</em> is what it does
       </h1>
       <p className="lead">
         The graph is generated from <code>agents/{detail.name}/agent.yaml</code> and the tool server's own schemas. Click a node for its config, source and — for a tool — a form that runs it with the trial's guards (read-only role, network-off sandbox; never a model). Pick a trace to
@@ -152,8 +154,18 @@ export function Agent() {
                 </dd>
                 <dt>hints</dt>
                 <dd>{detail.config.hints ? 'on' : 'off'} (the benchmark's --use_hints)</dd>
+                <dt>pack</dt>
+                <dd>{detail.config.pack === false ? 'off: no curated summary or pitfalls in the prompt' : 'on: the curated summary and pitfalls are in the prompt'}</dd>
+                {detail.config.challenger_of ? (
+                  <>
+                    <dt>optimised from</dt>
+                    <dd>
+                      <Link to={agentPath(String(detail.config.challenger_of))}>{String(detail.config.challenger_of)}</Link>
+                    </dd>
+                  </>
+                ) : null}
                 <dt>fingerprint</dt>
-                <dd className="mono">{detail.fingerprint} = sha256(system.md + agent.yaml + helper.py)</dd>
+                <dd className="mono">{detail.fingerprint} = sha256(system.md + agent.yaml + helper.py + datasets/*.md)</dd>
               </dl>
             </>
           )}
@@ -194,7 +206,9 @@ export function Agent() {
             <>
               <h3>System prompt for {dataset}</h3>
               <p className="small">
-                <code>system.md</code> (behaviour, {fmtInt(detail.files['system.md']?.length)} chars) + the pack's <code>summary.md</code>, <code>pitfalls.md</code> and the upstream description.{' '}
+                <code>system.md</code> (behaviour, {fmtInt(detail.files['system.md']?.length)} chars) + the tables map
+                {prompt?.pack === false ? '' : <> + the pack's <code>summary.md</code>, <code>pitfalls.md</code></>}
+                {prompt?.notes ? <> + this version's notes for {dataset}</> : ''} + the upstream description{prompt?.hints ? ' + the upstream hints' : ''}, both verbatim.{' '}
                 {prompt && (
                   <>
                     Composed: {fmtInt(prompt.chars)} chars, context <code>{prompt.context_sha}</code>.
@@ -325,6 +339,8 @@ export function Agent() {
         </div>
       </div>
 
+      {detail.lineage && <Lineage l={detail.lineage} name={detail.name} />}
+
       <h2>
         {trace ? (
           <>
@@ -351,6 +367,63 @@ export function Agent() {
       ) : (
         <p className="empty">A replay is the trace's span tree as rows: what each turn sent, what each tool returned, and a re-run button that opens the tool pre-filled so you can change the SQL or the code and compare.</p>
       )}
+    </>
+  );
+}
+
+/** A version an optimisation round wrote: what the optimiser read, what it wrote per dataset, what the guards
+ *  refused, and every editable file against the parent version. */
+function Lineage({ l, name }: { l: Lineage_; name: string }) {
+  const rec = l.optimise;
+  const sessions = rec?.sessions ?? [];
+  const accepted = sessions.filter((s) => s.notes != null && s.scope !== 'system.md');
+  return (
+    <>
+      <h2>
+        Optimised from <Link to={agentPath(l.parent)}>{l.parent}</Link> — {rec ? `${accepted.length} of ${sessions.filter((s) => s.scope !== 'system.md').length} datasets got notes, system.md ${rec.system_md_changed ? 'changed' : 'unchanged'}` : 'no round record'}
+      </h2>
+      {rec && (
+        <>
+          <p>
+            <code>dab optimise {rec.source_run} --into {name}</code>: {rec.optimiser.model} at effort {rec.optimiser.effort}, one isolated session per dataset with a failed training question ({rec.split.train} train, {rec.split.heldout} held out, never shown), then one cross-dataset pass over{' '}
+            <code>system.md</code>. The source run scored answer {rate(rec.source_scorecard.answer)} · SQL {rate(rec.source_scorecard.sql)} · decision {rate(rec.source_scorecard.decision)}. {fmtUsd(rec.cost_usd, 2)} on the subscription. Every write was checked for question text, gold values and golden SQL.
+          </p>
+          <div className="tw">
+            <table>
+              <thead>
+                <tr>
+                  <th>Scope</th>
+                  <th>Failed train questions it read</th>
+                  <th>Outcome</th>
+                  <th className="num">Chars</th>
+                  <th>Refusals, each sent back</th>
+                  <th>Rationale</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sessions.map((s) => (
+                  <tr key={s.scope}>
+                    <td className="sub">{s.scope}</td>
+                    <td className="small">{s.questions.join(', ') || '—'}</td>
+                    <td>{s.error ? <span className="chip warn">error</span> : s.notes != null ? <span className="chip ok">{s.notes ? 'written' : 'kept as is'}</span> : <span className="chip warn">dropped</span>}</td>
+                    <td className="num">{fmtInt(s.notes?.length ?? 0)}</td>
+                    <td className="small">{s.refusals.map((r) => r.problems.join('; ')).join(' | ') || '—'}</td>
+                    <td className="small">{s.error ?? s.rationale}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+      {l.files.map((f) => (
+        <div key={f.name}>
+          <p className="label">
+            agents/{name}/{f.name} {f.added ? `· new (not in ${l.parent})` : `· against ${l.parent}`}
+          </p>
+          <GoldDiff lines={f.diff} a={l.parent} b={name} />
+        </div>
+      ))}
     </>
   );
 }

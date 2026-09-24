@@ -1,0 +1,7 @@
+- `github_repos_languages.language_description` is templated free text; a repo can list several languages in one row. Templates end with "(N bytes...)" or ", totaling N bytes": "mainly written in X (N bytes)", "built entirely in X (N bytes)", "majority of the code is in X (N bytes)", "most of the project is built in X (N bytes)", "Nearly all of the code is in X, totaling N bytes.", "The codebase includes: X (N bytes), Y (N bytes), ...". To test "repo uses X" require X be followed by a byte marker, not `ILIKE '%X%'` on the whole sentence — prose can contain the word incidentally (e.g. "code is in Shell" wrongly matched even for other-language repos via a loose wildcard).
+- To get the primary language, extract the language name sitting between "in"/":" and its trailing byte marker.
+- `github_repos_contents.repo_data_description` is templated, one row per `id`; always states size, binary/non-binary, and a copy count phrased as a number then "times" (seen/appears/copied/duplicated/repeated N times) — pull digits before "times". Match "non-binary" with word boundaries since "binary" is a substring of it.
+- `github_repos_files.id` repeats (same blob, multiple paths/refs); dedupe by id before treating a file as unique.
+- Join `repo_name`/`id` exactly across tables; never wildcard-match a join key.
+- When listing rows with attributes (counts, names, paths), return all those columns, not just one identifying column.
+- File `mode` 33188 = regular file.

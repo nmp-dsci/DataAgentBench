@@ -184,13 +184,25 @@ pre.sql{background:var(--band);border-radius:var(--r-sm);padding:var(--s4);font-
 .sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
 .sw.b{background:var(--ink-2)} .sw.ok{background:var(--accent)} .sw.mid{background:var(--amber)} .sw.bad{background:var(--red)}
 .lg{white-space:nowrap;margin-right:var(--s3)}
+
+/* the challenger flow figure (.dia contract; nodes follow the page tokens) */
+.dia.flow .nd{fill:var(--panel);stroke:var(--line-3);stroke-width:1}
+.dia.flow .nd.in{fill:var(--band)}
+.dia.flow .nd.hi{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.dia.flow .nd.gold{fill:var(--amber-soft);stroke:var(--amber)}
+.dia.flow .ed{stroke:var(--ink-2);stroke-width:1.25;fill:none;marker-end:url(#arr)}
+.dia.flow .ed.both{marker-start:url(#arr)}
+.dia.flow .ed.dash{stroke-dasharray:5 4}
+.dia.flow .tx.s{font:400 12.8px var(--sans);fill:var(--muted)}
+td.nw{white-space:nowrap}
+.dia.flow .cap{font:500 12.8px var(--mono);fill:var(--faint);letter-spacing:.08em;text-transform:uppercase}
 </style>
 </head>
 <body>
 <div class="top"><div class="top-in">
   <b>s06 · golden from gold + hints + the run</b>
   <nav aria-label="Sections">
-    <a href="#impact">Impact</a><a href="#method">Method</a><a href="#walk">Walk-through</a><a href="#tie">The tie</a><a href="#sql">Golden SQL</a><a href="#spike">Spike: results</a><a href="#decide">Decide</a>
+    <a href="#build">Next build</a><a href="#impact">Impact</a><a href="#method">Method</a><a href="#walk">Walk-through</a><a href="#tie">The tie</a><a href="#sql">Golden SQL</a><a href="#spike">Spike: results</a><a href="#decide">Open items</a>
   </nav>
 </div></div>
 
@@ -198,14 +210,344 @@ pre.sql{background:var(--band);border-radius:var(--r-sm);padding:var(--s4);font-
 <header class="hero">
   <p class="label">DataAgentBench · analysis + impact · 2026-09-24 · deps_dev_v1/1 then the 26 · champion run 20260921T064521Z_v0_all_haiku · branch challenger_20260923</p>
   <h1>Golden SQL now reaches the answer for 49 of 54 questions, <em>22 more</em> than the champion agent: the method found SQL for 22 of the 27 it failed</h1>
-  <p class="lead">You asked me to finish the champion's <code>versioned_releases</code> query using the gold answer, the hints and that SQL. I checked the CTE against the gold first, then followed the hints' join path, parsed stars out of the free text, and ranked. The top four match the gold row for row, in order. Fifth place is a 95-way tie on 57,779 stars that no column breaks, so the SQL passes the validator but can't reproduce the gold's arbitrary fifth pick. It's loaded as proposal #30 at <a href="http://localhost:8091/golden/deps_dev_v1/1">/golden/deps_dev_v1/1</a> and isn't saved. The same method then ran on the other 26 failed questions (§5): <b>22 of 27 now pass</b>, 17 of them exactly, where the champion passed 0.</p>
-  <div class="kpi">
-    <div><div class="n">5 of 5</div><div class="d">gold rows are the latest release of their package in the champion's <code>versioned_releases</code> CTE (rn = 1), before any stars are added</div></div>
-    <div><div class="n">769 of 770</div><div class="d"><code>Project_Information</code> rows yield owner/repo and stars with 3 regexes; the one miss has 19 stars</div></div>
-    <div><div class="n">4 of 4</div><div class="d">above-cutoff rows identical to the gold, in the gold's order; fifth is 1 of the 95 tied (validator: pass)</div></div>
-    <div><div class="n">828 ms</div><div class="d">for the whole statement, as <code>dab_agent</code> (read-only). The champion's trial timed out at 900 s after 11 calls, 4 of them Python</div></div>
-  </div>
+  <p class="lead">Three parts. <b>Next build</b>: the SQL-answer challenger, decided and waiting for its build items. <b>Impact</b>: what golden SQL covers now, set against the champion agent. <b>§01–§05</b>: how the goldens were found: the method on deps_dev_v1/1, then on the 26 other questions the champion failed.</p>
 </header>
+
+<!-- ================================================= BUILD -->
+<section class="blk" id="build">
+  <div class="hd">
+    <p class="label">next build · plan · 2026-09-24 · replaces s05's T3 (c08-sqlonly) · nothing built yet</p>
+    <h2>The challenger answers with SQL, and each question is scored three times: answer, SQL and decision, each pass or fail against the gold and the golden</h2>
+    <p class="small">Now that golden SQL covers 49 of 54 questions, the challenger's job changes from "answer by any means" to "write the one statement that answers, and say whether the answer is that statement's result or one step past it". Every trial then produces an agent SQL to set beside a golden SQL, an agent result to diff against the golden result, and an answer for the validator. That makes each failure diagnosable at three levels, which is what the optimisation loop needs.</p>
+  </div>
+
+  <figure class="fig" style="margin-top:0">
+    <p class="fig-title">The contract: what goes in, what comes out, what it is compared with</p>
+    <svg class="dia flow" viewBox="0 0 1160 440" role="img" aria-label="The SQL-answer challenger: inputs, agent, submitted SQL and answer, compared with the golden SQL, result and gold answer, feeding the optimiser"><title>SQL-answer challenger: inputs, outputs and the golden comparison</title>
+<defs><marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" style="fill:var(--ink-2)"/></marker></defs>
+<text class="cap" x="20" y="22">inputs</text><text class="cap" x="290" y="22">agent</text><text class="cap" x="520" y="22">one tool call ends it</text><text class="cap" x="740" y="22">agent output</text><text class="cap" x="990" y="22">golden (explorer)</text>
+<g id="in-sys"><title>system.md · instructions · the only edited file</title><rect class="nd" x="20" y="40" width="210" height="42" rx="6"/><text class="tx" x="125.0" y="57.5" text-anchor="middle">system.md</text><text class="tx s" x="125.0" y="73.5" text-anchor="middle">instructions · the only edited file</text></g>
+<g id="e-in-sys"><path class="ed" d="M230,61 C260,61 260,160 288,160"/></g>
+<g id="in-map"><title>tables map · code-built: store → Postgres name</title><rect class="nd" x="20" y="92" width="210" height="42" rx="6"/><text class="tx" x="125.0" y="109.5" text-anchor="middle">tables map</text><text class="tx s" x="125.0" y="125.5" text-anchor="middle">code-built: store → Postgres name</text></g>
+<g id="e-in-map"><path class="ed" d="M230,113 C260,113 260,160 288,160"/></g>
+<g id="in-desc"><title>db_description.txt · upstream, verbatim</title><rect class="nd in" x="20" y="144" width="210" height="42" rx="6"/><text class="tx" x="125.0" y="161.5" text-anchor="middle">db_description.txt</text><text class="tx s" x="125.0" y="177.5" text-anchor="middle">upstream, verbatim</text></g>
+<g id="e-in-desc"><path class="ed" d="M230,165 C260,165 260,160 288,160"/></g>
+<g id="in-hint"><title>hints.txt · upstream, verbatim</title><rect class="nd in" x="20" y="196" width="210" height="42" rx="6"/><text class="tx" x="125.0" y="213.5" text-anchor="middle">hints.txt</text><text class="tx s" x="125.0" y="229.5" text-anchor="middle">upstream, verbatim</text></g>
+<g id="e-in-hint"><path class="ed" d="M230,217 C260,217 260,160 288,160"/></g>
+<g id="in-q"><title>question · user message, verbatim</title><rect class="nd in" x="20" y="248" width="210" height="42" rx="6"/><text class="tx" x="125.0" y="265.5" text-anchor="middle">question</text><text class="tx s" x="125.0" y="281.5" text-anchor="middle">user message, verbatim</text></g>
+<g id="e-in-q"><path class="ed" d="M230,269 C260,269 260,160 288,160"/></g>
+<g id="agent"><title>agent · a ReAct loop: reason, call a tool, read the result, repeat; ends when it calls submit_answer or hits 30 turns</title><rect class="nd hi" x="290" y="96" width="180" height="128" rx="6"/><text class="tx" x="380" y="122" text-anchor="middle">agent · ReAct loop</text><text class="tx s" x="380" y="140" text-anchor="middle">Haiku · ≤ 30 turns</text><text class="tx s" x="380" y="162" text-anchor="middle">reason → tool → observe</text><text class="tx s" x="380" y="180" text-anchor="middle">↻ until submit_answer</text><text class="tx s" x="380" y="206" text-anchor="middle">query_db · describe_table</text></g>
+<g id="e-agent"><path class="ed" d="M470,160 L518,160"/></g>
+<g id="submit"><title>submit_answer · sql · answer · mode · pass_through | derived</title><rect class="nd hi" x="520" y="115" width="170" height="90" rx="6"/><text class="tx" x="605.0" y="148.5" text-anchor="middle">submit_answer</text><text class="tx s" x="605.0" y="164.5" text-anchor="middle">sql · answer · mode</text><text class="tx s" x="605.0" y="180.5" text-anchor="middle">pass_through | derived</text></g>
+<g id="o-sql"><title>agent SQL · the final statement</title><rect class="nd" x="740" y="50" width="180" height="50" rx="6"/><text class="tx" x="830.0" y="71.5" text-anchor="middle">agent SQL</text><text class="tx s" x="830.0" y="87.5" text-anchor="middle">the final statement</text></g>
+<g id="e-o-sql"><path class="ed" d="M690,160 C715,160 715,75 738,75"/></g>
+<g id="g-sql"><title>golden SQL · saved in /golden</title><rect class="nd gold" x="990" y="50" width="150" height="50" rx="6"/><text class="tx" x="1065.0" y="71.5" text-anchor="middle">golden SQL</text><text class="tx s" x="1065.0" y="87.5" text-anchor="middle">saved in /golden</text></g>
+<g id="c-0"><path class="ed both" d="M922,75 L988,75"/><text class="tx k" x="955" y="67" text-anchor="middle">structure</text></g>
+<g id="o-res"><title>agent result · harness re-runs sql</title><rect class="nd" x="740" y="135" width="180" height="50" rx="6"/><text class="tx" x="830.0" y="156.5" text-anchor="middle">agent result</text><text class="tx s" x="830.0" y="172.5" text-anchor="middle">harness re-runs sql</text></g>
+<g id="e-o-res"><path class="ed" d="M690,160 C715,160 715,160 738,160"/></g>
+<g id="g-res"><title>golden result · its rendered rows</title><rect class="nd gold" x="990" y="135" width="150" height="50" rx="6"/><text class="tx" x="1065.0" y="156.5" text-anchor="middle">golden result</text><text class="tx s" x="1065.0" y="172.5" text-anchor="middle">its rendered rows</text></g>
+<g id="c-1"><path class="ed both" d="M922,160 L988,160"/><text class="tx k" x="955" y="152" text-anchor="middle">diff</text></g>
+<g id="o-ans"><title>agent answer · = result when pass_through</title><rect class="nd" x="740" y="220" width="180" height="50" rx="6"/><text class="tx" x="830.0" y="241.5" text-anchor="middle">agent answer</text><text class="tx s" x="830.0" y="257.5" text-anchor="middle">= result when pass_through</text></g>
+<g id="e-o-ans"><path class="ed" d="M690,160 C715,160 715,245 738,245"/></g>
+<g id="g-ans"><title>gold answer · + the validator</title><rect class="nd gold" x="990" y="220" width="150" height="50" rx="6"/><text class="tx" x="1065.0" y="241.5" text-anchor="middle">gold answer</text><text class="tx s" x="1065.0" y="257.5" text-anchor="middle">+ the validator</text></g>
+<g id="c-2"><path class="ed both" d="M922,245 L988,245"/><text class="tx k" x="955" y="237" text-anchor="middle">validator</text></g>
+<g id="diag"><title>diagnosis · per question · failure category from the three comparisons</title><rect class="nd hi" x="740" y="330" width="400" height="52" rx="6"/><text class="tx" x="940.0" y="352.5" text-anchor="middle">diagnosis · per question</text><text class="tx s" x="940.0" y="368.5" text-anchor="middle">failure category from the three comparisons</text></g>
+<g id="e-diag"><path class="ed" d="M940,305 L940,328"/></g>
+<g id="opt"><title>optimiser · edits system.md (and the pack) · accepted only if a held-out split improves</title><rect class="nd" x="290" y="330" width="400" height="52" rx="6"/><text class="tx" x="490.0" y="352.5" text-anchor="middle">optimiser · edits system.md (and the pack)</text><text class="tx s" x="490.0" y="368.5" text-anchor="middle">accepted only if a held-out split improves</text></g>
+<g id="e-opt"><path class="ed" d="M740,356 L692,356"/></g>
+<g id="e-loop"><path class="ed dash" d="M290,356 L125,356 L125,300"/><text class="tx k" x="205" y="348" text-anchor="middle">next version</text></g>
+</svg>
+    <figcaption>The agent is a <b>ReAct loop</b>, as today: the Claude Agent SDK session (<code>agent/session.py</code>, <code>ClaudeSDKClient</code>) lets the model reason, call a tool, read the result and go again, up to <code>max_turns</code>. What changes is the toolset (three tools) and the exit: the loop ends at <code>submit_answer</code>, which carries the SQL, the answer and the mode. Blue-green nodes are new. The three amber nodes live in the explorer's Golden tab (<code>dataagentbench_meta</code>) and are read only <b>after</b> the run, by the diagnosis; they never reach the agent. The dashed edge is the optimisation loop (decision D29).</figcaption>
+  </figure>
+
+  <div class="grid" style="margin-top:var(--s5)">
+    <div class="panel">
+      <p class="label">input · system prompt, in this order</p>
+      <div class="tw" style="box-shadow:none;border:1px solid var(--line)"><table style="min-width:0">
+        <thead><tr><th>Block</th><th>Source</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr class="pro"><td class="mono nw">system.md</td><td>new, short (below)</td><td>SQL-first instructions and the submit contract. The only file the optimiser edits.</td></tr>
+          <tr class="pro"><td class="mono nw">tables map</td><td>code (<code>tables_block</code>, exists)</td><td><b>Needed.</b> The description says "package_database · packageinfo, stored in SQLite"; the agent queries <code>deps_dev_v1_packageinfo</code> in Postgres. One line per table: Postgres name, row count, upstream store, columns.</td></tr>
+          <tr><td class="mono nw">db_description.txt</td><td>upstream, <b>verbatim</b></td><td>Already copied to <code>data/context/&lt;ds&gt;/description.txt</code> byte for byte.</td></tr>
+          <tr><td class="mono nw">hints.txt</td><td>upstream <code>db_description_withhint.txt</code>, <b>verbatim</b></td><td>Per dataset, not per question (628 bytes for deps_dev_v1). The champion ran without it (<code>hints: false</code>).</td></tr>
+          <tr class="dim"><td class="mono nw">summary.md · pitfalls.md</td><td>the curated pack</td><td>Off in this version (D26): the inputs stay the verbatim upstream text plus code, so a later ablation can add the pack back and measure it.</td></tr>
+        </tbody>
+      </table></div>
+      <p class="small" style="margin-top:var(--s3)"><b>User message:</b> the question, verbatim, as now. <b>Model and budget:</b> Haiku, as the champion, so the comparison isolates the build; <code>max_turns</code> 30 (the champion's median trial took 12 turns).</p>
+    </div>
+    <div class="panel">
+      <p class="label">system.md · draft, 1.5 KB against the champion's 2.9 KB</p>
+<pre class="sql" style="white-space:pre-wrap">You answer one question about one dataset by writing SQL.
+
+## The data
+Every table in the Tables list is loaded into one Postgres 16 schema and named &lt;dataset&gt;_&lt;table&gt;. The database description below was written for the original stores (SQLite, DuckDB, MongoDB): ignore the storage format, use the Postgres names from the Tables list, and write Postgres SQL. Quote mixed-case columns (&quot;Name&quot;).
+
+## How to work
+1. Read the description and the hints. Map every part of the question to a table and a column before you query.
+2. Explore with small queries (LIMIT, counts, distinct values). Free text is generated from a few templates: survey a column&#x27;s phrasings over the whole table and count what your pattern reads before you trust it.
+3. Build the answer as ONE SQL statement. Use CTEs for steps; regex (substring(s from &#x27;p&#x27;), regexp_match, split_part) for text; to_timestamp for dates stored as text; joins on exact keys, never ILIKE &#x27;%x%&#x27; where a key can be extracted. Read literally: &quot;more than&quot; is strict. Rankings need a tie-break.
+4. Finish with submit_answer(sql, answer, mode):
+   - sql: the final statement. Its result must contain the answer.
+   - mode &quot;pass_through&quot; (prefer it): the answer IS that result; the harness re-runs sql and renders it. Name the columns as the question names them.
+   - mode &quot;derived&quot;: the answer needs one step after the SQL (reading the returned text to reach a verdict, choosing between returned rows). Give the answer and describe the step in one line.</pre>
+    </div>
+  </div>
+
+  <div class="grid g2" style="margin-top:var(--s4)">
+    <div class="panel">
+      <p class="label">output · <code>submit_answer(sql, answer, mode, step?)</code> replaces <code>return_answer(answer)</code></p>
+      <ul class="qa">
+        <li><b><code>sql</code></b>: the one final statement. The harness re-runs it as <code>dab_agent</code> (read-only, 60 s) and stores the columns, rows and rendered text, so the agent's result is known exactly, not as the model retold it.</li>
+        <li><b><code>mode: "pass_through"</code></b>: the scored answer is the rendered result, the same <code>render()</code> a golden gets. Most questions: 43 of the 49 goldens pass their validator as the plain rendered result (github_repos/2 needs its header).</li>
+        <li><b><code>mode: "derived"</code></b> (+ <code>step</code>, one line): the model writes the answer from the returned rows. This is the post-processing the question asked about, and it needs no Python: the judgment questions (crmarenapro/1, 2, 3, 6, 7: read the returned transcript, name the violated policy), or choosing among a few returned candidates. <code>step</code> says what was done so a diagnosis can tell "SQL wrong" from "reading wrong".</li>
+        <li><b>Recorded per trial</b> in <code>results.jsonl</code> and the trace: <code>agent_sql</code>, <code>agent_result</code> (rendered), <code>mode</code>, <code>step</code>, <code>answer</code>, and the validator verdict as now.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <p class="label">diagnostics · computed after the run, never shown to the agent</p>
+      <div class="tw" style="box-shadow:none;border:1px solid var(--line)"><table style="min-width:0">
+        <thead><tr><th>Level</th><th>Agent</th><th>Golden</th><th>How</th></tr></thead>
+        <tbody>
+          <tr><td>answer</td><td class="mono">answer</td><td class="mono">gold</td><td>the validator (the score) + <code>match_gold</code></td></tr>
+          <tr><td>result</td><td class="mono">agent_result</td><td class="mono">golden result</td><td><code>gold_diff</code> (exists): which rows and cells differ</td></tr>
+          <tr><td>SQL</td><td class="mono">agent_sql</td><td class="mono">golden SQL</td><td><code>sqlglot</code> (new dependency): tables, join keys, filter literals, text patterns, group / order / limit</td></tr>
+        </tbody>
+      </table></div>
+      <p class="small" style="margin-top:var(--s3)">Together they give each failure one category: <b>no SQL</b> (timeout, no submit) · <b>SQL error</b> · <b>wrong tables</b> · <b>join differs</b> (e.g. <code>ILIKE</code> against the golden's exact key, deps_dev_v1/1) · <b>filter differs</b> (patents/1: publication vs filing date) · <b>parse differs</b> (deps_dev_v1/2: "30,522 forks" read as 522) · <b>aggregation</b> · <b>order / tie</b> · <b>derived step wrong</b> (right result, wrong reading) · <b>format</b> (right result, validator rejects its shape). The spike's notes already name a category for every one of the champion's 27 failures.</p>
+    </div>
+  </div>
+
+  <div class="hd" style="margin-top:var(--s6)">
+    <h3>The scorecard: every question scored three times, and the combination says what to optimise</h3>
+    <p class="small"><b>Every run scores all 54.</b> Each question is run and gets an answer verdict, golden or not, so the run stays comparable with the champion and the leaderboard. SQL and decision are scored against the golden, so they exist only where a golden does (49 of 54 today); the other 5 (agnews/1–4, crmarenapro/7) read "no golden" in those columns, still count in the answer total, and are left out of the optimisation loop until someone writes their golden.</p>
+  </div>
+  <div class="grid g3">
+    <div class="panel card pro"><h3>Answer · pass / fail</h3><p>The question's own validator on the submitted answer. Unchanged from today: this is the number on the leaderboard. <b>Denominator: 54.</b></p></div>
+    <div class="panel card pro"><h3>SQL · pass / fail</h3><p>The agent's SQL <b>result</b> against the golden's result, with the gold match's cell rules (case, float noise): <b>pass</b> when it recreates the golden result (same rows, any order). For an evidence golden, pass when the agent's result contains the golden's evidence rows. Two different SQL texts that return the same rows both pass; the structure diff only explains a fail. <b>Denominator: questions with a golden.</b></p></div>
+    <div class="panel card pro"><h3>Decision · pass / fail</h3><p>Did the agent choose the right mode? The golden says which is right: an <b>answer</b> golden means the result is the answer, so <code>pass_through</code> is right; an <b>evidence</b> golden (a judgment question) means <code>derived</code> is right. <b>Denominator: questions with a golden.</b></p></div>
+  </div>
+  <div class="tw" style="margin-top:var(--s4)"><table>
+    <caption>What each combination means, and where the optimiser should look</caption>
+    <thead><tr><th>SQL</th><th>Decision</th><th>Answer</th><th>Reading</th><th>Optimise</th></tr></thead>
+    <tbody>
+      <tr class="pro"><td class="v-ok">pass</td><td class="v-ok">pass</td><td class="v-ok">pass</td><td>solved the golden way</td><td>nothing; a regression test for the next version</td></tr>
+      <tr><td class="v-warn">fail</td><td>any</td><td class="v-warn">fail</td><td>the data work is wrong</td><td><b>SQL instructions</b>: the structure diff names the category (tables, join, filter, parse, aggregation, order)</td></tr>
+      <tr><td class="v-ok">pass</td><td class="v-warn">fail</td><td class="v-warn">fail</td><td>right rows, wrong last step</td><td><b>the decision rule</b> in system.md: when to pass the result through, when to read it</td></tr>
+      <tr><td class="v-ok">pass</td><td class="v-ok">pass · derived</td><td class="v-warn">fail</td><td>right evidence, wrong reading</td><td><b>the reading step</b>: how to reach a verdict from the returned text</td></tr>
+      <tr><td class="v-ok">pass</td><td class="v-ok">pass · pass_through</td><td class="v-warn">fail</td><td>right result, the validator rejects its shape</td><td><b>output shape</b> (column names, one value vs a table); or a validator quirk to record, as github_repos/2</td></tr>
+      <tr><td class="v-warn">fail</td><td>any</td><td class="v-ok">pass</td><td>right answer another way</td><td><b>review</b>: an alternative correct SQL (widen the golden check) or a lucky answer</td></tr>
+      <tr class="dim"><td>no golden</td><td>no golden</td><td>pass / fail</td><td>scored on the answer only; counts in the 54</td><td>not optimised: no SQL evidence to learn from. Write the golden first (agnews: the category is in no column)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="panel" style="margin-top:var(--s4)">
+    <p class="label">how a run reads · the Runs tab and <code>dab diagnose &lt;run&gt;</code> (numbers are illustrative)</p>
+<pre class="sql">run 2026-09-2xT…_v1_sql_all_haiku                    answer 31/54   SQL 29/49   decision 46/49
+  optimise first:  SQL · parse differs        6      deps_dev_v1/2, patents/2, yelp/2, …
+                   SQL · filter differs       4      patents/1, crmarenapro/12, …
+                   decision · derived wanted  3      crmarenapro/1, 3, 6
+                   answer · shape             2      github_repos/2, yelp/4
+question            answer  SQL   decision  category
+deps_dev_v1/1       pass    pass  pass      —
+deps_dev_v1/2       fail    fail  pass      parse differs ("30,522 forks" → 522)
+crmarenapro/6       fail    pass  fail      decision: pass_through where derived was wanted
+agnews/1            fail    —     —         no golden</pre>
+    <p class="small" style="margin-top:var(--s3)">The optimiser works down the "optimise first" list: the largest category, one general edit to <code>system.md</code>, re-score all three columns on the train split, accept on the held-out split. Each column can move on its own, so an edit that fixes SQL but breaks decisions is visible.</p>
+  </div>
+
+  <div class="hd" style="margin-top:var(--s6)">
+    <h3>Tools: nine down to three</h3>
+    <p class="small">Evidence from the champion run (54 trials, 27 passed) and the goldens. "Passed" is among the trials that called the tool.</p>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th>Tool</th><th>Champion use</th><th>Passed</th><th>Keep?</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr class="pro"><td class="mono">query_db</td><td class="num">54 of 54 trials · 295 calls</td><td class="num">27/54</td><td class="v-ok">keep</td><td>The work. Drop its <code>save_as</code> parameter (it only fed Python).</td></tr>
+      <tr class="pro"><td class="mono">describe_table</td><td class="num">26 of 54</td><td class="num">13/26</td><td class="v-ok">keep</td><td>Types, null rates and top values from the code-built profile, in one call; cheaper than several exploratory queries (D28).</td></tr>
+      <tr class="pro"><td class="mono">submit_answer</td><td class="num">new</td><td></td><td class="v-ok">new</td><td>Replaces <code>return_answer</code>: sql + answer + mode.</td></tr>
+      <tr><td class="mono">execute_python</td><td class="num">36 of 54 · 137 calls</td><td class="num">17/36</td><td class="v-no">cut</td><td><b>Python is not required.</b> 44 of the 49 goldens are one SQL statement that passes; s05 found every Python step in the 17 passing Python trials was SQL (14) or a judgment (3). Trials without Python passed 10 of 18, against 17 of 36 with it. Cutting it also removes the per-trial Docker sandbox, <code>/work</code> and parquet.</td></tr>
+      <tr><td class="mono">llm_extract</td><td class="num">8 of 54</td><td class="num">3/8</td><td class="v-no">cut</td><td>Every use read a templated field a regex reads exactly (s05). The one real classification need, agnews, is unreachable either way: the champion scored 0 of 4. Settles s03's D21.</td></tr>
+      <tr><td class="mono">sample_rows</td><td class="num">40 of 54</td><td class="num">20/40</td><td class="v-no">cut</td><td>Identical to <code>query_db("select * … limit n")</code>.</td></tr>
+      <tr><td class="mono">list_db</td><td class="num">4 of 54</td><td class="num">2/4</td><td class="v-no">cut</td><td>The tables map is in the prompt.</td></tr>
+      <tr><td class="mono">read_context · search_context</td><td class="num">8 of 54</td><td class="num">4/8</td><td class="v-no">cut</td><td>They read the curated pack, which this version leaves out (D26).</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="grid g3" style="margin-top:var(--s5)">
+    <div class="panel card"><h3>The optimisation loop, one turn</h3><p>Run the challenger on a <b>train</b> split. For each failure, the diagnosis gives a category and the evidence (result diff, SQL structure diff). The optimiser proposes one edit to <code>system.md</code> (or a pack file) that targets a category, never a question. Re-run the train split, then a <b>held-out</b> split; accept only if held-out pass@1 rises and nothing regresses. That is s03's loop with SQL-level evidence.</p></div>
+    <div class="panel card"><h3>Risks</h3><ul class="tight">
+      <li><b>Confounded comparison:</b> hints on, pack off, tools cut and the contract change all at once, against v0's existing run (hints off). Accepted: v0 is never re-run (too expensive), so the gain is the build as a whole, not per change.</li>
+      <li><b>Leakage:</b> an optimiser that sees golden SQL can write answers into the prompt. Guards in D29.</li>
+      <li><b>Shape:</b> a pass-through answer is the bare rendered result; github_repos/2 showed one validator can reject an exact bare value. The harness uses plain <code>render()</code> (never the gold's shape), so such cases show as "format".</li>
+      <li><b>Lost ground:</b> agnews (0 of 4 now) stays 0; nothing else needs Python.</li>
+    </ul></div>
+    <div class="panel card"><h3>What stays the same</h3><p>The isolation rules (an empty working directory, a strict MCP config, the <code>init</code> check), the read-only <code>dab_agent</code> role, the 54 questions, the validators and the rescore. A run folder stays the record and MLflow the index. The Runs tab compares the challenger with the champion as any version.</p></div>
+  </div>
+
+  <div class="hd" style="margin-top:var(--s6)"><h3>End to end: what the build does, in order</h3>
+    <p class="small">Confirmed against the code as it stands (2026-09-24). Rows marked <b>new</b> don't exist yet; the build adds them.</p></div>
+  <div class="tw"><table>
+    <thead><tr><th>#</th><th>Step</th><th>How</th><th>Exists today?</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td><b>Register the challenger</b></td><td>A version folder <code>agents/v1_sql/</code> (<code>agent.yaml</code> + <code>system.md</code>), fingerprinted by <code>sha256(system.md)</code>. Its <code>system.md</code> also goes to the central MLflow prompt registry as <code>dataagentbench.system</code>, with the version name and fingerprint as tags.</td><td>folder + fingerprint: yes. MLflow prompt registry: <b>new</b> (B1)</td></tr>
+      <tr><td class="num">2</td><td><b>Run and score the 54</b></td><td><code>dab eval --agent v1_sql --split all --challenger-of v0</code>; every question gets answer / SQL / decision (the scorecard), and the run lands in <code>runs/</code>, MLflow and the Runs tab.</td><td>eval: yes. Scorecard: <b>new</b> (B6)</td></tr>
+      <tr><td class="num">3</td><td><b>Diagnose</b></td><td><code>dab diagnose &lt;run&gt;</code>: for each question with a golden, agent SQL against golden SQL (structure), agent result against golden result (cells), mode against the golden kind, answer against the gold. One category per failure; an "optimise first" list.</td><td><b>new</b> (B6)</td></tr>
+      <tr><td class="num">4</td><td><b>Optimise, one round</b></td><td><code>dab optimise &lt;run&gt; --into v2_sql</code>: one isolated Sonnet 5 (medium) session <b>per dataset</b> reads that dataset's failed <b>train</b> questions (golden SQL included, D29) and writes its <b>dataset notes</b>; per D31, a short final pass may move a recurring lesson into <code>system.md</code>. Guarded (see the specification). The result is <code>agents/v2_sql/</code>, <code>challenger_of: v1_sql</code>.</td><td><b>new</b> (B9)</td></tr>
+      <tr><td class="num">5</td><td><b>Run the new challenger</b></td><td>The same 54 with <code>v2_sql</code>, scored the same three ways; the held-out questions show whether the edit generalised.</td><td>yes, once 1–4 exist</td></tr>
+      <tr><td class="num">6</td><td><b>Promote or not</b></td><td><code>dab promote</code>: the most answers passed out of 54 among v0 (27), v1_sql and v2_sql wins (D30; a tie keeps the incumbent). <code>agents/champion</code> points to the winner and its MLflow prompt version gets the <code>champion</code> alias; the report gives all three top lines and the held-out result.</td><td><b>new</b> (B10)</td></tr>
+      <tr><td class="num">7</td><td><b>Tell the story</b></td><td>A Lavish walkthrough (s07) built from screenshots of the explorer: the runs compared, the scorecard, a trial's agent SQL beside the golden, the <code>system.md</code> diff v1 → v2, the promotion verdict. Where the explorer lacks a view the story needs, the build adds it.</td><td><b>new</b> (B11)</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="grid g2" style="margin-top:var(--s4)">
+    <div class="panel card pro"><h3>Isolation: checked just now</h3><p><code>dab isolation-check</code> (one short Haiku turn, 2026-09-24): the session starts in an empty temp folder outside the repo. Tools: only the nine <code>mcp__dab__*</code>. Plugins: none. No CLAUDE.md, AGENTS.md or memory (<code>CLAUDE_CODE_DISABLE_CLAUDE_MDS</code>, <code>…_AUTO_MEMORY</code>, the <code>agents-md</code> plugin off). The 18 skills, 5 sub-agents and 53 slash commands are listed but unreachable (no Skill or Agent tool). Context the CLI adds: environment, model, date, token count, and your account email (no switch exists; it never reaches a trace or MLflow). Verdict: <b>"isolated: the dab tools and the prompt, nothing else"</b>. So it matches a fresh cloud container, apart from this machine's environment line and the email. B5 re-runs the check for <code>v1_sql</code>'s three tools, and the optimiser session gets the same isolation.</p></div>
+    <div class="panel card"><h3>Two project rules change with this build</h3><p><b>"Only three things call a model"</b> (the eval agent, the curator, <code>llm_extract</code>): <code>llm_extract</code> leaves the challenger, and the optimiser joins, as an Agent SDK session on the subscription with the same isolation. <b>"A golden never reaches … a proposer"</b> becomes D29's guarded rule. The build updates CLAUDE.md and the tests that enforce both.</p></div>
+  </div>
+
+  <div class="hd" style="margin-top:var(--s6)"><h3>The optimiser: specification</h3>
+    <p class="small">It fits how prompts are already built: one system prompt per dataset, composed from a shared <code>system.md</code> and that dataset's own blocks. The optimiser writes a new per-dataset block, <b>dataset notes</b>, from that dataset's failed train questions. It never writes to a question.</p></div>
+  <div class="grid g2">
+    <div class="panel">
+      <p class="label">agent · <code>agents/optimiser/</code> (a sibling of <code>agents/curator/</code>)</p>
+      <div class="tw" style="box-shadow:none;border:1px solid var(--line)"><table style="min-width:0">
+        <tbody>
+          <tr><td class="nw"><b>Model</b></td><td><code>sonnet</code> → <code>claude-sonnet-5</code> (<code>agent/llm.py</code>, the one place a model is named), effort <b>medium</b>, on the subscription (<code>require_live()</code>).</td></tr>
+          <tr><td class="nw"><b>Sessions</b></td><td><b>One per dataset</b> with at least one failed train question, run in parallel (up to 11; agnews has no golden, so no session). Each is isolated exactly like a trial: an empty directory, no CLAUDE.md or memory, a strict MCP config, the <code>init</code> check.</td></tr>
+          <tr><td class="nw"><b>Tools</b></td><td><code>query_db</code> (read-only, as <code>dab_agent</code>): to check a claim against the data, e.g. survey a text column's phrasings before recommending a pattern. <code>write_notes(notes, rationale)</code> ends the session.</td></tr>
+          <tr><td class="nw"><b>Budget</b></td><td><code>max_turns: 20</code>, 600 s per session. About $2–4 for a round of 11 sessions, going by the curator's $1.40 for 12 one-turn Sonnet sessions.</td></tr>
+          <tr><td class="nw"><b>Command</b></td><td><code>dab optimise &lt;run&gt; --into v2_sql</code>: copies <code>v1_sql</code>, writes the notes, sets <code>challenger_of: v1_sql</code>, registers the prompt version in MLflow.</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="panel">
+      <p class="label">what one dataset's session sees</p>
+      <ul class="qa">
+        <li><b>What the agent saw:</b> <code>system.md</code>, the tables map, <code>db_description.txt</code>, <code>hints.txt</code> and the current notes (empty for v1).</li>
+        <li><b>Each failed train question of that dataset:</b> the question text, the scorecard (answer / SQL / decision), the category, agent SQL beside golden SQL, the result diff, the mode and step, and a trace summary (tool calls, errors, turns).</li>
+        <li><b>Each passing train question of that dataset:</b> its agent SQL, so the notes don't break what already works.</li>
+        <li><b>Never:</b> held-out questions (16 of 49), other datasets' questions, or the gold answer text of a question that has no golden.</li>
+      </ul>
+      <p class="label" style="margin-top:var(--s3)">train / held-out split · seeded, 2/3 per dataset, recorded in the run</p>
+      <p class="small">deps_dev_v1 1/1 · github_repos 3/1 · pancancer_atlas 2/1 · patents 2/1 · bookreview 2/1 · crmarenapro 8/4 · googlelocal 3/1 · music_brainz_20k 2/1 · stockindex 2/1 · stockmarket 3/2 · yelp 5/2: <b>33 train, 16 held-out</b>. Every dataset has both, so held-out measures whether a dataset's notes generalise to its other questions.</p>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-top:var(--s4)">
+    <div class="panel">
+      <p class="label">output · <code>agents/v2_sql/datasets/&lt;ds&gt;.md</code> and where it lands in the prompt</p>
+<pre class="sql" style="white-space:pre-wrap">system.md                      (shared, unchanged by default: D31)
+# Dataset: &lt;ds&gt;
+## Tables                      (code-built map)
+## Notes for this dataset      ← agents/v2_sql/datasets/&lt;ds&gt;.md (optimiser, ≤ 1,500 chars)
+## Database description        (upstream, verbatim)
+## Hints                       (upstream, verbatim)
+question                       (user message, verbatim)</pre>
+      <p class="small" style="margin-top:var(--s3)">Notes are dataset knowledge written as instructions ("<i>Project_Information</i> states stars three ways: 'stars count of N', 'N stars', 'starred by N users'; strip commas; join on the owner/repo it names, not ILIKE"). They are the same kind of fact the curated pitfalls hold, now learned from failures. The version fingerprint covers <code>system.md</code> plus every notes file, and the composed prompts are written to the run folder as now.</p>
+    </div>
+    <div class="panel">
+      <p class="label">guards · an edit that fails is sent back once with the reason, then dropped</p>
+      <ul class="qa">
+        <li><b>No question text:</b> no run of 8+ words from any of the 54 questions (extends <code>tests/test_context.py</code>'s rule for the pack).</li>
+        <li><b>No gold values:</b> no gold cell as a literal (the P1 literal check).</li>
+        <li><b>No golden SQL fragments:</b> no run of 6+ normalised SQL tokens from any golden. Patterns and join keys are allowed in words, not as the golden's SQL.</li>
+        <li><b>Size:</b> ≤ 1,500 characters per dataset.</li>
+        <li><b>Recorded:</b> the notes, the rationale (which categories and failures they target) and every rejection go to the run folder and MLflow, and the explorer shows them beside the v1 → v2 diff (B11).</li>
+      </ul>
+    </div>
+  </div>
+
+  <form class="q" data-lavish-question="D31" onsubmit="event.preventDefault(); const c=new FormData(event.currentTarget).get('d31'); const note=event.currentTarget.querySelector('textarea').value.trim(); if(!c)return; window.lavish.queuePrompt('D31 · what the optimiser edits: '+c+(note?' — note: '+note:''), {tag:'choice', text:'D31: '+c, element:event.currentTarget, data:{question:'D31', answer:c, note}}); event.currentTarget.querySelector('.queued').textContent='queued: '+c+' — press Send to Agent';">
+    <h3>D31 · what does the optimiser edit?</h3>
+    <p class="why">Per-dataset notes follow your ask. The open question is whether a lesson that recurs across datasets also goes into the shared system.md.</p>
+    <label><input type="radio" name="d31" value="A · per-dataset notes (one Sonnet 5 medium session per dataset with failed train questions) + one short final session that moves a lesson recurring in 3+ datasets into system.md" checked> <span><b>A · per-dataset notes + one cross-dataset pass for system.md</b> <span class="rec">recommended</span><br><span class="small">Dataset facts stay with the dataset. A general lesson (e.g. "strip thousands separators before casting") reaches every dataset, including agnews and the held-out questions, through system.md. One extra session.</span></span></label>
+    <label><input type="radio" name="d31" value="B · per-dataset notes only; system.md stays as v1_sql's"> <span><b>B · per-dataset notes only</b><br><span class="small">The simplest reading of your ask. A lesson learned in yelp doesn't reach stockmarket.</span></span></label>
+    <label><input type="radio" name="d31" value="C · one global session edits system.md only"> <span><b>C · system.md only</b><br><span class="small">No dataset notes; one session sees every dataset's failures. Coarser and harder to attribute.</span></span></label>
+    <textarea placeholder="anything else (optional)"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue this answer</button><span class="queued"></span></div>
+  </form>
+
+  <div class="hd" style="margin-top:var(--s6)"><h3>Decisions, then the build items</h3></div>
+  <div class="panel pro" style="margin-bottom:var(--s4);box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)">
+    <p class="label">decided 2026-09-24 · D26–D29 as recommended, D30 in your words</p>
+    <ul class="tight">
+      <li><b>D26 A</b> · system prompt = <code>system.md</code> + the tables map + <code>db_description.txt</code> + <code>hints.txt</code> (both verbatim); the curated pack is off.</li>
+      <li><b>D27 A</b> · the agent chooses per question: <code>pass_through</code> (answer = rendered result) or <code>derived</code> (the model writes the answer from the rows, one-line step recorded). No Python.</li>
+      <li><b>D28</b> · tools: <code>query_db</code> (no <code>save_as</code>), <code>describe_table</code>, <code>submit_answer</code>. Cut: execute_python and the sandbox, llm_extract, sample_rows, list_db, read_context, search_context.</li>
+      <li><b>D29 A</b> · the optimiser sees golden SQL (train questions only); its edits are checked (no question text, no gold value, no golden SQL fragment); the held-out split is reported beside the top line (D30). The build updates the CLAUDE.md rule "a golden never reaches … a proposer" to say exactly this.</li>
+      <li><b>D30</b> · one 54 × 1 run each for v1_sql and v2_sql; champion = best answer accuracy of 54 among v0, v1_sql, v2_sql (a tie keeps the incumbent).</li>
+      <li><b>All 54, every run</b> · every question is run and answer-scored whether or not it has a golden; questions without one get no SQL or decision score and sit outside the optimisation loop until a golden exists.</li>
+    </ul>
+  </div>
+  <form class="q" data-lavish-question="D26" onsubmit="event.preventDefault(); const c=new FormData(event.currentTarget).get('d26'); const note=event.currentTarget.querySelector('textarea').value.trim(); if(!c)return; window.lavish.queuePrompt('D26 · system prompt inputs: '+c+(note?' — note: '+note:''), {tag:'choice', text:'D26: '+c, element:event.currentTarget, data:{question:'D26', answer:c, note}}); event.currentTarget.querySelector('.queued').textContent='queued: '+c+' — press Send to Agent';">
+    <h3>D26 · what goes in the system prompt besides the two verbatim files?</h3>
+    <p class="why">db_description.txt and hints.txt go in verbatim either way.</p>
+    <label><input type="radio" name="d26" value="A · system.md + tables map + description + hints; curated pack off" checked> <span><b>A · instructions + tables map + the two files</b> <span class="rec">decided 2026-09-24</span><br><span class="small">Upstream text plus code-built facts only. The pack comes back later as a measured ablation.</span></span></label>
+    <label><input type="radio" name="d26" value="B · A plus the curated summary.md and pitfalls.md"> <span><b>B · also the curated pack</b><br><span class="small">What the champion had, plus hints. More context, and harder to attribute a change to.</span></span></label>
+    <label><input type="radio" name="d26" value="C · only system.md + description + hints (no tables map)"> <span><b>C · no tables map</b><br><span class="small">Strictly the two files. The agent must discover the Postgres names itself (list the schema first); expect wasted turns.</span></span></label>
+    <textarea placeholder="anything else (optional)"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue this answer</button><span class="queued"></span></div>
+  </form>
+
+  <form class="q" data-lavish-question="D27" onsubmit="event.preventDefault(); const c=new FormData(event.currentTarget).get('d27'); const note=event.currentTarget.querySelector('textarea').value.trim(); if(!c)return; window.lavish.queuePrompt('D27 · after the SQL: '+c+(note?' — note: '+note:''), {tag:'choice', text:'D27: '+c, element:event.currentTarget, data:{question:'D27', answer:c, note}}); event.currentTarget.querySelector('.queued').textContent='queued: '+c+' — press Send to Agent';">
+    <h3>D27 · the key decision: pass the SQL result through, or process it?</h3>
+    <p class="why">This decides how comparable the answer is with the golden, and whether judgment questions can be answered at all.</p>
+    <label><input type="radio" name="d27" value="A · the agent chooses per question: pass_through (answer = rendered result) or derived (model writes the answer from the rows, one-line step recorded); no Python" checked> <span><b>A · the agent chooses: pass-through or derived</b> <span class="rec">decided 2026-09-24</span><br><span class="small">Pass-through by default, so the answer is exactly the SQL result. "Derived" covers judgment questions and choosing among candidates, and records the step, so "SQL right, reading wrong" is visible.</span></span></label>
+    <label><input type="radio" name="d27" value="B · always pass-through: the answer is the rendered result of the final SQL"> <span><b>B · always pass-through</b><br><span class="small">Maximally comparable: the answer is a pure function of the SQL. Judgment questions (5) cannot be answered.</span></span></label>
+    <label><input type="radio" name="d27" value="C · derived may run Python on the SQL result (keep execute_python for post-processing only)"> <span><b>C · allow Python after the SQL</b><br><span class="small">Keeps the sandbox. The evidence says no question needs it.</span></span></label>
+    <textarea placeholder="anything else (optional)"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue this answer</button><span class="queued"></span></div>
+  </form>
+
+  <form class="q" data-lavish-question="D28" onsubmit="event.preventDefault(); const keep=[...event.currentTarget.querySelectorAll('input[name=tools]:checked')].map(i=>i.value); const note=event.currentTarget.querySelector('textarea').value.trim(); window.lavish.queuePrompt('D28 · challenger tools: keep '+keep.join(', ')+'; cut the rest'+(note?' — note: '+note:''), {tag:'choice', text:'D28: '+keep.length+' tools', element:event.currentTarget, data:{question:'D28', keep, note}}); event.currentTarget.querySelector('.queued').textContent='queued: '+keep.join(', ')+' — press Send to Agent';">
+    <h3>D28 · which tools does the challenger keep? <span class="rec">decided 2026-09-24: query_db, submit_answer, describe_table</span></h3>
+    <p class="why">Ticked tools stay; the rest are cut.</p>
+    <label><input type="checkbox" name="tools" value="query_db" checked> <span><b>query_db</b> (without save_as)</span></label>
+    <label><input type="checkbox" name="tools" value="submit_answer" checked> <span><b>submit_answer</b> (new: sql, answer, mode)</span></label>
+    <label><input type="checkbox" name="tools" value="describe_table" checked> <span><b>describe_table</b>: one-call profile of a table</span></label>
+    <label><input type="checkbox" name="tools" value="sample_rows"> <span>sample_rows</span></label>
+    <label><input type="checkbox" name="tools" value="list_db"> <span>list_db</span></label>
+    <label><input type="checkbox" name="tools" value="read_context + search_context"> <span>read_context + search_context</span></label>
+    <label><input type="checkbox" name="tools" value="llm_extract"> <span>llm_extract</span></label>
+    <label><input type="checkbox" name="tools" value="execute_python"> <span>execute_python (and the sandbox)</span></label>
+    <textarea placeholder="anything else (optional)"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue this answer</button><span class="queued"></span></div>
+  </form>
+
+  <form class="q" data-lavish-question="D29" onsubmit="event.preventDefault(); const c=new FormData(event.currentTarget).get('d29'); const note=event.currentTarget.querySelector('textarea').value.trim(); if(!c)return; window.lavish.queuePrompt('D29 · optimiser and goldens: '+c+(note?' — note: '+note:''), {tag:'choice', text:'D29: '+c, element:event.currentTarget, data:{question:'D29', answer:c, note}}); event.currentTarget.querySelector('.queued').textContent='queued: '+c+' — press Send to Agent';">
+    <h3>D29 · how much of a golden does the optimiser see? (s03's D15, and a project rule)</h3>
+    <p class="why">CLAUDE.md says today: "A golden never reaches a prompt, the pack, the curator or a proposer." The loop you describe compares golden SQL with agent SQL, so A or B changes that rule, and I'd update CLAUDE.md with the guards.</p>
+    <label><input type="radio" name="d29" value="A · the diagnosis (code) sees the goldens; the optimiser sees the golden SQL too, but its edits are checked: no question text, no gold value, no golden SQL fragment; accepted only on a held-out split" checked> <span><b>A · sees golden SQL, edits are guarded</b> <span class="rec">decided 2026-09-24</span><br><span class="small">The richest evidence ("the golden joins on the exact owner/repo; you used ILIKE"). Edits must be general: the literal check (s06's P1) extended to golden SQL fragments, the question-text test the pack already has, and the held-out gate that catches overfitting.</span></span></label>
+    <label><input type="radio" name="d29" value="B · the optimiser sees only code-computed categories and diffs, never golden SQL text"> <span><b>B · categories and diffs only</b><br><span class="small">It sees "join differs on deps_dev_v1_project_info" but not the golden's SQL. Less leakage risk, less to go on.</span></span></label>
+    <label><input type="radio" name="d29" value="C · keep the rule: the optimiser sees answers and verdicts only; goldens are for people"> <span><b>C · keep the rule as it is</b><br><span class="small">Goldens stay a human diagnostic in the explorer (the diff views). The loop runs on validator verdicts alone.</span></span></label>
+    <textarea placeholder="anything else (optional)"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue this answer</button><span class="queued"></span></div>
+  </form>
+
+  <div class="panel" style="margin:var(--s4) 0;box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)">
+    <p class="label">D30 · decided 2026-09-24 (your words: "just do 1× 54 pass for challenger and optimisation, winner is best accuracy top line")</p>
+    <ul class="tight">
+      <li><b>One run of the 54 per version</b>, 1 trial each: <code>v1_sql</code>, then <code>v2_sql</code> after the optimisation round.</li>
+      <li><b>The champion is whichever of v0 (27/54), v1_sql and v2_sql has the most answers passed out of 54.</b> A tie keeps the incumbent.</li>
+      <li>The optimiser still sees only the train questions (33 of the 49 with a golden, seeded and stratified by dataset). The 16 held-out questions are <b>reported</b> as the generalisation check beside the top line; they don't gate the promotion.</li>
+    </ul>
+  </div>
+
+  <form class="q" data-lavish-question="build" onsubmit="event.preventDefault(); const sel=[...event.currentTarget.querySelectorAll('input[name=items]:checked')].map(i=>({id:i.value,label:i.dataset.label,disposition:'build'})); const skip=[...event.currentTarget.querySelectorAll('input[name=items]:not(:checked)')].map(i=>i.value); const note=event.currentTarget.querySelector('textarea').value.trim(); window.lavish.queuePrompt('Build exactly the ticked items from s06 &quot;next build&quot;, per the D26–D29 answers, and give an item-by-item receipt covering every id, ticked or not: '+sel.map(s=>s.id).join(', ')+(skip.length?' · skipped: '+skip.join(', '):'')+(note?' · note: '+note:''), {tag:'tracked-batch', text:'challenger build: '+sel.length+' of 11', element:event.currentTarget, data:{items:sel, skipped:skip, note}}); event.currentTarget.querySelector('.queued').textContent='queued: '+sel.length+' to build — press Send to Agent';">
+    <h3>Tracked batch · the build</h3>
+    <p class="why">B1–B5: the agent and its record. B6–B7: the comparison. B9–B10: one optimisation round and the promotion. B11: the story. Model time on the subscription: B8 (v1_sql) and B9's v2_sql run are 54 × 1 of Haiku each (≈ $9, going by the champion run's $8.96), plus ≈ $2–4 for the optimiser's Sonnet sessions: ≈ $21–23 in all, about half a Haiku window. v0 is never re-run; its 27/54 run is the baseline. B9–B11 need B6.</p>
+    <label><input type="checkbox" name="items" value="B1" data-label="register v1_sql: agents/v1_sql (agent.yaml: tools per D28, hints true, pack false, max_turns 30; system.md from the draft) + MLflow prompt registry dataagentbench.system with version/fingerprint tags" checked> <span><b>B1</b> · <b>register</b> <code>v1_sql</code>: <code>agents/v1_sql/</code> (<code>agent.yaml</code>: tools per D28, <code>hints: true</code>, <code>pack: false</code>, <code>max_turns: 30</code>; <code>system.md</code> from the draft) and the MLflow prompt registry entry <code>dataagentbench.system</code></span></label>
+    <label><input type="checkbox" name="items" value="B2" data-label="prompt.py: a pack switch (summary/pitfalls off), tables map + description + hints verbatim; the Agent tab shows the composed prompt" checked> <span><b>B2</b> · <code>prompt.py</code>: a <code>pack</code> switch; the tables map, description and hints stay verbatim; the Agent tab shows the composed prompt</span></label>
+    <label><input type="checkbox" name="items" value="B3" data-label="tools: submit_answer(sql, answer, mode, step); harness re-runs sql as dab_agent; query_db without save_as" checked> <span><b>B3</b> · <code>submit_answer(sql, answer, mode, step)</code>; the harness re-runs <code>sql</code> and renders it; <code>query_db</code> without <code>save_as</code>; no sandbox when <code>execute_python</code> is off</span></label>
+    <label><input type="checkbox" name="items" value="B4" data-label="record agent_sql, agent_result, mode, step in results.jsonl, the trace and MLflow" checked> <span><b>B4</b> · record <code>agent_sql</code>, <code>agent_result</code>, <code>mode</code>, <code>step</code> in <code>results.jsonl</code>, the trace and the MLflow run</span></label>
+    <label><input type="checkbox" name="items" value="B5" data-label="tests: prompt composition verbatim, submit contract, pass_through answer = render(result), isolation allowlist for the new tool set" checked> <span><b>B5</b> · tests: the composed prompt holds the two files byte for byte; the submit contract; pass-through answer = <code>render(result)</code>; the isolation allowlist for the new tool set</span></label>
+    <label><input type="checkbox" name="items" value="B6" data-label="scorecard: answer / SQL / decision pass-fail per question and per run (SQL = agent result recreates the golden result; decision = mode matches the golden kind), result diff + sqlglot structure diff for a category, dab diagnose <run>, the Runs tab shows the three totals" checked> <span><b>B6</b> · the <b>scorecard</b>: answer, SQL and decision pass / fail per question and per run; the result diff and <code>sqlglot</code> structure diff give the category; <code>dab diagnose &lt;run&gt;</code>; the Runs tab shows the three totals with denominators</span></label>
+    <label><input type="checkbox" name="items" value="B7" data-label="explorer: the trial page and the Golden editor show agent SQL beside golden SQL with the result diff and the category" checked> <span><b>B7</b> · explorer: the trial page and the Golden editor show agent SQL beside golden SQL, the result diff and the category</span></label>
+    <label><input type="checkbox" name="items" value="B8" data-label="run v1_sql: a zero-cost dab eval --dry-run over the 54 (no model), then straight to 54 x 1 scoring; no smoke run; compare with v0's existing run (27/54) on the Runs tab"> <span><b>B8</b> · run <code>v1_sql</code>: a zero-cost <code>--dry-run</code> over the 54 (prompts, harness and judge, no model), then straight to the <b>54 × 1</b> scoring; <b>no smoke run</b>; compare with v0's existing run (27/54) on the Runs tab</span></label>
+    <label><input type="checkbox" name="items" value="B9" data-label="agents/optimiser (sonnet-5, medium, max_turns 20, query_db + write_notes, isolated); dab optimise <run> --into v2_sql: one session per dataset with failed train questions writes agents/v2_sql/datasets/<ds>.md (+ the D31 system.md pass); guards; prompt composition gains the notes block; fingerprint covers notes; then run v2_sql 54 x 1; CLAUDE.md rules updated"> <span><b>B9</b> · the <b>optimiser</b> (<code>agents/optimiser/</code>, Sonnet 5 medium) and <code>dab optimise &lt;run&gt; --into v2_sql</code>: one session per dataset writes <code>datasets/&lt;ds&gt;.md</code> (+ D31's pass); the guards; the prompt gains the notes block; then run <code>v2_sql</code> 54 × 1. CLAUDE.md's two rules are updated</span></label>
+    <label><input type="checkbox" name="items" value="B10" data-label="dab promote: best answer accuracy on 54 among v0 / v1_sql / v2_sql wins (tie keeps the incumbent); move agents/champion and the MLflow champion alias; record the verdict"> <span><b>B10</b> · <code>dab promote</code>: the best answer accuracy on 54 among v0, v1_sql and v2_sql wins (a tie keeps the incumbent); move <code>agents/champion</code> and the MLflow <code>champion</code> alias; record the verdict</span></label>
+    <label><input type="checkbox" name="items" value="B11" data-label="s07 Lavish walkthrough from explorer screenshots: runs compared, scorecard, agent SQL vs golden, system.md v1->v2 diff, promotion verdict; add any explorer view the story needs"> <span><b>B11</b> · on completion: <b>s07</b>, a Lavish walkthrough told with explorer screenshots (runs compared, the scorecard, a trial's agent SQL beside the golden, the <code>system.md</code> diff v1 → v2, the promotion verdict), adding any explorer view the story needs</span></label>
+    <textarea placeholder="anything to change (optional)"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue the ticked items</button><span class="queued"></span></div>
+  </form>
+</section>
 
 <!-- ================================================= IMPACT -->
 <section class="blk" id="impact">
@@ -359,10 +701,9 @@ pre.sql{background:var(--band);border-radius:var(--r-sm);padding:var(--s4);font-
 </svg>
     <figcaption><span class="lg"><i class="sw b"></i> agent passed</span> <span class="lg"><i class="sw ok"></i> golden exact</span> <span class="lg"><i class="sw mid"></i> golden partial</span> <span class="lg"><i class="sw bad"></i> no working golden</span><br>The gap between the two bars is the headroom a SQL-first challenger can aim at: <b>patents 0/3 → 3/3 exact</b>, <b>googlelocal 1/4 → 4/4</b>, <b>music_brainz_20k 1/3 → 3/3</b>, <b>deps_dev_v1 0/2 → 2/2</b>, <b>github_repos 2/4 → 4/4 exact</b>. agnews is the one dataset SQL cannot reach.</figcaption>
   </figure>
-  <div class="grid g3" style="margin-top:var(--s5)">
+  <div class="grid g2" style="margin-top:var(--s5)">
     <div class="panel card"><h3>What the goldens are for</h3><p>Each golden is the reference path to its answer: the tables, joins, text patterns and filters that work. A challenger's trace can be compared with it query by query (s03's trace-vs-golden step), and a failure now has a concrete "what it should have done". Goldens stay in <code>dataagentbench_meta</code>: never in a prompt, the pack or the curator.</p></div>
     <div class="panel card"><h3>Why the agent fails where SQL succeeds</h3><p>The spike's notes name concrete causes, and most are teachable without an answer: regex that ignores thousands separators (deps_dev_v1/2), 1 of ~100 sentence templates parsed (patents/2), <code>ILIKE '%x%'</code> joins that match the wrong row, whole-day rounding that makes ties (crmarenapro/9), one date format of three (googlelocal/4), and <code>llm_extract</code> where a regex reads the template exactly.</p></div>
-    <div class="panel card pro"><h3>What it found beyond goldens</h3><p><b>Our loader leaves 38 tickers out of <code>stockmarket_stocktrade_all</code></b>, which cost the champion two questions (D25). <b><code>match_gold</code></b> called an empty result "reordered" (fixed, tested). Upstream: pancancer_atlas/1's gold groups by the ICD-O-3 code, which is why 0 of 270 trials pass; github_repos/2's validator slides a 21-character window, so the bare 18-character answer could never pass (our judge now renders a single value under the header the gold file writes, and it passes exactly); three golds spell names that aren't in the data.</p></div>
   </div>
   <div class="panel" style="margin-top:var(--s4)">
     <p class="label">in the explorer now · <a href="http://localhost:8091/golden">/golden</a></p>
@@ -475,7 +816,7 @@ pre.sql{background:var(--band);border-radius:var(--r-sm);padding:var(--s4);font-
 <!-- ================================================= SQL -->
 <section class="blk" id="sql">
   <div class="hd">
-    <p class="label">04 · the golden SQL · loaded as proposal #30, not saved</p>
+    <p class="label">04 · the golden SQL · saved as deps_dev_v1/1's golden (from proposal #30)</p>
     <h2>One statement, three CTEs on the hints' path, and a tiebreak stated in a comment</h2>
   </div>
   <div class="grid g2">
@@ -511,7 +852,7 @@ select &quot;Name&quot;, &quot;Version&quot;
 from release_stars
 order by stars desc, &quot;Name&quot; desc  -- 95 lodash/lodash packages tie at 5th (57779 stars); Name desc picks one
 limit 5</pre>
-      <div class="copyrow"><button class="btn" type="button" onclick="navigator.clipboard.writeText(document.getElementById('sqlA').innerText);this.textContent='Copied'">Copy the SQL</button><span class="small">It's already the proposal at <a href="http://localhost:8091/golden/deps_dev_v1/1">/golden/deps_dev_v1/1</a>: Run and check, then Confirm the proposal as golden</span></div>
+      <div class="copyrow"><button class="btn" type="button" onclick="navigator.clipboard.writeText(document.getElementById('sqlA').innerText);this.textContent='Copied'">Copy the SQL</button><span class="small">Saved as the golden at <a href="http://localhost:8091/golden/deps_dev_v1/1">/golden/deps_dev_v1/1</a></span></div>
     </div>
     <div class="panel">
       <h3>Result from the Golden route</h3>
@@ -540,7 +881,7 @@ order by stars desc, &quot;Name&quot; desc</pre>
   <div class="hd">
     <p class="label">05 · the spike, run · the 27 questions the champion failed with no golden</p>
     <h2>The method turns 22 of 27 failed questions into passing SQL: 17 recreate the gold exactly, and 4 are out of reach because the category isn't in the data</h2>
-    <p class="small">Denominator: the 27 questions with no golden, all failed by the champion (0 of 1 each). "Pooled" is the published pass rate across the leaderboard's trials, so it shows how hard each one is. Every row is a proposal in the Golden tab (click the id), run and judged again on load. <b>None is saved.</b> Before loading, a check that no gold value appears word for word in the SQL came back clean for all but stockindex/3, whose index → country map is declared in the note.</p>
+    <p class="small">Denominator: the 27 questions with no golden, all failed by the champion (0 of 1 each). "Pooled" is the published pass rate across the leaderboard's trials, so it shows how hard each one is. Every row was a proposal, run and judged again on load; you have since saved 22 of the 27 as goldens (click an id to open it). Before loading, a check that no gold value appears word for word in the SQL came back clean for all but stockindex/3, whose index → country map is declared in the note.</p>
   </div>
   <figure class="fig" style="margin-top:0">
     <p class="fig-title">27 failed questions after the method, by result</p>
@@ -587,7 +928,7 @@ order by stars desc, &quot;Name&quot; desc</pre>
     <div class="panel card pro"><h3>§5b · our loader drops 38 stockmarket tables from <code>stocktrade_all</code></h3><p><code>load.py:253</code> builds the union table from the largest group of per-ticker tables with <b>identical column types</b>. 2,715 tickers have <code>Volume bigint</code>; the <b>38</b> with <code>Volume double precision</code> (SDOW, FTFT, FTR …) are left out, yet the pack describes the table as the whole family. That alone cost the champion stockmarket/2 and /3. The fix is to group by column names and widen the types (bigint → double). It changes what the agent queries, so it's a re-load plus a re-baseline, and it's decision D25 below.</p></div>
     <div class="panel card"><h3>Gold and validator problems the spike found</h3><ul class="tight">
       <li><b>pancancer_atlas/1</b> (0 of 270): the gold groups by the ICD-O-3 code, while the question's "histology types" reads as the text column.</li>
-      <li><b>github_repos/2</b>: the validator needs 21 characters around an 18-character answer, so a bare correct answer always fails.</li>
+      <li><b>github_repos/2</b>: the validator needs 21 characters around an 18-character answer, so a bare correct answer always fails. Fixed on our side (175ca4e): a single value is rendered under the header the gold file writes, and the saved golden now passes exactly.</li>
       <li><b>deps_dev_v1/1, /2</b>: a tie and version picks that no column reproduces.</li>
       <li><b>stockmarket/2, yelp/4</b>: gold names spelled differently from the data.</li>
       <li><b>agnews/1–4</b>: the answers need an article category the database doesn't hold. The released benchmark expects an LLM step here.</li>
@@ -600,17 +941,9 @@ order by stars desc, &quot;Name&quot; desc</pre>
 <section class="blk" id="decide">
   <div class="hd">
     <p class="label">06 · decide</p>
-    <h2>How ties are handled, whether to fix the loader, and what is left</h2>
+    <h2>Still open: the stockmarket loader fix and two follow-ups</h2>
   </div>
-  <form class="q" data-lavish-question="D24" onsubmit="event.preventDefault(); const c=new FormData(event.currentTarget).get('d24'); const note=event.currentTarget.querySelector('textarea').value.trim(); if(!c)return; window.lavish.queuePrompt('D24 · deps_dev_v1/1 tie: '+c+(note?' — note: '+note:''), {tag:'choice', text:'D24: '+c, element:event.currentTarget, data:{question:'D24', answer:c, note}}); event.currentTarget.querySelector('.queued').textContent='queued: '+c+' — press Send to Agent';">
-    <h3>D24 · a top-N with a tie at the cutoff: which golden?</h3>
-    <p class="why">This is also the rule for any other question in the spike that ends on a tie.</p>
-    <label><input type="radio" name="d24" value="A · five rows, tiebreak Name desc stated in a comment (proposal #30 as loaded)" checked> <span><b>A · five rows, a stated tiebreak</b> <span class="rec">recommended</span><br><span class="small">The gold's shape (5 rows) and the validator passes. Gold match "differs" on one row, and the note says why. You confirm #30 as it is.</span></span></label>
-    <label><input type="radio" name="d24" value="B · every row ranked in the top 5 (rank() <= 5, 99 rows)"> <span><b>B · every row ranked in the top 5</b><br><span class="small">It doesn't choose among equals. The validator passes, and the result is 99 rows against 5. I'd reload #30 with the rank() ending.</span></span></label>
-    <label><input type="radio" name="d24" value="C · name the gold's package to force an exact match"> <span><b>C · name the gold's package</b><br><span class="small">Gold match "exact", but only by writing the answer in. Not recommended.</span></span></label>
-    <textarea placeholder="anything else (optional)"></textarea>
-    <div class="row"><button class="btn" type="submit">Queue this answer</button><span class="queued"></span></div>
-  </form>
+  <p class="small"><b>D24 · decided A</b> by your save: deps_dev_v1/1's golden is proposal #30, five rows with the <code>Name desc</code> tiebreak stated in a comment. The same rule applies to any other top-N that ends on a tie.</p>
 
   <form class="q" data-lavish-question="D25" onsubmit="event.preventDefault(); const c=new FormData(event.currentTarget).get('d25'); const note=event.currentTarget.querySelector('textarea').value.trim(); if(!c)return; window.lavish.queuePrompt('D25 · stocktrade_all loader bug: '+c+(note?' — note: '+note:''), {tag:'choice', text:'D25: '+c, element:event.currentTarget, data:{question:'D25', answer:c, note}}); event.currentTarget.querySelector('.queued').textContent='queued: '+c+' — press Send to Agent';">
     <h3>D25 · fix the stockmarket union table (§5b)?</h3>
@@ -622,12 +955,11 @@ order by stars desc, &quot;Name&quot; desc</pre>
     <div class="row"><button class="btn" type="submit">Queue this answer</button><span class="queued"></span></div>
   </form>
 
-  <form class="q" data-lavish-question="next" onsubmit="event.preventDefault(); const sel=[...event.currentTarget.querySelectorAll('input[name=items]:checked')].map(i=>({id:i.value,label:i.dataset.label,disposition:'build'})); const skip=[...event.currentTarget.querySelectorAll('input[name=items]:not(:checked)')].map(i=>i.value); const note=event.currentTarget.querySelector('textarea').value.trim(); window.lavish.queuePrompt('Build exactly the ticked items from s06 §6 and give an item-by-item receipt covering every id, ticked or not: '+sel.map(s=>s.id).join(', ')+(skip.length?' · skipped: '+skip.join(', '):'')+(note?' · note: '+note:''), {tag:'tracked-batch', text:'s06 next: '+sel.length+' of 3', element:event.currentTarget, data:{items:sel, skipped:skip, note}}); event.currentTarget.querySelector('.queued').textContent='queued: '+sel.length+' to build — press Send to Agent';">
+  <form class="q" data-lavish-question="next" onsubmit="event.preventDefault(); const sel=[...event.currentTarget.querySelectorAll('input[name=items]:checked')].map(i=>({id:i.value,label:i.dataset.label,disposition:'build'})); const skip=[...event.currentTarget.querySelectorAll('input[name=items]:not(:checked)')].map(i=>i.value); const note=event.currentTarget.querySelector('textarea').value.trim(); window.lavish.queuePrompt('Build exactly the ticked items from s06 §6 and give an item-by-item receipt covering every id, ticked or not: '+sel.map(s=>s.id).join(', ')+(skip.length?' · skipped: '+skip.join(', '):'')+(note?' · note: '+note:''), {tag:'tracked-batch', text:'s06 next: '+sel.length+' of 2', element:event.currentTarget, data:{items:sel, skipped:skip, note}}); event.currentTarget.querySelector('.queued').textContent='queued: '+sel.length+' to build — press Send to Agent';">
     <h3>Tracked batch · what's left from the spike</h3>
-    <p class="why">P2 and P3 are done: the 26 are loaded, and each note records the gold-in-CTE check and the parse coverage. Nothing here saves a golden.</p>
+    <p class="why">Done already: P2 and P3 (the 26 loaded, each note with the gold-in-CTE check and parse coverage) and P5 (committed in 175ca4e).</p>
     <label><input type="checkbox" name="items" value="P1" data-label="golden-propose flags SQL that contains a gold cell as a literal; the Golden tab shows the flag" checked> <span><b>P1</b> · build the gold-literal guard into <code>dab golden-propose</code> and the Golden tab. It ran as a one-off script this time.</span></label>
     <label><input type="checkbox" name="items" value="P4" data-label="draft upstream issues for the gold/validator problems (pancancer_atlas/1, github_repos/2, deps_dev_v1/1-2, stockmarket/2, yelp/4, agnews category)"> <span><b>P4</b> · draft (not file) upstream issues for the gold and validator problems in §5, like #86</span></label>
-    <label><input type="checkbox" name="items" value="P5" data-label="commit the match_gold empty-result fix and s06"> <span><b>P5</b> · commit the <code>match_gold</code> fix (with its test) and this page</span></label>
     <textarea placeholder="anything to change (optional)"></textarea>
     <div class="row"><button class="btn" type="submit">Queue the ticked items</button><span class="queued"></span></div>
   </form>
