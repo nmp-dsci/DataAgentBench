@@ -5,6 +5,7 @@
   --line:#DCDAD2; --line-2:#C7C5BC; --line-3:#8A8880;
   --accent:#0A6552; --accent-ink:#FFFFFF; --accent-soft:#DFEFE8;
   --amber:#8A5006; --amber-soft:#F6E6CF;
+  --red:#A2342B; --red-soft:#F6DEDB; /* project extension: missing / failed (DESIGN.md §2 Colour) */
   --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
   --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
   --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -21,6 +22,7 @@
   --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
   --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
   --amber:#D99A4E; --amber-soft:#3A2A14;
+  --red:#E8776B; --red-soft:#3D1D1A;
   --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
 }}
 :root[data-theme="dark"]{
@@ -29,6 +31,7 @@
   --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
   --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
   --amber:#D99A4E; --amber-soft:#3A2A14;
+  --red:#E8776B; --red-soft:#3D1D1A;
   --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
 }
 @media (prefers-reduced-motion: reduce){ :root{ --dur:0.01ms; } }

@@ -76,6 +76,10 @@ ONE INSIGHT LINE    — what it means, once, in under 25 words
   borders that carry no status, never a diagram fill without meaning.
 - **`--amber` means exactly one thing: partial** (a warning, a caveat, a
   provisional number). `--line-3` outlines mean **designed, not built**.
+- **`--red` means exactly one thing: missing or failed**, and only inside a
+  green / amber / red composition (a stacked bar that splits a whole into
+  done, partial and not done). Added 2026-09-24 for the Golden tab's coverage
+  chart; it is this project's extension to the site palette, not a site token.
 - Status is never colour alone; every glyph is accompanied by the word.
 - Light is the reference palette; dark redefines colour only. Every text and
   surface pair holds 4.5:1 in both themes (3:1 for meaningful borders).
@@ -171,6 +175,7 @@ follows it. Fonts load from Google Fonts in artifacts (the site self-hosts).
   --line:#DCDAD2; --line-2:#C7C5BC; --line-3:#8A8880;
   --accent:#0A6552; --accent-ink:#FFFFFF; --accent-soft:#DFEFE8;
   --amber:#8A5006; --amber-soft:#F6E6CF;
+  --red:#A2342B; --red-soft:#F6DEDB; /* project extension: missing / failed (§2 Colour) */
   --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
   --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
   --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -187,6 +192,7 @@ follows it. Fonts load from Google Fonts in artifacts (the site self-hosts).
   --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
   --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
   --amber:#D99A4E; --amber-soft:#3A2A14;
+  --red:#E8776B; --red-soft:#3D1D1A;
   --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
 }}
 :root[data-theme="dark"]{ /* same values as the dark block above */ }

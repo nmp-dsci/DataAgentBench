@@ -136,8 +136,10 @@ export type GoldenRow = {
 export type GoldenKind = 'answer' | 'evidence';
 export type ProposalBrief = { id: number; kind: GoldenKind; passed: boolean | null; gold_match: GoldMatch | ''; duration_ms: number | null; created_at: string };
 export type Proposal = ProposalBrief & { query_id: string; sql: string; expected_answer: string; answer_text: string; reason: string; row_count: number | null; error: string | null; replaces: string; note: string; author: string };
+/** One line of the gold-vs-result diff: `del` gold only, `add` result only; `changed` = differing cell indexes of a paired line. */
+export type GoldDiffLine = { op: 'eq' | 'del' | 'add'; gold: number | null; result: number | null; text: string; changed?: number[] };
 export type GoldMatch = 'exact' | 'exact_values' | 'reordered' | 'differs';
-export type GoldenBrief = { passed: boolean | null; gold_match: GoldMatch | ''; created_at: string; versions: number; author: string; note: string; kind: GoldenKind };
+export type GoldenBrief = { passed: boolean | null; gold_match: GoldMatch | ''; created_at: string; versions: number; author: string; note: string; kind: GoldenKind; source: string; origin: string /* where the SQL first came from, through re-saves */ };
 export type GoldenList = { queries: (QuerySummary & { golden: GoldenBrief | null; proposal: ProposalBrief | null })[]; n: number; written: number; evidence: number; proposed: number; passing: number; exact: number };
 export type GoldenOne = { query: QuerySummary; hints: string; current: GoldenRow | null; history: GoldenRow[]; proposal: Proposal | null };
 export type GoldenAttempt = {
@@ -145,6 +147,7 @@ export type GoldenAttempt = {
   answer_text: string;
   verdict: { passed: boolean | null; reason: string; timed_out?: boolean };
   gold_match: { match: GoldMatch | ''; detail: string };
+  gold_diff: GoldDiffLine[]; // empty when the result recreates the gold (or is evidence, or errored)
   kind: GoldenKind;
   saved?: { id: number; created_at: string };
 };

@@ -263,6 +263,7 @@ def create_app(index: Index | None = None) -> FastAPI:
 
         cur = _golden_db(golden.current)
         props = _golden_db(golden.proposals)
+        starts = _golden_db(golden.origins)
         rows = []
         for q in ix.queries:
             g = cur.get(q["id"])
@@ -281,8 +282,10 @@ def create_app(index: Index | None = None) -> FastAPI:
                             "author",
                             "note",
                             "kind",
+                            "source",
                         )
-                    },
+                    }
+                    | {"origin": starts.get(q["id"], g["source"])},
                     "proposal": None
                     if (p := props.get(q["id"])) is None
                     else {

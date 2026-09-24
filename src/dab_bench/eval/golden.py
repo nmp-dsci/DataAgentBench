@@ -23,9 +23,11 @@ import json
 import re
 import time
 from concurrent.futures import ProcessPoolExecutor
+from contextlib import suppress
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from decimal import Decimal
+from difflib import SequenceMatcher
 from typing import Any
 
 import psycopg
@@ -180,6 +182,24 @@ def render(columns: list[str], rows: list[list[Any]]) -> str:
     return "\n".join(lines)
 
 
+def render_like_gold(columns: list[str], rows: list[list[Any]], gold_text: str) -> str:
+    """`render`, but a single value keeps its column name above it when the gold file writes
+    the answer that way (a header line naming the same column, then the value). Some validators
+    slide a window longer than a bare value (github_repos/2: 18 characters against a 21-character
+    window), so the bare value fails although it is the gold's own answer."""
+    text = render(columns, rows)
+    gold = [ln.strip() for ln in gold_text.lstrip("\ufeff").strip().splitlines() if ln.strip()]
+    if (
+        len(columns) == 1
+        and len(rows) == 1
+        and len(gold) == 2
+        and "," not in gold[0]
+        and _cells_equal(gold[0], columns[0])
+    ):
+        return f"{columns[0]}\n{text}"
+    return text
+
+
 def _cells_equal(a: str, b: str) -> bool:
     a, b = a.strip().lower(), b.strip().lower()
     if a == b:
@@ -217,6 +237,8 @@ def match_gold(columns: list[str], rows: list[list[Any]], gold_text: str) -> dic
     header = ",".join(columns)
     if not gold:
         return {"match": "differs", "detail": "the gold answer is empty"}
+    if not body:
+        return {"match": "differs", "detail": f"no rows against {len(gold)} gold line(s)"}
     if _lines_equal(body, gold) or _lines_equal([header, *body], gold):
         return {"match": "exact", "detail": f"all {len(gold)} gold line(s), in order"}
     if len(gold) > 1 and _lines_equal(body, gold[1:]):
@@ -231,6 +253,89 @@ def match_gold(columns: list[str], rows: list[list[Any]], gold_text: str) -> dic
         "match": "differs",
         "detail": f"{len(body)} result row(s) against {n_gold} gold line(s)",
     }
+
+
+def _line_key(line: str) -> tuple[str, ...]:
+    """A line as difflib should see it: cells compared as `_cells_equal` does, numbers
+    rounded to 9 significant digits (a pair that straddles a rounding edge is re-checked
+    cell by cell below, so it cannot show as a change)."""
+    cells = []
+    for c in line.split(","):
+        c = c.strip().lower()
+        with suppress(ValueError):
+            c = f"{float(c):.9g}"
+        cells.append(c)
+    return tuple(cells)
+
+
+def gold_diff(columns: list[str], rows: list[list[Any]], gold_text: str) -> list[dict[str, Any]]:
+    """The gold against the result, line by line, the way a code review shows a change:
+    `del` is a gold line the result lacks, `add` a result line the gold lacks, `eq` a line
+    both have. A gold line and a result line that pair up carry `changed`, the indexes of the
+    cells that differ. The result side opens with its header only when that lines up better
+    with the gold (a gold file may or may not have one)."""
+    gold = [ln.strip() for ln in gold_text.lstrip("﻿").strip().splitlines() if ln.strip()]
+    body = [",".join(_text(v) for v in r) for r in rows[:RENDER_ROWS]]
+    gold_keys = [_line_key(g) for g in gold]
+
+    def matcher(side: list[str]) -> SequenceMatcher[tuple[str, ...]]:
+        return SequenceMatcher(None, gold_keys, [_line_key(x) for x in side], autojunk=False)
+
+    sides = [body, [",".join(columns), *body]] if body else [body]
+    result = max(sides, key=lambda s: matcher(s).ratio())
+    out: list[dict[str, Any]] = []
+
+    def same(gi: int, ri: int) -> None:
+        out.append({"op": "eq", "gold": gi + 1, "result": ri + 1, "text": result[ri]})
+
+    for tag, g0, g1, r0, r1 in matcher(result).get_opcodes():
+        if tag == "equal":
+            for k in range(g1 - g0):
+                same(g0 + k, r0 + k)
+            continue
+        pairs = min(g1 - g0, r1 - r0) if tag == "replace" else 0
+        dels: list[dict[str, Any]] = []
+        adds: list[dict[str, Any]] = []
+        for k in range(max(g1 - g0, r1 - r0)):
+            gi = g0 + k if k < g1 - g0 else None
+            ri = r0 + k if k < r1 - r0 else None
+            if k < pairs and gi is not None and ri is not None:
+                gc, rc = gold[gi].split(","), result[ri].split(",")
+                width = max(len(gc), len(rc))
+                changed = [
+                    i
+                    for i in range(width)
+                    if i >= len(gc) or i >= len(rc) or not _cells_equal(gc[i], rc[i])
+                ]
+                if not changed:  # equal once compared cell by cell
+                    out.extend(dels + adds)
+                    dels, adds = [], []
+                    same(gi, ri)
+                    continue
+                dels.append(
+                    {
+                        "op": "del",
+                        "gold": gi + 1,
+                        "result": None,
+                        "text": gold[gi],
+                        "changed": changed,
+                    }
+                )
+                adds.append(
+                    {
+                        "op": "add",
+                        "gold": None,
+                        "result": ri + 1,
+                        "text": result[ri],
+                        "changed": changed,
+                    }
+                )
+            elif gi is not None:
+                dels.append({"op": "del", "gold": gi + 1, "result": None, "text": gold[gi]})
+            elif ri is not None:
+                adds.append({"op": "add", "gold": None, "result": ri + 1, "text": result[ri]})
+        out.extend(dels + adds)  # a hunk reads gold lines first, then the result's, as in a review
+    return out
 
 
 _POOL: ProcessPoolExecutor | None = None
@@ -257,7 +362,7 @@ def attempt(
     if kind not in KINDS:
         raise ValueError(f"kind must be one of {KINDS}")
     ex = execute(sql)
-    answer = render(ex.columns, ex.rows)
+    answer = render_like_gold(ex.columns, ex.rows, q.get("gold_text", ""))
     if ex.error:
         verdict: dict[str, Any] = {"passed": None, "reason": ex.error}
     elif kind == "evidence":
@@ -277,6 +382,10 @@ def attempt(
         "answer_text": answer,
         "verdict": verdict,
         "gold_match": gold,
+        # a line diff against the gold whenever the result does not recreate it
+        "gold_diff": []
+        if ex.error or kind == "evidence" or gold["match"] in ("exact", "exact_values")
+        else gold_diff(ex.columns, ex.rows, q["gold_text"]),
         "kind": kind,
     }
     return out, ex
@@ -374,6 +483,31 @@ def current() -> dict[str, dict[str, Any]]:
                 order by query_id, id desc"""  # type: ignore[arg-type,unused-ignore]
         ).fetchall()
     return {r[1]: _row(r[:-1]) | {"versions": r[-1]} for r in rows}
+
+
+def origin(source: str, sources: dict[int, str]) -> str:
+    """Where a golden's SQL first came from: a save that started from an earlier golden
+    (`golden #n`) is followed back to that golden's own start (a proposal, a run's trial, or
+    '' for written by hand)."""
+    seen: set[int] = set()
+    while (m := re.fullmatch(r"golden #(\d+)", source)) and int(m[1]) in sources:
+        if int(m[1]) in seen:
+            break
+        seen.add(int(m[1]))
+        source = sources[int(m[1])]
+    return source
+
+
+def origins() -> dict[str, str]:
+    """`origin` of every question's current golden."""
+    ensure_table()
+    with pg.connect() as con:
+        rows = con.execute(
+            f"select id, query_id, source from {PG_META_SCHEMA}.{GOLDEN_TABLE} order by id"  # type: ignore[arg-type,unused-ignore]
+        ).fetchall()
+    sources = {i: src for i, _, src in rows}
+    newest = {q: src for _, q, src in rows}  # ordered by id: the last one wins
+    return {q: origin(src, sources) for q, src in newest.items()}
 
 
 def history(query_id: str) -> list[dict[str, Any]]:

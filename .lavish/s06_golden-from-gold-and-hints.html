@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>s06 · DataAgentBench — golden from gold, hints and the run</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Design source (2): the project's own system — DESIGN.md ("Field Guide"), tokens verbatim,
+   the same block s00–s03 and frontend/src/tokens.css carry. */
+:root{
+  --bg:#F7F6F2; --panel:#FFFFFF; --band:#EFEEE8;
+  --ink:#1A1D1B; --ink-2:#3B403D; --muted:#4A514D; --faint:#5C635E;
+  --line:#DCDAD2; --line-2:#C7C5BC; --line-3:#8A8880;
+  --accent:#0A6552; --accent-ink:#FFFFFF; --accent-soft:#DFEFE8;
+  --amber:#8A5006; --amber-soft:#F6E6CF;
+  --red:#A2342B; --red-soft:#F6DEDB;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --t-2:0.8rem; --t-1:0.875rem; --t0:1rem; --t1:1.125rem; --t2:1.406rem; --t3:1.758rem; --t4:2.197rem;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --r:10px; --r-sm:6px;
+  --shadow:0 1px 2px rgb(20 25 22 / .05), 0 12px 28px -18px rgb(20 25 22 / .22);
+  --dur:300ms; --ease:cubic-bezier(.2,.7,.2,1); --focus:var(--accent);
+  --w:1140px; --measure:68ch; --track-label:.08em;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121614; --panel:#191E1B; --band:#161A18;
+    --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+    --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+    --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+    --amber:#D99A4E; --amber-soft:#3A2A14;
+    --red:#E8776B; --red-soft:#3D1D1A;
+    --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121614; --panel:#191E1B; --band:#161A18;
+  --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+  --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+  --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+  --amber:#D99A4E; --amber-soft:#3A2A14;
+  --red:#E8776B; --red-soft:#3D1D1A;
+  --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+}
+@media (prefers-reduced-motion: reduce){ :root{ --dur:0.01ms; } }
+*,*::before,*::after{box-sizing:border-box}
+:where(.grid,.flex,.kpi,.cards,.mock-body,.mock-cols,.mock-top,.ladder)>*{min-width:0}
+:where(p,h1,h2,h3,h4,li,dd,figcaption,td,th,.chip,.label){overflow-wrap:anywhere}
+:where(img,svg,video,iframe){max-width:100%;height:auto}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink-2);font-family:var(--sans);font-size:var(--t0);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{color:var(--ink);margin:0;line-height:1.15;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+h1{font-size:var(--t4);font-family:var(--serif);font-weight:400} h1 em{font-style:italic;font-weight:400;color:var(--accent)}
+h2{font-size:var(--t3)} h3{font-size:var(--t1)} h4{font-size:var(--t0)}
+p{margin:0 0 var(--s4);text-wrap:pretty}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:.2em} a:hover{text-decoration-thickness:2px}
+strong,b{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:max(var(--t-2),.86em);background:var(--band);padding:.08em .32em;border-radius:var(--r-sm);color:var(--ink-2)}
+pre{margin:0;font-family:var(--mono);font-size:var(--t-2);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.wrap{max-width:var(--w);margin-inline:auto;padding-inline:var(--s5)}
+.label{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0}
+.lead{font-family:var(--serif);font-size:var(--t1);line-height:1.5;color:var(--ink-2);max-width:72ch}
+.small{font-size:var(--t-1);color:var(--muted)}
+.top{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:var(--w);margin-inline:auto;padding:var(--s3) var(--s5);display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.top b{font-family:var(--mono);font-size:var(--t-1);color:var(--ink);white-space:nowrap}
+.top nav{display:flex;gap:var(--s4);margin-left:auto;flex-wrap:wrap;font-size:var(--t-1);font-weight:500}
+.top nav a{color:var(--ink-2);text-decoration:none;padding:var(--s1) 0} .top nav a:hover{color:var(--accent)}
+header.hero{padding:var(--s7) 0 var(--s5)}
+.chips{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s4) 0 0}
+.chip{font-family:var(--mono);font-size:var(--t-2);padding:.3em .6em;border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--ink-2);background:var(--panel)}
+.chip.ok{border-color:var(--accent);color:var(--accent)} .chip.warn{border-color:var(--amber);color:var(--amber)}
+section.blk{padding-top:var(--s8)} section.blk:last-of-type{padding-bottom:var(--s9)}
+section.band-sec{background:var(--band);margin-top:var(--s8);padding:var(--s7) 0}
+section.band-sec + section.blk{padding-top:var(--s7)}
+.hd{margin-bottom:var(--s5);max-width:80ch} .hd .label{margin-bottom:var(--s2)} .hd h2{margin-bottom:var(--s3)}
+.panel{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5)}
+.grid{display:grid;gap:var(--s4)} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.g3,.g2{grid-template-columns:minmax(0,1fr)}}
+.card h3{margin-bottom:var(--s2)} .card p{margin-bottom:var(--s2);font-size:var(--t-1)} .card p:last-child{margin:0}
+.card.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r);box-shadow:var(--shadow);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:var(--t-1)}
+caption{text-align:left;padding:var(--s4) var(--s5) var(--s2);color:var(--muted);font-size:var(--t-1);caption-side:top}
+th,td{text-align:left;padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}
+thead th{font-family:var(--mono);font-size:var(--t-2);font-weight:500;color:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase;border-bottom:1px solid var(--line-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.sub{font-weight:600;color:var(--ink);white-space:nowrap}
+td.num{font-family:var(--mono);font-size:var(--t-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+td .path{display:block;font-family:var(--mono);font-size:var(--t-2);color:var(--faint);font-weight:400;margin-top:2px}
+td.mono,td code.u{font-family:var(--mono);font-size:var(--t-2)}
+code.u{background:none;padding:0;color:var(--ink)} code.u s{color:var(--faint);text-decoration:line-through}
+tr.pro td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+tr.dim td{color:var(--muted)}
+.v-ok{color:var(--accent);font-weight:600} .v-no{color:var(--muted)} .v-warn{color:var(--amber);font-weight:600}
+blockquote{margin:0;padding:var(--s3) var(--s4);border-left:2px solid var(--accent);background:var(--band);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:var(--t-1)}
+blockquote.warn{border-left-color:var(--amber)}
+.fig{margin:var(--s5) 0 0}
+.fig-title{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0 0 var(--s3);text-wrap:balance}
+.fig figcaption{font-family:var(--sans);font-size:var(--t-1);color:var(--muted);line-height:1.5;margin-top:var(--s3)}
+.fig figcaption b{color:var(--ink);font-weight:600}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:var(--s3)}
+.steps li{position:relative;padding-left:2.75rem;font-size:var(--t-1)}
+.steps li::before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:0;top:2px;font-family:var(--mono);color:var(--accent);font-weight:500}
+form.q{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5);display:grid;gap:var(--s3);margin-top:var(--s4)}
+form.q h3{margin:0} form.q .why{font-size:var(--t-1);color:var(--muted);margin:0}
+form.q label{display:grid;grid-template-columns:1.2rem minmax(0,1fr);gap:var(--s2);align-items:start;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;min-height:24px}
+form.q label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+form.q input[type=radio],form.q input[type=checkbox]{margin:3px 0 0;accent-color:var(--accent);width:16px;height:16px}
+form.q textarea{width:100%;font:inherit;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);color:var(--ink-2);min-height:3.2rem;resize:vertical}
+form.q .row{display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap}
+.btn{font:500 var(--t-1) var(--sans);background:var(--accent);color:var(--accent-ink);border:0;border-radius:var(--r-sm);padding:.55em 1em;cursor:pointer;min-height:24px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.08)} .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.queued{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);min-height:1.2em}
+.rec{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);margin-left:.4em}
+.tag{font-family:var(--mono);font-size:var(--t-2);padding:.15em .45em;border-radius:var(--r-sm);border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.tag.ok{border-color:var(--accent);color:var(--accent)} .tag.warn{border-color:var(--amber);color:var(--amber)} .tag.no{border-color:var(--line-3);color:var(--muted)}
+ul.tight{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.tight li{margin-bottom:var(--s1)}
+ul.qa{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.qa li{margin-bottom:var(--s2)}
+.code{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);margin-top:var(--s3);overflow-x:auto}
+.code .label{margin-bottom:var(--s2)}
+.code.band{background:var(--band)}
+.kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4);margin-top:var(--s5)}
+@media (max-width:900px){.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi .n{font-family:var(--serif);font-size:var(--t3);color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:var(--t-1);color:var(--muted);margin-top:var(--s1)}
+
+/* the hackable-address ladder */
+.ladder{display:grid;gap:var(--s2);margin-top:var(--s3)}
+.ladder .rung{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--s3);align-items:baseline;padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel);font-family:var(--mono);font-size:var(--t-2)}
+.ladder .rung .u{color:var(--ink)} .ladder .rung .u b{color:var(--accent);font-weight:500}
+.ladder .rung .w{font-family:var(--sans);color:var(--muted);font-size:var(--t-2);text-align:right;white-space:nowrap}
+@media (max-width:640px){.ladder .rung{grid-template-columns:minmax(0,1fr)} .ladder .rung .w{text-align:left;white-space:normal}}
+
+/* the mock of the explorer page, in the explorer's own styles */
+.addr{font-family:var(--mono);font-size:var(--t-2);color:var(--ink);background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:var(--s2) var(--s3);margin-top:var(--s4);display:flex;gap:var(--s2);align-items:center}
+.addr .lock{color:var(--faint)} .addr b{color:var(--accent);font-weight:500}
+.mock{background:var(--bg);border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin-top:var(--s2)}
+.mock-top{display:flex;gap:var(--s4);align-items:center;padding:var(--s2) var(--s4);border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 88%,transparent);font-size:var(--t-2);flex-wrap:wrap}
+.mock-top .brand{font-family:var(--mono);color:var(--ink);font-weight:500}
+.mock-top nav{display:flex;gap:var(--s3);flex-wrap:wrap} .mock-top nav span{color:var(--ink-2)} .mock-top nav span.on{color:var(--accent);border-bottom:2px solid var(--accent)}
+.mock-body{padding:var(--s4)}
+.mock h1{font-size:var(--t2)} .mock .label{font-size:.7rem}
+.mock .ed{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent);padding:var(--s4);margin:var(--s3) 0 var(--s4);display:grid;gap:var(--s2)}
+.mock .ed .hdr{display:flex;gap:var(--s3);align-items:baseline;flex-wrap:wrap;font-size:var(--t-1)}
+.mock .ed .hdr b{font-family:var(--mono);font-weight:500;color:var(--ink)} .mock .ed .hdr .nav{margin-left:auto;display:flex;gap:var(--s3);font-size:var(--t-2)}
+.mock .ed .hdr .nav a{text-decoration:underline}
+.mock .ed .qtext{font-size:var(--t-1);color:var(--ink-2);margin:0}
+.mock .ed .ta{font-family:var(--mono);font-size:var(--t-2);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);padding:var(--s2) var(--s3);min-height:4.4rem;color:var(--ink-2);white-space:pre-wrap}
+.mock .ed .row{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}
+.mock .ed .btn{font-size:var(--t-2);padding:.4em .8em} .mock .ed .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.mock table{min-width:0;font-size:var(--t-2)} .mock th,.mock td{padding:var(--s2) var(--s3)}
+.mock tr.cur td{background:var(--accent-soft)} .mock tr.cur td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.mock .tw{box-shadow:none;border:1px solid var(--line)}
+.cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.cmp{grid-template-columns:minmax(0,1fr)}}
+.cmp .side{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s4)}
+.cmp .side h4{margin-bottom:var(--s2)} .cmp .side .label{margin-bottom:var(--s2)}
+.cmp .side pre{background:var(--band);border-radius:var(--r-sm);padding:var(--s3)}
+.cmp .side.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.src{font-size:var(--t-1);color:var(--muted)} .src li{margin-bottom:var(--s1)}
+
+.bar{display:flex;height:34px;border-radius:var(--r-sm);overflow:hidden;margin-top:var(--s3);box-shadow:var(--shadow)}
+.bar span{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:var(--t-2);color:var(--ink);min-width:0;white-space:nowrap;overflow:hidden}
+.bar .a{background:var(--accent-soft)} .bar .b{background:color-mix(in srgb,var(--accent-soft) 45%,var(--panel))} .bar .c{background:var(--amber-soft)}
+.legend{display:flex;gap:var(--s4);flex-wrap:wrap;font-size:var(--t-1);color:var(--muted);margin-top:var(--s2)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+pre.sql{background:var(--band);border-radius:var(--r-sm);padding:var(--s4);font-size:var(--t-2);white-space:pre;overflow-x:auto}
+.copyrow{display:flex;gap:var(--s3);align-items:center;margin-top:var(--s2);flex-wrap:wrap}
+
+/* impact chart: the .dia contract, green / amber / red composition (DESIGN.md §2 Colour) */
+.dia{width:100%;height:auto;display:block;background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow)}
+.dia .ax{stroke:var(--line-2);stroke-width:1}
+.dia .tx{font:500 13px var(--sans);fill:var(--ink)} .dia .tx.all{font-weight:600}
+.dia .tx.k{font:500 13px var(--mono);fill:var(--faint)} .dia .tx.k.strong{fill:var(--ink)}
+.dia .tx.in{font:600 12.8px var(--mono);fill:var(--accent-ink)}
+.dia .trk{fill:var(--line-2)} .dia .agt{fill:var(--ink-2)}
+.dia .seg.ok{fill:var(--accent)} .dia .seg.mid{fill:var(--amber)} .dia .seg.bad{fill:var(--red)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+.sw.b{background:var(--ink-2)} .sw.ok{background:var(--accent)} .sw.mid{background:var(--amber)} .sw.bad{background:var(--red)}
+.lg{white-space:nowrap;margin-right:var(--s3)}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in">
+  <b>s06 · golden from gold + hints + the run</b>
+  <nav aria-label="Sections">
+    <a href="#impact">Impact</a><a href="#method">Method</a><a href="#walk">Walk-through</a><a href="#tie">The tie</a><a href="#sql">Golden SQL</a><a href="#spike">Spike: results</a><a href="#decide">Decide</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+<header class="hero">
+  <p class="label">DataAgentBench · analysis + impact · 2026-09-24 · deps_dev_v1/1 then the 26 · champion run 20260921T064521Z_v0_all_haiku · branch challenger_20260923</p>
+  <h1>Golden SQL now reaches the answer for 49 of 54 questions, <em>22 more</em> than the champion agent: the method found SQL for 22 of the 27 it failed</h1>
+  <p class="lead">You asked me to finish the champion's <code>versioned_releases</code> query using the gold answer, the hints and that SQL. I checked the CTE against the gold first, then followed the hints' join path, parsed stars out of the free text, and ranked. The top four match the gold row for row, in order. Fifth place is a 95-way tie on 57,779 stars that no column breaks, so the SQL passes the validator but can't reproduce the gold's arbitrary fifth pick. It's loaded as proposal #30 at <a href="http://localhost:8091/golden/deps_dev_v1/1">/golden/deps_dev_v1/1</a> and isn't saved. The same method then ran on the other 26 failed questions (§5): <b>22 of 27 now pass</b>, 17 of them exactly, where the champion passed 0.</p>
+  <div class="kpi">
+    <div><div class="n">5 of 5</div><div class="d">gold rows are the latest release of their package in the champion's <code>versioned_releases</code> CTE (rn = 1), before any stars are added</div></div>
+    <div><div class="n">769 of 770</div><div class="d"><code>Project_Information</code> rows yield owner/repo and stars with 3 regexes; the one miss has 19 stars</div></div>
+    <div><div class="n">4 of 4</div><div class="d">above-cutoff rows identical to the gold, in the gold's order; fifth is 1 of the 95 tied (validator: pass)</div></div>
+    <div><div class="n">828 ms</div><div class="d">for the whole statement, as <code>dab_agent</code> (read-only). The champion's trial timed out at 900 s after 11 calls, 4 of them Python</div></div>
+  </div>
+</header>
+
+<!-- ================================================= IMPACT -->
+<section class="blk" id="impact">
+  <div class="hd">
+    <p class="label">00 · impact · the golden SQL tab after s05 and s06 · live from /api/golden, 2026-09-24</p>
+    <h2>One SQL statement reaches the answer for 49 of 54 questions; the champion agent reaches 27</h2>
+    <p class="small">Denominators: the 54 released questions. "Agent" is the champion run (v0 · Haiku, 54 × 1 trial). "Golden" is the SQL saved in the Golden tab, run as the agent's own read-only role and judged by the question's validator. Covered = <b>exact</b> (recreates the gold answer) + <b>partial</b> (passes but differs from the gold, or an evidence golden for a judgment question).</p>
+  </div>
+  <div class="kpi" style="margin-top:0">
+    <div><div class="n">0 → 49</div><div class="d">questions with a saved golden (goldens start empty; 27 came from s05's passing traces, 22 from this spike's failed ones)</div></div>
+    <div><div class="n">44 of 54</div><div class="d">goldens pass their validator, against <b>27 of 54</b> for the champion agent: the answers are reachable in SQL far more often than the agent reaches them</div></div>
+    <div><div class="n">22 of 27</div><div class="d">questions the champion failed now have a golden (18 exact, 4 partial); every one of the 27 it passed has one too (18 exact, 9 partial)</div></div>
+    <div><div class="n">5 of 54</div><div class="d">still missing: agnews/1–4 (the category is in no column) and crmarenapro/7 (evidence waiting for you)</div></div>
+  </div>
+  <figure class="fig">
+    <p class="fig-title">Per dataset: the champion agent's pass rate (thin bar) against golden SQL coverage (thick bar)</p>
+    <svg class="dia" viewBox="0 0 1000 556" role="img" aria-label="Per dataset: the champion agent's pass rate against golden SQL coverage (exact, partial, missing)"><title>Champion pass rate against golden SQL coverage, by dataset</title>
+<line class="ax" x1="170.0" x2="170.0" y1="22" y2="552"/><text class="tx k" x="170.0" y="18" text-anchor="middle">0%</text>
+<line class="ax" x1="327.5" x2="327.5" y1="22" y2="552"/><text class="tx k" x="327.5" y="18" text-anchor="middle">25%</text>
+<line class="ax" x1="485.0" x2="485.0" y1="22" y2="552"/><text class="tx k" x="485.0" y="18" text-anchor="middle">50%</text>
+<line class="ax" x1="642.5" x2="642.5" y1="22" y2="552"/><text class="tx k" x="642.5" y="18" text-anchor="middle">75%</text>
+<line class="ax" x1="800.0" x2="800.0" y1="22" y2="552"/><text class="tx k" x="800.0" y="18" text-anchor="middle">100%</text>
+<g><title>all 54: champion 27/54 · golden 36 exact, 13 partial, 5 missing</title>
+<text class="tx all" x="160" y="51" text-anchor="end">all 54</text>
+<rect class="trk" x="170" y="34" width="630" height="9" opacity=".3"/>
+<rect class="agt" x="170" y="34" width="315.0" height="9"/>
+<rect class="trk" x="170" y="46" width="630" height="16" opacity=".3"/>
+<rect class="seg ok" x="170.0" y="46" width="420.0" height="16"/>
+<text class="tx in" x="380.0" y="58.5" text-anchor="middle">36</text>
+<rect class="seg mid" x="590.0" y="46" width="151.7" height="16"/>
+<text class="tx in" x="665.8" y="58.5" text-anchor="middle">13</text>
+<rect class="seg bad" x="741.7" y="46" width="58.3" height="16"/>
+<text class="tx in" x="770.8" y="58.5" text-anchor="middle">5</text>
+<text class="tx k" x="810" y="43">agent 27/54</text>
+<text class="tx k strong" x="810" y="59">golden 49/54 · 36 exact</text></g>
+<g><title>agnews: champion 0/4 · golden 0 exact, 0 partial, 4 missing</title>
+<text class="tx" x="160" y="91" text-anchor="end">agnews</text>
+<rect class="trk" x="170" y="74" width="630" height="9" opacity=".3"/>
+<rect class="trk" x="170" y="86" width="630" height="16" opacity=".3"/>
+<rect class="seg bad" x="170.0" y="86" width="630.0" height="16"/>
+<text class="tx in" x="485.0" y="98.5" text-anchor="middle">4</text>
+<text class="tx k" x="810" y="83">agent 0/4</text>
+<text class="tx k strong" x="810" y="99">golden 0/4 · 0 exact</text></g>
+<g><title>bookreview: champion 3/3 · golden 1 exact, 2 partial, 0 missing</title>
+<text class="tx" x="160" y="131" text-anchor="end">bookreview</text>
+<rect class="trk" x="170" y="114" width="630" height="9" opacity=".3"/>
+<rect class="agt" x="170" y="114" width="630.0" height="9"/>
+<rect class="trk" x="170" y="126" width="630" height="16" opacity=".3"/>
+<rect class="seg ok" x="170.0" y="126" width="210.0" height="16"/>
+<text class="tx in" x="275.0" y="138.5" text-anchor="middle">1</text>
+<rect class="seg mid" x="380.0" y="126" width="420.0" height="16"/>
+<text class="tx in" x="590.0" y="138.5" text-anchor="middle">2</text>
+<text class="tx k" x="810" y="123">agent 3/3</text>
+<text class="tx k strong" x="810" y="139">golden 3/3 · 1 exact</text></g>
+<g><title>crmarenapro: champion 9/13 · golden 7 exact, 5 partial, 1 missing</title>
+<text class="tx" x="160" y="171" text-anchor="end">crmarenapro</text>
+<rect class="trk" x="170" y="154" width="630" height="9" opacity=".3"/>
+<rect class="agt" x="170" y="154" width="436.2" height="9"/>
+<rect class="trk" x="170" y="166" width="630" height="16" opacity=".3"/>
+<rect class="seg ok" x="170.0" y="166" width="339.2" height="16"/>
+<text class="tx in" x="339.6" y="178.5" text-anchor="middle">7</text>
+<rect class="seg mid" x="509.2" y="166" width="242.3" height="16"/>
+<text class="tx in" x="630.4" y="178.5" text-anchor="middle">5</text>
+<rect class="seg bad" x="751.5" y="166" width="48.5" height="16"/>
+<text class="tx in" x="775.8" y="178.5" text-anchor="middle">1</text>
+<text class="tx k" x="810" y="163">agent 9/13</text>
+<text class="tx k strong" x="810" y="179">golden 12/13 · 7 exact</text></g>
+<g><title>deps_dev_v1: champion 0/2 · golden 0 exact, 2 partial, 0 missing</title>
+<text class="tx" x="160" y="211" text-anchor="end">deps_dev_v1</text>
+<rect class="trk" x="170" y="194" width="630" height="9" opacity=".3"/>
+<rect class="trk" x="170" y="206" width="630" height="16" opacity=".3"/>
+<rect class="seg mid" x="170.0" y="206" width="630.0" height="16"/>
+<text class="tx in" x="485.0" y="218.5" text-anchor="middle">2</text>
+<text class="tx k" x="810" y="203">agent 0/2</text>
+<text class="tx k strong" x="810" y="219">golden 2/2 · 0 exact</text></g>
+<g><title>github_repos: champion 2/4 · golden 4 exact, 0 partial, 0 missing</title>
+<text class="tx" x="160" y="251" text-anchor="end">github_repos</text>
+<rect class="trk" x="170" y="234" width="630" height="9" opacity=".3"/>
+<rect class="agt" x="170" y="234" width="315.0" height="9"/>
+<rect class="trk" x="170" y="246" width="630" height="16" opacity=".3"/>
+<rect class="seg ok" x="170.0" y="246" width="630.0" height="16"/>
+<text class="tx in" x="485.0" y="258.5" text-anchor="middle">4</text>
+<text class="tx k" x="810" y="243">agent 2/4</text>
+<text class="tx k strong" x="810" y="259">golden 4/4 · 4 exact</text></g>
+<g><title>googlelocal: champion 1/4 · golden 4 exact, 0 partial, 0 missing</title>
+<text class="tx" x="160" y="291" text-anchor="end">googlelocal</text>
+<rect class="trk" x="170" y="274" width="630" height="9" opacity=".3"/>
+<rect class="agt" x="170" y="274" width="157.5" height="9"/>
+<rect class="trk" x="170" y="286" width="630" height="16" opacity=".3"/>
+<rect class="seg ok" x="170.0" y="286" width="630.0" height="16"/>
+<text class="tx in" x="485.0" y="298.5" text-anchor="middle">4</text>
+<text class="tx k" x="810" y="283">agent 1/4</text>
+<text class="tx k strong" x="810" y="299">golden 4/4 · 4 exact</text></g>
+<g><title>music_brainz_20k: champion 1/3 · golden 3 exact, 0 partial, 0 missing</title>
+<text class="tx" x="160" y="331" text-anchor="end">music_brainz_20k</text>
+<rect class="trk" x="170" y="314" width="630" height="9" opacity=".3"/>
+<rect class="agt" x="170" y="314" width="210.0" height="9"/>
+<rect class="trk" x="170" y="326" width="630" height="16" opacity=".3"/>
+<rect class="seg ok" x="170.0" y="326" width="630.0" height="16"/>
+<text class="tx in" x="485.0" y="338.5" text-anchor="middle">3</text>
+<text class="tx k" x="810" y="323">agent 1/3</text>
+<text class="tx k strong" x="810" y="339">golden 3/3 · 3 exact</text></g>
+<g><title>pancancer_atlas: champion 2/3 · golden 3 exact, 0 partial, 0 missing</title>
+<text class="tx" x="160" y="371" text-anchor="end">pancancer_atlas</text>
+<rect class="trk" x="170" y="354" width="630" height="9" opacity=".3"/>
+<rect class="agt" x="170" y="354" width="420.0" height="9"/>
+<rect class="trk" x="170" y="366" width="630" height="16" opacity=".3"/>
+<rect class="seg ok" x="170.0" y="366" width="630.0" height="16"/>
+<text class="tx in" x="485.0" y="378.5" text-anchor="middle">3</text>
+<text class="tx k" x="810" y="363">agent 2/3</text>
+<text class="tx k strong" x="810" y="379">golden 3/3 · 3 exact</text></g>
+<g><title>patents: champion 0/3 · golden 3 exact, 0 partial, 0 missing</title>
+<text class="tx" x="160" y="411" text-anchor="end">patents</text>
+<rect class="trk" x="170" y="394" width="630" height="9" opacity=".3"/>
+<rect class="trk" x="170" y="406" width="630" height="16" opacity=".3"/>
+<rect class="seg ok" x="170.0" y="406" width="630.0" height="16"/>
+<text class="tx in" x="485.0" y="418.5" text-anchor="middle">3</text>
+<text class="tx k" x="810" y="403">agent 0/3</text>
+<text class="tx k strong" x="810" y="419">golden 3/3 · 3 exact</text></g>
+<g><title>stockindex: champion 2/3 · golden 3 exact, 0 partial, 0 missing</title>
+<text class="tx" x="160" y="451" text-anchor="end">stockindex</text>
+<rect class="trk" x="170" y="434" width="630" height="9" opacity=".3"/>
+<rect class="agt" x="170" y="434" width="420.0" height="9"/>
+<rect class="trk" x="170" y="446" width="630" height="16" opacity=".3"/>
+<rect class="seg ok" x="170.0" y="446" width="630.0" height="16"/>
+<text class="tx in" x="485.0" y="458.5" text-anchor="middle">3</text>
+<text class="tx k" x="810" y="443">agent 2/3</text>
+<text class="tx k strong" x="810" y="459">golden 3/3 · 3 exact</text></g>
+<g><title>stockmarket: champion 3/5 · golden 2 exact, 3 partial, 0 missing</title>
+<text class="tx" x="160" y="491" text-anchor="end">stockmarket</text>
+<rect class="trk" x="170" y="474" width="630" height="9" opacity=".3"/>
+<rect class="agt" x="170" y="474" width="378.0" height="9"/>
+<rect class="trk" x="170" y="486" width="630" height="16" opacity=".3"/>
+<rect class="seg ok" x="170.0" y="486" width="252.0" height="16"/>
+<text class="tx in" x="296.0" y="498.5" text-anchor="middle">2</text>
+<rect class="seg mid" x="422.0" y="486" width="378.0" height="16"/>
+<text class="tx in" x="611.0" y="498.5" text-anchor="middle">3</text>
+<text class="tx k" x="810" y="483">agent 3/5</text>
+<text class="tx k strong" x="810" y="499">golden 5/5 · 2 exact</text></g>
+<g><title>yelp: champion 4/7 · golden 6 exact, 1 partial, 0 missing</title>
+<text class="tx" x="160" y="531" text-anchor="end">yelp</text>
+<rect class="trk" x="170" y="514" width="630" height="9" opacity=".3"/>
+<rect class="agt" x="170" y="514" width="360.0" height="9"/>
+<rect class="trk" x="170" y="526" width="630" height="16" opacity=".3"/>
+<rect class="seg ok" x="170.0" y="526" width="540.0" height="16"/>
+<text class="tx in" x="440.0" y="538.5" text-anchor="middle">6</text>
+<rect class="seg mid" x="710.0" y="526" width="90.0" height="16"/>
+<text class="tx in" x="755.0" y="538.5" text-anchor="middle">1</text>
+<text class="tx k" x="810" y="523">agent 4/7</text>
+<text class="tx k strong" x="810" y="539">golden 7/7 · 6 exact</text></g>
+</svg>
+    <figcaption><span class="lg"><i class="sw b"></i> agent passed</span> <span class="lg"><i class="sw ok"></i> golden exact</span> <span class="lg"><i class="sw mid"></i> golden partial</span> <span class="lg"><i class="sw bad"></i> no working golden</span><br>The gap between the two bars is the headroom a SQL-first challenger can aim at: <b>patents 0/3 → 3/3 exact</b>, <b>googlelocal 1/4 → 4/4</b>, <b>music_brainz_20k 1/3 → 3/3</b>, <b>deps_dev_v1 0/2 → 2/2</b>, <b>github_repos 2/4 → 4/4 exact</b>. agnews is the one dataset SQL cannot reach.</figcaption>
+  </figure>
+  <div class="grid g3" style="margin-top:var(--s5)">
+    <div class="panel card"><h3>What the goldens are for</h3><p>Each golden is the reference path to its answer: the tables, joins, text patterns and filters that work. A challenger's trace can be compared with it query by query (s03's trace-vs-golden step), and a failure now has a concrete "what it should have done". Goldens stay in <code>dataagentbench_meta</code>: never in a prompt, the pack or the curator.</p></div>
+    <div class="panel card"><h3>Why the agent fails where SQL succeeds</h3><p>The spike's notes name concrete causes, and most are teachable without an answer: regex that ignores thousands separators (deps_dev_v1/2), 1 of ~100 sentence templates parsed (patents/2), <code>ILIKE '%x%'</code> joins that match the wrong row, whole-day rounding that makes ties (crmarenapro/9), one date format of three (googlelocal/4), and <code>llm_extract</code> where a regex reads the template exactly.</p></div>
+    <div class="panel card pro"><h3>What it found beyond goldens</h3><p><b>Our loader leaves 38 tickers out of <code>stockmarket_stocktrade_all</code></b>, which cost the champion two questions (D25). <b><code>match_gold</code></b> called an empty result "reordered" (fixed, tested). Upstream: pancancer_atlas/1's gold groups by the ICD-O-3 code, which is why 0 of 270 trials pass; github_repos/2's validator slides a 21-character window, so the bare 18-character answer could never pass (our judge now renders a single value under the header the gold file writes, and it passes exactly); three golds spell names that aren't in the data.</p></div>
+  </div>
+  <div class="panel" style="margin-top:var(--s4)">
+    <p class="label">in the explorer now · <a href="http://localhost:8091/golden">/golden</a></p>
+    <ul class="tight">
+      <li><b>Title and summary:</b> the 54 split by status (exact / partial / missing) and by how each golden's SQL began (from a proposal 47, from a run's SQL 2).</li>
+      <li><b>Coverage by dataset:</b> the same green / amber / red split per dataset; a click filters the list.</li>
+      <li><b>Diff against the gold:</b> when "Run and check" isn't exact, a code-review style diff shows the gold lines the result lacks (−) and the result lines the gold lacks (+), changed cells marked, in unified or split view.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================================================= METHOD -->
+<section class="blk" id="method">
+  <div class="hd">
+    <p class="label">01 · the method you proposed · written down so it can be repeated</p>
+    <h2>Gold as the target, hints as the join path, the run's SQL as the start: check each CTE against the gold before adding the next</h2>
+  </div>
+  <ol class="steps">
+    <li><b>Start from the run's SQL.</b> The Golden editor seeds from the champion's last error-free <code>query_db</code> call. Here that is the <code>versioned_releases</code> query: the latest NPM release per <code>Name</code> by <code>Ordinal</code>, joined to <code>project_packageversion</code>, with no stars yet.</li>
+    <li><b>Check the gold is in it before building on it.</b> Join the gold rows (as <code>values</code>) to the CTE. If a gold row is missing, the CTE's filter is wrong, and nothing added later will fix that. Here all five are present with rn = 1.</li>
+    <li><b>Follow the hints for the join.</b> System + Name + Version into <code>project_packageversion</code>, then <code>ProjectName</code> into <code>project_info</code>. Join on the <b>exact</b> owner/repo, never <code>ILIKE '%name%'</code> (§2, step 3).</li>
+    <li><b>Parse the text column in SQL.</b> Survey every phrasing, count what each regex reads, and name what stays unread. No Python.</li>
+    <li><b>Rank, then judge with the real route.</b> <code>POST /api/golden/&lt;ds&gt;/&lt;n&gt;/run</code> runs as the agent's role and returns the validator's verdict plus the gold match (exact, reordered or differs).</li>
+    <li><b>When it isn't exact, explain why before changing anything.</b> Every difference is either a bug in the SQL or a property of the gold. Only the first is fixed; the second is recorded in the proposal's note. The gold's values never go into the SQL as literals.</li>
+  </ol>
+</section>
+
+<!-- ================================================= WALK -->
+<section class="blk" id="walk">
+  <div class="hd">
+    <p class="label">02 · walk-through · deps_dev_v1/1</p>
+    <h2>Each step checked against the gold before the next was added</h2>
+    <p class="small">Question: "Considering only the latest release versions for each distinct NPM package, which packages are the top 5 most popular based on the Github star number, as well as their versions?" Gold (<code>ground_truth.csv</code>, 5 rows): the two typescript rows, svelte, tailwindcss, then <code>@dwarvesf/react-scripts&gt;0.7.0&gt;lodash.indexof 4.0.5</code>. <code>packageinfo</code>: 661,372 rows, all NPM, 16,614 names, 337,844 marked as a release.</p>
+  </div>
+
+  <div class="grid g2">
+    <div class="panel">
+      <p class="label">step 1 · are the gold rows in versioned_releases?</p>
+      <div class="tw" style="box-shadow:none;border:1px solid var(--line)"><table style="min-width:0">
+        <thead><tr><th>Gold Name</th><th>Gold ver.</th><th>CTE latest</th><th>rn</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">@dmrvos/infrajs&gt;0.0.6&gt;typescript</td><td class="num">2.6.2</td><td class="num">2.6.2</td><td class="num v-ok">1</td></tr>
+          <tr><td class="mono">@dmrvos/infrajs&gt;0.0.5&gt;typescript</td><td class="num">2.6.2</td><td class="num">2.6.2</td><td class="num v-ok">1</td></tr>
+          <tr><td class="mono">@dylanvann/svelte</td><td class="num">3.25.4</td><td class="num">3.25.4</td><td class="num v-ok">1</td></tr>
+          <tr><td class="mono">@dumc11/tailwindcss</td><td class="num">0.4.0</td><td class="num">0.4.0</td><td class="num v-ok">1</td></tr>
+          <tr><td class="mono">@dwarvesf/…&gt;lodash.indexof</td><td class="num">4.0.5</td><td class="num">4.0.5</td><td class="num v-ok">1</td></tr>
+        </tbody>
+      </table></div>
+      <p class="small" style="margin-top:var(--s3)">The champion's filter was right, 5 of 5. What it lacked was stars: its trial spent the rest of its 900 s on Python and <code>llm_extract</code>, and its final text was "Now let me join with project_info and extract stars:".</p>
+    </div>
+    <div class="panel">
+      <p class="label">step 2 · how Project_Information says "stars"</p>
+      <ul class="qa">
+        <li>"… an open issues count of 24, <b>a stars count of 57779</b>, and a forks count of 7109 …" (lodash/lodash)</li>
+        <li>"… boasting an impressive <b>73,499 stars</b> and 4,091 forks." (sveltejs/svelte)</li>
+        <li>"… is currently <b>starred by 1835 users</b> …" (nandorojo/dripsy, the only one)</li>
+      </ul>
+      <p class="small">Three patterns (<code>stars count of N</code>, <code>starred by N</code>, <code>N stars</code>, commas stripped) read <b>769 of 770</b> rows. The project name is the first <code>owner/repo</code> token, lowercased, and is unique per row (769 distinct). The miss: "The project reactjs-pull-refresh is hosted on GitHub under the organization reactjs-ui", which has no slash and 19 stars, far below the cutoff.</p>
+    </div>
+  </div>
+
+  <div class="grid g2" style="margin-top:var(--s4)">
+    <div class="panel">
+      <p class="label">step 3 · the trap in the champion's join</p>
+      <h3>ILIKE '%ProjectName%' gives 36 of 2,450 releases the wrong star count</h3>
+      <p class="small">The champion joined with <code>"Project_Information" ILIKE '%' || "ProjectName" || '%'</code>. A short name matches inside longer ones: <code>microsoft/typescript</code> also matches <code>microsoft/typescript-website</code>, and <code>tj/co</code> picks up a bigger <code>tj/co…</code> project. Of the 2,450 latest releases with a project, <b>122</b> match more than one info row and <b>36</b> end up with a different star count (e.g. <code>…&gt;co</code> 11,862 → 25,437). None of the 36 passes 57,779, so the top 5 survives here by luck. Joining on the parsed owner/repo, <code>ps.project = lower(ppv."ProjectName")</code>, is exact.</p>
+    </div>
+    <div class="panel">
+      <p class="label">step 4 · rank by stars</p>
+      <div class="tw" style="box-shadow:none;border:1px solid var(--line)"><table style="min-width:0">
+        <thead><tr><th>Name</th><th>Ver.</th><th>Stars</th><th>Rank</th></tr></thead>
+        <tbody>
+          <tr class="pro"><td class="mono">@dmrvos/infrajs&gt;0.0.6&gt;typescript</td><td class="num">2.6.2</td><td class="num">94,931</td><td class="num">1</td></tr>
+          <tr class="pro"><td class="mono">@dmrvos/infrajs&gt;0.0.5&gt;typescript</td><td class="num">2.6.2</td><td class="num">94,931</td><td class="num">1</td></tr>
+          <tr class="pro"><td class="mono">@dylanvann/svelte</td><td class="num">3.25.4</td><td class="num">73,499</td><td class="num">3</td></tr>
+          <tr class="pro"><td class="mono">@dumc11/tailwindcss</td><td class="num">0.4.0</td><td class="num">73,464</td><td class="num">4</td></tr>
+          <tr><td class="mono">@dwarvesf/…&gt;lodash.words</td><td class="num">3.2.0</td><td class="num">57,779</td><td class="num">5</td></tr>
+          <tr><td class="mono">… 93 more lodash/lodash packages</td><td class="num"></td><td class="num">57,779</td><td class="num">5</td></tr>
+          <tr><td class="mono">@dwarvesf/…&gt;lodash.indexof <span class="tag">gold</span></td><td class="num">4.0.5</td><td class="num">57,779</td><td class="num">5</td></tr>
+        </tbody>
+      </table></div>
+      <p class="small" style="margin-top:var(--s3)">Shaded rows are identical to the gold, in the gold's order: the two typescript rows tie at 94,931, and <code>Name desc</code> puts 0.0.6 first, as the gold does.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================= TIE -->
+<section class="band-sec" id="tie"><div class="wrap">
+  <div class="hd">
+    <p class="label">03 · why the answer can't be exact without hardcoding</p>
+    <h2>95 packages tie at fifth on 57,779 stars, and nothing in the data picks the gold's one</h2>
+    <p class="small">All 95 map to <code>lodash/lodash</code>. The upstream validator says so too: it was revised (issue #86, re-scored 2026-08-18) to accept any of the 95 as fifth. I tried every ordering the data offers to see where the gold's <code>lodash.indexof</code> lands among the 95.</p>
+  </div>
+  <div class="tw"><table>
+    <caption>Position of the gold's fifth row among the 95 tied, by tiebreak (1 would reproduce the gold)</caption>
+    <thead><tr><th>Tiebreak</th><th>Position of lodash.indexof</th></tr></thead>
+    <tbody>
+      <tr><td>Name ascending</td><td class="num">89 of 95</td></tr>
+      <tr><td>Name descending (used in the proposal)</td><td class="num">7 of 95</td></tr>
+      <tr><td>Version descending (semver)</td><td class="num">60 of 95</td></tr>
+      <tr><td>Physical row order in <code>packageinfo</code></td><td class="num">36 of 95</td></tr>
+      <tr><td>Physical row order in <code>project_packageversion</code></td><td class="num">54 of 95</td></tr>
+      <tr><td>Shortest name</td><td class="num">62 of 95</td></tr>
+      <tr class="dim"><td>Ordinal, UpstreamPublishedAt</td><td>no help: every tied package has Ordinal = 1 and a NULL publish date (validator docstring)</td></tr>
+    </tbody>
+  </table></div>
+  <blockquote class="warn" style="margin-top:var(--s4)">The only way to reach <code>exact</code> is <code>where "Name" = '…lodash.indexof'</code>, which writes the answer into the SQL. That breaks the rule the method depends on (step 6), so it isn't offered as the golden. The gold match reads "differs" on one row for a reason that belongs to the gold, and the proposal's note records that reason.</blockquote>
+</div></section>
+
+<!-- ================================================= SQL -->
+<section class="blk" id="sql">
+  <div class="hd">
+    <p class="label">04 · the golden SQL · loaded as proposal #30, not saved</p>
+    <h2>One statement, three CTEs on the hints' path, and a tiebreak stated in a comment</h2>
+  </div>
+  <div class="grid g2">
+    <div class="panel">
+      <p class="label">A · five rows · validator: pass · gold match: differs (row 5 of 5, a tied package) · 828 ms</p>
+<pre class="sql" id="sqlA">-- deps_dev_v1/1: the 5 latest NPM releases whose GitHub project has the most stars
+with versioned_releases as (       -- the latest release of each NPM package (highest Ordinal)
+  select pi.&quot;Name&quot;, pi.&quot;Version&quot;,
+    row_number() over (partition by pi.&quot;Name&quot;
+      order by (pi.&quot;VersionInfo&quot;::jsonb-&gt;&gt;&#x27;Ordinal&#x27;)::int desc nulls last) as rn
+  from deps_dev_v1_packageinfo pi
+  where pi.&quot;System&quot; = &#x27;NPM&#x27; and pi.&quot;VersionInfo&quot;::jsonb-&gt;&gt;&#x27;IsRelease&#x27; = &#x27;true&#x27;
+),
+project_stars as (                 -- owner/repo and stars, read from the free-text Project_Information
+  select lower(substring(&quot;Project_Information&quot; from &#x27;([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]*[A-Za-z0-9_-])&#x27;)) as project,
+    replace(coalesce(
+      substring(&quot;Project_Information&quot; from &#x27;(?i)stars? count of ([\d,]+)&#x27;),   -- &quot;a stars count of 57779&quot;
+      substring(&quot;Project_Information&quot; from &#x27;(?i)starred by ([\d,]+)&#x27;),        -- &quot;starred by 1835 users&quot;
+      substring(&quot;Project_Information&quot; from &#x27;(?i)([\d,]+) stars?\M&#x27;)           -- &quot;73,499 stars&quot;
+    ), &#x27;,&#x27;, &#x27;&#x27;)::bigint as stars
+  from deps_dev_v1_project_info
+),
+release_stars as (                 -- hint: match on System, Name, Version, then ProjectName -&gt; project_info
+  select vr.&quot;Name&quot;, vr.&quot;Version&quot;, max(ps.stars) as stars
+  from versioned_releases vr
+  join deps_dev_v1_project_packageversion ppv
+    on ppv.&quot;System&quot; = &#x27;NPM&#x27; and ppv.&quot;Name&quot; = vr.&quot;Name&quot; and ppv.&quot;Version&quot; = vr.&quot;Version&quot;
+  join project_stars ps on ps.project = lower(ppv.&quot;ProjectName&quot;)
+  where vr.rn = 1
+  group by vr.&quot;Name&quot;, vr.&quot;Version&quot;
+)
+select &quot;Name&quot;, &quot;Version&quot;
+from release_stars
+order by stars desc, &quot;Name&quot; desc  -- 95 lodash/lodash packages tie at 5th (57779 stars); Name desc picks one
+limit 5</pre>
+      <div class="copyrow"><button class="btn" type="button" onclick="navigator.clipboard.writeText(document.getElementById('sqlA').innerText);this.textContent='Copied'">Copy the SQL</button><span class="small">It's already the proposal at <a href="http://localhost:8091/golden/deps_dev_v1/1">/golden/deps_dev_v1/1</a>: Run and check, then Confirm the proposal as golden</span></div>
+    </div>
+    <div class="panel">
+      <h3>Result from the Golden route</h3>
+      <p class="small"><b>Validator:</b> "All 4 above-cutoff packages validated; fifth place satisfied by 1 package(s) from the 95-way tie at 57779 stars."</p>
+      <pre class="sql">Name,Version
+@dmrvos/infrajs&gt;0.0.6&gt;typescript,2.6.2
+@dmrvos/infrajs&gt;0.0.5&gt;typescript,2.6.2
+@dylanvann/svelte,3.25.4
+@dumc11/tailwindcss,0.4.0
+@dwarvesf/react-scripts&gt;0.7.0&gt;lodash.words,3.2.0</pre>
+      <p class="small" style="margin-top:var(--s3)"><b>B · ties included</b> (validator: pass, 95 of 95 tied; 99 rows, 761 ms): replace the final <code>select</code> with a <code>rank()</code> CTE. This answers "top 5" without choosing among equals, at the cost of 99 rows against the gold's 5.</p>
+<pre class="sql">,
+ranked as (
+  select &quot;Name&quot;, &quot;Version&quot;, stars, rank() over (order by stars desc) as star_rank from release_stars
+)
+select &quot;Name&quot;, &quot;Version&quot;
+from ranked
+where star_rank &lt;= 5               -- every release ranked in the top 5: 4 above the cutoff, 95 tied at 5th
+order by stars desc, &quot;Name&quot; desc</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================= SPIKE -->
+<section class="band-sec" id="spike"><div class="wrap">
+  <div class="hd">
+    <p class="label">05 · the spike, run · the 27 questions the champion failed with no golden</p>
+    <h2>The method turns 22 of 27 failed questions into passing SQL: 17 recreate the gold exactly, and 4 are out of reach because the category isn't in the data</h2>
+    <p class="small">Denominator: the 27 questions with no golden, all failed by the champion (0 of 1 each). "Pooled" is the published pass rate across the leaderboard's trials, so it shows how hard each one is. Every row is a proposal in the Golden tab (click the id), run and judged again on load. <b>None is saved.</b> Before loading, a check that no gold value appears word for word in the SQL came back clean for all but stockindex/3, whose index → country map is declared in the note.</p>
+  </div>
+  <figure class="fig" style="margin-top:0">
+    <p class="fig-title">27 failed questions after the method, by result</p>
+    <div class="bar" role="img" aria-label="17 exact, 5 pass but differ, 1 evidence, 4 fail">
+      <span class="a" style="flex:17">17 exact</span><span class="b" style="flex:5">5 pass, differ</span><span class="b" style="flex:1">1 ev.</span><span class="c" style="flex:4">4 fail</span>
+    </div>
+    <figcaption>Baseline: the champion passed <b>0 of 27</b>. "Pass, differ" rows pass the validator and differ from the gold for a reason recorded in the gold, the validator or the data, never a known SQL bug. The fails are agnews/1–4.</figcaption>
+  </figure>
+  <div class="tw" style="margin-top:var(--s4)"><table style="min-width:1080px">
+    <caption>Each failed question: why the champion missed it, and what the SQL gets now (validator result, and a comparison with the gold text)</caption>
+    <thead><tr><th>Question</th><th>Pooled</th><th>Why the champion failed</th><th>Proposal</th><th>Validator</th><th>Gold match</th><th>Time</th><th>Why not exact / to review</th></tr></thead>
+    <tbody>
+<tr class='pro'><td class='mono'><a href='http://localhost:8091/golden/deps_dev_v1/1'>deps_dev_v1/1</a></td><td class='num'>18/270</td><td class='small'>the champion stopped before stars (ILIKE join, Python, llm_extract; timed out at 900 s)</td><td class='num'>#30</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-warn'>differs</span></td><td class='num'>828 ms</td><td class='small'>5th is a 95-way tie at 57,779 stars; no column picks the gold&#x27;s one (§3)</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/deps_dev_v1/2'>deps_dev_v1/2</a></td><td class='num'>14/270</td><td class='small'>its regex read &quot;30,522 forks&quot; as 522, dropping three projects</td><td class='num'>#39</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-warn'>differs</span></td><td class='num'>2,129 ms</td><td class='small'>projects and fork counts exact, in order; the gold&#x27;s Version for 2 projects follows no rule (date, Ordinal, text, row order tried); the validator checks names only</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/github_repos/1'>github_repos/1</a></td><td class='num'>2/270</td><td class='small'>took READMEs from contents alone and used llm_extract (0.14375)</td><td class='num'>#40</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-ok'>exact</span></td><td class='num'>696 ms</td><td class='small'>—</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/github_repos/2'>github_repos/2</a></td><td class='num'>2/270</td><td class='small'>ranked contents.sample_path without going through files; its file id has no files row</td><td class='num'>#41</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-warn'>differs</span></td><td class='num'>1,798 ms</td><td class='small'>validator quirk: a bare &quot;SwiftAndroid/swift&quot; (18 chars) can never pass its 21-char window, so the SQL adds the file path the question asks for; drop it for exact</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/pancancer_atlas/1'>pancancer_atlas/1</a></td><td class='num'>0/270</td><td class='small'>grouped by the text histological_type</td><td class='num'>#47</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-ok'>exact</span></td><td class='num'>1,395 ms</td><td class='small'>the gold groups by the ICD-O-3 code column (9382/3 …), not the words; why 0 of 270 pass</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/patents/1'>patents/1</a></td><td class='num'>0/270</td><td class='small'>used publication_date, not filing_date</td><td class='num'>#48</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-ok'>exact</span></td><td class='num'>4,504 ms</td><td class='small'>—</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/patents/2'>patents/2</a></td><td class='num'>1/270</td><td class='small'>kept only sentences starting &quot;In DE&quot;, 1 of ~100 phrasings (12 patents, not 34)</td><td class='num'>#49</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-ok'>exact</span></td><td class='num'>355 ms</td><td class='small'>—</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/patents/3'>patents/3</a></td><td class='num'>10/270</td><td class='small'>LIKE &#x27;%UNIV CALIFORNIA%&#x27; caught another owner; titled full codes, not subclasses</td><td class='num'>#50</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-ok'>exact</span></td><td class='num'>1,204 ms</td><td class='small'>quotes a title that contains a comma, as the gold CSV does</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/agnews/1'>agnews/1</a></td><td class='num'>35/270</td><td class='small'>llm_extract to classify articles; timed out</td><td class='num'>#31</td><td><span class='tag no'>fail</span></td><td class='mono'><span class='v-no'>differs</span></td><td class='num'>25 ms</td><td class='small'>the article category is in no column, key or template (10 columns and doc jsonb checked); SQL cannot, by design</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/agnews/2'>agnews/2</a></td><td class='num'>15/270</td><td class='small'>an llm classifier counted 11 of 111</td><td class='num'>#32</td><td><span class='tag no'>fail</span></td><td class='mono'><span class='v-no'>differs</span></td><td class='num'>185 ms</td><td class='small'>category not in the data; denominator right (111 by Amy Jones)</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/agnews/3'>agnews/3</a></td><td class='num'>0/270</td><td class='small'>llm_extract; timed out</td><td class='num'>#33</td><td><span class='tag no'>fail</span></td><td class='mono'><span class='v-no'>differs</span></td><td class='num'>74 ms</td><td class='small'>category not in the data; date and region filter right (14,860 Europe articles 2010–20)</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/agnews/4'>agnews/4</a></td><td class='num'>58/270</td><td class='small'>llm_extract; timed out</td><td class='num'>#34</td><td><span class='tag no'>fail</span></td><td class='mono'><span class='v-no'>differs</span></td><td class='num'>9 ms</td><td class='small'>category not in the data; total 2015 volume ranks Europe first, the gold is Africa</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/crmarenapro/7'>crmarenapro/7</a></td><td class='num'>76/270</td><td class='small'>blamed the installation-timeline article</td><td class='num'>#36</td><td><span class='tag'>evidence</span></td><td class='mono'><span class=''>—</span></td><td class='num'>33 ms</td><td class='small'>evidence: returns the one article the agent&#x27;s offer breached (offer 367 days after purchase, valid 365); validator also passes</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/crmarenapro/8'>crmarenapro/8</a></td><td class='num'>22/270</td><td class='small'>counted agents with no transfers as 0, tie of ~30, picked by raw id</td><td class='num'>#37</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-ok'>exact</span></td><td class='num'>8 ms</td><td class='small'>—</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/crmarenapro/9'>crmarenapro/9</a></td><td class='num'>182/270</td><td class='small'>closure time in whole days: 8 states tied at 0</td><td class='num'>#38</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-ok'>exact</span></td><td class='num'>9 ms</td><td class='small'>—</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/crmarenapro/12'>crmarenapro/12</a></td><td class='num'>96/270</td><td class='small'>filtered opportunities created in April and joined contracts by account</td><td class='num'>#35</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-ok'>exact</span></td><td class='num'>10 ms</td><td class='small'>—</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/googlelocal/2'>googlelocal/2</a></td><td class='num'>6/270</td><td class='small'>its LLM labels missed a massage business whose text never says &quot;massage&quot;</td><td class='num'>#42</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-ok'>exact</span></td><td class='num'>9 ms</td><td class='small'>&quot;massage&quot; = name or a stated bodywork/therapy regex (8 of 79): review the definition</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/googlelocal/3'>googlelocal/3</a></td><td class='num'>72/270</td><td class='small'>read &quot;9AM–3:30AM&quot; as closing 3:30; shortened hours</td><td class='num'>#43</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-ok'>exact</span></td><td class='num'>45 ms</td><td class='small'>five tie at 5.0; tie order (fewest reviews, then name) chosen, it reproduces the gold&#x27;s order</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/googlelocal/4'>googlelocal/4</a></td><td class='num'>85/270</td><td class='small'>parsed 2 of 3 date formats, losing 661 rows</td><td class='num'>#44</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-ok'>exact</span></td><td class='num'>14 ms</td><td class='small'>—</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/music_brainz_20k/1'>music_brainz_20k/1</a></td><td class='num'>46/270</td><td class='small'>LIKE found 2 of the song&#x27;s 5 duplicate records (601.44)</td><td class='num'>#45</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-ok'>exact</span></td><td class='num'>2,477 ms</td><td class='small'>duplicates merged by normalised, one-typo-tolerant title and artist</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/music_brainz_20k/3'>music_brainz_20k/3</a></td><td class='num'>38/270</td><td class='small'>ranked single records, not songs</td><td class='num'>#46</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-ok'>exact</span></td><td class='num'>3,604 ms</td><td class='small'>18,880 of 19,375 records match; badly corrupted ones stay unmatched</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/stockindex/3'>stockindex/3</a></td><td class='num'>165/270</td><td class='small'>ranked by price range, not return</td><td class='num'>#51</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-ok'>exact</span></td><td class='num'>205 ms</td><td class='small'>hand-written index → exchange → country map (all 13 indices): countries are in no table</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/stockmarket/2'>stockmarket/2</a></td><td class='num'>15/270</td><td class='small'>missed SDOW: it is not in stocktrade_all (our loader bug, §5b)</td><td class='num'>#52</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-warn'>differs</span></td><td class='num'>638 ms</td><td class='small'>gold&#x27;s XOP name &quot;…Explor &amp; Product&quot; is in no description; the data says &quot;…Exploration &amp; Production&quot;</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/stockmarket/3'>stockmarket/3</a></td><td class='num'>100/270</td><td class='small'>missed FTFT, FTR: not in stocktrade_all (our loader bug, §5b)</td><td class='num'>#53</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-ok'>exact</span></td><td class='num'>358 ms</td><td class='small'>—</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/yelp/2'>yelp/2</a></td><td class='num'>34/270</td><td class='small'>its state pattern missed &quot;This Philadelphia, PA location&quot; (26 of 27)</td><td class='num'>#54</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-ok'>exact</span></td><td class='num'>12 ms</td><td class='small'>a hand-written 50-state + DC list drops AB (Alberta)</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/yelp/3'>yelp/3</a></td><td class='num'>29/270</td><td class='small'>text match on BusinessParking caught other attributes (41 not 35)</td><td class='num'>#55</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-ok'>exact</span></td><td class='num'>26 ms</td><td class='small'>—</td></tr>
+<tr><td class='mono'><a href='http://localhost:8091/golden/yelp/4'>yelp/4</a></td><td class='num'>18/270</td><td class='small'>labelled only each description&#x27;s first category (3.81)</td><td class='num'>#56</td><td><span class='tag ok'>pass</span></td><td class='mono'><span class='v-warn'>differs</span></td><td class='num'>13 ms</td><td class='small'>gold says &quot;Restaurant&quot;; the data only has &quot;Restaurants&quot;; value exact</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="grid g2" style="margin-top:var(--s5)">
+    <div class="panel card pro"><h3>§5b · our loader drops 38 stockmarket tables from <code>stocktrade_all</code></h3><p><code>load.py:253</code> builds the union table from the largest group of per-ticker tables with <b>identical column types</b>. 2,715 tickers have <code>Volume bigint</code>; the <b>38</b> with <code>Volume double precision</code> (SDOW, FTFT, FTR …) are left out, yet the pack describes the table as the whole family. That alone cost the champion stockmarket/2 and /3. The fix is to group by column names and widen the types (bigint → double). It changes what the agent queries, so it's a re-load plus a re-baseline, and it's decision D25 below.</p></div>
+    <div class="panel card"><h3>Gold and validator problems the spike found</h3><ul class="tight">
+      <li><b>pancancer_atlas/1</b> (0 of 270): the gold groups by the ICD-O-3 code, while the question's "histology types" reads as the text column.</li>
+      <li><b>github_repos/2</b>: the validator needs 21 characters around an 18-character answer, so a bare correct answer always fails.</li>
+      <li><b>deps_dev_v1/1, /2</b>: a tie and version picks that no column reproduces.</li>
+      <li><b>stockmarket/2, yelp/4</b>: gold names spelled differently from the data.</li>
+      <li><b>agnews/1–4</b>: the answers need an article category the database doesn't hold. The released benchmark expects an LLM step here.</li>
+      <li><b>Fixed in our code:</b> <code>match_gold</code> called an empty result "reordered" against a single-line gold. It now reads "differs", with a test.</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<!-- ================================================= DECIDE -->
+<section class="blk" id="decide">
+  <div class="hd">
+    <p class="label">06 · decide</p>
+    <h2>How ties are handled, whether to fix the loader, and what is left</h2>
+  </div>
+  <form class="q" data-lavish-question="D24" onsubmit="event.preventDefault(); const c=new FormData(event.currentTarget).get('d24'); const note=event.currentTarget.querySelector('textarea').value.trim(); if(!c)return; window.lavish.queuePrompt('D24 · deps_dev_v1/1 tie: '+c+(note?' — note: '+note:''), {tag:'choice', text:'D24: '+c, element:event.currentTarget, data:{question:'D24', answer:c, note}}); event.currentTarget.querySelector('.queued').textContent='queued: '+c+' — press Send to Agent';">
+    <h3>D24 · a top-N with a tie at the cutoff: which golden?</h3>
+    <p class="why">This is also the rule for any other question in the spike that ends on a tie.</p>
+    <label><input type="radio" name="d24" value="A · five rows, tiebreak Name desc stated in a comment (proposal #30 as loaded)" checked> <span><b>A · five rows, a stated tiebreak</b> <span class="rec">recommended</span><br><span class="small">The gold's shape (5 rows) and the validator passes. Gold match "differs" on one row, and the note says why. You confirm #30 as it is.</span></span></label>
+    <label><input type="radio" name="d24" value="B · every row ranked in the top 5 (rank() <= 5, 99 rows)"> <span><b>B · every row ranked in the top 5</b><br><span class="small">It doesn't choose among equals. The validator passes, and the result is 99 rows against 5. I'd reload #30 with the rank() ending.</span></span></label>
+    <label><input type="radio" name="d24" value="C · name the gold's package to force an exact match"> <span><b>C · name the gold's package</b><br><span class="small">Gold match "exact", but only by writing the answer in. Not recommended.</span></span></label>
+    <textarea placeholder="anything else (optional)"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue this answer</button><span class="queued"></span></div>
+  </form>
+
+  <form class="q" data-lavish-question="D25" onsubmit="event.preventDefault(); const c=new FormData(event.currentTarget).get('d25'); const note=event.currentTarget.querySelector('textarea').value.trim(); if(!c)return; window.lavish.queuePrompt('D25 · stocktrade_all loader bug: '+c+(note?' — note: '+note:''), {tag:'choice', text:'D25: '+c, element:event.currentTarget, data:{question:'D25', answer:c, note}}); event.currentTarget.querySelector('.queued').textContent='queued: '+c+' — press Send to Agent';">
+    <h3>D25 · fix the stockmarket union table (§5b)?</h3>
+    <p class="why">The champion was scored against the table without the 38 tickers. Fixing it changes the agent's data, so the runs before and after aren't directly comparable on stockmarket.</p>
+    <label><input type="radio" name="d25" value="A · fix now: group by column names, widen types, re-load stockmarket, re-build the pack, note it as a data change for the next baseline" checked> <span><b>A · fix now, re-baseline</b> <span class="rec">recommended</span><br><span class="small">Group by column names and widen <code>Volume</code> to double. Re-load stockmarket and re-build its pack (by code). A test asserts every per-ticker table is in the union. The next champion run is the new stockmarket baseline.</span></span></label>
+    <label><input type="radio" name="d25" value="B · fix in the challenger branch only, measured as a change like any other"> <span><b>B · treat it as a challenger change</b><br><span class="small">The fix goes through the s03 loop as a data change and is measured against the current champion.</span></span></label>
+    <label><input type="radio" name="d25" value="C · leave it, document it in the pack's pitfalls"> <span><b>C · leave it and document it</b><br><span class="small">A pitfall line tells the agent the union is partial. The data stays as it is.</span></span></label>
+    <textarea placeholder="anything else (optional)"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue this answer</button><span class="queued"></span></div>
+  </form>
+
+  <form class="q" data-lavish-question="next" onsubmit="event.preventDefault(); const sel=[...event.currentTarget.querySelectorAll('input[name=items]:checked')].map(i=>({id:i.value,label:i.dataset.label,disposition:'build'})); const skip=[...event.currentTarget.querySelectorAll('input[name=items]:not(:checked)')].map(i=>i.value); const note=event.currentTarget.querySelector('textarea').value.trim(); window.lavish.queuePrompt('Build exactly the ticked items from s06 §6 and give an item-by-item receipt covering every id, ticked or not: '+sel.map(s=>s.id).join(', ')+(skip.length?' · skipped: '+skip.join(', '):'')+(note?' · note: '+note:''), {tag:'tracked-batch', text:'s06 next: '+sel.length+' of 3', element:event.currentTarget, data:{items:sel, skipped:skip, note}}); event.currentTarget.querySelector('.queued').textContent='queued: '+sel.length+' to build — press Send to Agent';">
+    <h3>Tracked batch · what's left from the spike</h3>
+    <p class="why">P2 and P3 are done: the 26 are loaded, and each note records the gold-in-CTE check and the parse coverage. Nothing here saves a golden.</p>
+    <label><input type="checkbox" name="items" value="P1" data-label="golden-propose flags SQL that contains a gold cell as a literal; the Golden tab shows the flag" checked> <span><b>P1</b> · build the gold-literal guard into <code>dab golden-propose</code> and the Golden tab. It ran as a one-off script this time.</span></label>
+    <label><input type="checkbox" name="items" value="P4" data-label="draft upstream issues for the gold/validator problems (pancancer_atlas/1, github_repos/2, deps_dev_v1/1-2, stockmarket/2, yelp/4, agnews category)"> <span><b>P4</b> · draft (not file) upstream issues for the gold and validator problems in §5, like #86</span></label>
+    <label><input type="checkbox" name="items" value="P5" data-label="commit the match_gold empty-result fix and s06"> <span><b>P5</b> · commit the <code>match_gold</code> fix (with its test) and this page</span></label>
+    <textarea placeholder="anything to change (optional)"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue the ticked items</button><span class="queued"></span></div>
+  </form>
+  <p class="small" style="margin-top:var(--s4)">Where the inputs came from: the gold is <code>query_deps_dev_v1/query1/ground_truth.csv</code> and its <code>validate.py</code>. The "current SQL" is the champion's <code>versioned_releases</code> call (call 4 of trial t1), because your pasted text didn't come through to me as text. Design source: the project's own DESIGN.md tokens, as in s00–s05.</p>
+</section>
+</div>
+</body>
+</html>

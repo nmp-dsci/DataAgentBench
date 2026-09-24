@@ -46,12 +46,44 @@ def test_a_table_renders_like_the_gold_files() -> None:
         (["t"], [["b"], ["a"]], "a\nb", "reordered"),
         (["state", "r"], [["PA", 3.699395770392749]], "PA,3.699395770392749", "exact"),  # no header
         (["avg"], [[3.2]], "3.547008547008547", "differs"),
+        (["title"], [], "The Rundown", "differs"),  # no rows is never the gold "reordered"
+        (["name", "v"], [], "Name,V\nx,2.6.2", "differs"),
     ],
 )
 def test_the_result_is_matched_against_the_gold_itself(
     columns: list[str], rows: list[list[object]], gold: str, match: str
 ) -> None:
     assert golden.match_gold(columns, rows, gold)["match"] == match
+
+
+def _ops(diff: list[dict[str, object]]) -> list[tuple[object, ...]]:
+    return [(d["op"], d["gold"], d["result"], tuple(d.get("changed", ()))) for d in diff]  # type: ignore[arg-type]
+
+
+def test_the_diff_shows_gold_lines_removed_and_result_lines_added() -> None:
+    gold = "\ufeffName,Version\na,1.0\nb,2.0\nc,3.0"
+    # b's version differs; c is missing; d is extra; the header differs only in case
+    diff = golden.gold_diff(["name", "version"], [["a", "1.0"], ["b", "2.1"], ["d", "4.0"]], gold)
+    assert _ops(diff) == [
+        ("eq", 1, 1, ()),
+        ("eq", 2, 2, ()),
+        ("del", 3, None, (1,)),
+        ("del", 4, None, (0, 1)),
+        ("add", None, 3, (1,)),
+        ("add", None, 4, (0, 1)),
+    ]
+    assert [d["text"] for d in diff if d["op"] == "add"] == ["b,2.1", "d,4.0"]
+
+
+def test_the_diff_ignores_what_the_gold_match_ignores() -> None:
+    # float noise in the last digit, and a gold with no header: nothing to show but equal lines
+    diff = golden.gold_diff(["s", "r"], [["PA", 3.6993957703927493]], "PA,3.699395770392749")
+    assert _ops(diff) == [("eq", 1, 1, ())]
+
+
+def test_a_missing_row_is_only_removed() -> None:
+    diff = golden.gold_diff(["t"], [["a"], ["c"]], "a\nb\nc")
+    assert _ops(diff) == [("eq", 1, 1, ()), ("del", 2, None, ()), ("eq", 3, 2, ())]
 
 
 def test_writes_are_refused_before_the_database() -> None:
@@ -163,3 +195,24 @@ def test_the_agent_role_cannot_read_the_proposals() -> None:
         pytest.raises(psycopg.errors.InsufficientPrivilege),
     ):
         con.execute(f"select * from {PG_META_SCHEMA}.golden_proposal")
+
+
+def test_a_golden_saved_from_a_golden_is_traced_to_where_its_sql_began() -> None:
+    sources = {1: "proposal #7", 2: "golden #1", 3: "golden #2", 4: "", 5: "golden #9"}
+    assert golden.origin("golden #3", sources) == "proposal #7"
+    assert golden.origin("golden #4", sources) == ""  # by hand
+    assert golden.origin("golden #5", sources) == "golden #9"  # an unknown id stays as recorded
+    assert (
+        golden.origin("r1 · deps_dev_v1/1/t1 · query_db #2", sources)
+        == "r1 · deps_dev_v1/1/t1 · query_db #2"
+    )
+
+
+def test_a_single_value_keeps_the_header_the_gold_file_writes() -> None:
+    # github_repos/2: the validator slides a 21-character window, so the bare 18-character
+    # answer can never pass; the gold file writes `repo_name` above it, and so does the render
+    gold = "repo_name\nSwiftAndroid/swift"
+    assert golden.render_like_gold(["repo_name"], [["SwiftAndroid/swift"]], gold) == gold
+    assert golden.render_like_gold(["n"], [["SwiftAndroid/swift"]], gold) == "SwiftAndroid/swift"
+    assert golden.render_like_gold(["avg"], [[3.5]], "3.5") == "3.5"  # a gold with no header
+    assert golden.render_like_gold(["a", "b"], [["x", 1]], "a,b\nx,1") == "a,b\nx,1"

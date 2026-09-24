@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate, useOutletContext, useParams } from 'react-router-dom';
-import { type Board, type GoldMatch, type GoldenAttempt, type GoldenKind, type GoldenList, type GoldenOne, type ProposalBrief, type RunDetail, type RunSummary, type ToolCall, type Trace, type TrialRow, ROLE_LABEL, STYLE_LABEL, fmtInt, post, useGet } from '../lib/api';
+import { type Board, type GoldDiffLine, type GoldMatch, type GoldenAttempt, type GoldenKind, type GoldenList, type GoldenOne, type ProposalBrief, type RunDetail, type RunSummary, type ToolCall, type Trace, type TrialRow, ROLE_LABEL, STYLE_LABEL, fmtInt, post, useGet } from '../lib/api';
 import { Clip, Gold, Loading } from '../lib/ui';
+import { diffStat, foldDiff, splitRows } from '../lib/diff';
 import { apiTrialPath, datasetPath, goldenPath, questionPath, trialId, trialPath, useLens } from '../lib/url';
 
 function Status({ g, kind }: { g: { passed: boolean | null; kind?: GoldenKind } | null; kind?: GoldenKind }) {
@@ -24,6 +25,110 @@ function Match({ m }: { m: GoldMatch | '' | undefined }) {
   return <span className={`chip ${m === 'exact' || m === 'exact_values' ? 'ok' : 'warn'}`}>{MATCH_LABEL[m]}</span>;
 }
 
+/** A line's cells, the differing ones marked (cells are the comma-separated values the gold match compares). */
+function Cells({ l }: { l: GoldDiffLine }) {
+  if (!l.changed?.length) return <>{l.text}</>;
+  const changed = new Set(l.changed);
+  return (
+    <>
+      {l.text.split(',').map((c, i) => (
+        <span key={i}>
+          {i > 0 && ','}
+          {changed.has(i) ? <mark>{c}</mark> : c}
+        </span>
+      ))}
+    </>
+  );
+}
+
+const MARK = { eq: ' ', del: '−', add: '+' } as const;
+
+/** The result against the gold, like a code review: gold lines the result lacks (−), result lines the gold lacks (+). */
+function GoldDiff({ lines }: { lines: GoldDiffLine[] }) {
+  const [split, setSplit] = useState(false);
+  const [open, setOpen] = useState<Set<number>>(new Set());
+  const { added, removed } = diffStat(lines);
+  const unified = (ls: GoldDiffLine[]) =>
+    ls.map((l, i) => (
+      <tr key={`u${l.gold}-${l.result}-${i}`} className={l.op}>
+        <td className="ln">{l.gold ?? ''}</td>
+        <td className="ln">{l.result ?? ''}</td>
+        <td className="mk">{MARK[l.op]}</td>
+        <td className="tx">
+          <Cells l={l} />
+        </td>
+      </tr>
+    ));
+  const side = (ls: GoldDiffLine[]) =>
+    splitRows(ls).map((r, i) => (
+      <tr key={`s${r.gold?.gold}-${r.result?.result}-${i}`}>
+        <td className="ln">{r.gold?.gold ?? ''}</td>
+        <td className={`tx ${!r.gold ? 'blank' : r.gold.op === 'eq' ? '' : 'del'}`}>{r.gold && <Cells l={r.gold} />}</td>
+        <td className="ln">{r.result?.result ?? ''}</td>
+        <td className={`tx ${!r.result ? 'blank' : r.result.op === 'eq' ? '' : 'add'}`}>{r.result && <Cells l={r.result} />}</td>
+      </tr>
+    ));
+  // runs of shown lines between folds; a fold is one row until it is opened (folds hold only unchanged lines, so no hunk is cut)
+  const body = (render: (ls: GoldDiffLine[]) => JSX.Element[]) => {
+    const out: JSX.Element[] = [];
+    let run: GoldDiffLine[] = [];
+    const flush = () => {
+      out.push(...render(run));
+      run = [];
+    };
+    foldDiff(lines).forEach((it, k) => {
+      if (it.kind === 'line') run.push(it.line);
+      else if (open.has(k)) run.push(...it.lines);
+      else {
+        flush();
+        out.push(
+          <tr key={`f${k}`} className="fold">
+            <td colSpan={4}>
+              <button type="button" className="linkish" onClick={() => setOpen((o) => new Set(o).add(k))}>
+                ⋯ {it.lines.length} unchanged line{it.lines.length === 1 ? '' : 's'}
+              </button>
+            </td>
+          </tr>,
+        );
+      }
+    });
+    flush();
+    return out;
+  };
+  return (
+    <div className="code golddiff">
+      <div className="golddiff-head">
+        <p className="label">diff against the gold</p>
+        <span className="stat">
+          <span className="add">+{added}</span> <span className="del">−{removed}</span>
+        </span>
+        <span className="small muted">− in the gold, not in the result · + in the result, not in the gold · changed cells marked</span>
+        <span className="seg" role="group" aria-label="diff layout">
+          <button type="button" className={split ? '' : 'on'} aria-pressed={!split} onClick={() => setSplit(false)}>
+            Unified
+          </button>
+          <button type="button" className={split ? 'on' : ''} aria-pressed={split} onClick={() => setSplit(true)}>
+            Split
+          </button>
+        </span>
+      </div>
+      <div className="golddiff-scroll">
+        <table className={split ? 'split' : 'unified'}>
+          {split && (
+            <thead>
+              <tr>
+                <th colSpan={2}>gold</th>
+                <th colSpan={2}>result</th>
+              </tr>
+            </thead>
+          )}
+          <tbody>{body(split ? side : unified)}</tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 /** What the editor holds for a question: the SQL, where it started, and its kind. */
 type Draft = { sql: string; source: string; kind: GoldenKind; expected: string };
 
@@ -39,6 +144,181 @@ function Proposed({ p, golden }: { p: ProposalBrief | null; golden: { created_at
   );
 }
 const toReview = (q: { golden: { created_at: string } | null; proposal: ProposalBrief | null }) => !!q.proposal && !(q.golden && q.golden.created_at >= q.proposal.created_at);
+
+/** Where a question stands, one bucket each, so the 54 add up. */
+type GoldStatus = 'exact' | 'differs' | 'evidence' | 'fails' | 'waiting' | 'none';
+/** Green / amber / red: the golden recreates the gold, covers it partly, or there is no working golden. */
+type Tone = 'ok' | 'mid' | 'bad';
+const STATUS: { key: GoldStatus; label: string; tone: Tone }[] = [
+  { key: 'exact', label: 'recreates the gold exactly', tone: 'ok' },
+  { key: 'differs', label: 'passes, differs from the gold', tone: 'mid' },
+  { key: 'evidence', label: 'evidence (a judgment question)', tone: 'mid' },
+  { key: 'fails', label: 'saved, fails its validator', tone: 'bad' },
+  { key: 'waiting', label: 'no golden · a proposal waits', tone: 'bad' },
+  { key: 'none', label: 'no golden, no proposal', tone: 'bad' },
+];
+const TONE: { key: Tone; label: string }[] = [
+  { key: 'ok', label: 'exact: the golden recreates the gold answer' },
+  { key: 'mid', label: 'partial: passes but differs, or evidence' },
+  { key: 'bad', label: 'missing: no golden yet, or it fails' },
+];
+const toneOf = (q: Row): Tone => STATUS.find((s) => s.key === goldStatus(q))!.tone;
+type Row = GoldenList['queries'][number];
+function goldStatus(q: Row): GoldStatus {
+  const g = q.golden;
+  if (!g) return q.proposal ? 'waiting' : 'none';
+  if (g.kind === 'evidence') return 'evidence';
+  if (g.passed) return g.gold_match === 'exact' || g.gold_match === 'exact_values' ? 'exact' : 'differs';
+  return 'fails';
+}
+/** How the golden's SQL began: a checked proposal, the SQL a run's agent wrote, or by hand. */
+type GoldHow = 'proposal' | 'run' | 'hand';
+const HOW: { key: GoldHow; label: string }[] = [
+  { key: 'proposal', label: 'from a proposal' },
+  { key: 'run', label: "from a run's SQL" },
+  { key: 'hand', label: 'written by hand' },
+];
+const goldHow = (origin: string): GoldHow => (origin.startsWith('proposal') ? 'proposal' : origin ? 'run' : 'hand');
+
+/** Golden coverage by dataset, like the Runs tab's pass rate by dataset: each bar split green / amber / red. A row filters the list. */
+function CoverageChart({ queries, dataset, onDataset, compact }: { queries: Row[]; dataset: string; onDataset: (d: string) => void; compact: boolean }) {
+  const groups = [
+    { key: '', label: `all ${queries.length}`, qs: queries },
+    ...(compact ? [] : [...new Set(queries.map((q) => q.dataset_key))].sort().map((d) => ({ key: d, label: d, qs: queries.filter((q) => q.dataset_key === d) }))),
+  ];
+  const W = 1000;
+  const barH = 16;
+  const rowH = 26;
+  const top = 26;
+  const H = top + groups.length * rowH + 6;
+  const labelW = 180;
+  const trackW = W - labelW - 160;
+  return (
+    <figure className="gcov">
+      <p className="label">Fig · golden SQL coverage by dataset</p>
+      <svg className="dia" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Golden SQL coverage by dataset: exact, partial and missing">
+        <title>Golden SQL coverage by dataset</title>
+        {[0, 0.25, 0.5, 0.75, 1].map((f) => (
+          <g key={f}>
+            <line className="ax" x1={labelW + f * trackW} x2={labelW + f * trackW} y1={top - 6} y2={H - 4} />
+            <text className="tx k" x={labelW + f * trackW} y={top - 10} textAnchor="middle">
+              {f * 100}%
+            </text>
+          </g>
+        ))}
+        {groups.map((g, i) => {
+          const y = top + i * rowH + 4;
+          const n = g.qs.length;
+          const count = (t: Tone) => g.qs.filter((q) => toneOf(q) === t).length;
+          let x = labelW;
+          const pick = () => g.key && onDataset(g.key === dataset ? '' : g.key);
+          return (
+            <g
+              key={g.key || 'all'}
+              className={`cov ${g.key ? 'pick' : ''} ${g.key && g.key === dataset ? 'cur' : ''}`}
+              onClick={pick}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), pick())}
+              tabIndex={g.key ? 0 : undefined}
+              role={g.key ? 'button' : undefined}
+              aria-pressed={g.key ? g.key === dataset : undefined}
+            >
+              <title>
+                {g.label}: {TONE.map((t) => `${count(t.key)} ${t.label.split(':')[0]}`).join(' · ')} (of {n})
+              </title>
+              <text className={`tx ${g.key ? '' : 'all'}`} x={labelW - 10} y={y + 13} textAnchor="end">
+                {g.label}
+              </text>
+              <rect className="bar" x={labelW} y={y} width={trackW} height={barH} opacity={0.3} />
+              {TONE.map((t) => {
+                const c = count(t.key);
+                const w = (c / n) * trackW;
+                const seg = (
+                  <g key={t.key}>
+                    {c > 0 && <rect className={`seg ${t.key}`} x={x} y={y} width={w} height={barH} />}
+                    {c > 0 && w >= 22 && (
+                      <text className="tx in" x={x + w / 2} y={y + 12.5} textAnchor="middle">
+                        {c}
+                      </text>
+                    )}
+                  </g>
+                );
+                x += w;
+                return seg;
+              })}
+              <text className="tx k" x={labelW + trackW + 10} y={y + 13}>
+                {count('ok') + count('mid')}/{n} · {count('ok')} exact
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      <figcaption>
+        {TONE.map((t) => (
+          <span key={t.key} className="lg">
+            <i className={`sw ${t.key}`} aria-hidden="true" /> {t.label}
+          </span>
+        ))}
+        <span className="lg">At the right: covered (exact + partial) of the dataset's questions, then exact. Click a dataset to list only its questions.</span>
+      </figcaption>
+    </figure>
+  );
+}
+
+/** The 54 split by golden status, and each status by how its SQL began. A row filters the list; with the editor open, only the bar. */
+function GoldSummary({ queries, active, onPick, compact, dataset, onDataset }: { queries: Row[]; active: string; onPick: (s: GoldStatus) => void; compact: boolean; dataset: string; onDataset: (d: string) => void }) {
+  const n = queries.length;
+  const by = new Map(STATUS.map((s) => [s.key, queries.filter((q) => goldStatus(q) === s.key)]));
+  const how = (rs: Row[], h: GoldHow) => rs.filter((q) => q.golden && goldHow(q.golden.origin) === h).length;
+  return (
+    <div className="gsum">
+      <CoverageChart queries={queries} dataset={dataset} onDataset={onDataset} compact={compact} />
+      {!compact && (
+        <div className="tw">
+          <table>
+            <caption>
+              {queries.filter((q) => q.golden).length} of {n} questions have golden SQL · a row shows only its questions
+            </caption>
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th className="num">Questions</th>
+                {HOW.map((h) => (
+                  <th key={h.key} className="num">
+                    {h.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {STATUS.map((s) => {
+                const rs = by.get(s.key)!;
+                const saved = s.key !== 'waiting' && s.key !== 'none';
+                return (
+                  <tr key={s.key} className={`pickrow ${active === s.key ? 'cur' : ''}`} onClick={() => onPick(s.key)} aria-disabled={!rs.length}>
+                    <td>
+                      <i className={`sw ${s.tone}`} aria-hidden="true" />
+                      <button type="button" className="linkish" aria-pressed={active === s.key} onClick={(e) => (e.stopPropagation(), onPick(s.key))}>
+                        {s.label}
+                      </button>
+                    </td>
+                    <td className="num">
+                      {rs.length} of {n}
+                    </td>
+                    {HOW.map((h) => (
+                      <td key={h.key} className="num muted">
+                        {saved ? how(rs, h.key) || '·' : ''}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
 
 /** The run picked on the list, with its trials by question. */
 type PickedRun = { id: string; label: string; trials: Map<string, TrialRow[]> };
@@ -123,7 +403,9 @@ export function Golden() {
       : null;
   const verdict = picked ? sp.get('verdict') ?? '' : '';
   const show = sp.get('show') ?? '';
+  const status = sp.get('status') ?? '';
   const rows = data.queries
+    .filter((q) => !status || goldStatus(q) === status)
     .filter((q) => !only || q.dataset_key === only)
     .filter((q) => show !== 'review' || toReview(q))
     .filter((q) => !verdict || (verdict === 'pass' ? passedAny(picked?.trials.get(q.id)) : picked?.trials.has(q.id) && !passedAny(picked.trials.get(q.id))));
@@ -133,16 +415,19 @@ export function Golden() {
   const ctx: EditorCtx = { order, lens, refresh: () => setBump((b) => b + 1), drafts: drafts.current, run: picked };
   return (
     <>
-      <p className="label">golden · SQL a person reviews and saves, run as the agent's role, judged by the question's validator</p>
+      <p className="label">Golden SQL</p>
       <h1>
-        {data.written} of {data.n} questions have golden SQL; {data.exact} of {data.n} <em>recreate</em> the gold answer and {data.passing} of {data.n} pass their validator
+        Golden SQL is the key step an LLM needs to reach each answer, and this process has <em>found</em> it for{' '}
+        {data.queries.filter((q) => toneOf(q) !== 'bad').length} of {data.n} questions
       </h1>
-      <p className="lead">
-        A golden is one Postgres query that reproduces a question's gold answer. It runs as <code>dab_agent</code>, read-only, over exactly the tables the agent sees, so a
-        passing golden proves the question is answerable in SQL. Every save is kept; the newest is current. Goldens live in <code>dataagentbench_meta</code>, which the agent's role
-        cannot read, and never reach a prompt. Pick a run to see how it did on each question; opening one starts the editor from the SQL that run's
-        agent wrote, for you to review, run and save. The editor opens here and the list stays.
-      </p>
+      <GoldSummary
+        queries={data.queries}
+        active={status}
+        onPick={(k) => set({ status: k === status ? null : k })}
+        compact={!!open}
+        dataset={only}
+        onDataset={(d) => set({ dataset: d || null })}
+      />
       <Outlet context={ctx} />
       <div className="filters">
         <label className="pick">
@@ -498,6 +783,7 @@ export function GoldenEditor() {
             <p className="label">against the gold answer itself</p>
             <pre>{res.gold_match.detail}</pre>
           </div>
+          {res.gold_diff?.length > 0 && <GoldDiff key={res.answer_text} lines={res.gold_diff} />}
           {res.answer_text && (
             <div className="code">
               <p className="label">what the validator read (the result rendered like the gold)</p>
