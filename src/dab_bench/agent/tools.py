@@ -364,7 +364,12 @@ class ToolSpec:
 
 
 def _obj(props: dict[str, Any], required: list[str]) -> dict[str, Any]:
-    return {"type": "object", "properties": props, "required": required, "additionalProperties": False}
+    return {
+        "type": "object",
+        "properties": props,
+        "required": required,
+        "additionalProperties": False,
+    }
 
 
 TOOL_SPECS: dict[str, ToolSpec] = {

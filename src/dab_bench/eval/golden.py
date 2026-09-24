@@ -60,6 +60,7 @@ _STRIP_FOR_STMT_CHECK = re.compile(
 def _has_extra_statement(sql: str) -> bool:
     return ";" in _STRIP_FOR_STMT_CHECK.sub("", sql)
 
+
 DDL = f"""
 create table if not exists {PG_META_SCHEMA}.{GOLDEN_TABLE} (
   id               bigserial primary key,
