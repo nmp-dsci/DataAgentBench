@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import typer
 from rich.console import Console
@@ -403,6 +404,56 @@ def isolation_check_cmd(agent: str = "champion", dataset: str = "yelp") -> None:
         console.print(f"[red]not isolated[/red]: {'; '.join(out['problems'])}")
         raise typer.Exit(1)
     console.print("[green]isolated[/green]: the dab tools and the prompt, nothing else")
+
+
+@app.command("golden-propose")
+def golden_propose_cmd(folder: Path) -> None:
+    """Load proposed golden SQL from FOLDER: one `<ds>_<n>.sql` + `<ds>_<n>.json` per question
+    (json: query_id, kind, replaces, note, expected_answer). Each is run as dab_agent and judged
+    before it is stored in `dataagentbench_meta.golden_proposal`. A proposal is not a golden: a
+    person confirms it by saving it in the Golden tab."""
+    import json
+
+    from dab_bench.data.index import load
+    from dab_bench.eval import golden
+
+    ix = load()
+    loaded = 0
+    for meta_path in sorted(folder.glob("*.json")):
+        meta = json.loads(meta_path.read_text())
+        if not isinstance(meta, dict) or "query_id" not in meta:
+            continue  # a request body or anything else that is not a proposal
+        sql_path = meta_path.with_suffix(".sql")
+        q = ix.query_by_id.get(meta["query_id"])
+        if q is None or not sql_path.exists():
+            console.print(
+                f"[yellow]skip[/yellow] {meta_path.name}: no such query or no .sql beside it"
+            )
+            continue
+        sql = sql_path.read_text()
+        kind = meta.get("kind", "answer")
+        folder_name = ix.dataset_by_key[q["dataset_key"]]["folder"]
+        out, ex = golden.attempt(q, folder_name, sql, kind)
+        saved = golden.propose(
+            q["id"],
+            sql,
+            out,
+            ex,
+            replaces=str(meta.get("replaces") or ""),
+            note=str(meta.get("note") or ""),
+            expected_answer=str(meta.get("expected_answer") or "") if kind == "evidence" else "",
+        )
+        loaded += 1
+        v = out["verdict"]["passed"]
+        verdict = (
+            "evidence"
+            if kind == "evidence"
+            else ("pass" if v else "fail" if v is False else "error")
+        )
+        console.print(
+            f"#{saved['id']:<4} {q['id']:<22} {verdict:<9} {out['gold_match']['match'] or '-':<13} {ex.duration_ms:>6} ms"
+        )
+    console.print(f"{loaded} proposal(s) loaded; none is a golden until someone saves it")
 
 
 @app.command()

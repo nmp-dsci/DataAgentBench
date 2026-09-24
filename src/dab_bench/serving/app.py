@@ -18,7 +18,7 @@ import functools
 import json
 import re
 from dataclasses import asdict
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
@@ -262,6 +262,7 @@ def create_app(index: Index | None = None) -> FastAPI:
         from dab_bench.eval import golden
 
         cur = _golden_db(golden.current)
+        props = _golden_db(golden.proposals)
         rows = []
         for q in ix.queries:
             g = cur.get(q["id"])
@@ -279,14 +280,23 @@ def create_app(index: Index | None = None) -> FastAPI:
                             "versions",
                             "author",
                             "note",
+                            "kind",
                         )
-                    }
+                    },
+                    "proposal": None
+                    if (p := props.get(q["id"])) is None
+                    else {
+                        k: p[k]
+                        for k in ("id", "kind", "passed", "gold_match", "duration_ms", "created_at")
+                    },
                 }
             )
         return {
             "queries": rows,
             "n": len(rows),
             "written": sum(1 for r in rows if r["golden"]),
+            "evidence": sum(1 for r in rows if r["golden"] and r["golden"]["kind"] == "evidence"),
+            "proposed": sum(1 for r in rows if r["proposal"]),
             "passing": sum(1 for r in rows if r["golden"] and r["golden"]["passed"]),
             "exact": sum(
                 1
@@ -306,37 +316,21 @@ def create_app(index: Index | None = None) -> FastAPI:
             "hints": ix.dataset_by_key[q["dataset_key"]]["hints"],
             "current": hist[0] if hist else None,
             "history": hist,
+            "proposal": _golden_db(golden.proposals).get(q["id"]),
         }
 
-    def _golden_attempt(q: dict[str, Any], sql: str) -> dict[str, Any]:
+    def _golden_attempt(q: dict[str, Any], sql: str, kind: str = "answer") -> dict[str, Any]:
         from dab_bench.eval import golden
 
-        ex = _golden_db(golden.execute, sql)
-        answer = golden.render(ex.columns, ex.rows)
-        if ex.error:
-            verdict: dict[str, Any] = {"passed": None, "reason": ex.error}
-        elif not answer:
-            verdict = {"passed": False, "reason": "the query returned no rows"}
-        else:
-            folder = ix.dataset_by_key[q["dataset_key"]]["folder"]
-            verdict = golden.judge_answer(folder, int(q["query_id"]), answer)
-        gold = (
-            golden.match_gold(ex.columns, ex.rows, q["gold_text"])
-            if not ex.error
-            else {"match": "differs", "detail": ex.error}
-        )
-        return {
-            "execution": ex.as_dict() | {"rows": ex.rows[:200]},  # the page shows 200
-            "answer_text": answer,
-            "verdict": verdict,
-            "gold_match": gold,
-            "_ex": ex,
-        }
+        folder = ix.dataset_by_key[q["dataset_key"]]["folder"]
+        out: dict[str, Any]
+        out, ex = _golden_db(golden.attempt, q, folder, sql, kind)
+        return out | {"_ex": ex}
 
     @app.post("/api/golden/{key}/{n}/run")
     def golden_run(key: str, n: int, body: GoldenSQL) -> dict[str, Any]:
         """Run and judge without saving."""
-        out = _golden_attempt(_golden_query(key, n), body.sql)
+        out = _golden_attempt(_golden_query(key, n), body.sql, body.kind)
         out.pop("_ex")
         return out
 
@@ -346,7 +340,7 @@ def create_app(index: Index | None = None) -> FastAPI:
         from dab_bench.eval import golden
 
         q = _golden_query(key, n)
-        out = _golden_attempt(q, body.sql)
+        out = _golden_attempt(q, body.sql, body.kind)
         ex = out.pop("_ex")
         saved = golden.save(
             q["id"],
@@ -357,6 +351,8 @@ def create_app(index: Index | None = None) -> FastAPI:
             body.note,
             gold_match=out["gold_match"]["match"],
             source=body.source,
+            kind=body.kind,
+            expected_answer=body.expected_answer,
         )
         return out | {"saved": saved}
 
@@ -507,6 +503,8 @@ class GoldenSQL(BaseModel):
     sql: str
     note: str = ""
     source: str = ""  # where the SQL started: '' by hand, else a run's trial and call
+    kind: Literal["answer", "evidence"] = "answer"  # evidence: a judgment question (D23)
+    expected_answer: str = ""  # evidence only: the answer a reader reaches from the rows
 
 
 class ToolCall(BaseModel):

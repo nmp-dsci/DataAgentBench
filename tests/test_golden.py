@@ -108,3 +108,58 @@ def test_the_agent_role_cannot_read_the_goldens() -> None:
         pytest.raises(psycopg.errors.InsufficientPrivilege),
     ):
         con.execute(f"select * from {PG_META_SCHEMA}.golden_sql")
+
+
+@live
+def test_an_evidence_golden_is_run_but_not_judged() -> None:
+    """D23: a judgment question's golden returns the evidence; the answer is recorded beside it."""
+    client = TestClient(create_app())
+    body = {"sql": "select 1 as evidence", "kind": "evidence", "expected_answer": "Authority"}
+    saved = client.post("/api/golden/crmarenapro/1", json=body).json()
+    gid = saved["saved"]["id"]
+    try:
+        assert saved["kind"] == "evidence" and saved["verdict"]["passed"] is None
+        assert saved["verdict"]["reason"] == golden.EVIDENCE_REASON
+        assert saved["gold_match"]["match"] == ""
+        cur = client.get("/api/golden/crmarenapro/1").json()["current"]
+        assert cur["kind"] == "evidence" and cur["expected_answer"] == "Authority"
+        row = next(
+            q for q in client.get("/api/golden").json()["queries"] if q["id"] == "crmarenapro/1"
+        )
+        assert row["golden"]["kind"] == "evidence"
+    finally:
+        with psycopg.connect(settings().database_url, autocommit=True) as con:
+            con.execute(f"delete from {PG_META_SCHEMA}.golden_sql where id = %s", (gid,))
+
+
+@live
+def test_a_proposal_is_checked_shown_and_not_a_golden() -> None:
+    from dab_bench.data.index import load
+
+    ix = load()
+    q = ix.query_by_id["yelp/1"]
+    out, ex = golden.attempt(q, ix.dataset_by_key["yelp"]["folder"], YELP_1)
+    pid = golden.propose("yelp/1", YELP_1, out, ex, replaces="nothing", note="test")["id"]
+    try:
+        client = TestClient(create_app())
+        one = client.get("/api/golden/yelp/1").json()
+        assert one["proposal"]["id"] == pid and one["proposal"]["passed"] is True
+        assert one["proposal"]["gold_match"] == "exact" and one["proposal"]["author"] == "claude"
+        listing = client.get("/api/golden").json()
+        row = next(r for r in listing["queries"] if r["id"] == "yelp/1")
+        assert row["proposal"]["id"] == pid
+        # a proposal is not a golden: nothing was saved on its behalf
+        assert all(h["source"] != f"proposal #{pid}" for h in one["history"])
+    finally:
+        with psycopg.connect(settings().database_url, autocommit=True) as con:
+            con.execute(f"delete from {PG_META_SCHEMA}.golden_proposal where id = %s", (pid,))
+
+
+@live
+def test_the_agent_role_cannot_read_the_proposals() -> None:
+    golden.ensure_table()
+    with (
+        psycopg.connect(settings().agent_database_url, autocommit=True) as con,
+        pytest.raises(psycopg.errors.InsufficientPrivilege),
+    ):
+        con.execute(f"select * from {PG_META_SCHEMA}.golden_proposal")

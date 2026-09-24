@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate, useOutletContext, useParams } from 'react-router-dom';
-import { type Board, type GoldMatch, type GoldenAttempt, type GoldenBrief, type GoldenList, type GoldenOne, type RunDetail, type RunSummary, type ToolCall, type Trace, type TrialRow, ROLE_LABEL, STYLE_LABEL, fmtInt, post, useGet } from '../lib/api';
+import { type Board, type GoldMatch, type GoldenAttempt, type GoldenKind, type GoldenList, type GoldenOne, type ProposalBrief, type RunDetail, type RunSummary, type ToolCall, type Trace, type TrialRow, ROLE_LABEL, STYLE_LABEL, fmtInt, post, useGet } from '../lib/api';
 import { Clip, Gold, Loading } from '../lib/ui';
 import { apiTrialPath, datasetPath, goldenPath, questionPath, trialId, trialPath, useLens } from '../lib/url';
 
-function Status({ g }: { g: GoldenBrief | { passed: boolean | null } | null }) {
+function Status({ g, kind }: { g: { passed: boolean | null; kind?: GoldenKind } | null; kind?: GoldenKind }) {
   if (!g) return <span className="chip">none yet</span>;
+  if ((kind ?? g.kind) === 'evidence') return <span className="chip ok" title="a judgment question: the SQL returns the evidence, the answer is recorded beside it">evidence</span>;
   if (g.passed === true) return <span className="chip ok">passes</span>;
   if (g.passed === false) return <span className="chip warn">fails</span>;
   return <span className="chip warn">errored</span>;
@@ -23,6 +24,22 @@ function Match({ m }: { m: GoldMatch | '' | undefined }) {
   return <span className={`chip ${m === 'exact' || m === 'exact_values' ? 'ok' : 'warn'}`}>{MATCH_LABEL[m]}</span>;
 }
 
+/** What the editor holds for a question: the SQL, where it started, and its kind. */
+type Draft = { sql: string; source: string; kind: GoldenKind; expected: string };
+
+/** A proposal's standing: written and checked outside the tab, waiting for you to confirm it. */
+function Proposed({ p, golden }: { p: ProposalBrief | null; golden: { created_at: string } | null }) {
+  if (!p) return <span className="small muted">—</span>;
+  const confirmed = golden && golden.created_at >= p.created_at;
+  const label = p.kind === 'evidence' ? 'evidence' : p.passed ? (p.gold_match === 'exact' || p.gold_match === 'exact_values' ? 'passes · exact' : 'passes') : p.passed === false ? 'fails' : 'errored';
+  return (
+    <span className={`chip ${confirmed ? '' : p.kind === 'evidence' || p.passed ? 'ok' : 'warn'}`} title={confirmed ? 'a golden was saved after this proposal' : 'waiting for you to review and save'}>
+      {confirmed ? `reviewed · ${label}` : label}
+    </span>
+  );
+}
+const toReview = (q: { golden: { created_at: string } | null; proposal: ProposalBrief | null }) => !!q.proposal && !(q.golden && q.golden.created_at >= q.proposal.created_at);
+
 /** The run picked on the list, with its trials by question. */
 type PickedRun = { id: string; label: string; trials: Map<string, TrialRow[]> };
 
@@ -31,7 +48,7 @@ type EditorCtx = {
   order: string[]; // question ids in the list's current order, for prev / next
   lens: string; // the list's `?…`, kept as the editor moves so the filter survives
   refresh: () => void; // re-read the coverage after a save
-  drafts: Map<string, { sql: string; source: string }>; // unsaved SQL per question, while this page is open
+  drafts: Map<string, Draft>; // unsaved SQL per question, while this page is open
   run: PickedRun | null;
 };
 
@@ -87,7 +104,7 @@ export function Golden() {
   const [bump, setBump] = useState(0);
   const { data: fresh, error } = useGet<GoldenList>(`/api/golden${bump ? `?v=${bump}` : ''}`);
   const data = useKept(fresh);
-  const drafts = useRef(new Map<string, { sql: string; source: string }>());
+  const drafts = useRef(new Map<string, Draft>());
   // the run whose verdicts and SQL seed the editor: `?run=<id>`, the champion by default, `?run=none` for none
   const { data: board } = useGet<Board>('/api/runs');
   const runs = (board?.runs ?? []).filter((r) => !r.dry_run && (r.scored ?? 0) > 0);
@@ -105,8 +122,10 @@ export function Golden() {
         }
       : null;
   const verdict = picked ? sp.get('verdict') ?? '' : '';
+  const show = sp.get('show') ?? '';
   const rows = data.queries
     .filter((q) => !only || q.dataset_key === only)
+    .filter((q) => show !== 'review' || toReview(q))
     .filter((q) => !verdict || (verdict === 'pass' ? passedAny(picked?.trials.get(q.id)) : picked?.trials.has(q.id) && !passedAny(picked.trials.get(q.id))));
   const inRun = picked ? data.queries.filter((q) => picked.trials.has(q.id)) : [];
   const datasets = [...new Set(data.queries.map((q) => q.dataset_key))].sort();
@@ -149,6 +168,13 @@ export function Golden() {
             ))}
           </select>
         </label>
+        <label className="pick">
+          <span className="label">show</span>
+          <select value={show} onChange={(e) => set({ show: e.target.value || null })} aria-label="show">
+            <option value="">every question</option>
+            <option value="review">proposals to review ({data.queries.filter(toReview).length})</option>
+          </select>
+        </label>
         {picked && (
           <label className="pick">
             <span className="label">in that run</span>
@@ -172,7 +198,8 @@ export function Golden() {
               <th>Question</th>
               <th>Style</th>
               <th>In the run</th>
-              <th>Validator</th>
+              <th>Proposed</th>
+              <th>Golden</th>
               <th>Against the gold</th>
               <th className="num">Saves</th>
               <th>Last saved</th>
@@ -191,6 +218,9 @@ export function Golden() {
                 </td>
                 <td className="small">{STYLE_LABEL[q.validator_style] ?? q.validator_style}</td>
                 <td>{picked ? <RunVerdict rows={picked.trials.get(q.id)} /> : <span className="small muted">—</span>}</td>
+                <td>
+                  <Proposed p={q.proposal} golden={q.golden} />
+                </td>
                 <td>
                   <Status g={q.golden} />
                 </td>
@@ -234,6 +264,8 @@ export function GoldenEditor() {
   const [res, setRes] = useState<GoldenAttempt | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState<'run' | 'save' | null>(null);
+  const [kind, setKind] = useState<GoldenKind>('answer');
+  const [expected, setExpected] = useState(''); // evidence only: the answer a reader reaches
   const panel = useRef<HTMLElement>(null);
   const loaded = data?.query.id;
   useEffect(() => {
@@ -245,15 +277,23 @@ export function GoldenEditor() {
     panel.current?.scrollIntoView({ block: 'start' });
   }, [loaded]);
   const seedKey = seed ? from(seed) : '';
+  const prop = data?.proposal ?? null;
+  const propKey = prop ? `proposal #${prop.id}` : '';
   useEffect(() => {
-    // what the editor starts from: your unsaved draft, else the current golden, else the run's SQL, else nothing
+    // what the editor starts from: your unsaved draft, else the current golden, else the proposal,
+    // else the run's SQL, else nothing
     if (!loaded) return;
-    const d = drafts.get(loaded);
     const cur = data?.current;
-    const [s, src] = d ? [d.sql, d.source] : cur ? [cur.sql, `golden #${cur.id}`] : seed ? [seed.sql, seedKey] : ['', ''];
-    setSql(s);
-    setSource(src);
-  }, [loaded, seedKey]); // eslint-disable-line react-hooks/exhaustive-deps
+    const d: Draft = drafts.get(loaded) ??
+      (cur ? { sql: cur.sql, source: `golden #${cur.id}`, kind: cur.kind, expected: cur.expected_answer }
+      : prop ? { sql: prop.sql, source: propKey, kind: prop.kind, expected: prop.expected_answer }
+      : seed ? { sql: seed.sql, source: seedKey, kind: 'answer', expected: '' }
+      : { sql: '', source: '', kind: 'answer', expected: '' });
+    setSql(d.sql);
+    setSource(d.source);
+    setKind(d.kind);
+    setExpected(d.expected);
+  }, [loaded, seedKey, propKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const at = order.indexOf(id);
   const prev = at > 0 ? order[at - 1] : null;
@@ -275,18 +315,21 @@ export function GoldenEditor() {
       </section>
     );
   const q = data.query;
-  const edit = (v: string, src = source) => {
-    setSql(v);
-    setSource(src);
-    drafts.set(q.id, { sql: v, source: src });
+  const edit = (patch: Partial<Draft>) => {
+    const d: Draft = { sql, source, kind, expected, ...patch };
+    setSql(d.sql);
+    setSource(d.source);
+    setKind(d.kind);
+    setExpected(d.expected);
+    drafts.set(q.id, d);
   };
-  async function go(kind: 'run' | 'save') {
-    setBusy(kind);
+  async function go(action: 'run' | 'save') {
+    setBusy(action);
     setErr(null);
     try {
-      const r = await post<GoldenAttempt>(`/api/golden/${key}/${n}${kind === 'run' ? '/run' : ''}`, { sql, note, source });
+      const r = await post<GoldenAttempt>(`/api/golden/${key}/${n}${action === 'run' ? '/run' : ''}`, { sql, note, source, kind, expected_answer: kind === 'evidence' ? expected : '' });
       setRes(r);
-      if (kind === 'save') {
+      if (action === 'save') {
         setNote('');
         setBump((b) => b + 1);
         refresh();
@@ -337,6 +380,30 @@ export function GoldenEditor() {
         ) : (
           <p className="small muted">{run.label} did not run {id}; the editor starts empty.</p>
         ))}
+      {prop && (
+        <div className={`answer ${prop.kind === 'evidence' || prop.passed ? 'ok' : 'no'}`}>
+          <p className="label">
+            proposed #{prop.id} · {prop.kind} · {prop.kind === 'evidence' ? 'not judged' : prop.passed ? 'passes' : prop.passed === false ? 'fails' : 'errored'}
+            {prop.gold_match && ` · ${MATCH_LABEL[prop.gold_match]}`} · {prop.duration_ms ?? '—'} ms · by {prop.author}, {prop.created_at.slice(0, 10)}
+          </p>
+          {prop.replaces && <p className="small">Replaces: {prop.replaces}</p>}
+          {prop.note && <p className="small">{prop.note}</p>}
+          {prop.kind === 'evidence' && <p className="small">Expected answer: <b>{prop.expected_answer}</b></p>}
+          <p className="small">
+            {source === propKey ? (
+              sql.trim() === prop.sql.trim() ? (
+                <>In the editor, unchanged. Run and check, then confirm it.</>
+              ) : (
+                <>In the editor, edited.</>
+              )
+            ) : (
+              <button type="button" className="more" onClick={() => edit({ sql: prop.sql, source: propKey, kind: prop.kind, expected: prop.expected_answer })}>
+                load the proposal into the editor
+              </button>
+            )}
+          </p>
+        </div>
+      )}
       <h2>
         {q.id}{' '}
         {cur
@@ -380,8 +447,22 @@ export function GoldenEditor() {
           <span className="label">
             SQL · runs as dab_agent · read-only · 60 s · search_path dataagentbench (tables are {q.dataset_key}_*) · {source ? `started from ${source.replace(/^run \S+ · /, '')}` : 'by hand'}
           </span>
-          <textarea value={sql} onChange={(e) => edit(e.target.value)} rows={12} spellCheck={false} placeholder={`select … from ${q.dataset_key}_…`} />
+          <textarea value={sql} onChange={(e) => edit({ sql: e.target.value })} rows={12} spellCheck={false} placeholder={`select … from ${q.dataset_key}_…`} />
         </label>
+        <div className="filters" role="radiogroup" aria-label="kind">
+          <label className="pick">
+            <input type="radio" name="kind" checked={kind === 'answer'} onChange={() => edit({ kind: 'answer' })} /> answer · the result is judged by the validator
+          </label>
+          <label className="pick">
+            <input type="radio" name="kind" checked={kind === 'evidence'} onChange={() => edit({ kind: 'evidence' })} /> evidence · a judgment question: the rows are what a reader needs
+          </label>
+        </div>
+        {kind === 'evidence' && (
+          <label className="field">
+            <span className="label">expected answer · what a reader concludes from the rows (the gold: {q.gold_preview})</span>
+            <input type="text" value={expected} onChange={(e) => edit({ expected: e.target.value })} />
+          </label>
+        )}
         <label className="field">
           <span className="label">note · optional, saved with it</span>
           <input type="text" value={note} onChange={(e) => setNote(e.target.value)} />
@@ -391,7 +472,7 @@ export function GoldenEditor() {
             {busy === 'run' ? 'Running…' : 'Run and check'}
           </button>
           <button type="button" className="btn" disabled={!!busy || !sql.trim()} onClick={() => void go('save')}>
-            {busy === 'save' ? 'Saving…' : 'Save as golden'}
+            {busy === 'save' ? 'Saving…' : prop && source === propKey && sql.trim() === prop.sql.trim() ? 'Confirm the proposal as golden' : 'Save as golden'}
           </button>
           <span className="count">a save runs and judges it again; a failing golden is saved too and says so</span>
         </div>
@@ -401,7 +482,7 @@ export function GoldenEditor() {
       {res && (
         <>
           <div className="chips" style={{ marginTop: 'var(--s4)' }}>
-            <Status g={res.verdict} />
+            <Status g={res.verdict} kind={res.kind} />
             <Match m={res.gold_match.match} />
             <span className="chip">
               {fmtInt(res.execution.row_count)}
@@ -465,7 +546,7 @@ export function GoldenEditor() {
                   {source === from(c) ? (
                     <span className="chip ok">in the editor</span>
                   ) : (
-                    <button type="button" className="more" onClick={() => edit(c.sql, from(c))}>
+                    <button type="button" className="more" onClick={() => edit({ sql: c.sql, source: from(c), kind: 'answer', expected: '' })}>
                       load into the editor
                     </button>
                   )}
@@ -514,7 +595,7 @@ export function GoldenEditor() {
                   <td className="small">{h.note || '—'}</td>
                   <td className="small mono">{h.source ? h.source.replace(/^run (\S{16})\S* · /, 'run $1… · ') : 'by hand'}</td>
                   <td>
-                    <button type="button" className="more" onClick={() => edit(h.sql, `golden #${h.id}`)}>
+                    <button type="button" className="more" onClick={() => edit({ sql: h.sql, source: `golden #${h.id}`, kind: h.kind, expected: h.expected_answer })}>
                       load into the editor
                     </button>
                   </td>

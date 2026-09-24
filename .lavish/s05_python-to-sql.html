@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>s05 · DataAgentBench — Python back to SQL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Design source (2): the project's own system — DESIGN.md ("Field Guide"), tokens verbatim,
+   the same block s00–s03 and frontend/src/tokens.css carry. */
+:root{
+  --bg:#F7F6F2; --panel:#FFFFFF; --band:#EFEEE8;
+  --ink:#1A1D1B; --ink-2:#3B403D; --muted:#4A514D; --faint:#5C635E;
+  --line:#DCDAD2; --line-2:#C7C5BC; --line-3:#8A8880;
+  --accent:#0A6552; --accent-ink:#FFFFFF; --accent-soft:#DFEFE8;
+  --amber:#8A5006; --amber-soft:#F6E6CF;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --t-2:0.8rem; --t-1:0.875rem; --t0:1rem; --t1:1.125rem; --t2:1.406rem; --t3:1.758rem; --t4:2.197rem;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --r:10px; --r-sm:6px;
+  --shadow:0 1px 2px rgb(20 25 22 / .05), 0 12px 28px -18px rgb(20 25 22 / .22);
+  --dur:300ms; --ease:cubic-bezier(.2,.7,.2,1); --focus:var(--accent);
+  --w:1140px; --measure:68ch; --track-label:.08em;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121614; --panel:#191E1B; --band:#161A18;
+    --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+    --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+    --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+    --amber:#D99A4E; --amber-soft:#3A2A14;
+    --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121614; --panel:#191E1B; --band:#161A18;
+  --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+  --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+  --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+  --amber:#D99A4E; --amber-soft:#3A2A14;
+  --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+}
+@media (prefers-reduced-motion: reduce){ :root{ --dur:0.01ms; } }
+*,*::before,*::after{box-sizing:border-box}
+:where(.grid,.flex,.kpi,.cards,.mock-body,.mock-cols,.mock-top,.ladder)>*{min-width:0}
+:where(p,h1,h2,h3,h4,li,dd,figcaption,td,th,.chip,.label){overflow-wrap:anywhere}
+:where(img,svg,video,iframe){max-width:100%;height:auto}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink-2);font-family:var(--sans);font-size:var(--t0);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{color:var(--ink);margin:0;line-height:1.15;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+h1{font-size:var(--t4);font-family:var(--serif);font-weight:400} h1 em{font-style:italic;font-weight:400;color:var(--accent)}
+h2{font-size:var(--t3)} h3{font-size:var(--t1)} h4{font-size:var(--t0)}
+p{margin:0 0 var(--s4);text-wrap:pretty}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:.2em} a:hover{text-decoration-thickness:2px}
+strong,b{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:max(var(--t-2),.86em);background:var(--band);padding:.08em .32em;border-radius:var(--r-sm);color:var(--ink-2)}
+pre{margin:0;font-family:var(--mono);font-size:var(--t-2);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.wrap{max-width:var(--w);margin-inline:auto;padding-inline:var(--s5)}
+.label{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0}
+.lead{font-family:var(--serif);font-size:var(--t1);line-height:1.5;color:var(--ink-2);max-width:72ch}
+.small{font-size:var(--t-1);color:var(--muted)}
+.top{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:var(--w);margin-inline:auto;padding:var(--s3) var(--s5);display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.top b{font-family:var(--mono);font-size:var(--t-1);color:var(--ink);white-space:nowrap}
+.top nav{display:flex;gap:var(--s4);margin-left:auto;flex-wrap:wrap;font-size:var(--t-1);font-weight:500}
+.top nav a{color:var(--ink-2);text-decoration:none;padding:var(--s1) 0} .top nav a:hover{color:var(--accent)}
+header.hero{padding:var(--s7) 0 var(--s5)}
+.chips{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s4) 0 0}
+.chip{font-family:var(--mono);font-size:var(--t-2);padding:.3em .6em;border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--ink-2);background:var(--panel)}
+.chip.ok{border-color:var(--accent);color:var(--accent)} .chip.warn{border-color:var(--amber);color:var(--amber)}
+section.blk{padding-top:var(--s8)} section.blk:last-of-type{padding-bottom:var(--s9)}
+section.band-sec{background:var(--band);margin-top:var(--s8);padding:var(--s7) 0}
+section.band-sec + section.blk{padding-top:var(--s7)}
+.hd{margin-bottom:var(--s5);max-width:80ch} .hd .label{margin-bottom:var(--s2)} .hd h2{margin-bottom:var(--s3)}
+.panel{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5)}
+.grid{display:grid;gap:var(--s4)} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.g3,.g2{grid-template-columns:minmax(0,1fr)}}
+.card h3{margin-bottom:var(--s2)} .card p{margin-bottom:var(--s2);font-size:var(--t-1)} .card p:last-child{margin:0}
+.card.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r);box-shadow:var(--shadow);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:var(--t-1)}
+caption{text-align:left;padding:var(--s4) var(--s5) var(--s2);color:var(--muted);font-size:var(--t-1);caption-side:top}
+th,td{text-align:left;padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}
+thead th{font-family:var(--mono);font-size:var(--t-2);font-weight:500;color:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase;border-bottom:1px solid var(--line-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.sub{font-weight:600;color:var(--ink);white-space:nowrap}
+td.num{font-family:var(--mono);font-size:var(--t-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+td .path{display:block;font-family:var(--mono);font-size:var(--t-2);color:var(--faint);font-weight:400;margin-top:2px}
+td.mono,td code.u{font-family:var(--mono);font-size:var(--t-2)}
+code.u{background:none;padding:0;color:var(--ink)} code.u s{color:var(--faint);text-decoration:line-through}
+tr.pro td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+tr.dim td{color:var(--muted)}
+.v-ok{color:var(--accent);font-weight:600} .v-no{color:var(--muted)} .v-warn{color:var(--amber);font-weight:600}
+blockquote{margin:0;padding:var(--s3) var(--s4);border-left:2px solid var(--accent);background:var(--band);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:var(--t-1)}
+blockquote.warn{border-left-color:var(--amber)}
+.fig{margin:var(--s5) 0 0}
+.fig-title{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0 0 var(--s3);text-wrap:balance}
+.fig figcaption{font-family:var(--sans);font-size:var(--t-1);color:var(--muted);line-height:1.5;margin-top:var(--s3)}
+.fig figcaption b{color:var(--ink);font-weight:600}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:var(--s3)}
+.steps li{position:relative;padding-left:2.75rem;font-size:var(--t-1)}
+.steps li::before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:0;top:2px;font-family:var(--mono);color:var(--accent);font-weight:500}
+form.q{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5);display:grid;gap:var(--s3);margin-top:var(--s4)}
+form.q h3{margin:0} form.q .why{font-size:var(--t-1);color:var(--muted);margin:0}
+form.q label{display:grid;grid-template-columns:1.2rem minmax(0,1fr);gap:var(--s2);align-items:start;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;min-height:24px}
+form.q label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+form.q input[type=radio],form.q input[type=checkbox]{margin:3px 0 0;accent-color:var(--accent);width:16px;height:16px}
+form.q textarea{width:100%;font:inherit;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);color:var(--ink-2);min-height:3.2rem;resize:vertical}
+form.q .row{display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap}
+.btn{font:500 var(--t-1) var(--sans);background:var(--accent);color:var(--accent-ink);border:0;border-radius:var(--r-sm);padding:.55em 1em;cursor:pointer;min-height:24px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.08)} .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.queued{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);min-height:1.2em}
+.rec{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);margin-left:.4em}
+.tag{font-family:var(--mono);font-size:var(--t-2);padding:.15em .45em;border-radius:var(--r-sm);border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.tag.ok{border-color:var(--accent);color:var(--accent)} .tag.warn{border-color:var(--amber);color:var(--amber)} .tag.no{border-color:var(--line-3);color:var(--muted)}
+ul.tight{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.tight li{margin-bottom:var(--s1)}
+ul.qa{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.qa li{margin-bottom:var(--s2)}
+.code{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);margin-top:var(--s3);overflow-x:auto}
+.code .label{margin-bottom:var(--s2)}
+.code.band{background:var(--band)}
+.kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4);margin-top:var(--s5)}
+@media (max-width:900px){.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi .n{font-family:var(--serif);font-size:var(--t3);color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:var(--t-1);color:var(--muted);margin-top:var(--s1)}
+
+/* the hackable-address ladder */
+.ladder{display:grid;gap:var(--s2);margin-top:var(--s3)}
+.ladder .rung{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--s3);align-items:baseline;padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel);font-family:var(--mono);font-size:var(--t-2)}
+.ladder .rung .u{color:var(--ink)} .ladder .rung .u b{color:var(--accent);font-weight:500}
+.ladder .rung .w{font-family:var(--sans);color:var(--muted);font-size:var(--t-2);text-align:right;white-space:nowrap}
+@media (max-width:640px){.ladder .rung{grid-template-columns:minmax(0,1fr)} .ladder .rung .w{text-align:left;white-space:normal}}
+
+/* the mock of the explorer page, in the explorer's own styles */
+.addr{font-family:var(--mono);font-size:var(--t-2);color:var(--ink);background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:var(--s2) var(--s3);margin-top:var(--s4);display:flex;gap:var(--s2);align-items:center}
+.addr .lock{color:var(--faint)} .addr b{color:var(--accent);font-weight:500}
+.mock{background:var(--bg);border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin-top:var(--s2)}
+.mock-top{display:flex;gap:var(--s4);align-items:center;padding:var(--s2) var(--s4);border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 88%,transparent);font-size:var(--t-2);flex-wrap:wrap}
+.mock-top .brand{font-family:var(--mono);color:var(--ink);font-weight:500}
+.mock-top nav{display:flex;gap:var(--s3);flex-wrap:wrap} .mock-top nav span{color:var(--ink-2)} .mock-top nav span.on{color:var(--accent);border-bottom:2px solid var(--accent)}
+.mock-body{padding:var(--s4)}
+.mock h1{font-size:var(--t2)} .mock .label{font-size:.7rem}
+.mock .ed{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent);padding:var(--s4);margin:var(--s3) 0 var(--s4);display:grid;gap:var(--s2)}
+.mock .ed .hdr{display:flex;gap:var(--s3);align-items:baseline;flex-wrap:wrap;font-size:var(--t-1)}
+.mock .ed .hdr b{font-family:var(--mono);font-weight:500;color:var(--ink)} .mock .ed .hdr .nav{margin-left:auto;display:flex;gap:var(--s3);font-size:var(--t-2)}
+.mock .ed .hdr .nav a{text-decoration:underline}
+.mock .ed .qtext{font-size:var(--t-1);color:var(--ink-2);margin:0}
+.mock .ed .ta{font-family:var(--mono);font-size:var(--t-2);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);padding:var(--s2) var(--s3);min-height:4.4rem;color:var(--ink-2);white-space:pre-wrap}
+.mock .ed .row{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}
+.mock .ed .btn{font-size:var(--t-2);padding:.4em .8em} .mock .ed .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.mock table{min-width:0;font-size:var(--t-2)} .mock th,.mock td{padding:var(--s2) var(--s3)}
+.mock tr.cur td{background:var(--accent-soft)} .mock tr.cur td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.mock .tw{box-shadow:none;border:1px solid var(--line)}
+.cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.cmp{grid-template-columns:minmax(0,1fr)}}
+.cmp .side{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s4)}
+.cmp .side h4{margin-bottom:var(--s2)} .cmp .side .label{margin-bottom:var(--s2)}
+.cmp .side pre{background:var(--band);border-radius:var(--r-sm);padding:var(--s3)}
+.cmp .side.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.src{font-size:var(--t-1);color:var(--muted)} .src li{margin-bottom:var(--s1)}
+
+.bar{display:flex;height:34px;border-radius:var(--r-sm);overflow:hidden;margin-top:var(--s3);box-shadow:var(--shadow)}
+.bar span{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:var(--t-2);color:var(--ink);min-width:0;white-space:nowrap;overflow:hidden}
+.bar .a{background:var(--accent-soft)} .bar .b{background:color-mix(in srgb,var(--accent-soft) 45%,var(--panel))} .bar .c{background:var(--amber-soft)}
+.legend{display:flex;gap:var(--s4);flex-wrap:wrap;font-size:var(--t-1);color:var(--muted);margin-top:var(--s2)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+pre.sql{background:var(--band);border-radius:var(--r-sm);padding:var(--s4);font-size:var(--t-2);white-space:pre;overflow-x:auto}
+.copyrow{display:flex;gap:var(--s3);align-items:center;margin-top:var(--s2);flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in">
+  <b>s05 · Python back to SQL</b>
+  <nav aria-label="Sections">
+    <a href="#case">github_repos/4</a><a href="#census">The 17</a><a href="#why">Why Python</a><a href="#rollout">Rollout</a><a href="#decide">Decide</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+<header class="hero">
+  <p class="label">DataAgentBench · diagnosis · 2026-09-24 · champion run 20260921T064521Z_v0_all_haiku (v0, 54 × 1) · branch challenger_20260923</p>
+  <h1>github_repos/4 is one SQL statement; so is every Python step in 14 of the 17 passing Python trials, and the other 3 are <em>judgment</em>, not computation</h1>
+  <p class="lead">You asked for github_repos/4 in SQL and whether that generalises. It does. The Python in the passing trials does four kinds of work: printing what SQL already returned, small arithmetic, parsing templated text, and <code>llm_extract</code> on templated text. Postgres does all four. The exception is five crmarenapro questions whose answer is a reading of a transcript or a policy. SQL can fetch the evidence for those, but no query computes the verdict without hardcoding it.</p>
+  <div class="kpi">
+    <div><div class="n">374 ms</div><div class="d">github_repos/4 in one statement: passes its validator and <b>recreates the gold exactly</b> (6 of 6 lines, column names included). Not saved; it is yours to save.</div></div>
+    <div><div class="n">17 of 27</div><div class="d">passing trials in the champion run used <code>execute_python</code> or <code>llm_extract</code>; 10 passed on SQL alone</div></div>
+    <div><div class="n">14 of 17</div><div class="d">port to SQL with regex, date parsing or aggregates; 1 is verified (github_repos/4), 13 are read from their traces</div></div>
+    <div><div class="n">5 of 54</div><div class="d">questions are judgment over text (crmarenapro/1, 2, 3, 6, 7): SQL is the evidence, not the answer. Decision D23</div></div>
+  </div>
+  <figure class="fig">
+    <p class="fig-title">The 54 questions in the champion run, by how the trial got there</p>
+    <div class="bar" role="img" aria-label="10 passed on SQL alone, 17 passed with Python, 27 failed">
+      <span class="a" style="flex:10">10 SQL only</span><span class="b" style="flex:17">17 passed with Python</span><span class="c" style="flex:27">27 failed (19 of them used Python)</span>
+    </div>
+    <figcaption>Denominator: 54 questions × 1 trial. Every one needs a golden; the order in §4 starts with the cheapest.</figcaption>
+  </figure>
+</header>
+
+<!-- ================================================= CASE -->
+<section class="blk" id="case">
+  <div class="hd">
+    <p class="label">01 · the case you asked about · github_repos/4</p>
+    <h2>The agent split one query into SQL, four regexes and a pandas merge; one statement does it, once three facts about the data are known</h2>
+    <p class="small">Question: "List the repository names for the top five GitHub repositories whose main language is not Python, ordered by the highest number of commits." Gold: <code>apple/swift 1051, twbs/bootstrap 340, Microsoft/vscode 190, facebook/react 178, tensorflow/tensorflow 156</code>. Trace: <a href="http://localhost:8091/runs/20260921T064521Z_v0_all_haiku/github_repos/4/t1">/runs/…/github_repos/4/t1</a>, 12 tool calls, passed.</p>
+  </div>
+  <div class="tw"><table>
+    <caption>What the trial did, call by call</caption>
+    <thead><tr><th>#</th><th>Tool</th><th>What it did</th><th>Needed?</th></tr></thead>
+    <tbody>
+      <tr><td class="num">0–1</td><td class="mono">sample_rows</td><td>looked at <code>github_repos_languages</code> and <code>github_repos_commits</code></td><td class="v-ok">yes, exploration</td></tr>
+      <tr><td class="num">2</td><td class="mono">query_db</td><td>commits per repo, saved to parquet: <b>only 6 repos</b> have commits (17,976 rows)</td><td class="v-ok">yes, your query</td></tr>
+      <tr><td class="num">3–5</td><td class="mono">query_db</td><td>the language rows for those 6; <code>torvalds/linux</code> returns 0 rows</td><td class="v-ok">yes</td></tr>
+      <tr><td class="num">6</td><td class="mono">query_db</td><td>call 2 again, unsaved</td><td class="v-no">no</td></tr>
+      <tr><td class="num">7–10</td><td class="mono">execute_python</td><td>four regexes to pull the main language out of the description, a merge, a filter <code>!= 'Python'</code>; one call crashed on a lost variable</td><td class="v-warn">no: this is the SQL below</td></tr>
+      <tr><td class="num">11</td><td class="mono">return_answer</td><td>the five names</td><td class="v-ok">yes</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="grid g3" style="margin-top:var(--s5)">
+    <div class="panel card"><h3>Fact 1 · six phrasings, one position</h3><p>Every description names its languages as <code>Name (N bytes)</code> after one of six openers ("The codebase includes:", "The majority of the code is in", "This repository is mainly written in", "While most of the project is built in", "Nearly all of the code is in … totaling N bytes", "This project is built entirely in"). The trial's Python knew five of the six. The rule "what follows the first <code>in </code> or <code>: </code>" parses <b>2,957,293 of 2,957,293</b> descriptions that name a language; 368,341 say "No language information available."</p></div>
+    <div class="panel card"><h3>Fact 2 · first listed is largest</h3><p>So "main language" needs no byte comparison: in <b>0 of 69,647</b> sampled repos was the first-listed language not the largest. Names can be lowercase ("Vim script", "sed") or contain " in " ("Ragel in Ruby Host", 15 rows), which is why the pattern anchors on the opener, not on capital letters.</p></div>
+    <div class="panel card"><h3>Fact 3 · no language row, no main language</h3><p><code>torvalds/linux</code> has the most commits (16,061) but no row in the languages table, and the gold leaves it out. An inner join does the same, so "not Python" means "known, and not Python".</p></div>
+  </div>
+
+  <div class="grid g2" style="margin-top:var(--s5)">
+    <div class="panel">
+      <p class="label">golden SQL · github_repos/4 · passes · recreates the gold exactly · 374 ms</p>
+<pre class="sql" id="gr4">with commits as (
+  select repo_name, count(*) as num_commits
+  from github_repos_commits
+  group by repo_name
+),
+langs as materialized (              -- the six repos' rows first, so the regex runs 6 times, not 3.3M
+  select repo_name, language_description
+  from github_repos_languages
+  where repo_name in (select repo_name from commits)
+),
+main as (
+  select repo_name,
+         substring(language_description
+                   from '^.*?(?: in|:) (.+?)(?: \([\d,]+ bytes|, totaling)') as main_language
+  from langs
+)
+select c.repo_name, c.num_commits
+from commits c
+join main m using (repo_name)       -- no language row (torvalds/linux) = no main language: left out
+where m.main_language &lt;&gt; 'Python'
+order by c.num_commits desc
+limit 5</pre>
+      <div class="copyrow"><button class="btn" type="button" onclick="navigator.clipboard.writeText(document.getElementById('gr4').innerText);this.textContent='Copied'">Copy the SQL</button><span class="small">then paste it in <a href="http://localhost:8091/golden/github_repos/4">/golden/github_repos/4</a>, Run and check, Save as golden</span></div>
+    </div>
+    <div class="panel">
+      <h3>The trap it avoids: 31 s against a 60 s limit</h3>
+      <p class="small">The first version put the regex in a plain CTE. Postgres pushed the <code>&lt;&gt; 'Python'</code> filter down into the scan, so the regex ran on all <b>3,325,634</b> language rows before the join cut them to six: <b>31,067 ms</b>. <code>as materialized</code> forces the six rows first: <b>374 ms</b>. The whole <code>dataagentbench</code> schema has <b>2 indexes</b>, none on <code>repo_name</code>; the 480 MB languages table is a sequential scan every time.</p>
+      <p class="small">Validator: "All repo names matched with fuzzy tolerance." Gold check: "all 6 gold line(s), in order", the header <code>repo_name,num_commits</code> included, because the columns are named as the gold names them.</p>
+      <p class="small">Postgres regex, for the rest of the rollout: <code>substring(s from 'p')</code> (first group), <code>regexp_match</code> (all groups, first match), <code>regexp_matches(s,'p','g')</code> (every match, as rows), <code>regexp_substr</code> / <code>regexp_count</code> (PG 15+; the server is 16.14). Word boundaries are <code>\m</code> / <code>\M</code>, not <code>\b</code>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================= CENSUS -->
+<section class="blk" id="census">
+  <div class="hd">
+    <p class="label">02 · the rollout question · every passing trial that used Python</p>
+    <h2>The 17 split into five kinds of work; four of them are SQL, the fifth is reading</h2>
+    <p class="small">Read from each trace's calls (the code, not a keyword count: a keyword count puts github_repos/4's names "in the SQL output" although Python did the filtering). "Verified" means run through the Golden route; everything else is the plan, to be proven one golden at a time.</p>
+  </div>
+  <div class="tw"><table>
+    <caption>17 passing trials with Python or llm_extract, champion run</caption>
+    <thead><tr><th>Question</th><th>Kind</th><th>What the Python did</th><th>In SQL</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr class="pro"><td class="mono">github_repos/4</td><td>parse text</td><td>four regexes for the main language, merge, filter</td><td><code>substring</code> after the opener, inner join</td><td class="v-ok">verified · exact</td></tr>
+      <tr><td class="mono">bookreview/1</td><td>parse text</td><td>year from <code>details</code> ("released on January 1, 2004") → decade → average rating</td><td><code>substring(details from '\d{4}')</code>, <code>/10*10</code>, <code>having count(distinct) ≥ 10</code></td><td>plan</td></tr>
+      <tr><td class="mono">stockmarket/4</td><td>parse text</td><td>company name = description up to "is / provides / …"</td><td><code>substring("Company Description" from '^(.+?) (is|provides|specializes|…) ')</code></td><td class="v-warn">plan · gold says "HDFC Bank Limited Common Stock": check where that name lives</td></tr>
+      <tr><td class="mono">stockmarket/5</td><td>parse text</td><td>company name = text before the first "."</td><td><code>split_part</code> or the same <code>substring</code></td><td class="v-warn">plan · gold names end "- Common Stock": same check</td></tr>
+      <tr><td class="mono">yelp/6</td><td>parse text + dates</td><td>five date formats with <code>to_datetime</code>; categories cut from the description</td><td><code>case</code> on the date's shape + <code>to_timestamp</code>; <code>substring</code> after "including / services in"</td><td>plan</td></tr>
+      <tr><td class="mono">pancancer_atlas/2</td><td>llm_extract → regex</td><td>vital status and barcode by <b>llm_extract</b>, then merge + percentages</td><td><code>substring(… from 'TCGA-\w\w-\w{4}')</code>, <code>~* 'alive'</code>; group, divide</td><td>plan</td></tr>
+      <tr><td class="mono">pancancer_atlas/3</td><td>llm_extract → regex + stats</td><td>sex by <b>llm_extract</b>; <code>scipy.chi2_contingency</code></td><td>regex for <code>FEMALE</code>; χ² = Σ (O − E)² / E from row and column totals; gold is the statistic, not a p-value</td><td>plan</td></tr>
+      <tr><td class="mono">yelp/7</td><td>llm_extract → regex</td><td>categories by <b>llm_extract</b>, then a Counter</td><td>the category list after the lead-in, <code>regexp_split_to_table(…, ', (and )?')</code>, <code>count(*)</code></td><td>plan</td></tr>
+      <tr><td class="mono">stockindex/2</td><td>arithmetic</td><td>up vs down days per index (date parsing not needed: the SQL already filtered <code>like '%2018%'</code>)</td><td><code>sum(("Close" &gt; "Open")::int)</code> vs <code>&lt;</code></td><td>plan</td></tr>
+      <tr><td class="mono">crmarenapro/4</td><td>arithmetic</td><td>typed three monthly counts from a SQL result into a DataFrame, took the max</td><td><code>order by count desc limit 1</code>, <code>to_char(month,'FMMonth')</code></td><td>plan</td></tr>
+      <tr><td class="mono">bookreview/2</td><td>read-back</td><td>printed the SQL result</td><td>the SQL it already had</td><td>plan · seed from the run</td></tr>
+      <tr><td class="mono">bookreview/3</td><td>read-back</td><td>printed the SQL result</td><td>the SQL it already had</td><td>plan · seed from the run</td></tr>
+      <tr><td class="mono">crmarenapro/10</td><td>read-back</td><td>loaded one parquet; 24 SQL calls did the work</td><td>the last SQL</td><td>plan · seed from the run</td></tr>
+      <tr><td class="mono">github_repos/3</td><td>read-back</td><td>checked a <code>startswith</code> filter; the count came from SQL</td><td><code>lower(ltrim(message)) !~ '^(merge|update|test)'</code></td><td>plan</td></tr>
+      <tr class="dim"><td class="mono">crmarenapro/1</td><td>judgment</td><td>printed a call transcript; the model read it and said "Authority"</td><td>SQL fetches the transcript and articles; the verdict is a reading</td><td class="v-no">D23</td></tr>
+      <tr class="dim"><td class="mono">crmarenapro/2</td><td>judgment</td><td>printed a policy article, checked a discount by hand</td><td>SQL fetches quote lines + articles</td><td class="v-no">D23</td></tr>
+      <tr class="dim"><td class="mono">crmarenapro/6</td><td>judgment</td><td>keyword search over articles (<code>str.contains</code>)</td><td><code>ilike</code> finds the candidates; the match is a reading</td><td class="v-no">D23</td></tr>
+    </tbody>
+  </table></div>
+  <div class="grid g3" style="margin-top:var(--s4)">
+    <div class="panel card"><h3>The text is generated, so regex is exact</h3><p>Every free-text column these trials parsed is templated: <code>Patient TCGA-36-1569 (FEMALE, …) … Vital status: Alive.</code>; <code>Located at … this establishment offers …, including Hair Salons, Beauty &amp; Spas, …</code>; <code>… released on January 1, 2004. It is written in English …</code>. One case-insensitive pattern reads the vital status in 10,756 of 10,761 patient rows; 5 do not match it.</p></div>
+    <div class="panel card"><h3>llm_extract was never needed</h3><p>All three trials that called it (5 calls) extracted a field a regex reads exactly. That is evidence for D21 in s03: decommission it.</p></div>
+    <div class="panel card"><h3>The 19 failing trials that used Python</h3><p>Not ported here: a failing trial's SQL is a starting point, not a translation. patents/1–3 are the heaviest (9–15 Python calls each, JSON + fuzzy matching); they are the real test of "all SQL".</p></div>
+  </div>
+</section>
+
+<!-- ================================================= WHY -->
+<section class="band-sec" id="why"><div class="wrap">
+  <div class="hd">
+    <p class="label">03 · diagnosis · why the agent reached for Python</p>
+    <h2>Four habits, each fixable in the prompt or the pack, none in the data</h2>
+  </div>
+  <div class="grid g2">
+    <div class="panel card"><h3>1 · It assumed parsing needs Python</h3><p>Sampled a templated column, then wrote <code>re.search</code> in pandas. Nothing in the prompt says Postgres has <code>substring … from</code>, <code>regexp_match</code> and <code>regexp_split_to_table</code>, or that the text is generated. Fix: the SQL-first rule plus a five-line Postgres regex and date cheat sheet (the c08-sqlonly challenger in s03).</p></div>
+    <div class="panel card pro"><h3>2 · <code>save_as</code> invites a pandas pipeline <span class="rec">decided: no Python</span></h3><p>Once a result is parquet in <code>/work</code>, the next step is <code>pd.read_parquet</code>. In github_repos/4 the agent saved three results and merged them in Python, instead of one statement with CTEs. <b>Fix (your call): remove Python.</b> The SQL-first belt drops <code>execute_python</code> and <code>save_as</code> together; intermediate results become CTEs in the one statement, as every proposal in §4 is written.</p></div>
+    <div class="panel card"><h3>3 · The pack does not describe text columns</h3><p>The agent rediscovered each template by sampling 10 rows, and its regexes covered five of the six phrasings. The context build (code, never a question) can survey every text column the way §1 did (templates, counts, a tested extraction pattern) and write it into the pack. That is the legitimate version of "the answer is in the data".</p></div>
+    <div class="panel card"><h3>4 · Mixed date formats</h3><p>yelp and stockindex store dates in three to five shapes (<code>2016-01-29 00:00:00</code>, <code>29 May 2013, 23:01</code>, <code>August 01, 2016 at 03:44 AM</code>); the agent reached for <code>to_datetime</code> with a format list. SQL does it with a <code>case</code> on the shape and <code>to_timestamp</code>, and the pack can list the shapes per column.</p></div>
+  </div>
+  <blockquote style="margin-top:var(--s4)">Performance goes with it: an all-SQL agent will write regex over big tables. Teach "cut rows first, regex last" (<code>as materialized</code>), and consider indexes on the join keys at load time: the schema has 2 indexes today.</blockquote>
+</div></section>
+
+<!-- ================================================= ROLLOUT -->
+<section class="blk" id="rollout">
+  <div class="hd">
+    <p class="label">04 · rollout · all 54 goldens, cheapest first</p>
+    <h2>Seed 9, port 14, write 26 from failing SQL or scratch, and decide how 5 judgment questions count</h2>
+  </div>
+  <ol class="steps">
+    <li><b>10 passed on SQL alone</b> (crmarenapro/3, 5, 11, 13 · googlelocal/1 · music_brainz_20k/2 · stockindex/1 · stockmarket/1 · yelp/1, 5). Pick the champion run in the Golden tab; the editor already holds the SQL behind the answer. Run and check, fix the column names if the gold match says "column names differ", save. Minutes each. crmarenapro/3 is judgment (below), so this is 9.</li>
+    <li><b>14 passed with Python, portable</b> (the table in §2 minus the three judgment rows). Port as github_repos/4 was: find the template, one statement, materialize before regex. Tooling T1 below puts the trial's Python beside its SQL in the editor so the port is side by side.</li>
+    <li><b>26 failed</b> (27 less crmarenapro/7, which is judgment), 19 of the 27 with Python. Seed from the run where its SQL is close; patents/1–3 and the stockmarket name questions are the ones most likely to test "all SQL". Goldens for these are the most valuable: they are the questions the agent cannot do yet.</li>
+    <li><b>5 judgment questions</b> (crmarenapro/1, 2, 3, 6, 7): D23 decided A. Each gets an <b>evidence golden</b>: SQL that returns the transcript, lines and articles a reader needs, with the expected answer recorded beside it; the tab marks it "evidence" and skips the validator.</li>
+  </ol>
+  <div class="panel" style="margin-top:var(--s5)">
+    <p class="label">loaded · your next step · <a href="http://localhost:8091/golden?show=review">/golden?show=review</a></p>
+    <h3>27 proposals, one SQL statement each, waiting for you to confirm</h3>
+    <p class="small">Written without Python, then re-run and judged on load: <b>21</b> pass and recreate the gold exactly; <b>2</b> pass with the gold's rows in another order (bookreview/2, 3: the gold's order follows no column); <b>2</b> pass but differ from the gold text (stockmarket/4, 5: the gold's " - Common Stock" names exist nowhere in the data); <b>4</b> are evidence (crmarenapro/1, 2, 3, 6). Open one, read the proposal box above the question, Run and check, then <b>Confirm the proposal as golden</b>. Worth a look: stockindex/1–2 carry a hand-written index → region map (region is in no table); crmarenapro/2 and /6 have two arguable violations and the gold names one; music_brainz_20k/2 merges four duplicate records of the song.</p>
+  </div>
+  <p class="small" style="margin-top:var(--s4)">Where the goldens then go is unchanged from s03: they stay in <code>dataagentbench_meta</code>, never reach a prompt, and become the reference a challenger's SQL is compared to.</p>
+</section>
+
+<!-- ================================================= DECIDE -->
+<section class="band-sec" id="decide"><div class="wrap">
+  <div class="hd">
+    <p class="label">05 · decide</p>
+    <h2>One question on judgment questions, and a batch of optional builds</h2>
+  </div>
+  <form class="q" data-lavish-question="D23" onsubmit="event.preventDefault(); const c=new FormData(event.currentTarget).get('d23'); const note=event.currentTarget.querySelector('textarea').value.trim(); if(!c)return; window.lavish.queuePrompt('D23 · judgment questions: '+c+(note?' — note: '+note:''), {tag:'choice', text:'D23: '+c, element:event.currentTarget, data:{question:'D23', answer:c, note}}); event.currentTarget.querySelector('.queued').textContent='queued: '+c+' — press Send to Agent';">
+    <h3>D23 · how does a judgment question get a golden?</h3>
+    <p class="why">crmarenapro/1, 2, 3, 6, 7 ask for a verdict from a transcript or a policy. SQL can return exactly the rows a reader needs; it cannot return "Authority" without writing it in.</p>
+    <label><input type="radio" name="d23" value="A · evidence golden: the SQL returns the evidence rows, you record the expected answer; the tab shows it as 'evidence', not pass/fail" checked> <span><b>A · evidence golden</b> <span class="rec">decided · building</span><br><span class="small">The SQL returns the transcript, quote lines and candidate articles; you record the answer beside it. The Golden tab marks it "evidence" and skips the validator. Coverage counts 54 of 54. Small build: a <code>kind</code> column and one branch in the tab.</span></span></label>
+    <label><input type="radio" name="d23" value="B · leave them out: the golden set targets 49 of 54, judgment questions listed separately"> <span><b>B · leave them out</b><br><span class="small">The golden set targets 49; the five are listed as judgment. No build. "SQL is the source of truth" stays literally true for every golden.</span></span></label>
+    <label><input type="radio" name="d23" value="C · literal SQL (select 'Authority') so every question passes"> <span><b>C · literal answer</b><br><span class="small">Every question "passes". It encodes the answer with no derivation, so it proves nothing. Not recommended.</span></span></label>
+    <textarea placeholder="anything else (optional)"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue this answer</button><span class="queued"></span></div>
+  </form>
+
+  <form class="q" data-lavish-question="builds" onsubmit="event.preventDefault(); const sel=[...event.currentTarget.querySelectorAll('input[name=items]:checked')].map(i=>({id:i.value,label:i.dataset.label,disposition:'build'})); const skip=[...event.currentTarget.querySelectorAll('input[name=items]:not(:checked)')].map(i=>i.value); const note=event.currentTarget.querySelector('textarea').value.trim(); window.lavish.queuePrompt('Build exactly the ticked items from s05 §5 and give an item-by-item receipt covering every id, ticked or not: '+sel.map(s=>s.id).join(', ')+(skip.length?' · skipped: '+skip.join(', '):'')+(note?' · note: '+note:''), {tag:'tracked-batch', text:'s05 builds: '+sel.length+' of 6', element:event.currentTarget, data:{items:sel, skipped:skip, note}}); event.currentTarget.querySelector('.queued').textContent='queued: '+sel.length+' to build — press Send to Agent';">
+    <h3>Tracked batch · what to build next (tick what you want)</h3>
+    <p class="why">T0–T1 speed up your goldens now. T2–T5 are the challenger changes the diagnosis points to; they change the agent, so they go through the s03 loop.</p>
+    <label><input type="checkbox" name="items" value="T0" data-label="save the github_repos/4 golden as written here, source 'written in s05'"> <span><b>T0</b> · save the github_repos/4 golden above for you (source "written in s05"). Unticked: you paste and save it yourself.</span></label>
+    <label><input type="checkbox" name="items" value="T1" data-label="Golden tab: a 'Python' column (did the run's trial use execute_python / llm_extract) and the trial's Python calls beside its SQL in the editor" checked> <span><b>T1</b> · Golden tab: a "used Python" column for the picked run, and the trial's Python calls shown beside its SQL calls in the editor, read-only, so a port is side by side</span></label>
+    <label><input type="checkbox" name="items" value="T2" data-label="context build: survey every text column (templates, counts, a tested extraction pattern) into the pack"> <span><b>T2</b> · context build: survey every text column (templates with counts, date shapes, a tested extraction pattern) into the pack, by code</span></label>
+    <label><input type="checkbox" name="items" value="T3" data-label="c08-sqlonly challenger: SQL-first rule, Postgres regex/date cheat sheet, materialize-before-regex, save_as tied to execute_python"> <span><b>T3</b> · c08-sqlonly challenger: the SQL-first rule, a Postgres regex and date cheat sheet, "cut rows first, regex last"</span></label>
+    <label><input type="checkbox" name="items" value="T4" data-label="load: indexes on join keys (repo_name, business ids, barcodes) in the dataagentbench schema"> <span><b>T4</b> · load: indexes on the join keys (<code>repo_name</code>, business and review refs, barcodes); the schema has 2 today</span></label>
+    <label><input type="checkbox" name="items" value="T5" data-label="D21: decommission llm_extract (re-baseline v1 without it)"> <span><b>T5</b> · D21: decommission <code>llm_extract</code> (re-baseline as v1 without it, ≈ $9)</span></label>
+    <textarea placeholder="anything to change (optional)"></textarea>
+    <div class="row"><button class="btn" type="submit">Queue the ticked builds</button><span class="queued"></span></div>
+  </form>
+</div></section>
+</div>
+</body>
+</html>

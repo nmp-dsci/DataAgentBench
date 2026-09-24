@@ -67,7 +67,13 @@
   golden in the Golden tab. The editor may start from the SQL a run's agent
   wrote for that question (the run picker; the champion by default), but nothing
   saves a golden without someone running and saving it, and each save records
-  where its SQL started (`source`). A question's golden starts empty. Saves append to `dataagentbench_meta.golden_sql` (the
+  where its SQL started (`source`). A question's golden starts empty.
+  Proposals (`dab golden-propose <folder>`, table `golden_proposal`) are SQL
+  written outside the tab, run and judged before they land; they are shown
+  for review and are never goldens until someone saves one. A judgment
+  question (crmarenapro/1, 2, 3, 6, 7) gets an *evidence* golden (D23): its SQL
+  returns what a reader needs, the expected answer is recorded beside it, and
+  the validator is not applied. A golden is one SQL statement: no Python. Saves append to `dataagentbench_meta.golden_sql` (the
   newest is current, and nothing is ever dropped; `make db-reset` leaves the
   meta schema alone). `dab_agent` is refused there (`tests/test_golden.py`).
   A golden never reaches a prompt, the pack, the curator or a proposer.

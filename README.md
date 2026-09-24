@@ -142,6 +142,11 @@ redirect.
   opening a question shows the run's verdict and answer at the top and seeds the
   editor with the agent's SQL: the last call whose output holds its answer, with
   every other call listed to load instead. A save records where its SQL started.
+  Proposed SQL (loaded with `uv run dab golden-propose <folder>`, already run
+  and judged) shows as a "Proposed" column and a "proposals to review" filter;
+  opening one puts it in the editor with its verdict on top, and saving it is
+  the confirmation. Judgment questions take an *evidence* golden: the SQL
+  returns the evidence and the expected answer is recorded beside it.
   Picking a
   question opens its editor above the list at `/golden/<ds>/<n>`, with
   previous / next through the 54; the list stays.

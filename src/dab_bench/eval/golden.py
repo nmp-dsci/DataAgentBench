@@ -34,6 +34,12 @@ from dab_bench.config import PG_META_SCHEMA, SOURCE_PATH, settings
 from dab_bench.data import pg
 
 GOLDEN_TABLE = "golden_sql"
+PROPOSAL_TABLE = "golden_proposal"
+KINDS = ("answer", "evidence")
+EVIDENCE_REASON = (
+    "evidence golden: the question asks for a judgment over text, so the SQL returns the evidence "
+    "and the expected answer is recorded beside it; the validator is not applied"
+)
 MAX_ROWS = 5_000  # fetched per run; more means the SQL has not reduced to an answer yet
 RENDER_ROWS = 500  # rows the validator sees
 
@@ -63,6 +69,33 @@ alter table {PG_META_SCHEMA}.{GOLDEN_TABLE}
   add column if not exists gold_match text not null default '';  -- exact | exact_values | reordered | differs
 alter table {PG_META_SCHEMA}.{GOLDEN_TABLE}
   add column if not exists source text not null default '';  -- where the SQL started: '' by hand, or a run's trial
+alter table {PG_META_SCHEMA}.{GOLDEN_TABLE}
+  add column if not exists kind text not null default 'answer';  -- answer | evidence (a judgment question)
+alter table {PG_META_SCHEMA}.{GOLDEN_TABLE}
+  add column if not exists expected_answer text not null default '';  -- evidence only: the answer a reader reaches
+create table if not exists {PG_META_SCHEMA}.{PROPOSAL_TABLE} (
+  id               bigserial primary key,
+  query_id         text not null,
+  sql              text not null,
+  kind             text not null default 'answer',
+  expected_answer  text not null default '',
+  answer_text      text not null,
+  passed           boolean,
+  reason           text not null default '',
+  gold_match       text not null default '',
+  row_count        integer,
+  duration_ms      integer,
+  error            text,
+  replaces         text not null default '',   -- what the trial's Python / llm_extract did
+  note             text not null default '',
+  author           text not null,
+  upstream_commit  text not null,
+  created_at       timestamptz not null default now()
+);
+create index if not exists {PROPOSAL_TABLE}_query on {PG_META_SCHEMA}.{PROPOSAL_TABLE} (query_id, id desc);
+comment on table {PG_META_SCHEMA}.{PROPOSAL_TABLE} is
+  'Proposed golden SQL, written outside the explorer and checked before it lands. Not a golden: a person '
+  'confirms one by saving it in the Golden tab. Append-only; encodes answers, so never granted to dab_agent.';
 create index if not exists {GOLDEN_TABLE}_query on {PG_META_SCHEMA}.{GOLDEN_TABLE} (query_id, id desc);
 comment on table {PG_META_SCHEMA}.{GOLDEN_TABLE} is
   'Golden SQL, curated in the explorer. Append-only: the newest row per query_id is current. '
@@ -87,7 +120,8 @@ def ensure_table() -> None:
     """Create the table if it is missing (as dab_owner, who owns the schema's tables)."""
     with pg.connect() as con:
         con.execute(DDL)  # type: ignore[arg-type,unused-ignore]
-        con.execute(f"revoke all on {PG_META_SCHEMA}.{GOLDEN_TABLE} from dab_agent")  # type: ignore[arg-type,unused-ignore]
+        for table in (GOLDEN_TABLE, PROPOSAL_TABLE):
+            con.execute(f"revoke all on {PG_META_SCHEMA}.{table} from dab_agent")  # type: ignore[arg-type,unused-ignore]
 
 
 def _json_safe(v: Any) -> Any:
@@ -214,6 +248,40 @@ def judge_answer(folder: str, query_id: int, answer: str, timeout_s: int = 30) -
     )
 
 
+def attempt(
+    q: dict[str, Any], folder: str, sql: str, kind: str = "answer"
+) -> tuple[dict[str, Any], Execution]:
+    """Run `sql` for question `q` (an index row) and judge it: the validator's verdict and the
+    comparison with the gold. An evidence golden is run but not judged: its rows are the evidence
+    for a judgment the validator cannot check."""
+    if kind not in KINDS:
+        raise ValueError(f"kind must be one of {KINDS}")
+    ex = execute(sql)
+    answer = render(ex.columns, ex.rows)
+    if ex.error:
+        verdict: dict[str, Any] = {"passed": None, "reason": ex.error}
+    elif kind == "evidence":
+        verdict = {"passed": None, "reason": EVIDENCE_REASON}
+    elif not answer:
+        verdict = {"passed": False, "reason": "the query returned no rows"}
+    else:
+        verdict = judge_answer(folder, int(q["query_id"]), answer)
+    if ex.error:
+        gold = {"match": "differs", "detail": ex.error}
+    elif kind == "evidence":
+        gold = {"match": "", "detail": "evidence: not compared with the gold"}
+    else:
+        gold = match_gold(ex.columns, ex.rows, q["gold_text"])
+    out = {
+        "execution": ex.as_dict() | {"rows": ex.rows[:200]},  # the page shows 200
+        "answer_text": answer,
+        "verdict": verdict,
+        "gold_match": gold,
+        "kind": kind,
+    }
+    return out, ex
+
+
 def _commit() -> str:
     try:
         return str(json.loads(SOURCE_PATH.read_text()).get("commit") or "unknown")
@@ -231,6 +299,8 @@ def save(
     author: str | None = None,
     gold_match: str = "",
     source: str = "",
+    kind: str = "answer",
+    expected_answer: str = "",
 ) -> dict[str, Any]:
     """Append one golden. `source` says where the SQL started (empty: typed by hand; else a
     run's trial and call, e.g. `run 2026…_v0_all_haiku · yelp/1/t1 · query_db #3`); a person
@@ -240,8 +310,8 @@ def save(
         row = con.execute(
             f"""insert into {PG_META_SCHEMA}.{GOLDEN_TABLE}
                 (query_id, sql, answer_text, passed, reason, row_count, duration_ms, error,
-                 note, author, db_role, upstream_commit, gold_match, source)
-                values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'dab_agent', %s, %s, %s)
+                 note, author, db_role, upstream_commit, gold_match, source, kind, expected_answer)
+                values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'dab_agent', %s, %s, %s, %s, %s)
                 returning id, created_at""",  # type: ignore[arg-type,unused-ignore]
             (
                 query_id,
@@ -257,6 +327,8 @@ def save(
                 _commit(),
                 gold_match,
                 source.strip(),
+                kind,
+                expected_answer.strip(),
             ),
         ).fetchone()
     assert row is not None
@@ -279,6 +351,8 @@ _COLS = (
     "created_at",
     "gold_match",
     "source",
+    "kind",
+    "expected_answer",
 )
 
 
@@ -312,3 +386,86 @@ def history(query_id: str) -> list[dict[str, Any]]:
             (query_id,),
         ).fetchall()
     return [_row(r) for r in rows]
+
+
+# ── proposals: checked SQL waiting for a person to confirm it ────────────────
+
+_PCOLS = (
+    "id",
+    "query_id",
+    "sql",
+    "kind",
+    "expected_answer",
+    "answer_text",
+    "passed",
+    "reason",
+    "gold_match",
+    "row_count",
+    "duration_ms",
+    "error",
+    "replaces",
+    "note",
+    "author",
+    "upstream_commit",
+    "created_at",
+)
+
+
+def _prow(r: tuple[Any, ...]) -> dict[str, Any]:
+    d = dict(zip(_PCOLS, r, strict=True))
+    if isinstance(d["created_at"], datetime):
+        d["created_at"] = d["created_at"].astimezone(UTC).isoformat()
+    return d
+
+
+def propose(
+    query_id: str,
+    sql: str,
+    out: dict[str, Any],
+    ex: Execution,
+    replaces: str = "",
+    note: str = "",
+    expected_answer: str = "",
+    author: str = "claude",
+) -> dict[str, Any]:
+    """Append one proposal (already run and judged by `attempt`). It is not a golden."""
+    ensure_table()
+    with pg.connect() as con:
+        row = con.execute(
+            f"""insert into {PG_META_SCHEMA}.{PROPOSAL_TABLE}
+                (query_id, sql, kind, expected_answer, answer_text, passed, reason, gold_match,
+                 row_count, duration_ms, error, replaces, note, author, upstream_commit)
+                values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                returning id, created_at""",  # type: ignore[arg-type,unused-ignore]
+            (
+                query_id,
+                sql.strip(),
+                out["kind"],
+                expected_answer.strip(),
+                out["answer_text"],
+                out["verdict"].get("passed"),
+                str(out["verdict"].get("reason") or ""),
+                out["gold_match"].get("match") or "",
+                ex.row_count,
+                ex.duration_ms,
+                ex.error,
+                replaces.strip(),
+                note.strip(),
+                author,
+                _commit(),
+            ),
+        ).fetchone()
+    assert row is not None
+    return {"id": row[0], "created_at": row[1].astimezone(UTC).isoformat()}
+
+
+def proposals() -> dict[str, dict[str, Any]]:
+    """The newest proposal per question."""
+    ensure_table()
+    with pg.connect() as con:
+        rows = con.execute(
+            f"""select distinct on (query_id) {", ".join(_PCOLS)}
+                from {PG_META_SCHEMA}.{PROPOSAL_TABLE}
+                order by query_id, id desc"""  # type: ignore[arg-type,unused-ignore]
+        ).fetchall()
+    return {r[1]: _prow(r) for r in rows}

@@ -129,16 +129,23 @@ export type GoldenRow = {
   created_at: string;
   gold_match: GoldMatch | '';
   source: string; // where the SQL started: '' by hand, else a run's trial and call
+  kind: GoldenKind;
+  expected_answer: string; // evidence only
 };
+/** answer: judged by the validator. evidence: a judgment question; the rows are the evidence (D23). */
+export type GoldenKind = 'answer' | 'evidence';
+export type ProposalBrief = { id: number; kind: GoldenKind; passed: boolean | null; gold_match: GoldMatch | ''; duration_ms: number | null; created_at: string };
+export type Proposal = ProposalBrief & { query_id: string; sql: string; expected_answer: string; answer_text: string; reason: string; row_count: number | null; error: string | null; replaces: string; note: string; author: string };
 export type GoldMatch = 'exact' | 'exact_values' | 'reordered' | 'differs';
-export type GoldenBrief = { passed: boolean | null; gold_match: GoldMatch | ''; created_at: string; versions: number; author: string; note: string };
-export type GoldenList = { queries: (QuerySummary & { golden: GoldenBrief | null })[]; n: number; written: number; passing: number; exact: number };
-export type GoldenOne = { query: QuerySummary; hints: string; current: GoldenRow | null; history: GoldenRow[] };
+export type GoldenBrief = { passed: boolean | null; gold_match: GoldMatch | ''; created_at: string; versions: number; author: string; note: string; kind: GoldenKind };
+export type GoldenList = { queries: (QuerySummary & { golden: GoldenBrief | null; proposal: ProposalBrief | null })[]; n: number; written: number; evidence: number; proposed: number; passing: number; exact: number };
+export type GoldenOne = { query: QuerySummary; hints: string; current: GoldenRow | null; history: GoldenRow[]; proposal: Proposal | null };
 export type GoldenAttempt = {
   execution: { columns: string[]; rows: unknown[][]; row_count: number; truncated: boolean; duration_ms: number; error: string | null };
   answer_text: string;
   verdict: { passed: boolean | null; reason: string; timed_out?: boolean };
-  gold_match: { match: GoldMatch; detail: string };
+  gold_match: { match: GoldMatch | ''; detail: string };
+  kind: GoldenKind;
   saved?: { id: number; created_at: string };
 };
 
