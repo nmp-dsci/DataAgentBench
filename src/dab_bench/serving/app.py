@@ -6,7 +6,8 @@ agent versions under `agents/` — plus this machine's run folders under `runs/`
 Nothing here reads the upstream clone or calls a model; MLflow is linked, never
 read. Two routes execute, both on the agent's read-only role: the playground,
 `POST /api/agent/tools/<name>` (the trial's own tool bodies and the network-off
-sandbox, writing nothing but /work files under `workspace/playground_*`), and the
+sandbox, writing nothing but /work files under `workspace/playground/playground_<dataset>/`),
+and the
 golden SQL routes, `POST /api/golden/<dataset>/<n>[/run]`, which run one SELECT as
 `dab_agent`, judge it with the question's validator in a worker process and, on
 save, append it to `dataagentbench_meta.golden_sql` (which `dab_agent` cannot read).
@@ -511,7 +512,7 @@ def create_app(index: Index | None = None) -> FastAPI:
     @app.post("/api/agent/tools/{name}")
     def playground(name: str, body: ToolCall) -> dict[str, Any]:
         """Run one tool by hand with the trial's own guards. Not a trial: no run folder,
-        no MLflow trace; only /work files under workspace/playground_<dataset>."""
+        no MLflow trace; only /work files under workspace/playground/playground_<dataset>/."""
         from dab_bench.agent.prompt import load_context
         from dab_bench.agent.sandbox import image_exists
         from dab_bench.agent.tools import TOOL_SPECS, ToolState, call_tool
@@ -574,7 +575,8 @@ class GoldenSQL(BaseModel):
     sql: str
     note: str = ""
     source: str = ""  # where the SQL started: '' by hand, else a run's trial and call
-    kind: Literal["answer", "evidence"] = "answer"  # evidence: a judgment question (D23)
+    kind: Literal["answer", "evidence"] = "answer"  # chosen by the curator, e.g. for a judgment
+    # question such as crmarenapro/1,2,3,6,7 (D23); any question may be saved as evidence
     expected_answer: str = ""  # evidence only: the answer a reader reaches from the rows
 
 

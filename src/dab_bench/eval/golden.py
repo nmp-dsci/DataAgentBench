@@ -50,6 +50,16 @@ _FORBIDDEN = re.compile(
     re.I,
 )
 
+# strips string/identifier literals and comments so a leftover ';' means a second statement
+_STRIP_FOR_STMT_CHECK = re.compile(
+    r"'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"|--[^\n]*|/\*.*?\*/",
+    re.S,
+)
+
+
+def _has_extra_statement(sql: str) -> bool:
+    return ";" in _STRIP_FOR_STMT_CHECK.sub("", sql)
+
 DDL = f"""
 create table if not exists {PG_META_SCHEMA}.{GOLDEN_TABLE} (
   id               bigserial primary key,
@@ -138,8 +148,13 @@ def _json_safe(v: Any) -> Any:
 
 def execute(sql: str) -> Execution:
     """Run `sql` as dab_agent in a read-only transaction; fetch at most MAX_ROWS rows."""
-    sql = sql.strip().rstrip(";").strip()
+    sql = sql.strip()
     t0 = time.time()
+    if not sql:
+        return Execution([], [], 0, False, 0, "Error: empty SQL")
+    if _has_extra_statement(sql.rstrip(";")):
+        return Execution([], [], 0, False, 0, "Error: only one statement")
+    sql = sql.rstrip(";").strip()
     if not sql:
         return Execution([], [], 0, False, 0, "Error: empty SQL")
     if _FORBIDDEN.match(sql):

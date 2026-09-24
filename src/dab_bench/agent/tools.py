@@ -364,7 +364,7 @@ class ToolSpec:
 
 
 def _obj(props: dict[str, Any], required: list[str]) -> dict[str, Any]:
-    return {"type": "object", "properties": props, "required": required}
+    return {"type": "object", "properties": props, "required": required, "additionalProperties": False}
 
 
 TOOL_SPECS: dict[str, ToolSpec] = {
@@ -528,7 +528,7 @@ def _sample_rows(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, Any]
 def _query_db(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, Any], str]:
     sql = str(args.get("sql", ""))
     limit = int(args.get("limit") or DEFAULT_LIMIT)
-    save_as = str(args.get("save_as") or "").strip() or None
+    save_as = str(args.get("save_as") or "").strip() or None if state.work_dir is not None else None
     inputs = {"sql": sql, "limit": limit, "save_as": save_as}
     try:
         return inputs, run_sql(state, sql, limit, save_as)

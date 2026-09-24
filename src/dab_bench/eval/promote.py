@@ -4,7 +4,8 @@ Each candidate version is represented by its newest complete run of the full spl
 dry run, every trial scored (a rate-limited trial must be resumed first). Accuracy is the
 top line, answers passed out of trials scored, the leaderboard's own number. The most
 answers passed wins; a tie keeps the incumbent, and a tie between two challengers goes
-to the one listed first (the older version). The verdict appends to
+to whichever's newest complete full-split run started first (the older run). The verdict
+appends to
 `agents/promotions.jsonl`, with every candidate's top line, its scorecard and its
 held-out result, and `agents/champion` moves when the winner changes. The winner's
 prompt gets the `champion` alias in the MLflow prompt registry.
@@ -33,6 +34,7 @@ class Candidate:
     heldout: dict[str, Any] | None = None
     scorecard: dict[str, Any] | None = None
     why_not: str = ""  # why the version has no usable run
+    started_at: str | None = None  # the winning run's start, for the challenger tie-break
 
 
 def candidate(version: str) -> Candidate:
@@ -56,6 +58,7 @@ def candidate(version: str) -> Candidate:
             s.get("scored"),
             s.get("n"),
             why_not=f"{s.get('n', 0) - s.get('scored', 0)} trial(s) not scored: `dab eval --resume {m.run_id}`",
+            started_at=m.started_at,
         )
     card = load_scorecard(m.run_id)
     return Candidate(
@@ -66,11 +69,13 @@ def candidate(version: str) -> Candidate:
         int(s["n"]),
         heldout=((card or {}).get("by_split") or {}).get("heldout"),
         scorecard=(card or {}).get("totals"),
+        started_at=m.started_at,
     )
 
 
 def decide(cands: list[Candidate], incumbent: str) -> tuple[str, str]:
-    """(winner, reason): the most answers passed; a tie keeps the incumbent."""
+    """(winner, reason): the most answers passed; a tie keeps the incumbent; a tie between two
+    challengers goes to whichever's run started first (the older run)."""
     ok = [c for c in cands if not c.why_not and c.passed is not None]
     if not ok:
         return incumbent, "no candidate has a complete full-split run; the incumbent stays"
@@ -84,7 +89,13 @@ def decide(cands: list[Candidate], incumbent: str) -> tuple[str, str]:
             + ("a tie at the top keeps the incumbent" if tie else "it has the best top line")
             + f" ({names})"
         )
-    return top[0].version, f"{top[0].version} has the best top line ({names})"
+    winner = min(top, key=lambda c: c.started_at or "")
+    tie = len(top) > 1
+    return winner.version, (
+        f"{winner.version} has the best top line"
+        + (" (tie broken by the older run)" if tie else "")
+        + f" ({names})"
+    )
 
 
 def promote(candidates: list[str] | None = None, dry_run: bool = False) -> dict[str, Any]:

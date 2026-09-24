@@ -339,6 +339,8 @@ table.checks td.small{min-width:14rem}
 .sql-code code{font:inherit}
 .sq-kw{color:var(--syn-kw);font-weight:600}
 .sq-fn{color:var(--syn-fn)}
+/* in the editor a call is marked over the grammar's keyword span: the call wins, whichever wraps which */
+.cm-call,.cm-call .sq-kw,.cm-call .sq-name,.sq-kw .cm-call,.sq-name .cm-call{color:var(--syn-fn);font-weight:400}
 .sq-str{color:var(--syn-str)}
 .sq-num{color:var(--syn-num)}
 .sq-id{color:var(--ink);font-weight:500}

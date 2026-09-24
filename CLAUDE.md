@@ -73,10 +73,12 @@
   where its SQL started (`source`). A question's golden starts empty.
   Proposals (`dab golden-propose <folder>`, table `golden_proposal`) are SQL
   written outside the tab, run and judged before they land; they are shown
-  for review and are never goldens until someone saves one. A judgment
-  question (crmarenapro/1, 2, 3, 6, 7) gets an *evidence* golden (D23): its SQL
-  returns what a reader needs, the expected answer is recorded beside it, and
-  the validator is not applied. A golden is one SQL statement: no Python. Saves append to `dataagentbench_meta.golden_sql` (the
+  for review and are never goldens until someone saves one. An *evidence*
+  golden (D23) is intended for a judgment question such as crmarenapro/1, 2,
+  3, 6, 7: its SQL returns what a reader needs, the expected answer is
+  recorded beside it, and the validator is not applied. The kind is chosen by
+  the curator in the Golden tab, not restricted in code to those five — any
+  question may be saved as evidence. A golden is one SQL statement: no Python. Saves append to `dataagentbench_meta.golden_sql` (the
   newest is current, and nothing is ever dropped; `make db-reset` leaves the
   meta schema alone). `dab_agent` is refused there (`tests/test_golden.py`).
   A golden never reaches a trial's prompt, the pack, the curator or a proposer.

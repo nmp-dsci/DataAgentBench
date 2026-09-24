@@ -1,8 +1,8 @@
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
 import { PostgreSQL, sql as sqlLanguage } from '@codemirror/lang-sql';
-import { bracketMatching, indentOnInput, syntaxHighlighting } from '@codemirror/language';
-import { EditorState } from '@codemirror/state';
-import { EditorView, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers, placeholder as cmPlaceholder } from '@codemirror/view';
+import { bracketMatching, indentOnInput, syntaxHighlighting, syntaxTree } from '@codemirror/language';
+import { EditorState, RangeSetBuilder } from '@codemirror/state';
+import { Decoration, type DecorationSet, EditorView, ViewPlugin, type ViewUpdate, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers, placeholder as cmPlaceholder } from '@codemirror/view';
 import { highlightCode, tagHighlighter, tags } from '@lezer/highlight';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 
@@ -48,12 +48,51 @@ export function highlightLines(sql: string): Span[][] {
   const flat = lines.flat();
   for (let i = 0; i < flat.length; i++) {
     const s = flat[i];
-    const call = s.cls === 'sq-name' || (s.cls === 'sq-kw' && !STRUCTURAL.has(s.text.toLowerCase()));
-    if (!call) continue;
     const next = flat.slice(i + 1).find((x) => x.text.trim() !== '');
-    if (next?.text.trimStart().startsWith('(')) s.cls = 'sq-fn';
+    if (isCall(s.text, s.cls === 'sq-name' ? 'name' : s.cls === 'sq-kw' ? 'keyword' : null, next?.text.trimStart()[0])) s.cls = 'sq-fn';
   }
   return lines;
+}
+
+/** A function call, as an editor colours it: a name, or a keyword that is not structural
+ *  (`count`, `lower`, `substring` are keywords in the Postgres dialect), followed by "(". The
+ *  one rule both the read-only blocks and the editor use. */
+export function isCall(text: string, kind: 'name' | 'keyword' | null, nextChar: string | undefined): boolean {
+  if (nextChar !== '(' || kind == null) return false;
+  return kind === 'name' || !STRUCTURAL.has(text.toLowerCase());
+}
+
+/** The editor's half of `isCall`: marks each call in the visible ranges with the function class. */
+const callMarks = ViewPlugin.fromClass(
+  class {
+    decorations: DecorationSet;
+    constructor(view: EditorView) {
+      this.decorations = marks(view);
+    }
+    update(u: ViewUpdate) {
+      if (u.docChanged || u.viewportChanged || syntaxTree(u.startState) !== syntaxTree(u.state)) this.decorations = marks(u.view);
+    }
+  },
+  { decorations: (v) => v.decorations },
+);
+const FN_MARK = Decoration.mark({ class: 'sq-fn cm-call' });
+
+function marks(view: EditorView): DecorationSet {
+  const b = new RangeSetBuilder<Decoration>();
+  const doc = view.state.doc;
+  for (const { from, to } of view.visibleRanges) {
+    syntaxTree(view.state).iterate({
+      from,
+      to,
+      enter: (node) => {
+        const kind = node.name === 'Identifier' ? 'name' : node.name === 'Keyword' ? 'keyword' : null;
+        if (!kind) return;
+        const after = doc.sliceString(node.to, Math.min(doc.length, node.to + 40)).trimStart()[0];
+        if (isCall(doc.sliceString(node.from, node.to), kind, after)) b.add(node.from, node.to, FN_MARK);
+      },
+    });
+  }
+  return b.finish();
 }
 
 /** Keywords that open a parenthesis without being a function call (`IN (…)`, `AS (…)`). */
@@ -156,6 +195,7 @@ export function SqlEditor({ value, onChange, rows = 12, placeholder, label, aria
           keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
           sqlLanguage({ dialect: PostgreSQL }),
           syntaxHighlighting(HIGHLIGHT),
+          callMarks,
           editorTheme,
           EditorView.contentAttributes.of({ 'aria-label': ariaLabel ?? 'SQL', spellcheck: 'false', autocapitalize: 'off', autocorrect: 'off' }),
           ...(placeholder ? [cmPlaceholder(placeholder)] : []),

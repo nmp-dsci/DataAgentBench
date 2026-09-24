@@ -235,14 +235,16 @@ def _server(state: ToolState, sess: Session, guard: Guard, dataset: str | None) 
                 "content": [{"type": "text", "text": "The notes were dropped. Stop."}],
                 "is_error": True,
             }
-        problems = guard.check(notes) if notes else []
+        rationale_problems = guard.check(rationale) if rationale else []
+        problems = (guard.check(notes) if notes else []) + rationale_problems
         if problems:
-            sess.refusals.append({"notes": notes, "problems": problems})
+            sess.refusals.append({"notes": notes, "rationale": rationale, "problems": problems})
             # a leak (question text, gold value, golden SQL) is sent back once, then the notes are
             # dropped; a length overrun alone is a format fix and does not count toward the drop
             leaks = sum(1 for r in sess.refusals if guard.leaks(r["problems"]))
             if guard.leaks(problems) and leaks >= 2:
-                sess.notes, sess.rationale, sess.dropped = None, rationale, True
+                stored_rationale = "[redacted]" if guard.leaks(rationale_problems) else rationale
+                sess.notes, sess.rationale, sess.dropped = None, stored_rationale, True
                 text = "Refused again: " + "; ".join(problems) + ". The notes are dropped. Stop."
             else:
                 text = "Refused: " + "; ".join(problems) + ". Fix exactly this and call again."

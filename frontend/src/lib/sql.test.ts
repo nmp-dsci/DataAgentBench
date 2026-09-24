@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { highlightLines } from './sql';
+import { highlightLines, isCall } from './sql';
 
 describe('highlightLines (CodeMirror SQL grammar, Postgres dialect)', () => {
   const sql = `-- top repos\nWITH r AS (SELECT "Name", count(*)::int AS n FROM t WHERE s ILIKE '%it''s%' AND x >= 3.5)\nselect * from r order by n desc limit 5;`;
@@ -30,5 +30,16 @@ describe('highlightLines (CodeMirror SQL grammar, Postgres dialect)', () => {
           .map((l) => l.map((x) => x.text).join(''))
           .join('\n'),
       ).toBe(s);
+  });
+});
+
+describe('isCall (the one rule for blocks and the editor)', () => {
+  it('a name or a non-structural keyword before "(" is a call; structural keywords are not', () => {
+    expect(isCall('my_fn', 'name', '(')).toBe(true);
+    expect(isCall('count', 'keyword', '(')).toBe(true);
+    expect(isCall('IN', 'keyword', '(')).toBe(false);
+    expect(isCall('AS', 'keyword', '(')).toBe(false);
+    expect(isCall('count', 'keyword', ' ')).toBe(false);
+    expect(isCall('x', null, '(')).toBe(false);
   });
 });
