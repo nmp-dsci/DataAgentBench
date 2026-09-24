@@ -96,10 +96,9 @@ export function TracePage() {
             {t.score.category === 'solved' ? 'it recreates the golden result' : t.score.category === 'no golden' ? 'this question has no golden yet, so only the answer is scored' : `${t.score.category}`}
           </h2>
           <p>
-            The scorecard reads each trial three ways after the run: the answer (the validator), the SQL (does its result recreate the golden's, in any row or column order) and the decision (pass the result through, or derive the answer from it). It is computed by{' '}
-            <code>dab diagnose {id}</code> and never reaches the agent.
+            After the run, <code>dab diagnose {id}</code> checks this trial three ways against the question's golden SQL and gives the failure one category. None of it reaches the agent.
           </p>
-          <SqlVersus score={t.score} agentSql={t.submission?.sql} golden={t.golden} mode={t.submission?.mode} step={t.submission?.step} />
+          <SqlVersus score={t.score} agentSql={t.submission?.sql} golden={t.golden} mode={t.submission?.mode} step={t.submission?.step} reason={t.reason} />
         </>
       )}
 

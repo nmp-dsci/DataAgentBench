@@ -203,12 +203,15 @@ def compare_results(
     if not a_rows:
         return {"pass": False, "detail": "the agent's SQL returned no rows"}
     if not contain and len(a_rows) != len(g_rows):
-        return {"pass": False, "detail": f"{len(a_rows)} row(s) against the golden's {len(g_rows)}"}
+        return {
+            "pass": False,
+            "detail": f"returns {len(a_rows)} row(s); the golden returns {len(g_rows)}",
+        }
     cols = _match_columns(g_rows, a_rows, len(g_cols), len(a_cols), contain=contain)
     if cols is None:
         return {
             "pass": False,
-            "detail": "no agent column holds the values of every golden column",
+            "detail": "the values differ: some column of the golden's result has no column with the same values in the agent's (names and order do not matter, the values do)",
         }
     g_set = Counter(tuple(key(r[j]) for j, (_, key) in enumerate(cols)) for r in g_rows)
     a_set = Counter(tuple(key(r[k]) for k, key in cols) for r in a_rows)
@@ -218,16 +221,22 @@ def compare_results(
         if missing:
             return {
                 "pass": False,
-                "detail": f"{sum(missing.values())} of the golden's {len(g_rows)} evidence row(s) missing",
+                "detail": f"{sum(missing.values())} of the golden's {len(g_rows)} evidence row(s) are not in the agent's result",
             }
-        return {"pass": True, "detail": f"contains the golden's {len(g_rows)} evidence row(s)"}
+        return {
+            "pass": True,
+            "detail": f"contains all {len(g_rows)} of the golden's evidence row(s)",
+        }
     if g_set != a_set:
         n = sum((g_set - a_set).values())
-        return {"pass": False, "detail": f"{n} of {len(g_rows)} row(s) differ from the golden's"}
+        return {
+            "pass": False,
+            "detail": f"{n} of the golden's {len(g_rows)} row(s) are not in the agent's result",
+        }
     rounded = any(key is not _key for _, key in cols)
     return {
         "pass": True,
-        "detail": f"the golden's {len(g_rows)} row(s)"
+        "detail": f"returns the golden's {len(g_rows)} row(s)"
         + (", compared at the agent's rounding" if rounded else "")
         + (f", plus {extra} extra column(s)" if extra > 0 else ""),
     }
@@ -420,11 +429,16 @@ def score_trial(
     a_cols, a_rows, err = _agent_result(trace, sql)
     if err:
         out["sql"] = False
+        out["sql_detail"] = f"the SQL failed when re-run: {err[:200]}"
         return done("SQL error", err[:200])
     cmp = compare_results(g.columns, g.rows, a_cols, a_rows, g.kind)
     out["sql"] = cmp["pass"]
+    out["sql_detail"] = cmp["detail"]
     want = MODE_FOR_KIND[g.kind]
     out["decision"] = row.get("mode") == want
+    out["decision_detail"] = (
+        f"chose {row.get('mode') or 'no mode'}; the golden is an {g.kind} golden, so {want} is right"
+    )
     answer = row.get("passed")  # an evidence question's validator still scores its answer
     if cmp["pass"]:
         if not out["decision"]:

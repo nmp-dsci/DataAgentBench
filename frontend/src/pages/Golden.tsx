@@ -554,7 +554,7 @@ export function GoldenEditor() {
             </p>
             <pre className="wrap-any">{trial.answer || '(no answer)'}</pre>
             {!trial.passed && trial.reason && <p className="reason">{trial.reason}</p>}
-            {trace?.score && trace.score.golden_id != null && <SqlVersus score={trace.score} agentSql={trace.submission?.sql} golden={trace.golden} mode={trace.submission?.mode} step={trace.submission?.step} />}
+            {trace?.score && trace.score.golden_id != null && <SqlVersus score={trace.score} agentSql={trace.submission?.sql} golden={trace.golden} mode={trace.submission?.mode} step={trace.submission?.step} reason={trial.reason} />}
             <p className="small">
               {trace ? `${calls.length} query_db call${calls.length === 1 ? '' : 's'}` : 'loading its SQL…'}
               {submitted && ', then one submitted statement (the editor starts from it)'}

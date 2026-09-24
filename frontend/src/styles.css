@@ -305,7 +305,6 @@ ol.sqlcalls pre{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:var(--s2)
 .linkish:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 /* the scorecard: agent SQL beside golden SQL (lib/scorecard.tsx) */
 .versus{margin-top:var(--s3);min-width:0}
-.versus .verdicts{display:flex;flex-wrap:wrap;gap:var(--s3);align-items:center;margin:0 0 var(--s2)}
 .versus .compare{margin-top:var(--s3)}
 .versus pre{white-space:pre-wrap;overflow-wrap:anywhere}
 table.structure td.mono{font:400 var(--t-1)/1.4 var(--mono);overflow-wrap:anywhere}
@@ -321,3 +320,6 @@ table.structure td.mono{font:400 var(--t-1)/1.4 var(--mono);overflow-wrap:anywhe
 @media (max-width:760px){.steps3{grid-template-columns:minmax(0,1fr)}.steps3 .arrow{display:none}}
 .dia .bar.ho{fill:var(--panel);stroke:var(--ink-2);stroke-width:1.5}
 td.nw{white-space:nowrap}
+.versus .diagnosis{margin:var(--s3) 0;max-width:var(--measure)}
+.versus .diagnosis .label{margin-right:var(--s2)}
+table.checks td.small{min-width:14rem}

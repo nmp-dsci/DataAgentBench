@@ -263,6 +263,8 @@ export type ScoreRow = {
   golden_kind: GoldenKind | null;
   category: string;
   detail: string;
+  sql_detail?: string;
+  decision_detail?: string;
   structure: Record<string, { golden: unknown; agent: unknown } | string>;
   result_diff?: GoldDiffLine[];
   split?: string | null;

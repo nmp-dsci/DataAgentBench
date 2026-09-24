@@ -31,8 +31,8 @@ def test_same_rows_in_any_order_any_column_order_and_names_pass() -> None:
 @pytest.mark.parametrize(
     ("rows", "says"),
     [
-        ([["a/b", 10]], "1 row(s) against the golden's 2"),
-        ([["a/b", 10], ["c/d", 8]], "no agent column"),
+        ([["a/b", 10]], "returns 1 row(s); the golden returns 2"),
+        ([["a/b", 10], ["c/d", 8]], "the values differ"),
         ([], "no rows"),
     ],
 )
@@ -108,6 +108,10 @@ def test_categories() -> None:
     assert sc.score_trial(_row(), right, _golden(), True)["category"] == "solved"
     got = sc.score_trial(_row(mode="derived", passed=False), right, _golden(), True)
     assert got["category"] == "decision" and got["sql"] and not got["decision"]
+    assert got["decision_detail"] == (
+        "chose derived; the golden is an answer golden, so pass_through is right"
+    )
+    assert got["sql_detail"] == "returns the golden's 2 row(s)"
     got = sc.score_trial(_row(passed=False), right, _golden(), True)
     assert got["category"] == "format"
     evid = _golden("evidence")
