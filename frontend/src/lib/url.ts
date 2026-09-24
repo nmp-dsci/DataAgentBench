@@ -49,6 +49,8 @@ export const trialPath = (runId: string, tid: string): string => `/runs/${runId}
 export const goldenPath = (queryId?: string): string => (queryId ? `/golden/${queryId}` : '/golden');
 export const agentPath = (version: string, lens?: Lens): string => `/agent/${version}${search(lens)}`;
 export const runsPath = (lens?: Lens): string => `/runs${search(lens)}`;
+/** An optimisation round is named for the version it wrote: `/optimise/v2_sql`. */
+export const optimisePath = (version?: string, lens?: Lens): string => (version ? `/optimise/${version}` : '/optimise') + search(lens);
 
 // ── the API's mirror of the same ids ───────────────────────────────────────
 export const apiTrialPath = (runId: string, tid: string): string => `/api/runs/${runId}/${tid}`;

@@ -1,0 +1,294 @@
+"""Optimisation rounds and the champion's history, as the explorer reads them.
+
+A **round** is one `dab optimise <run> --into <version>`: it read a scored run (the
+*diagnostic*), wrote a new version (the *proposal*, `agents/<version>/`), and that
+version's newest complete full-split run is its *outcome*. Rounds chain: the outcome
+of one can be the diagnostic of the next, so the list is a lineage over time.
+
+The outcome is read the way an experiment comparison reads two runs (a baseline and a
+candidate, per example): every question before and after, improved / regressed /
+unchanged, per split, per dataset, and how failure categories moved.
+
+The **champion's history** is the reigns `dab promote` recorded
+(`agents/promotions.jsonl`): who held the title from when, on which run, with what
+top line, and the lift over the reign before. Everything here is read from the run
+folders and the agent folders; nothing calls a model or writes.
+"""
+
+from __future__ import annotations
+
+import json
+from collections import Counter
+from typing import Any
+
+from dab_bench.config import AGENTS_DIR, RUNS_DIR
+
+
+def _load(path: Any) -> Any:
+    return json.loads(path.read_text()) if path.exists() else None
+
+
+def round_records() -> list[dict[str, Any]]:
+    """Every version an optimisation round wrote, oldest round first."""
+    recs = []
+    for p in sorted(AGENTS_DIR.glob("*/optimise.json")):
+        rec = json.loads(p.read_text())
+        rec.setdefault("version", p.parent.name)
+        recs.append(rec)
+    return sorted(recs, key=lambda r: str(r.get("started_at") or ""))
+
+
+def _results(run_id: str) -> dict[str, dict[str, Any]]:
+    p = RUNS_DIR / run_id / "results.jsonl"
+    if not p.exists():
+        return {}
+    out = {}
+    for line in p.read_text().splitlines():
+        if line.strip():
+            r = json.loads(line)
+            if r["trial"] == 1:
+                out[r["query_id"]] = r
+    return out
+
+
+def _card_rows(run_id: str) -> dict[str, dict[str, Any]]:
+    card = _load(RUNS_DIR / run_id / "scorecard.json") or {}
+    return {q["query_id"]: q for q in card.get("questions", []) if q["trial"] == 1}
+
+
+def outcome_run(version: str) -> str | None:
+    """The version's newest complete full-split run (the one `dab promote` would read)."""
+    from dab_bench.eval.promote import candidate
+
+    c = candidate(version)
+    return None if c.why_not else c.run_id
+
+
+def _side(r: dict[str, Any] | None, s: dict[str, Any] | None) -> dict[str, Any] | None:
+    if r is None:
+        return None
+    s = s or {}
+    return {
+        "answer": r.get("passed"),
+        "sql": s.get("sql"),
+        "decision": s.get("decision"),
+        "category": s.get("category", ""),
+        "mode": r.get("mode"),
+    }
+
+
+def change(before: bool | None, after: bool | None) -> str:
+    """improved / regressed / held (pass both) / still failing / not scored."""
+    if before is None or after is None:
+        return "not scored"
+    if after and not before:
+        return "improved"
+    if before and not after:
+        return "regressed"
+    return "held" if after else "still failing"
+
+
+def compare_questions(
+    before_run: str,
+    after_run: str | None,
+    split: dict[str, list[str]] | None,
+    read: set[str],
+) -> list[dict[str, Any]]:
+    """Every question of the diagnostic run beside the outcome run."""
+    br, bc = _results(before_run), _card_rows(before_run)
+    ar, ac = (_results(after_run), _card_rows(after_run)) if after_run else ({}, {})
+    where = {q: name for name, qs in (split or {}).items() for q in qs}
+    rows = []
+    for qid, r in br.items():
+        b = _side(r, bc.get(qid))
+        a = _side(ar.get(qid), ac.get(qid)) if after_run else None
+        rows.append(
+            {
+                "query_id": qid,
+                "dataset": r["dataset"],
+                "question": r["question"],
+                "split": where.get(qid)
+                or ("no golden" if bc.get(qid, {}).get("golden_id") is None else None),
+                "read": qid in read,  # the optimiser was shown this question
+                "before": b,
+                "after": a,
+                "change": change(b["answer"] if b else None, a["answer"] if a else None),
+            }
+        )
+    return rows
+
+
+def summarise_changes(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    def tally(rs: list[dict[str, Any]]) -> dict[str, Any]:
+        c = Counter(r["change"] for r in rs)
+        before = sum(1 for r in rs if r["before"] and r["before"]["answer"])
+        after = sum(1 for r in rs if r["after"] and r["after"]["answer"])
+        return {"n": len(rs), "before": before, "after": after} | {
+            k: c.get(k, 0) for k in ("improved", "regressed", "held", "still failing", "not scored")
+        }
+
+    splits = sorted({str(r["split"]) for r in rows if r["split"]})
+    by_ds: dict[str, list[dict[str, Any]]] = {}
+    for r in rows:
+        by_ds.setdefault(r["dataset"], []).append(r)
+    moves: Counter[tuple[str, str]] = Counter()
+    for r in rows:
+        if r["before"] and r["after"]:
+            moves[(r["before"]["category"] or "—", r["after"]["category"] or "—")] += 1
+    return {
+        "all": tally(rows),
+        "by_split": {s: tally([r for r in rows if r["split"] == s]) for s in splits},
+        "by_dataset": {d: tally(rs) for d, rs in sorted(by_ds.items())},
+        "category_moves": [
+            {"from": f, "to": t, "n": n}
+            for (f, t), n in sorted(moves.items(), key=lambda kv: (-kv[1], kv[0]))
+        ],
+    }
+
+
+def _totals(run_id: str | None) -> dict[str, Any] | None:
+    if not run_id:
+        return None
+    card = _load(RUNS_DIR / run_id / "scorecard.json")
+    return None if card is None else {"totals": card["totals"], "by_split": card.get("by_split")}
+
+
+def round_summary(rec: dict[str, Any]) -> dict[str, Any]:
+    """One row of the rounds list: what it read, what it wrote, what it scored."""
+    from dab_bench.eval.promote import history
+
+    after = outcome_run(rec["version"])
+    sessions = [s for s in rec.get("sessions", []) if s["scope"] != "system.md"]
+    rows = compare_questions(rec["source_run"], after, None, set())
+    tally = summarise_changes(rows)["all"]
+    promoted = next(
+        (p for p in history() if p.get("winner") == rec["version"] and p.get("changed")), None
+    )
+    return {
+        "version": rec["version"],
+        "parent": rec.get("challenger_of"),
+        "source_run": rec["source_run"],
+        "outcome_run": after,
+        "started_at": rec.get("started_at"),
+        "optimiser": rec.get("optimiser"),
+        "cost_usd": rec.get("cost_usd"),
+        "sessions": len(sessions),
+        "notes_written": sum(1 for s in sessions if s.get("notes")),
+        "refusals": sum(len(s.get("refusals") or []) for s in rec.get("sessions", [])),
+        "system_md_changed": rec.get("system_md_changed"),
+        "split": rec.get("split"),
+        "before": _totals(rec["source_run"]),
+        "after": _totals(after),
+        "changes": tally,
+        "promoted_at": promoted["at"] if promoted else None,
+    }
+
+
+def round_detail(version: str) -> dict[str, Any] | None:
+    from dab_bench.eval.scorecard import load_optimise_split
+
+    rec = _load(AGENTS_DIR / version / "optimise.json")
+    if rec is None:
+        return None
+    rec.setdefault("version", version)
+    split = load_optimise_split()
+    read = {q for s in rec.get("sessions", []) for q in s.get("questions") or []}
+    after = outcome_run(version)
+    rows = compare_questions(rec["source_run"], after, split, read)
+    card = _load(RUNS_DIR / rec["source_run"] / "scorecard.json") or {}
+    return {
+        "summary": round_summary(rec),
+        "record": rec,
+        "diagnostic": {
+            "run_id": rec["source_run"],
+            "totals": card.get("totals"),
+            "by_split": card.get("by_split"),
+            "optimise_first": card.get("optimise_first", []),
+            "categories": card.get("categories", {}),
+        },
+        "questions": rows,
+        "outcome": summarise_changes(rows) if after else None,
+    }
+
+
+# ── the champion over time ───────────────────────────────────────────────────
+
+
+def champion_history() -> dict[str, Any]:
+    """The reigns (who held the title from when, its top line, the lift) and every full-split
+    run as a point, for the Runs tab's accuracy-over-time figure."""
+    from dab_bench.agent.versions import champion_name
+    from dab_bench.eval.promote import history
+    from dab_bench.eval.runner import list_runs
+
+    runs = [
+        m
+        for m in list_runs()
+        if m.split == "all" and not m.dry_run and m.summary and m.summary.get("scored")
+    ]
+    points = [
+        {
+            "run_id": m.run_id,
+            "agent": m.agent,
+            "started_at": m.started_at,
+            "passed": int((m.summary or {})["passed"]),
+            "scored": int((m.summary or {})["scored"]),
+        }
+        for m in sorted(runs, key=lambda m: m.started_at)
+    ]
+    by_run = {p["run_id"]: p for p in points}
+    reigns: list[dict[str, Any]] = []
+    promos = history()
+    if promos:
+        first = promos[0]
+        inc = next((c for c in first["candidates"] if c["version"] == first["incumbent"]), None)
+        if inc and inc.get("run_id") in by_run:
+            p = by_run[inc["run_id"]]
+            reigns.append(
+                {
+                    "version": first["incumbent"],
+                    "run_id": p["run_id"],
+                    "from": p["started_at"],
+                    "passed": p["passed"],
+                    "scored": p["scored"],
+                    "reason": "the first champion",
+                }
+            )
+    for pr in promos:
+        if not pr.get("changed"):
+            continue
+        run = pr.get("champion_run_id")
+        won = by_run.get(run) if run else None
+        if won is None:
+            continue
+        p = won
+        reigns.append(
+            {
+                "version": pr["winner"],
+                "run_id": run,
+                "from": pr["at"],
+                "passed": p["passed"],
+                "scored": p["scored"],
+                "reason": pr.get("reason", ""),
+            }
+        )
+    if not reigns:
+        champ = champion_name()
+        mine = [p for p in points if p["agent"] == champ]
+        if mine:
+            p = mine[0]
+            reigns.append(
+                {
+                    "version": champ,
+                    "run_id": p["run_id"],
+                    "from": p["started_at"],
+                    "passed": p["passed"],
+                    "scored": p["scored"],
+                    "reason": "the first champion",
+                }
+            )
+    for i, r in enumerate(reigns):
+        prev = reigns[i - 1] if i else None
+        r["lift"] = None if prev is None else r["passed"] - prev["passed"]
+        r["until"] = reigns[i + 1]["from"] if i + 1 < len(reigns) else None
+    return {"reigns": reigns, "points": points, "promotions": promos}

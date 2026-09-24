@@ -310,3 +310,14 @@ ol.sqlcalls pre{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:var(--s2)
 .versus pre{white-space:pre-wrap;overflow-wrap:anywhere}
 table.structure td.mono{font:400 var(--t-1)/1.4 var(--mono);overflow-wrap:anywhere}
 .note-cell{min-width:18rem;overflow-wrap:anywhere}
+/* the Optimise tab: a round opens in place, its three steps as a flow of tabs */
+.round-open{margin-top:var(--s5)}
+.steps3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s4);margin:var(--s4) 0 var(--s5)}
+.steps3 .step{position:relative;display:flex;flex-direction:column;gap:var(--s2);text-align:left;padding:var(--s4);background:var(--panel);border:1px solid var(--line);border-radius:var(--r);color:var(--ink);font:inherit;cursor:pointer;min-width:0;transition:border-color var(--dur) var(--ease)}
+.steps3 .step:hover{border-color:var(--accent)}
+.steps3 .step.on{border-color:var(--accent);background:var(--accent-soft)}
+.steps3 .step:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.steps3 .arrow{position:absolute;right:calc(-1 * var(--s4));top:50%;transform:translate(50%,-50%);color:var(--muted);font:500 var(--t1)/1 var(--sans)}
+@media (max-width:760px){.steps3{grid-template-columns:minmax(0,1fr)}.steps3 .arrow{display:none}}
+.dia .bar.ho{fill:var(--panel);stroke:var(--ink-2);stroke-width:1.5}
+td.nw{white-space:nowrap}

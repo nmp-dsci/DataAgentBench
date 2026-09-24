@@ -316,7 +316,47 @@ export type RunRole = 'champion' | 'challenger' | 'superseded' | 'smoke' | 'dry'
 export type PromotionCandidate = { version: string; run_id: string | null; passed: number | null; scored: number | null; n: number | null; heldout: ScoreTotals | null; scorecard: ScoreTotals | null; why_not: string };
 /** `dab promote`'s latest verdict (agents/promotions.jsonl): D30, the most answers passed of the 54 wins. */
 export type Promotion = { at: string; rule: string; incumbent: string; winner: string; changed: boolean; reason: string; candidates: PromotionCandidate[]; champion_run_id: string | null; prompt_version?: number };
-export type Board = { champion: string; champion_run_id: string | null; runs: RunSummary[]; submissions: Submission[]; promotion: Promotion | null };
+/** The champion over time (`eval/rounds.champion_history`): the reigns and every full-split run. */
+export type Reign = { version: string; run_id: string; from: string; until: string | null; passed: number; scored: number; reason: string; lift: number | null };
+export type HistoryPoint = { run_id: string; agent: string; started_at: string; passed: number; scored: number };
+export type ChampionHistory = { reigns: Reign[]; points: HistoryPoint[]; promotions: Promotion[] };
+export type Board = { champion: string; champion_run_id: string | null; runs: RunSummary[]; submissions: Submission[]; promotion: Promotion | null; history: ChampionHistory };
+
+// ── optimisation rounds (/api/optimise): diagnostic → proposal → outcome ─────────
+export type Tally = { n: number; before: number; after: number; improved: number; regressed: number; held: number; 'still failing': number; 'not scored': number };
+export type CardTotals = { totals: ScoreTotals; by_split: Record<string, ScoreTotals> | null };
+export type RoundSummary = {
+  version: string;
+  parent: string | null;
+  source_run: string;
+  outcome_run: string | null;
+  started_at: string;
+  optimiser: { model: string; effort: string } | null;
+  cost_usd: number | null;
+  sessions: number;
+  notes_written: number;
+  refusals: number;
+  system_md_changed: boolean;
+  split: { train: number; heldout: number } | null;
+  before: CardTotals | null;
+  after: CardTotals | null;
+  changes: Tally;
+  promoted_at: string | null;
+};
+export type VersionNode = { version: string; parent: string | null; measured_against: string | null; run_id: string | null; passed: number | null; scored: number | null; fingerprint: string; started_at: string | null };
+export type Rounds = { champion: string; rounds: RoundSummary[]; versions: VersionNode[] };
+export type Side = { answer: boolean | null; sql: boolean | null; decision: boolean | null; category: string; mode: string | null };
+export type Change = 'improved' | 'regressed' | 'held' | 'still failing' | 'not scored';
+export type QuestionChange = { query_id: string; dataset: string; question: string; split: string | null; read: boolean; before: Side | null; after: Side | null; change: Change };
+export type OptimiseSessionRec = { scope: string; notes: string | null; rationale: string; refusals: { notes: string; problems: string[] }[]; questions: string[]; n_turns: number; cost_usd: number | null; error: string | null; duration_ms?: number };
+export type RoundDetail = {
+  summary: RoundSummary;
+  record: { version: string; challenger_of: string; source_run: string; started_at: string; optimiser: { model: string; effort: string }; split: { train: number; heldout: number }; cost_usd: number; sessions: OptimiseSessionRec[]; system_md_changed: boolean };
+  diagnostic: { run_id: string; totals: ScoreTotals | null; by_split: Record<string, ScoreTotals> | null; optimise_first: { category: string; n: number; queries: string[] }[]; categories: Record<string, number> };
+  questions: QuestionChange[];
+  outcome: { all: Tally; by_split: Record<string, Tally>; by_dataset: Record<string, Tally>; category_moves: { from: string; to: string; n: number }[] } | null;
+  files: { name: string; added: boolean; diff: GoldDiffLine[] }[];
+};
 export type Stat = { mean: number; p50: number; p95: number; max: number; sum: number };
 export type ProfileKey = 'turns' | 'tool_calls' | 'wall_s' | 'fresh_in' | 'cache_read' | 'output' | 'total' | 'cost_usd';
 export type Profile = {

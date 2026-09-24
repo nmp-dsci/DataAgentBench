@@ -142,6 +142,10 @@ Plan `.lavish/s06_golden-from-gold-and-hints.html`, decisions D26–D31:
   versions' newest complete runs wins; a tie keeps the incumbent;
   `agents/promotions.jsonl` keeps every verdict; the MLflow prompt
   `dataagentbench.system` carries the `champion` alias.
+- **The explorer**: the Optimise tab (`/optimise`, a round at `/optimise/<version>`,
+  `eval/rounds.py`) shows every round as diagnostic → proposal → outcome, with the
+  version lineage and each question before and after; the Runs tab opens with the
+  champion over time (the reigns in `agents/promotions.jsonl` and every full-split run).
 
 ## 8 · The agent build — decisions, layout, contract
 

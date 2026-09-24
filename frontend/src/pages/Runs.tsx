@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { type Board, type CompareGroup, type CompareRate, type CompareResp, type CompareSide, type Leaderboard, type Promotion, type RunSummary, type Submission, ROLE_LABEL, STYLE_LABEL, fmtDur, fmtPct, fmtSec, fmtTok, fmtUsd, useGet } from '../lib/api';
+import { type Board, type CompareGroup, type CompareRate, type CompareResp, type CompareSide, type ChampionHistory, type Leaderboard, type Promotion, type PromotionCandidate, type RunSummary, type Submission, ROLE_LABEL, STYLE_LABEL, fmtDur, fmtPct, fmtSec, fmtTok, fmtUsd, useGet } from '../lib/api';
 import { Delta, ProfileTable, Ratios, Role } from '../lib/runs';
 import { Totals, rate } from '../lib/scorecard';
 import { Loading, Rate } from '../lib/ui';
@@ -376,7 +376,7 @@ export function Runs() {
         a smoke run screens one query per dataset and never holds the title. The same runs are logged to the central MLflow (<code>dataagentbench/evals</code>) and linked from each page.
       </p>
 
-      {board.promotion && <PromotionVerdict p={board.promotion} />}
+      {board.history.reigns.length > 0 && <ChampionOverTime h={board.history} p={board.promotion} />}
 
       <Compare board={board} base={base} />
 
@@ -515,40 +515,121 @@ export function Runs() {
   );
 }
 
-/** The latest `dab promote` verdict: every candidate's top line, its scorecard and its held-out answers. */
-function PromotionVerdict({ p }: { p: Promotion }) {
+/** Accuracy over time by champion: every full-split run as a point, the champion's reign as a step line,
+ *  each promotion marked with its lift. The story of the agent improving, told by the runs themselves. */
+function ChampionOverTime({ h, p }: { h: ChampionHistory; p: Promotion | null }) {
+  const reigns = h.reigns;
+  const first = reigns[0];
+  const last = reigns[reigns.length - 1];
+  const promos = h.promotions.filter((p) => p.changed);
+  // x: the full-split runs in the order they ran; the champions' runs are joined by the line
+  const runs = h.points;
+  const reignOf = new Map(reigns.map((r) => [r.run_id, r]));
+  const n = Math.max(...runs.map((p) => p.scored), 1);
+  const W = 1000;
+  const H = 300;
+  const pad = { l: 96, r: 60, t: 40, b: 48 };
+  const step = runs.length > 1 ? (W - pad.l - pad.r) / (runs.length - 1) : 0;
+  const X = (i: number) => (runs.length > 1 ? pad.l + i * step : (W + pad.l - pad.r) / 2);
+  const Y = (v: number) => pad.t + (H - pad.t - pad.b) * (1 - v / n);
+  const champIdx = runs.map((p, i) => (reignOf.has(p.run_id) ? i : -1)).filter((i) => i >= 0);
+  const total = last.passed - first.passed;
+  // one row per version: the latest promotion's candidates, else the reigns alone
+  const reignByVersion = new Map(reigns.map((r) => [r.version, r]));
+  const rows: PromotionCandidate[] = p
+    ? p.candidates
+    : reigns.map((r) => ({ version: r.version, run_id: r.run_id, passed: r.passed, scored: r.scored, n: r.scored, heldout: null, scorecard: null, why_not: '' }));
   return (
     <>
       <h2>
-        00 · Promotion — {p.changed ? `${p.winner} took the title from ${p.incumbent}` : `${p.winner} kept the title`} on {p.at.slice(0, 10)}
+        00 · The champion over time — {first.version} {first.passed}/{first.scored}
+        {reigns.length > 1 ? ` → ${last.version} ${last.passed}/${last.scored}, ${total >= 0 ? '+' : '−'}${Math.abs(total)} answers across ${promos.length} promotion${promos.length === 1 ? '' : 's'}` : ', no promotion yet'}
       </h2>
-      <p>
-        {p.rule}. {p.reason}.{p.prompt_version != null && <> Its prompt is version {p.prompt_version} of <code>dataagentbench.system</code>, alias <code>champion</code>.</>}
-      </p>
-      <div className="tw">
+      <figure style={{ margin: 0 }}>
+        <p className="label">Fig · answers passed of {n} by every full-split run, in run order; the line joins the champions</p>
+        <svg className="dia" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Every full-split run in the order it ran, answers passed of ${n}; a solid line joins the champions from ${first.version} to ${last.version}, challengers are dots`}>
+          <title>The champion over the runs</title>
+          {[0, 0.25, 0.5, 0.75, 1].map((g) => (
+            <g key={g}>
+              <line className="ax" x1={pad.l} x2={W - pad.r} y1={Y(g * n)} y2={Y(g * n)} style={{ opacity: g === 0 ? 1 : 0.5 }} />
+              <text className="tx k" x={pad.l - 10} y={Y(g * n) + 5} textAnchor="end">
+                {Math.round(g * n)}/{n}
+              </text>
+            </g>
+          ))}
+          {champIdx.length > 1 && <polyline points={champIdx.map((i) => `${X(i)},${Y(runs[i].passed)}`).join(' ')} fill="none" stroke="var(--accent)" strokeWidth={3} />}
+          {runs.map((p, i) => {
+            const r = reignOf.get(p.run_id);
+            return (
+              <g key={p.run_id} className="pt">
+                <title>
+                  run {i + 1} · {p.run_id}: {p.agent} {p.passed}/{p.scored}
+                  {r ? ` · champion${r.lift != null ? `, ${r.lift >= 0 ? '+' : '−'}${Math.abs(r.lift)} over the one before` : ''}` : ' · challenger'}
+                </title>
+                <circle cx={X(i)} cy={Y(p.passed)} r={r ? 8 : 6} fill={r ? 'var(--accent)' : 'var(--panel)'} stroke={r ? 'var(--accent)' : 'var(--ink-2)'} strokeWidth={2} />
+                <text className="tx" x={X(i)} y={r ? Y(p.passed) - 16 : Y(p.passed) + 28} textAnchor="middle" style={r ? { fill: 'var(--accent)' } : undefined}>
+                  {p.agent} {p.passed}
+                  {r && r.lift != null ? ` (${r.lift >= 0 ? '+' : '−'}${Math.abs(r.lift)})` : ''}
+                </text>
+                <text className="tx k" x={X(i)} y={H - pad.b + 22} textAnchor="middle">
+                  run {i + 1} · {p.started_at.slice(5, 10)}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+        <figcaption className="small">
+          Runs in the order they ran, one per point (answers passed of {n}). Filled points joined by the accent line are the champions, each crowned by <code>dab promote</code>, labelled with its lift over the one before; open points are challengers that did not take the
+          title. Source: <code>runs/*/run.json</code> and <code>agents/promotions.jsonl</code>.
+        </figcaption>
+      </figure>
+      {p && (
+        <p style={{ marginTop: 'var(--s4)' }}>
+          The latest <code>dab promote</code> ({p.at.slice(0, 10)}): {p.reason}.{p.prompt_version != null && <> The champion's prompt is version {p.prompt_version} of <code>dataagentbench.system</code>, alias <code>champion</code>.</>}
+        </p>
+      )}
+      <div className="tw" style={{ marginTop: 'var(--s4)' }}>
         <table>
           <thead>
             <tr>
               <th>Version</th>
-              <th>Run</th>
+              <th>Its run</th>
               <th>Answer (the top line)</th>
               <th>SQL · decision</th>
               <th>Held-out answer</th>
+              <th>Held the title</th>
+              <th className="num">Lift</th>
             </tr>
           </thead>
           <tbody>
-            {p.candidates.map((c) => (
-              <tr key={c.version}>
-                <td className="sub">
-                  <Link to={agentPath(c.version)}>{c.version}</Link>
-                  {c.version === p.winner && <span className="chip ok">champion</span>}
-                </td>
-                <td className="mono small">{c.run_id ? <Link to={runPath(c.run_id)}>{c.run_id}</Link> : c.why_not}</td>
-                <td>{c.passed != null ? <Rate passed={c.passed} n={c.scored} /> : '—'}</td>
-                <td className="small">{c.scorecard && c.scorecard.sql.n > 0 ? `SQL ${rate(c.scorecard.sql)} · decision ${rate(c.scorecard.decision)}` : 'answer only'}</td>
-                <td className="small">{c.heldout ? rate(c.heldout.answer) : '—'}</td>
-              </tr>
-            ))}
+            {rows.map((c) => {
+              const r = reignByVersion.get(c.version);
+              const current = c.version === last.version;
+              return (
+                <tr key={c.version}>
+                  <td className="sub">
+                    <Link to={agentPath(c.version)}>{c.version}</Link>{' '}
+                    {current ? <span className="chip ok">champion</span> : r ? <span className="chip">previous champion</span> : null}
+                  </td>
+                  <td className="mono small nw">
+                    {c.run_id ? (
+                      <Link to={runPath(c.run_id)} title={c.run_id}>
+                        {c.run_id.slice(4, 6)}-{c.run_id.slice(6, 8)} {c.run_id.slice(9, 11)}:{c.run_id.slice(11, 13)}
+                      </Link>
+                    ) : (
+                      c.why_not
+                    )}
+                  </td>
+                  <td>{c.passed != null ? <Rate passed={c.passed} n={c.scored} /> : '—'}</td>
+                  <td className="small nw">{c.scorecard && c.scorecard.sql.n > 0 ? `${rate(c.scorecard.sql)} · ${rate(c.scorecard.decision)}` : 'answer only'}</td>
+                  <td className="small">{c.heldout ? rate(c.heldout.answer) : '—'}</td>
+                  <td className="small nw">{r ? `${r.from.slice(5, 10)} → ${r.until ? r.until.slice(5, 10) : 'now'}` : '—'}</td>
+                  <td className="num" title={r?.lift == null ? 'the first champion' : 'answers over the champion before'}>
+                    {r ? (r.lift == null ? 'first' : `${r.lift >= 0 ? '+' : '−'}${Math.abs(r.lift)}`) : '—'}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

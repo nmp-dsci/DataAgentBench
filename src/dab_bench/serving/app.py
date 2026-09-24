@@ -367,6 +367,53 @@ def create_app(index: Index | None = None) -> FastAPI:
         )
         return out | {"saved": saved}
 
+    # ── optimisation rounds: diagnostic → proposal → outcome, over time ─────────
+
+    @app.get("/api/optimise")
+    def optimise_rounds() -> dict[str, Any]:
+        """Every optimisation round, oldest first, and the version lineage it built: each
+        version with its parent and the top line of its newest complete full-split run."""
+        from dab_bench.agent.versions import champion_name, list_versions, load_version
+        from dab_bench.eval.promote import candidate
+        from dab_bench.eval.rounds import round_records, round_summary
+        from dab_bench.eval.runner import list_runs
+
+        rounds = [round_summary(r) for r in round_records()]
+        agent_of = {m.run_id: m.agent for m in list_runs()}
+        nodes = []
+        for name in list_versions():
+            v = load_version(name)
+            c = candidate(name)
+            meta = next((m for m in list_runs() if m.run_id == c.run_id), None)
+            nodes.append(
+                {
+                    "version": name,
+                    "parent": v.config.challenger_of,
+                    # a hand-built challenger names no parent; its run says what it was measured against
+                    "measured_against": agent_of.get(meta.challenger_of or "") if meta else None,
+                    "started_at": meta.started_at if meta else None,
+                    "run_id": c.run_id if not c.why_not else None,
+                    "passed": c.passed if not c.why_not else None,
+                    "scored": c.scored if not c.why_not else None,
+                    "fingerprint": v.fingerprint,
+                }
+            )
+        return {"champion": champion_name(), "rounds": rounds, "versions": nodes}
+
+    @app.get("/api/optimise/{version}")
+    def optimise_round(version: str) -> dict[str, Any]:
+        """One round: what it read (the source run's scorecard), what it wrote (sessions, notes,
+        refusals, each file against the parent) and what it scored (every question before and
+        after)."""
+        from dab_bench.eval.rounds import round_detail
+
+        d = round_detail(version)
+        if d is None:
+            raise HTTPException(404, f"no optimisation round wrote {version!r}")
+        lin = _lineage(_version(version))
+        d["files"] = lin["files"] if lin else []
+        return d
+
     # ── the agent: versions, the composed prompt, and the playground ─────────────
 
     @app.get("/api/agents")
@@ -424,7 +471,12 @@ def create_app(index: Index | None = None) -> FastAPI:
             ],
             "sandbox_built": image_exists(),
             "playground_llm": s.playground_llm,
-            "lineage": _lineage(v),
+            "lineage": {
+                "parent": v.config.challenger_of,
+                "round": (v.path / "optimise.json").exists(),
+            }
+            if v.config.challenger_of
+            else None,
             "datasets": sorted(
                 p.name for p in CONTEXT_DIR.iterdir() if (p / "tables.json").exists()
             )
@@ -863,6 +915,7 @@ def _board() -> dict[str, Any]:
     """The runs list with roles. Read from disk on every call: five folders, tiny files."""
     from dab_bench.agent.versions import champion_name
     from dab_bench.eval.promote import history
+    from dab_bench.eval.rounds import champion_history
     from dab_bench.eval.runner import list_runs, load_run
     from dab_bench.eval.score import profile
 
@@ -898,6 +951,7 @@ def _board() -> dict[str, Any]:
         "champion_run_id": champ["run_id"] if champ else None,
         "runs": rows,
         "promotion": promotions[-1] if promotions else None,
+        "history": champion_history(),
     }
 
 

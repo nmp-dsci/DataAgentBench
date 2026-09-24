@@ -5,7 +5,7 @@
  */
 import { createMemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
-import { patchLens, search, trialId, trialIdFromStem, parseTrialId, questionPath, trialPath, agentPath } from './lib/url';
+import { patchLens, search, trialId, trialIdFromStem, parseTrialId, questionPath, trialPath, agentPath, optimisePath } from './lib/url';
 import { routes } from './routes';
 
 const RUN = '20260921T064521Z_v0_all_haiku';
@@ -71,10 +71,18 @@ describe('every address the explorer builds lands on the page it names', () => {
     [agentPath('champion', { run: RUN, trial: 'yelp/1/t1', node: 'tool:query_db' }), 'agent'],
     ['/golden', 'golden'],
     ['/golden/deps_dev_v1/1', 'golden-editor'],
+    [optimisePath(), 'optimise'],
+    [optimisePath('v2_sql', { view: 'outcome', change: 'regressed' }), 'optimise-round'],
   ])('%s', async (url, route) => {
     const got = await land(url);
     expect(got.route).toBe(route);
     expect(got.path).toBe(decodeURIComponent(url));
+  });
+
+  it('an optimisation round is nested in the rounds list', async () => {
+    const router = createMemoryRouter(routes, { initialEntries: [optimisePath('v2_sql')] });
+    expect(router.state.matches.map((m) => m.route.id)).toEqual(['shell', 'optimise', 'optimise-round']);
+    router.dispose();
   });
 
   it('the golden editor is nested in the list, so the list stays mounted', async () => {

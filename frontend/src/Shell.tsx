@@ -7,6 +7,7 @@ const NAV: [string, string][] = [
   ['/validators', 'Validators'],
   ['/leaderboard', 'Leaderboard'],
   ['/runs', 'Runs'],
+  ['/optimise', 'Optimise'],
   ['/agent', 'Agent'],
   ['/golden', 'Golden'],
 ];

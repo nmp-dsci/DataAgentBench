@@ -5,6 +5,7 @@ import { Dataset } from './pages/Dataset';
 import { Datasets } from './pages/Datasets';
 import { Golden, GoldenEditor } from './pages/Golden';
 import { Leaderboard } from './pages/Leaderboard';
+import { Optimise, OptimiseRound } from './pages/Optimise';
 import { Overview } from './pages/Overview';
 import { Query } from './pages/Query';
 import { Run } from './pages/Run';
@@ -49,6 +50,13 @@ export const routes: RouteObject[] = [
       { id: 'run-dataset', path: '/runs/:id/:ds', loader: ({ params }) => redirect(runPath(params.id!, { q: params.ds })) },
       { id: 'run-question', path: '/runs/:id/:ds/:n', loader: ({ params }) => redirect(runPath(params.id!, { q: `${params.ds}/${params.n}` })) },
       { id: 'trial', path: '/runs/:id/:ds/:n/:t', element: <TracePage /> },
+      {
+        id: 'optimise',
+        path: '/optimise',
+        element: <Optimise />,
+        // rule 3: a round opens inside the rounds list
+        children: [{ id: 'optimise-round', path: ':version', element: <OptimiseRound /> }],
+      },
       {
         id: 'agent-bare',
         path: '/agent',

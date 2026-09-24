@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { type AgentDetail, AgentGraph, type Lineage as Lineage_, type AgentsBoard, type NodeId, type PlayResult, type PromptResp, Replay, ToolForm, TraceLine, toolCounts } from '../lib/agent';
-import { type Board, type RunDetail, type Span, type Trace, fmtInt, fmtUsd, useGet } from '../lib/api';
-import { GoldDiff } from '../lib/golddiff';
-import { rate } from '../lib/scorecard';
+import { type AgentDetail, AgentGraph, type AgentsBoard, type NodeId, type PlayResult, type PromptResp, Replay, ToolForm, TraceLine, toolCounts } from '../lib/agent';
+import { type Board, type RunDetail, type Span, type Trace, fmtInt, useGet } from '../lib/api';
 import { Gold, Loading } from '../lib/ui';
-import { agentPath, apiTrialPath, datasetPath, questionPath, runPath, trialId, useLens } from '../lib/url';
+import { agentPath, apiTrialPath, optimisePath, datasetPath, questionPath, runPath, trialId, useLens } from '../lib/url';
 
 /** sessionStorage key: the last Agent view in this browser tab, as `/agent/<v>?…`. The nav's bare
  *  `/agent` redirects there (routes.tsx). */
@@ -339,7 +337,19 @@ export function Agent() {
         </div>
       </div>
 
-      {detail.lineage && <Lineage l={detail.lineage} name={detail.name} />}
+      {detail.lineage && (
+        <p className="small">
+          {detail.name} was optimised from <Link to={agentPath(detail.lineage.parent)}>{detail.lineage.parent}</Link>
+          {detail.lineage.round ? (
+            <>
+              {' '}
+              in a round of the loop: <Link to={optimisePath(detail.name)}>its diagnostic, proposal and outcome on the Optimise tab</Link>.
+            </>
+          ) : (
+            '.'
+          )}
+        </p>
+      )}
 
       <h2>
         {trace ? (
@@ -367,63 +377,6 @@ export function Agent() {
       ) : (
         <p className="empty">A replay is the trace's span tree as rows: what each turn sent, what each tool returned, and a re-run button that opens the tool pre-filled so you can change the SQL or the code and compare.</p>
       )}
-    </>
-  );
-}
-
-/** A version an optimisation round wrote: what the optimiser read, what it wrote per dataset, what the guards
- *  refused, and every editable file against the parent version. */
-function Lineage({ l, name }: { l: Lineage_; name: string }) {
-  const rec = l.optimise;
-  const sessions = rec?.sessions ?? [];
-  const accepted = sessions.filter((s) => s.notes != null && s.scope !== 'system.md');
-  return (
-    <>
-      <h2>
-        Optimised from <Link to={agentPath(l.parent)}>{l.parent}</Link> — {rec ? `${accepted.length} of ${sessions.filter((s) => s.scope !== 'system.md').length} datasets got notes, system.md ${rec.system_md_changed ? 'changed' : 'unchanged'}` : 'no round record'}
-      </h2>
-      {rec && (
-        <>
-          <p>
-            <code>dab optimise {rec.source_run} --into {name}</code>: {rec.optimiser.model} at effort {rec.optimiser.effort}, one isolated session per dataset with a failed training question ({rec.split.train} train, {rec.split.heldout} held out, never shown), then one cross-dataset pass over{' '}
-            <code>system.md</code>. The source run scored answer {rate(rec.source_scorecard.answer)} · SQL {rate(rec.source_scorecard.sql)} · decision {rate(rec.source_scorecard.decision)}. {fmtUsd(rec.cost_usd, 2)} on the subscription. Every write was checked for question text, gold values and golden SQL.
-          </p>
-          <div className="tw">
-            <table>
-              <thead>
-                <tr>
-                  <th>Scope</th>
-                  <th>Failed train questions it read</th>
-                  <th>Outcome</th>
-                  <th className="num">Chars</th>
-                  <th>Refusals, each sent back</th>
-                  <th>Rationale</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sessions.map((s) => (
-                  <tr key={s.scope}>
-                    <td className="sub">{s.scope}</td>
-                    <td className="small">{s.questions.join(', ') || '—'}</td>
-                    <td>{s.error ? <span className="chip warn">error</span> : s.notes != null ? <span className="chip ok">{s.notes ? 'written' : 'kept as is'}</span> : <span className="chip warn">dropped</span>}</td>
-                    <td className="num">{fmtInt(s.notes?.length ?? 0)}</td>
-                    <td className="small">{s.refusals.map((r) => r.problems.join('; ')).join(' | ') || '—'}</td>
-                    <td className="small">{s.error ?? s.rationale}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
-      )}
-      {l.files.map((f) => (
-        <div key={f.name}>
-          <p className="label">
-            agents/{name}/{f.name} {f.added ? `· new (not in ${l.parent})` : `· against ${l.parent}`}
-          </p>
-          <GoldDiff lines={f.diff} a={l.parent} b={name} />
-        </div>
-      ))}
     </>
   );
 }

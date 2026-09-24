@@ -512,10 +512,16 @@ async def rerun_system_pass(into: str) -> dict[str, Any]:
         (target / "system.md").write_text(s.notes.rstrip() + "\n")
     new = load_version(into)
     entry = {k: v for k, v in asdict(s).items() if k != "trace"}
+    # the pass it replaces stays on the record (it was paid for), outside `sessions`
+    record.setdefault("superseded", []).extend(
+        x for x in record["sessions"] if x["scope"] == "system.md"
+    )
     record["sessions"] = [x for x in record["sessions"] if x["scope"] != "system.md"] + [entry]
     record["system_md_changed"] = new.system_prompt != source.system_prompt
     record["fingerprint"] = new.fingerprint
-    record["cost_usd"] = sum(x.get("cost_usd") or 0.0 for x in record["sessions"])
+    record["cost_usd"] = sum(
+        x.get("cost_usd") or 0.0 for x in record["sessions"] + record["superseded"]
+    )
     record["system_pass_rerun_at"] = datetime.now(UTC).isoformat()
     tdir = RUNS_DIR / record["source_run"] / "optimise" / into
     tdir.mkdir(parents=True, exist_ok=True)
