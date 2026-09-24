@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { type GoldRef, type Profile, type ProfileKey, ROLE_LABEL, type RunRole, type Span, type TrialRow, fmtInt, fmtPct, fmtSec, fmtTok, fmtUsd } from './api';
 import { Clip, Gold } from './ui';
+import { SqlBlock } from './sql';
 import { questionPath, trialId, trialPath } from './url';
 
 /** The role word, never colour alone: champion is the accent (shipped), superseded and dry are muted. */
@@ -208,7 +209,15 @@ function SpanDetail({ s }: { s: Span }) {
       ) : (
         <>
           <p className="label">input</p>
-          <pre>{Object.entries(s.input ?? {}).map(([k, v]) => `${k}: ${typeof v === 'string' ? v : JSON.stringify(v)}`).join('\n')}</pre>
+          {typeof s.input?.sql === 'string' && <SqlBlock sql={s.input.sql} maxHeight={360} />}
+          {Object.keys(s.input ?? {}).some((k) => k !== 'sql') && (
+            <pre>
+              {Object.entries(s.input ?? {})
+                .filter(([k]) => k !== 'sql')
+                .map(([k, v]) => `${k}: ${typeof v === 'string' ? v : JSON.stringify(v)}`)
+                .join('\n')}
+            </pre>
+          )}
           <p className="label">output</p>
           <pre>{s.output || '(empty)'}</pre>
         </>

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { type Trace, type TraceBlock, fmtDur, fmtInt, fmtUsd, useGet } from '../lib/api';
 import { Waterfall } from '../lib/runs';
 import { SqlVersus } from '../lib/scorecard';
+import { SqlBlock } from '../lib/sql';
 import { Loading } from '../lib/ui';
 import { apiTrialPath, questionPath, runPath } from '../lib/url';
 
@@ -19,6 +20,18 @@ function Block({ b }: { b: TraceBlock }) {
     const input = b.input ?? {};
     const main = (input.sql ?? input.code ?? input.answer ?? input.table ?? input.path ?? input.term ?? '') as string;
     const rest = Object.entries(input).filter(([k]) => !['sql', 'code', 'answer', 'table', 'path', 'term'].includes(k));
+    if (typeof input.sql === 'string')
+      return (
+        <SqlBlock
+          sql={input.sql}
+          label={
+            <>
+              → {(b.name ?? '').replace('mcp__dab__', '')}
+              {rest.length > 0 && ` · ${rest.map(([k, v]) => `${k}=${JSON.stringify(v)}`).join(' ')}`}
+            </>
+          }
+        />
+      );
     return (
       <div className="code band">
         <p className="label">

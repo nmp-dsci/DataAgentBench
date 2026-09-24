@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { type Span, type SpanTokens, fmtInt, fmtTok, fmtUsd } from './api';
+import { SqlBlock, SqlEditor } from './sql';
 import { questionPath, trialId, trialPath } from './url';
 
 // ── shapes served by /api/agents* and /api/agent/tools ────────────────────────
@@ -183,7 +184,11 @@ export function ToolForm({ spec, agent, dataset, initial, original, onResult }: 
             {p.type === 'array' ? ' · comma-separated' : ''}
             {p.description ? ` — ${p.description}` : ''}
           </span>
-          {big(k) ? <textarea value={values[k] ?? ''} onChange={(e) => setValues({ ...values, [k]: e.target.value })} rows={k === 'code' ? 10 : 5} spellCheck={false} /> : <input type={p.type === 'integer' ? 'number' : 'text'} value={values[k] ?? ''} onChange={(e) => setValues({ ...values, [k]: e.target.value })} />}
+          {k === 'sql' ? (
+            <SqlEditor value={values[k] ?? ''} onChange={(v) => setValues({ ...values, [k]: v })} rows={8} ariaLabel={`${spec.name} sql`} />
+          ) : big(k) ? <textarea value={values[k] ?? ''} onChange={(e) => setValues({ ...values, [k]: e.target.value })} rows={k === 'code' ? 10 : 5} spellCheck={false} /> : (
+            <input type={p.type === 'integer' ? 'number' : 'text'} value={values[k] ?? ''} onChange={(e) => setValues({ ...values, [k]: e.target.value })} />
+          )}
         </label>
       ))}
       <div className="filters">
@@ -286,7 +291,11 @@ export function Replay({ spans, onlyTools, filterTool, onRerun }: { spans: Span[
                 <td className="num">{s.start.toFixed(1)}s</td>
                 <td className="num">{turn}</td>
                 <td className="mono small replay-cell">
-                  <pre className="cell">{isOpen ? sent : sent.slice(0, 140) + (sent.length > 140 ? '…' : '')}</pre>
+                  {isOpen && s.kind === 'tool' && typeof s.input?.sql === 'string' ? (
+                    <SqlBlock sql={s.input.sql} label={s.name} maxHeight={360} />
+                  ) : (
+                    <pre className="cell">{isOpen ? sent : sent.slice(0, 140) + (sent.length > 140 ? '…' : '')}</pre>
+                  )}
                   {(sent.length > 140 || recv.length > 140) && (
                     <button type="button" className="linkbtn small" onClick={() => setOpen(isOpen ? null : i)}>
                       {isOpen ? 'less' : 'more'}

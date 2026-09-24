@@ -80,6 +80,11 @@ ONE INSIGHT LINE    — what it means, once, in under 25 words
   green / amber / red composition (a stacked bar that splits a whole into
   done, partial and not done). Added 2026-09-24 for the Golden tab's coverage
   chart; it is this project's extension to the site palette, not a site token.
+- **`--syn-kw --syn-fn --syn-str --syn-num` colour SQL, and only SQL**: keywords,
+  functions, strings and numbers inside a SQL box (`frontend/src/lib/sql.tsx`,
+  CodeMirror 6). They never mean status and never appear outside code. Added
+  2026-09-24 so a query reads as a query; each holds 5.4:1 or better on `--panel`
+  and `--band` in both themes.
 - Status is never colour alone; every glyph is accompanied by the word.
 - Light is the reference palette; dark redefines colour only. Every text and
   surface pair holds 4.5:1 in both themes (3:1 for meaningful borders).
@@ -176,6 +181,7 @@ follows it. Fonts load from Google Fonts in artifacts (the site self-hosts).
   --accent:#0A6552; --accent-ink:#FFFFFF; --accent-soft:#DFEFE8;
   --amber:#8A5006; --amber-soft:#F6E6CF;
   --red:#A2342B; --red-soft:#F6DEDB; /* project extension: missing / failed (§2 Colour) */
+  --syn-kw:#6B3FA0; --syn-fn:#1D5FA0; --syn-str:#6E5A00; --syn-num:#A13D63; /* project extension: SQL syntax, inside code only (§2 Colour) */
   --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
   --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
   --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -193,6 +199,7 @@ follows it. Fonts load from Google Fonts in artifacts (the site self-hosts).
   --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
   --amber:#D99A4E; --amber-soft:#3A2A14;
   --red:#E8776B; --red-soft:#3D1D1A;
+  --syn-kw:#C9A2F2; --syn-fn:#8CB8F2; --syn-str:#D8C878; --syn-num:#F0A0C0;
   --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
 }}
 :root[data-theme="dark"]{ /* same values as the dark block above */ }

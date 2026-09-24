@@ -1,5 +1,6 @@
 import type { GoldenBriefSql, Rate, ScoreRow, ScoreTotals } from './api';
 import { GoldDiff } from './golddiff';
+import { SqlBlock } from './sql';
 
 /** The scorecard (s06) in the explorer: a question scored three ways, and the agent's SQL beside the golden. */
 
@@ -122,17 +123,22 @@ export function SqlVersus({ score, agentSql, golden, mode, step, reason }: { sco
         {score.split && <> This is {score.split === 'heldout' ? 'a held-out question: the optimiser never sees it.' : 'a training question: the optimiser may read it.'}</>}
       </p>
       <div className="compare">
-        <div className="code">
-          <p className="label">
-            agent SQL · {mode ?? 'no submit'}
-            {step ? ` · step: ${step}` : ''}
-          </p>
-          <pre>{agentSql || '(no SQL submitted)'}</pre>
-        </div>
-        <div className="code band">
-          <p className="label">{golden ? `golden #${golden.id} · ${golden.kind} · saved ${golden.created_at.slice(0, 10)}` : score.golden_id ? `golden #${score.golden_id}` : 'no golden'}</p>
-          <pre>{golden?.sql ?? (score.golden_id ? '(the database is unreachable; the golden SQL is in the Golden tab)' : '—')}</pre>
-        </div>
+        {agentSql ? (
+          <SqlBlock sql={agentSql} label={`agent · ${mode ?? 'no submit'}${step ? ` · step: ${step}` : ''}`} />
+        ) : (
+          <div className="code">
+            <p className="label">agent SQL</p>
+            <pre>(no SQL submitted)</pre>
+          </div>
+        )}
+        {golden ? (
+          <SqlBlock sql={golden.sql} band label={`golden #${golden.id} · ${golden.kind} · saved ${golden.created_at.slice(0, 10)}`} />
+        ) : (
+          <div className="code band">
+            <p className="label">{score.golden_id ? `golden #${score.golden_id}` : 'no golden'}</p>
+            <pre>{score.golden_id ? '(the database is unreachable; the golden SQL is in the Golden tab)' : '—'}</pre>
+          </div>
+        )}
       </div>
       {structure.length > 0 && (
         <div className="tw">

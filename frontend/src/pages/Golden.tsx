@@ -4,6 +4,7 @@ import { type Board, type GoldMatch, type GoldenAttempt, type GoldenKind, type G
 import { Clip, Gold, Loading } from '../lib/ui';
 import { GoldDiff } from '../lib/golddiff';
 import { SqlVersus } from '../lib/scorecard';
+import { SqlBlock, SqlEditor } from '../lib/sql';
 import { apiTrialPath, datasetPath, goldenPath, questionPath, trialId, trialPath, useLens } from '../lib/url';
 
 function Status({ g, kind }: { g: { passed: boolean | null; kind?: GoldenKind } | null; kind?: GoldenKind }) {
@@ -633,7 +634,7 @@ export function GoldenEditor() {
           <span className="label">
             SQL · runs as dab_agent · read-only · 60 s · search_path dataagentbench (tables are {q.dataset_key}_*) · {source ? `started from ${source.replace(/^run \S+ · /, '')}` : 'by hand'}
           </span>
-          <textarea value={sql} onChange={(e) => edit({ sql: e.target.value })} rows={12} spellCheck={false} placeholder={`select … from ${q.dataset_key}_…`} />
+          <SqlEditor value={sql} onChange={(v) => edit({ sql: v })} rows={14} placeholder={`select … from ${q.dataset_key}_…`} ariaLabel={`golden SQL for ${q.id}`} />
         </label>
         <div className="filters" role="radiogroup" aria-label="kind">
           <label className="pick">
@@ -738,7 +739,7 @@ export function GoldenEditor() {
                     </button>
                   )}
                 </div>
-                <pre>{c.sql}</pre>
+                <SqlBlock sql={c.sql} maxHeight={360} />
                 <details>
                   <summary>what it returned</summary>
                   <pre>{c.output.length > 2000 ? `${c.output.slice(0, 2000)}\n…` : c.output}</pre>
