@@ -55,6 +55,7 @@ class ToolState:
     extract_input_tokens: int = 0
     extract_output_tokens: int = 0
     submission: dict[str, Any] | None = None  # submit_answer's record: sql, result, mode, step
+    plan_required: bool = False  # s08, D34: submit_answer needs the seven-step plan
 
     def record(
         self, name: str, inputs: dict[str, Any], output: str, t0: float, error: bool = False
@@ -572,7 +573,13 @@ def _submit_answer(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, An
     mode = str(args.get("mode", "")).strip()
     answer = str(args.get("answer") or "").strip()
     step = str(args.get("step") or "").strip()
-    inputs = {"sql": sql, "mode": mode, "answer": answer, "step": step}
+    inputs: dict[str, Any] = {"sql": sql, "mode": mode, "answer": answer, "step": step}
+    plan = None
+    if state.plan_required:
+        plan, why = read_plan(args.get("plan"))
+        inputs["plan"] = args.get("plan")
+        if plan is None:
+            return inputs, f"Error: {why}; nothing recorded."
     if mode not in MODES:
         return inputs, f"Error: mode must be one of {', '.join(MODES)}; nothing recorded."
     if mode == "derived" and not answer:
@@ -593,6 +600,7 @@ def _submit_answer(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, An
         "sql": sql,
         "mode": mode,
         "step": step,
+        "plan": plan,
         "model_answer": answer,
         "columns": ex.columns,
         "rows": ex.rows[:RESULT_ROWS_KEPT],
@@ -613,6 +621,50 @@ def _submit_answer(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, An
 
 
 RESULT_ROWS_KEPT = 500  # the agent's result rows kept on the trace for the diagnosis
+
+# the seven steps of a statement, in the order it is built (the ledger's components, s08)
+PLAN_STEPS = ("sources", "keys", "parse", "filter", "metric", "rank", "shape")
+PLAN_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "description": "your statement's seven steps in words, one line each",
+    "properties": {
+        "sources": {
+            "type": "string",
+            "description": "which tables (and fields) hold what the question names",
+        },
+        "keys": {"type": "string", "description": "how rows match, and what each side needs first"},
+        "parse": {"type": "string", "description": "what is read out of text or JSON, and how"},
+        "filter": {
+            "type": "string",
+            "description": "which rows count: every condition, the window",
+        },
+        "metric": {
+            "type": "string",
+            "description": "what is measured, at what grain, by what formula",
+        },
+        "rank": {"type": "string", "description": "the order, the tie-break, the limit"},
+        "shape": {
+            "type": "string",
+            "description": "the columns returned, one row or many, the mode",
+        },
+    },
+    "required": list(PLAN_STEPS),
+}
+
+
+def read_plan(raw: Any) -> tuple[dict[str, str] | None, str]:
+    """The plan as seven lines, or None and why not. A JSON string of the object is accepted."""
+    if isinstance(raw, str):
+        try:
+            raw = json.loads(raw)
+        except ValueError:
+            return None, "`plan` must be an object with one line per step: " + ", ".join(PLAN_STEPS)
+    if not isinstance(raw, dict):
+        return None, "`plan` is required: one line per step: " + ", ".join(PLAN_STEPS)
+    missing = [k for k in PLAN_STEPS if not str(raw.get(k) or "").strip()]
+    if missing:
+        return None, "`plan` lacks " + ", ".join(missing) + " (write 'none' for an absent step)"
+    return {k: str(raw[k]).strip()[:400] for k in PLAN_STEPS}, ""
 
 
 def _return_answer(state: ToolState, args: dict[str, Any]) -> tuple[dict[str, Any], str]:
@@ -671,9 +723,10 @@ async def call_tool_async(state: ToolState, name: str, args: dict[str, Any]) -> 
     return await asyncio.to_thread(call_tool, state, name, args)
 
 
-def specs_for(tools: list[str] | None) -> list[ToolSpec]:
+def specs_for(tools: list[str] | None, plan: bool = False) -> list[ToolSpec]:
     """The specs a version's tool list names (`mcp__dab__<name>`), in the table's order.
-    Without execute_python, `query_db` loses `save_as`: it only ever fed the sandbox."""
+    Without execute_python, `query_db` loses `save_as`: it only ever fed the sandbox. With
+    `plan` (s08, D34), `submit_answer` requires the statement's seven steps in words."""
     names = None if tools is None else {t.removeprefix("mcp__dab__") for t in tools}
     out = []
     for spec in TOOL_SPECS.values():
@@ -688,11 +741,23 @@ def specs_for(tools: list[str] | None) -> list[ToolSpec]:
                 _obj(props, ["sql"]),
                 spec.backend,
             )
+        if spec.name == "submit_answer" and plan:
+            props = dict(spec.schema["properties"]) | {"plan": PLAN_SCHEMA}
+            spec = ToolSpec(
+                spec.name,
+                spec.description
+                + " `plan` is required: the seven steps of your statement in words, one line each "
+                "(sources, keys, parse, filter, metric, rank, shape; 'none' when a step is absent).",
+                _obj(props, ["sql", "mode", "plan"]),
+                spec.backend,
+            )
         out.append(spec)
     return out
 
 
-def make_tool_server(state: ToolState, tools: list[str] | None = None) -> McpSdkServerConfig:
+def make_tool_server(
+    state: ToolState, tools: list[str] | None = None, plan: bool = False
+) -> McpSdkServerConfig:
     """The `dab` MCP server for one trial: the version's own specs (`tools`, every spec when
     None), each wrapped around `call_tool_async`. A tool the version lacks is not registered,
     so the session cannot see it, let alone call it."""
@@ -709,5 +774,5 @@ def make_tool_server(state: ToolState, tools: list[str] | None = None) -> McpSdk
         return tool(spec.name, spec.description, spec.schema)(_fn)
 
     return create_sdk_mcp_server(
-        name="dab", version="1.0.0", tools=[_make(spec) for spec in specs_for(tools)]
+        name="dab", version="1.0.0", tools=[_make(spec) for spec in specs_for(tools, plan)]
     )

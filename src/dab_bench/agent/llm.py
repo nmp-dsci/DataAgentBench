@@ -17,7 +17,7 @@ from dab_bench.config import settings
 MODELS: dict[str, str] = {
     "haiku": "claude-haiku-4-5",
     "sonnet": "claude-sonnet-5",
-    "opus": "claude-opus-5",
+    "opus": "claude-opus-5-5",
 }
 
 # Every Agent SDK session in this app (the task agent, the curator) runs at this

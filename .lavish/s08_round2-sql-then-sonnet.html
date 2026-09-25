@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>s08 · DataAgentBench — round 2 on the SQL, then Sonnet 5, and a new Optimise tab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Design source (2): the project's own system — DESIGN.md ("Field Guide"), tokens verbatim,
+   the same block s00–s07 and frontend/src/tokens.css carry. */
+:root{
+  --bg:#F7F6F2; --panel:#FFFFFF; --band:#EFEEE8;
+  --ink:#1A1D1B; --ink-2:#3B403D; --muted:#4A514D; --faint:#5C635E;
+  --line:#DCDAD2; --line-2:#C7C5BC; --line-3:#8A8880;
+  --accent:#0A6552; --accent-ink:#FFFFFF; --accent-soft:#DFEFE8;
+  --amber:#8A5006; --amber-soft:#F6E6CF;
+  --red:#A2342B; --red-soft:#F6DEDB;
+  --syn-kw:#6B3FA0; --syn-fn:#1D5FA0; --syn-str:#6E5A00; --syn-num:#A13D63;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --t-2:0.8rem; --t-1:0.875rem; --t0:1rem; --t1:1.125rem; --t2:1.406rem; --t3:1.758rem; --t4:2.197rem;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --r:10px; --r-sm:6px;
+  --shadow:0 1px 2px rgb(20 25 22 / .05), 0 12px 28px -18px rgb(20 25 22 / .22);
+  --dur:300ms; --ease:cubic-bezier(.2,.7,.2,1); --focus:var(--accent);
+  --w:1140px; --measure:68ch; --track-label:.08em;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121614; --panel:#191E1B; --band:#161A18;
+    --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+    --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+    --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+    --amber:#D99A4E; --amber-soft:#3A2A14;
+    --red:#E8776B; --red-soft:#3D1D1A;
+    --syn-kw:#C9A2F2; --syn-fn:#8CB8F2; --syn-str:#D8C878; --syn-num:#F0A0C0;
+    --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121614; --panel:#191E1B; --band:#161A18;
+  --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+  --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+  --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+  --amber:#D99A4E; --amber-soft:#3A2A14;
+  --red:#E8776B; --red-soft:#3D1D1A;
+  --syn-kw:#C9A2F2; --syn-fn:#8CB8F2; --syn-str:#D8C878; --syn-num:#F0A0C0;
+  --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+}
+@media (prefers-reduced-motion: reduce){ :root{ --dur:0.01ms; } }
+*,*::before,*::after{box-sizing:border-box}
+:where(.grid,.flex,.kpi,.cards,.mock-body,.mock-top,.cmp,.stage-nav,.tl)>*{min-width:0}
+:where(p,h1,h2,h3,h4,li,dd,figcaption,td,th,.chip,.label){overflow-wrap:anywhere}
+:where(img,svg,video,iframe){max-width:100%;height:auto}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink-2);font-family:var(--sans);font-size:var(--t0);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{color:var(--ink);margin:0;line-height:1.15;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+h1{font-size:var(--t4);font-family:var(--serif);font-weight:400} h1 em{font-style:italic;font-weight:400;color:var(--accent)}
+h2{font-size:var(--t3)} h3{font-size:var(--t1)} h4{font-size:var(--t0)}
+p{margin:0 0 var(--s4);text-wrap:pretty}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:.2em} a:hover{text-decoration-thickness:2px}
+strong,b{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:max(var(--t-2),.86em);background:var(--band);padding:.08em .32em;border-radius:var(--r-sm);color:var(--ink-2)}
+pre{margin:0;font-family:var(--mono);font-size:var(--t-2);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.wrap{max-width:var(--w);margin-inline:auto;padding-inline:var(--s5)}
+.label{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0}
+.lead{font-family:var(--serif);font-size:var(--t1);line-height:1.5;color:var(--ink-2);max-width:72ch}
+.small{font-size:var(--t-1);color:var(--muted)}
+.top{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:var(--w);margin-inline:auto;padding:var(--s3) var(--s5);display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.top b{font-family:var(--mono);font-size:var(--t-1);color:var(--ink);white-space:nowrap}
+.top nav{display:flex;gap:var(--s4);margin-left:auto;flex-wrap:wrap;font-size:var(--t-1);font-weight:500}
+.top nav a{color:var(--ink-2);text-decoration:none;padding:var(--s1) 0} .top nav a:hover{color:var(--accent)}
+header.hero{padding:var(--s7) 0 var(--s5)}
+.chips{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s4) 0 0}
+.chip{font-family:var(--mono);font-size:var(--t-2);padding:.3em .6em;border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--ink-2);background:var(--panel);white-space:nowrap}
+.chip.ok{border-color:var(--accent);color:var(--accent)} .chip.warn{border-color:var(--amber);color:var(--amber)} .chip.no{border-color:var(--line-3);color:var(--muted)}
+section.blk{padding-top:var(--s8)} section.blk:last-of-type{padding-bottom:var(--s9)}
+section.band-sec{background:var(--band);margin-top:var(--s8);padding:var(--s7) 0}
+section.band-sec + section.blk{padding-top:var(--s7)}
+.hd{margin-bottom:var(--s5);max-width:80ch} .hd .label{margin-bottom:var(--s2)} .hd h2{margin-bottom:var(--s3)}
+.panel{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5)}
+.grid{display:grid;gap:var(--s4)} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.g3,.g2{grid-template-columns:minmax(0,1fr)}}
+.card h3{margin-bottom:var(--s2)} .card p{margin-bottom:var(--s2);font-size:var(--t-1)} .card p:last-child{margin:0}
+.card.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.card.dim{box-shadow:var(--shadow),inset 0 0 0 1px var(--line-3)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r);box-shadow:var(--shadow);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:var(--t-1)}
+caption{text-align:left;padding:var(--s4) var(--s5) var(--s2);color:var(--muted);font-size:var(--t-1);caption-side:top}
+th,td{text-align:left;padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}
+thead th{font-family:var(--mono);font-size:var(--t-2);font-weight:500;color:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase;border-bottom:1px solid var(--line-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.sub{font-weight:600;color:var(--ink);white-space:nowrap}
+td.num{font-family:var(--mono);font-size:var(--t-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+td .path{display:block;font-family:var(--mono);font-size:var(--t-2);color:var(--faint);font-weight:400;margin-top:2px}
+td.mono{font-family:var(--mono);font-size:var(--t-2)} td.nw{white-space:nowrap}
+tr.pro td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+tr.dim td{color:var(--muted)}
+.v-ok{color:var(--accent);font-weight:600} .v-no{color:var(--muted)} .v-warn{color:var(--amber);font-weight:600}
+blockquote{margin:0;padding:var(--s3) var(--s4);border-left:2px solid var(--accent);background:var(--band);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:var(--t-1)}
+blockquote.warn{border-left-color:var(--amber)}
+.fig{margin:var(--s5) 0 0}
+.fig-title{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0 0 var(--s3);text-wrap:balance}
+.fig figcaption{font-family:var(--sans);font-size:var(--t-1);color:var(--muted);line-height:1.5;margin-top:var(--s3)}
+.fig figcaption b{color:var(--ink);font-weight:600}
+form.q{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5);display:grid;gap:var(--s3);margin-top:var(--s4)}
+form.q h3{margin:0} form.q .why{font-size:var(--t-1);color:var(--muted);margin:0}
+form.q label{display:grid;grid-template-columns:1.2rem minmax(0,1fr);gap:var(--s2);align-items:start;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;min-height:24px}
+form.q label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+form.q input[type=radio],form.q input[type=checkbox]{margin:3px 0 0;accent-color:var(--accent);width:16px;height:16px}
+form.q textarea{width:100%;font:inherit;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);color:var(--ink-2);min-height:3.2rem;resize:vertical}
+form.q .row{display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap}
+.btn{font:500 var(--t-1) var(--sans);background:var(--accent);color:var(--accent-ink);border:0;border-radius:var(--r-sm);padding:.55em 1em;cursor:pointer;min-height:24px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.08)} .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.queued{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);min-height:1.2em}
+.rec{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);margin-left:.4em}
+ul.tight{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.tight li{margin-bottom:var(--s1)}
+ul.qa{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.qa li{margin-bottom:var(--s2)}
+.code{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);margin-top:var(--s3);overflow-x:auto}
+.code .label{margin-bottom:var(--s2)} .code.band{background:var(--band)}
+.kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4);margin-top:var(--s5)}
+@media (max-width:900px){.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi .n{font-family:var(--serif);font-size:var(--t3);color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:var(--t-1);color:var(--muted);margin-top:var(--s1)}
+.cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.cmp{grid-template-columns:minmax(0,1fr)}}
+.cmp .side{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s4)}
+.cmp .side h4{margin-bottom:var(--s2)} .cmp .side .label{margin-bottom:var(--s2)}
+.cmp .side.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+pre.sql{background:var(--band);border-radius:var(--r-sm);padding:var(--s4);font-size:var(--t-2);white-space:pre-wrap}
+pre.sql .kw{color:var(--syn-kw)} pre.sql .fn{color:var(--syn-fn)} pre.sql .st{color:var(--syn-str)} pre.sql .nu{color:var(--syn-num)}
+
+/* .dia contract (DESIGN.md §2) */
+.dia{width:100%;height:auto;display:block;background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow)}
+.fig,.mock-body{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media (max-width:900px){.dia{min-width:880px}}
+.dia .ax{stroke:var(--line-2);stroke-width:1} .dia .gl{stroke:var(--line);stroke-width:1}
+.dia .tx{font:500 13px var(--sans);fill:var(--ink)} .dia .tx.s{font:400 12.8px var(--sans);fill:var(--muted)}
+.dia .tx.k{font:500 12.8px var(--mono);fill:var(--faint)} .dia .tx.k.strong{fill:var(--ink)}
+.dia .tx.in{font:600 12.8px var(--mono);fill:var(--accent-ink)}
+.dia .cap{font:500 12.8px var(--mono);fill:var(--faint);letter-spacing:.08em;text-transform:uppercase}
+.dia .nd{fill:var(--panel);stroke:var(--line-3);stroke-width:1}
+.dia .nd.in{fill:var(--band)} .dia .nd.hi{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.dia .nd.gold{fill:var(--amber-soft);stroke:var(--amber)} .dia .nd.ext{fill:none;stroke:var(--line-3);stroke-dasharray:5 4}
+.dia .ed{stroke:var(--ink-2);stroke-width:1.25;fill:none;marker-end:url(#arr)} .dia .ed.dash{stroke-dasharray:5 4} .dia .ed.hi{stroke:var(--accent);stroke-width:2}
+.dia .bar{fill:var(--line-2)} .dia .bar.hi{fill:var(--accent)} .dia .bar.pro{fill:var(--amber)} .dia .bar.ho{fill:none;stroke:var(--line-3);stroke-width:1.2}
+.dia .cell{stroke:var(--panel);stroke-width:1} .dia .cell.same{fill:var(--accent-soft)} .dia .cell.diff{fill:var(--amber)} .dia .cell.na{fill:none;stroke:var(--line-3);stroke-dasharray:3 3} .dia .cell.blind{fill:var(--line)}
+.dia .pt{fill:var(--accent)} .dia .pt.o{fill:var(--panel);stroke:var(--ink-2);stroke-width:2} .dia .pt.plan{fill:none;stroke:var(--line-3);stroke-width:1.5;stroke-dasharray:3 3}
+.dia .ln{fill:none;stroke:var(--accent);stroke-width:2} .dia .ln.b{stroke:var(--ink-2);stroke-dasharray:5 4}
+.dia g.pick{cursor:pointer} .dia g.pick:hover .nd{stroke-width:2} .dia g.pick:focus-visible{outline:2px solid var(--focus)}
+.dia g.pick.on .nd{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2.5}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+.sw.same{background:var(--accent-soft);border:1px solid var(--line-2)} .sw.diff{background:var(--amber)} .sw.na{border:1px dashed var(--line-3)} .sw.blind{background:var(--line)} .sw.hi{background:var(--accent)} .sw.ho{border:1.5px solid var(--line-3)}
+.lg{white-space:nowrap;margin-right:var(--s3)}
+
+/* the interactive loop figure's stage panel */
+.stage-nav{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap;margin-top:var(--s3)}
+.stage-nav .btn{padding:.4em .8em;font-size:var(--t-2)}
+.stage-nav .where{font-family:var(--mono);font-size:var(--t-2);color:var(--faint);margin-left:auto}
+.stage{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent);padding:var(--s4) var(--s5);margin-top:var(--s3);display:grid;gap:var(--s2)}
+.stage h4{margin:0} .stage p{margin:0;font-size:var(--t-1)} .stage .label{margin:0}
+.stage .row{display:flex;gap:var(--s3);flex-wrap:wrap;font-family:var(--mono);font-size:var(--t-2)}
+.stage .row span{padding:.2em .5em;border:1px solid var(--line-2);border-radius:var(--r-sm)} .stage .row span.ok{border-color:var(--accent);color:var(--accent)} .stage .row span.new{border-color:var(--line-3);border-style:dashed;color:var(--muted)}
+
+/* the mock of the explorer page, in the explorer's own styles */
+.mock{background:var(--bg);border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin-top:var(--s2)}
+.mock-top{display:flex;gap:var(--s4);align-items:center;padding:var(--s2) var(--s4);border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 88%,transparent);font-size:var(--t-2);flex-wrap:wrap}
+.mock-top .brand{font-family:var(--mono);color:var(--ink);font-weight:500}
+.mock-top nav{display:flex;gap:var(--s3);flex-wrap:wrap} .mock-top nav span{color:var(--ink-2)} .mock-top nav span.on{color:var(--accent);border-bottom:2px solid var(--accent)}
+.mock-body{padding:var(--s4)}
+.mock h1{font-size:var(--t2)} .mock h2{font-size:var(--t1)} .mock .label{font-size:.7rem}
+.mock table{min-width:0;font-size:var(--t-2)} .mock th,.mock td{padding:var(--s2) var(--s3)}
+.mock .tw{box-shadow:none;border:1px solid var(--line)} .mock td.nw,.mock td.nw .path{white-space:nowrap}
+.mock .steps3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s2);margin:var(--s3) 0}
+@media (max-width:640px){.mock .steps3{grid-template-columns:minmax(0,1fr)}}
+.mock .steps3 .step{border:1px solid var(--line-2);border-radius:var(--r-sm);padding:var(--s2) var(--s3);font-size:var(--t-2);background:var(--panel)} .mock .steps3 .step.on{border-color:var(--accent);background:var(--accent-soft)}
+.mock .steps3 .step .label{display:block;margin-bottom:2px}
+.tl{display:grid;gap:var(--s1);margin:var(--s2) 0} .tl div{display:grid;grid-template-columns:5.5rem minmax(0,1fr);gap:var(--s2);font-size:var(--t-2);align-items:baseline}
+.tl div b{font-family:var(--mono);font-weight:500;color:var(--faint)} .tl div .warn{color:var(--amber)} .tl div .ok{color:var(--accent);font-weight:600}
+.mock .chips{margin-top:var(--s1)}
+.src{font-size:var(--t-1);color:var(--muted)} .src li{margin-bottom:var(--s1)}
+.two{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:var(--s4)} @media (max-width:900px){.two{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in">
+  <b>s08 · round 2 on the SQL, then Sonnet 5</b>
+  <nav aria-label="Sections">
+    <a href="#verdict">Verdict</a><a href="#review">Review</a><a href="#round2">Round 2</a><a href="#sonnet">Sonnet</a><a href="#tab">Optimise tab</a><a href="#build">Build</a><a href="#decide">Decide</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+<header class="hero">
+  <p class="label">DataAgentBench · plan · 2026-09-25 · branch challenger_v3 · champion v2_sql, run 20260924T053026Z · nothing built yet</p>
+  <h1>Round 1 lifted answers 24 → 30 of 54 but SQL only 13 → 18 of 49, and held-out SQL from 1 to <em>2 of 16</em>: round 2 optimises the statement itself, then Sonnet 5 runs the same prompt</h1>
+  <p class="lead">Three parts. <b>Review</b>: what the round-1 optimiser saw, what it wrote, and why it taught data facts rather than SQL. <b>Round 2 and the model</b>: a component ledger that says where each statement broke, an optimiser that writes an SQL playbook across datasets, and only then <code>model: sonnet</code> at the same medium effort, so the prompt's lift and the model's lift are measured apart. <b>The Optimise tab</b>: a redesign around a clickable picture of the loop, with SQL first.</p>
+  <div class="chips">
+    <span class="chip">v0 · 27/54 · $8.96</span><span class="chip">v1_sql · 24/54 · SQL 13/49 · $4.60</span><span class="chip ok">v2_sql · 30/54 · SQL 18/49 · champion</span><span class="chip">round 1 · $1.24 · 10 notes + system.md</span><span class="chip no">v3_sql · v4_sql · planned</span>
+  </div>
+</header>
+
+<!-- ================================================= VERDICT -->
+<section class="blk" id="verdict">
+  <div class="hd">
+    <p class="label">01 · verdict</p>
+    <h2>01 · Verdict — round 1 taught the data, not the SQL: train SQL 12 → 16 of 33, held-out SQL 1 → 2 of 16</h2>
+    <p class="small">The optimiser (<code>agents/optimiser/system.md</code>, Sonnet 5 at medium) ran one session per dataset with failed <i>training</i> questions and wrote what such a session can see: a join key's real shape, a text column's templates, three date formats in one column. Those facts fixed questions it had read and the answers followed (train 17 → 21 of 33). On the 16 held-out questions the SQL check barely moved, and 12 of v2_sql's 31 SQL failures are answers the validator accepts from a statement whose result is not the golden's.</p>
+  </div>
+  <div class="kpi" style="margin-top:0">
+    <div class="panel"><div class="n">30 / 54</div><div class="d">answers passed, v2_sql, against 24 for v1_sql and 27 for v0 (the leaderboard's number)</div></div>
+    <div class="panel"><div class="n">18 / 49</div><div class="d">SQL passed (the re-run statement returns the golden's rows), against 13 for v1_sql; v0 has no statement to score</div></div>
+    <div class="panel"><div class="n">2 / 16</div><div class="d">held-out SQL passed, against 1 for v1_sql: the notes generalised the answer (6 → 8) more than the statement</div></div>
+    <div class="panel"><div class="n">26 / 26</div><div class="d">round-1 refusals that cited the 1,500-character cap; 11 of them also a leak (6 gold values, 5 golden SQL). No notes were dropped</div></div>
+  </div>
+
+  <figure class="fig">
+    <p class="fig-title">Fig 1 · answers and SQL passed per split, v1_sql → v2_sql (one 54 × 1 run each)</p>
+    <svg class="dia" viewBox="0 0 1000 250" role="img" aria-label="Dumbbell chart: answers and SQL passed on the train and held-out splits, before and after round 1"><title>Answers and SQL per split, before and after round 1</title>
+      <g id="f1-axis">
+        <line class="ax" x1="230" x2="230" y1="30" y2="215"/>
+        <line class="gl" x1="422" x2="422" y1="30" y2="215"/><line class="gl" x1="615" x2="615" y1="30" y2="215"/><line class="gl" x1="807" x2="807" y1="30" y2="215"/><line class="gl" x1="1000" x2="1000" y1="30" y2="215" style="stroke:none"/>
+        <text class="tx k" x="230" y="20" text-anchor="middle">0%</text><text class="tx k" x="422" y="20" text-anchor="middle">25%</text><text class="tx k" x="615" y="20" text-anchor="middle">50%</text><text class="tx k" x="807" y="20" text-anchor="middle">75%</text><text class="tx k" x="985" y="20" text-anchor="end">100%</text>
+      </g>
+      <g id="f1-train-ans"><title>train · answers: 17/33 → 21/33</title>
+        <text class="tx" x="218" y="55" text-anchor="end">train · answers</text>
+        <line class="ln" x1="626" x2="720" y1="50" y2="50"/><circle class="pt o" cx="626" cy="50" r="6"/><circle class="pt" cx="720" cy="50" r="6"/>
+        <text class="tx k" x="735" y="55">17 → 21 / 33</text></g>
+      <g id="f1-train-sql"><title>train · SQL: 12/33 → 16/33</title>
+        <text class="tx" x="218" y="95" text-anchor="end">train · SQL</text>
+        <line class="ln" x1="510" x2="603" y1="90" y2="90"/><circle class="pt o" cx="510" cy="90" r="6"/><circle class="pt" cx="603" cy="90" r="6"/>
+        <text class="tx k" x="618" y="95">12 → 16 / 33</text></g>
+      <g id="f1-ho-ans"><title>held out · answers: 6/16 → 8/16</title>
+        <text class="tx" x="218" y="145" text-anchor="end">held out · answers</text>
+        <line class="ln" x1="519" x2="615" y1="140" y2="140"/><circle class="pt o" cx="519" cy="140" r="6"/><circle class="pt" cx="615" cy="140" r="6"/>
+        <text class="tx k" x="630" y="145">6 → 8 / 16</text></g>
+      <g id="f1-ho-sql"><title>held out · SQL: 1/16 → 2/16</title>
+        <text class="tx" x="218" y="185" text-anchor="end">held out · SQL</text>
+        <line class="ln" x1="278" x2="326" y1="180" y2="180"/><circle class="pt o" cx="278" cy="180" r="6"/><circle class="pt" cx="326" cy="180" r="6"/>
+        <text class="tx k" x="341" y="185">1 → 2 / 16</text></g>
+      <text class="tx s" x="230" y="238">open dot v1_sql · filled dot v2_sql · the 5 no-golden questions are outside both splits (answers 1 → 1 of 5)</text>
+    </svg>
+    <figcaption><b>The held-out SQL line is the test of the method, and it moved by one question.</b> Source: <code>runs/20260924T050324Z_v1_sql_all_haiku_hints/scorecard.json</code> and <code>…T053026Z_v2_sql…/scorecard.json</code>, <code>by_split</code>.</figcaption>
+  </figure>
+</section>
+
+<!-- ================================================= REVIEW -->
+<section class="band-sec" id="review"><div class="wrap">
+  <div class="hd">
+    <p class="label">02 · review of the optimisation approach</p>
+    <h2>02 · Review — the diagnosis names a category, not the component that broke, so the optimiser cannot be taught SQL</h2>
+    <p class="small">A statement is a plan made of parts: which tables hold what the question names, how their rows match, what is read out of text, which conditions apply, what is measured at what grain, how the rows are ranked, and what shape comes out. The golden SQL carries every part for its question. Today's scorecard compares statements with <code>sqlglot</code> sets (tables, join columns, literals, aggregates, order) and names the <i>first</i> set that differs. Fig 2 shows what that gives on v2_sql's 31 SQL failures.</p>
+  </div>
+
+  <figure class="fig" style="margin-top:0">
+    <p class="fig-title">Fig 2 · v2_sql's 31 SQL failures, by the part of the statement sqlglot sees as different (today's diagnosis, mapped onto seven components)</p>
+    <svg class="dia" viewBox="0 0 1120 700" role="img" aria-label="Matrix of 31 questions by seven SQL components; amber cells where sqlglot sees a difference, faint cells where it sees none, dashed cells for the component it cannot see"><title>Where the SQL differs, per question and component</title>
+      <g id="f2-head">
+        <text class="cap" x="20" y="22">question</text>
+        <text class="tx k" x="296" y="22" text-anchor="middle">sources</text><text class="tx k" x="368" y="22" text-anchor="middle">keys</text><text class="tx k" x="440" y="22" text-anchor="middle">parse</text><text class="tx k" x="512" y="22" text-anchor="middle">filter</text><text class="tx k" x="584" y="22" text-anchor="middle">metric</text><text class="tx k" x="656" y="22" text-anchor="middle">rank</text><text class="tx k" x="728" y="22" text-anchor="middle">shape</text>
+        <text class="cap" x="780" y="22">category today · answer</text>
+      </g>
+      <!-- rows: y = 36 + i*20; cells x = 264 + c*72, w 64, h 16 -->
+      <g id="r-bookreview-1"><title>bookreview/1 · held out · sqlglot: no aspect differs · right answer another way · answer pass</title><text class="tx s" x="20" y="49">bookreview/1 · ho</text><rect class="cell blind" x="264" y="36" width="64" height="16"/><rect class="cell blind" x="336" y="36" width="64" height="16"/><rect class="cell blind" x="408" y="36" width="64" height="16"/><rect class="cell blind" x="480" y="36" width="64" height="16"/><rect class="cell blind" x="552" y="36" width="64" height="16"/><rect class="cell blind" x="624" y="36" width="64" height="16"/><rect class="cell na" x="696" y="36" width="64" height="16"/><text class="tx k" x="780" y="49">right answer another way · pass</text></g>
+      <g id="r-bookreview-2"><title>bookreview/2 · train · no aspect differs · right answer another way · answer pass</title><text class="tx s" x="20" y="69">bookreview/2</text><rect class="cell blind" x="264" y="56" width="64" height="16"/><rect class="cell blind" x="336" y="56" width="64" height="16"/><rect class="cell blind" x="408" y="56" width="64" height="16"/><rect class="cell blind" x="480" y="56" width="64" height="16"/><rect class="cell blind" x="552" y="56" width="64" height="16"/><rect class="cell blind" x="624" y="56" width="64" height="16"/><rect class="cell na" x="696" y="56" width="64" height="16"/><text class="tx k" x="780" y="69">right answer another way · pass</text></g>
+      <g id="r-crm-1"><title>crmarenapro/1 · held out · no aspect differs · right answer another way · answer pass</title><text class="tx s" x="20" y="89">crmarenapro/1 · ho</text><rect class="cell blind" x="264" y="76" width="64" height="16"/><rect class="cell blind" x="336" y="76" width="64" height="16"/><rect class="cell blind" x="408" y="76" width="64" height="16"/><rect class="cell blind" x="480" y="76" width="64" height="16"/><rect class="cell blind" x="552" y="76" width="64" height="16"/><rect class="cell blind" x="624" y="76" width="64" height="16"/><rect class="cell na" x="696" y="76" width="64" height="16"/><text class="tx k" x="780" y="89">right answer another way · pass</text></g>
+      <g id="r-crm-2"><title>crmarenapro/2 · train · no statement submitted (30 turns) · no SQL · answer fail</title><text class="tx s" x="20" y="109">crmarenapro/2</text><rect class="cell na" x="264" y="96" width="64" height="16"/><rect class="cell na" x="336" y="96" width="64" height="16"/><rect class="cell na" x="408" y="96" width="64" height="16"/><rect class="cell na" x="480" y="96" width="64" height="16"/><rect class="cell na" x="552" y="96" width="64" height="16"/><rect class="cell na" x="624" y="96" width="64" height="16"/><rect class="cell na" x="696" y="96" width="64" height="16"/><text class="tx k" x="780" y="109">no SQL (30 turns) · fail</text></g>
+      <g id="r-crm-3"><title>crmarenapro/3 · held out · differs: sources, keys, filter, rank · wrong tables · answer fail</title><text class="tx s" x="20" y="129">crmarenapro/3 · ho</text><rect class="cell diff" x="264" y="116" width="64" height="16"/><rect class="cell diff" x="336" y="116" width="64" height="16"/><rect class="cell same" x="408" y="116" width="64" height="16"/><rect class="cell diff" x="480" y="116" width="64" height="16"/><rect class="cell same" x="552" y="116" width="64" height="16"/><rect class="cell diff" x="624" y="116" width="64" height="16"/><rect class="cell na" x="696" y="116" width="64" height="16"/><text class="tx k" x="780" y="129">wrong tables · fail</text></g>
+      <g id="r-crm-6"><title>crmarenapro/6 · held out · no aspect differs · right answer another way · answer pass</title><text class="tx s" x="20" y="149">crmarenapro/6 · ho</text><rect class="cell blind" x="264" y="136" width="64" height="16"/><rect class="cell blind" x="336" y="136" width="64" height="16"/><rect class="cell blind" x="408" y="136" width="64" height="16"/><rect class="cell blind" x="480" y="136" width="64" height="16"/><rect class="cell blind" x="552" y="136" width="64" height="16"/><rect class="cell blind" x="624" y="136" width="64" height="16"/><rect class="cell na" x="696" y="136" width="64" height="16"/><text class="tx k" x="780" y="149">right answer another way · pass</text></g>
+      <g id="r-crm-8"><title>crmarenapro/8 · train · differs: keys, filter, rank · join differs · answer fail</title><text class="tx s" x="20" y="169">crmarenapro/8</text><rect class="cell same" x="264" y="156" width="64" height="16"/><rect class="cell diff" x="336" y="156" width="64" height="16"/><rect class="cell same" x="408" y="156" width="64" height="16"/><rect class="cell diff" x="480" y="156" width="64" height="16"/><rect class="cell same" x="552" y="156" width="64" height="16"/><rect class="cell diff" x="624" y="156" width="64" height="16"/><rect class="cell na" x="696" y="156" width="64" height="16"/><text class="tx k" x="780" y="169">join differs · fail</text></g>
+      <g id="r-crm-9"><title>crmarenapro/9 · train · differs: filter, metric, rank · filter differs · answer fail</title><text class="tx s" x="20" y="189">crmarenapro/9</text><rect class="cell same" x="264" y="176" width="64" height="16"/><rect class="cell same" x="336" y="176" width="64" height="16"/><rect class="cell same" x="408" y="176" width="64" height="16"/><rect class="cell diff" x="480" y="176" width="64" height="16"/><rect class="cell diff" x="552" y="176" width="64" height="16"/><rect class="cell diff" x="624" y="176" width="64" height="16"/><rect class="cell na" x="696" y="176" width="64" height="16"/><text class="tx k" x="780" y="189">filter differs · fail</text></g>
+      <g id="r-crm-12"><title>crmarenapro/12 · train · differs: rank · order / tie · answer fail</title><text class="tx s" x="20" y="209">crmarenapro/12</text><rect class="cell same" x="264" y="196" width="64" height="16"/><rect class="cell same" x="336" y="196" width="64" height="16"/><rect class="cell same" x="408" y="196" width="64" height="16"/><rect class="cell same" x="480" y="196" width="64" height="16"/><rect class="cell same" x="552" y="196" width="64" height="16"/><rect class="cell diff" x="624" y="196" width="64" height="16"/><rect class="cell na" x="696" y="196" width="64" height="16"/><text class="tx k" x="780" y="209">order / tie · fail</text></g>
+      <g id="r-deps-1"><title>deps_dev_v1/1 · held out · differs: keys, parse, filter, metric, rank · join differs · answer fail</title><text class="tx s" x="20" y="229">deps_dev_v1/1 · ho</text><rect class="cell same" x="264" y="216" width="64" height="16"/><rect class="cell diff" x="336" y="216" width="64" height="16"/><rect class="cell diff" x="408" y="216" width="64" height="16"/><rect class="cell diff" x="480" y="216" width="64" height="16"/><rect class="cell diff" x="552" y="216" width="64" height="16"/><rect class="cell diff" x="624" y="216" width="64" height="16"/><rect class="cell na" x="696" y="216" width="64" height="16"/><text class="tx k" x="780" y="229">join differs · fail</text></g>
+      <g id="r-deps-2"><title>deps_dev_v1/2 · train · no aspect differs · right answer another way · answer pass</title><text class="tx s" x="20" y="249">deps_dev_v1/2</text><rect class="cell blind" x="264" y="236" width="64" height="16"/><rect class="cell blind" x="336" y="236" width="64" height="16"/><rect class="cell blind" x="408" y="236" width="64" height="16"/><rect class="cell blind" x="480" y="236" width="64" height="16"/><rect class="cell blind" x="552" y="236" width="64" height="16"/><rect class="cell blind" x="624" y="236" width="64" height="16"/><rect class="cell na" x="696" y="236" width="64" height="16"/><text class="tx k" x="780" y="249">right answer another way · pass</text></g>
+      <g id="r-gh-1"><title>github_repos/1 · held out · differs: keys, parse, metric · join differs · answer fail</title><text class="tx s" x="20" y="269">github_repos/1 · ho</text><rect class="cell same" x="264" y="256" width="64" height="16"/><rect class="cell diff" x="336" y="256" width="64" height="16"/><rect class="cell diff" x="408" y="256" width="64" height="16"/><rect class="cell same" x="480" y="256" width="64" height="16"/><rect class="cell diff" x="552" y="256" width="64" height="16"/><rect class="cell same" x="624" y="256" width="64" height="16"/><rect class="cell na" x="696" y="256" width="64" height="16"/><text class="tx k" x="780" y="269">join differs · fail</text></g>
+      <g id="r-gh-4"><title>github_repos/4 · train · no aspect differs · right answer another way · answer pass</title><text class="tx s" x="20" y="289">github_repos/4</text><rect class="cell blind" x="264" y="276" width="64" height="16"/><rect class="cell blind" x="336" y="276" width="64" height="16"/><rect class="cell blind" x="408" y="276" width="64" height="16"/><rect class="cell blind" x="480" y="276" width="64" height="16"/><rect class="cell blind" x="552" y="276" width="64" height="16"/><rect class="cell blind" x="624" y="276" width="64" height="16"/><rect class="cell na" x="696" y="276" width="64" height="16"/><text class="tx k" x="780" y="289">right answer another way · pass</text></g>
+      <g id="r-gl-3"><title>googlelocal/3 · held out · differs: parse, filter, metric, rank · parse differs · answer fail</title><text class="tx s" x="20" y="309">googlelocal/3 · ho</text><rect class="cell same" x="264" y="296" width="64" height="16"/><rect class="cell same" x="336" y="296" width="64" height="16"/><rect class="cell diff" x="408" y="296" width="64" height="16"/><rect class="cell diff" x="480" y="296" width="64" height="16"/><rect class="cell diff" x="552" y="296" width="64" height="16"/><rect class="cell diff" x="624" y="296" width="64" height="16"/><rect class="cell na" x="696" y="296" width="64" height="16"/><text class="tx k" x="780" y="309">parse differs · fail</text></g>
+      <g id="r-mb-1"><title>music_brainz_20k/1 · train · differs: parse, filter · parse differs · answer fail</title><text class="tx s" x="20" y="329">music_brainz_20k/1</text><rect class="cell same" x="264" y="316" width="64" height="16"/><rect class="cell same" x="336" y="316" width="64" height="16"/><rect class="cell diff" x="408" y="316" width="64" height="16"/><rect class="cell diff" x="480" y="316" width="64" height="16"/><rect class="cell same" x="552" y="316" width="64" height="16"/><rect class="cell same" x="624" y="316" width="64" height="16"/><rect class="cell na" x="696" y="316" width="64" height="16"/><text class="tx k" x="780" y="329">parse differs · fail</text></g>
+      <g id="r-mb-2"><title>music_brainz_20k/2 · train · differs: keys, parse, rank · join differs · answer fail (regressed from solved)</title><text class="tx s" x="20" y="349">music_brainz_20k/2</text><rect class="cell same" x="264" y="336" width="64" height="16"/><rect class="cell diff" x="336" y="336" width="64" height="16"/><rect class="cell diff" x="408" y="336" width="64" height="16"/><rect class="cell same" x="480" y="336" width="64" height="16"/><rect class="cell same" x="552" y="336" width="64" height="16"/><rect class="cell diff" x="624" y="336" width="64" height="16"/><rect class="cell na" x="696" y="336" width="64" height="16"/><text class="tx k" x="780" y="349">join differs · fail · regressed</text></g>
+      <g id="r-mb-3"><title>music_brainz_20k/3 · held out · no aspect differs · right answer another way · answer pass</title><text class="tx s" x="20" y="369">music_brainz_20k/3 · ho</text><rect class="cell blind" x="264" y="356" width="64" height="16"/><rect class="cell blind" x="336" y="356" width="64" height="16"/><rect class="cell blind" x="408" y="356" width="64" height="16"/><rect class="cell blind" x="480" y="356" width="64" height="16"/><rect class="cell blind" x="552" y="356" width="64" height="16"/><rect class="cell blind" x="624" y="356" width="64" height="16"/><rect class="cell na" x="696" y="356" width="64" height="16"/><text class="tx k" x="780" y="369">right answer another way · pass</text></g>
+      <g id="r-pca-2"><title>pancancer_atlas/2 · held out · differs: keys, parse, filter, rank · join differs · answer fail (regressed)</title><text class="tx s" x="20" y="389">pancancer_atlas/2 · ho</text><rect class="cell same" x="264" y="376" width="64" height="16"/><rect class="cell diff" x="336" y="376" width="64" height="16"/><rect class="cell diff" x="408" y="376" width="64" height="16"/><rect class="cell diff" x="480" y="376" width="64" height="16"/><rect class="cell same" x="552" y="376" width="64" height="16"/><rect class="cell diff" x="624" y="376" width="64" height="16"/><rect class="cell na" x="696" y="376" width="64" height="16"/><text class="tx k" x="780" y="389">join differs · fail · regressed</text></g>
+      <g id="r-pca-3"><title>pancancer_atlas/3 · train · differs: keys, parse, filter · join differs · answer fail</title><text class="tx s" x="20" y="409">pancancer_atlas/3</text><rect class="cell same" x="264" y="396" width="64" height="16"/><rect class="cell diff" x="336" y="396" width="64" height="16"/><rect class="cell diff" x="408" y="396" width="64" height="16"/><rect class="cell diff" x="480" y="396" width="64" height="16"/><rect class="cell same" x="552" y="396" width="64" height="16"/><rect class="cell same" x="624" y="396" width="64" height="16"/><rect class="cell na" x="696" y="396" width="64" height="16"/><text class="tx k" x="780" y="409">join differs · fail</text></g>
+      <g id="r-pat-1"><title>patents/1 · held out · differs: every aspect · wrong tables · answer fail</title><text class="tx s" x="20" y="429">patents/1 · ho</text><rect class="cell diff" x="264" y="416" width="64" height="16"/><rect class="cell diff" x="336" y="416" width="64" height="16"/><rect class="cell diff" x="408" y="416" width="64" height="16"/><rect class="cell diff" x="480" y="416" width="64" height="16"/><rect class="cell diff" x="552" y="416" width="64" height="16"/><rect class="cell diff" x="624" y="416" width="64" height="16"/><rect class="cell na" x="696" y="416" width="64" height="16"/><text class="tx k" x="780" y="429">wrong tables · fail</text></g>
+      <g id="r-pat-2"><title>patents/2 · train · differs: keys, parse, filter, rank · join differs · answer fail</title><text class="tx s" x="20" y="449">patents/2</text><rect class="cell same" x="264" y="436" width="64" height="16"/><rect class="cell diff" x="336" y="436" width="64" height="16"/><rect class="cell diff" x="408" y="436" width="64" height="16"/><rect class="cell diff" x="480" y="436" width="64" height="16"/><rect class="cell same" x="552" y="436" width="64" height="16"/><rect class="cell diff" x="624" y="436" width="64" height="16"/><rect class="cell na" x="696" y="436" width="64" height="16"/><text class="tx k" x="780" y="449">join differs · fail</text></g>
+      <g id="r-pat-3"><title>patents/3 · train · no aspect differs · right answer another way · answer pass</title><text class="tx s" x="20" y="469">patents/3</text><rect class="cell blind" x="264" y="456" width="64" height="16"/><rect class="cell blind" x="336" y="456" width="64" height="16"/><rect class="cell blind" x="408" y="456" width="64" height="16"/><rect class="cell blind" x="480" y="456" width="64" height="16"/><rect class="cell blind" x="552" y="456" width="64" height="16"/><rect class="cell blind" x="624" y="456" width="64" height="16"/><rect class="cell na" x="696" y="456" width="64" height="16"/><text class="tx k" x="780" y="469">right answer another way · pass</text></g>
+      <g id="r-si-3"><title>stockindex/3 · train · no aspect differs · right answer another way · answer pass</title><text class="tx s" x="20" y="489">stockindex/3</text><rect class="cell blind" x="264" y="476" width="64" height="16"/><rect class="cell blind" x="336" y="476" width="64" height="16"/><rect class="cell blind" x="408" y="476" width="64" height="16"/><rect class="cell blind" x="480" y="476" width="64" height="16"/><rect class="cell blind" x="552" y="476" width="64" height="16"/><rect class="cell blind" x="624" y="476" width="64" height="16"/><rect class="cell na" x="696" y="476" width="64" height="16"/><text class="tx k" x="780" y="489">right answer another way · pass</text></g>
+      <g id="r-sm-2"><title>stockmarket/2 · train · differs: every aspect · wrong tables · answer fail</title><text class="tx s" x="20" y="509">stockmarket/2</text><rect class="cell diff" x="264" y="496" width="64" height="16"/><rect class="cell diff" x="336" y="496" width="64" height="16"/><rect class="cell diff" x="408" y="496" width="64" height="16"/><rect class="cell diff" x="480" y="496" width="64" height="16"/><rect class="cell diff" x="552" y="496" width="64" height="16"/><rect class="cell diff" x="624" y="496" width="64" height="16"/><rect class="cell na" x="696" y="496" width="64" height="16"/><text class="tx k" x="780" y="509">wrong tables · fail</text></g>
+      <g id="r-sm-3"><title>stockmarket/3 · train · differs: sources, keys, parse, filter, rank · wrong tables · answer fail</title><text class="tx s" x="20" y="529">stockmarket/3</text><rect class="cell diff" x="264" y="516" width="64" height="16"/><rect class="cell diff" x="336" y="516" width="64" height="16"/><rect class="cell diff" x="408" y="516" width="64" height="16"/><rect class="cell diff" x="480" y="516" width="64" height="16"/><rect class="cell same" x="552" y="516" width="64" height="16"/><rect class="cell diff" x="624" y="516" width="64" height="16"/><rect class="cell na" x="696" y="516" width="64" height="16"/><text class="tx k" x="780" y="529">wrong tables · fail</text></g>
+      <g id="r-sm-4"><title>stockmarket/4 · held out · no aspect differs · right answer another way · answer pass (the company-name extraction differs)</title><text class="tx s" x="20" y="549">stockmarket/4 · ho</text><rect class="cell blind" x="264" y="536" width="64" height="16"/><rect class="cell blind" x="336" y="536" width="64" height="16"/><rect class="cell blind" x="408" y="536" width="64" height="16"/><rect class="cell blind" x="480" y="536" width="64" height="16"/><rect class="cell blind" x="552" y="536" width="64" height="16"/><rect class="cell blind" x="624" y="536" width="64" height="16"/><rect class="cell na" x="696" y="536" width="64" height="16"/><text class="tx k" x="780" y="549">right answer another way · pass</text></g>
+      <g id="r-sm-5"><title>stockmarket/5 · held out · no aspect differs · right answer another way · answer pass</title><text class="tx s" x="20" y="569">stockmarket/5 · ho</text><rect class="cell blind" x="264" y="556" width="64" height="16"/><rect class="cell blind" x="336" y="556" width="64" height="16"/><rect class="cell blind" x="408" y="556" width="64" height="16"/><rect class="cell blind" x="480" y="556" width="64" height="16"/><rect class="cell blind" x="552" y="556" width="64" height="16"/><rect class="cell blind" x="624" y="556" width="64" height="16"/><rect class="cell na" x="696" y="556" width="64" height="16"/><text class="tx k" x="780" y="569">right answer another way · pass</text></g>
+      <g id="r-yelp-2"><title>yelp/2 · train · differs: keys, parse, filter, rank · join differs · answer fail</title><text class="tx s" x="20" y="589">yelp/2</text><rect class="cell same" x="264" y="576" width="64" height="16"/><rect class="cell diff" x="336" y="576" width="64" height="16"/><rect class="cell diff" x="408" y="576" width="64" height="16"/><rect class="cell diff" x="480" y="576" width="64" height="16"/><rect class="cell same" x="552" y="576" width="64" height="16"/><rect class="cell diff" x="624" y="576" width="64" height="16"/><rect class="cell na" x="696" y="576" width="64" height="16"/><text class="tx k" x="780" y="589">join differs · fail</text></g>
+      <g id="r-yelp-4"><title>yelp/4 · held out · differs: keys, parse, filter · join differs · answer fail — the keys differ only by a CTE alias; the parse is the real break</title><text class="tx s" x="20" y="609">yelp/4 · ho</text><rect class="cell same" x="264" y="596" width="64" height="16"/><rect class="cell diff" x="336" y="596" width="64" height="16"/><rect class="cell diff" x="408" y="596" width="64" height="16"/><rect class="cell diff" x="480" y="596" width="64" height="16"/><rect class="cell same" x="552" y="596" width="64" height="16"/><rect class="cell same" x="624" y="596" width="64" height="16"/><rect class="cell na" x="696" y="596" width="64" height="16"/><text class="tx k" x="780" y="609">join differs · fail · see below</text></g>
+      <g id="r-yelp-6"><title>yelp/6 · train · no aspect differs · right answer another way · answer pass</title><text class="tx s" x="20" y="629">yelp/6</text><rect class="cell blind" x="264" y="616" width="64" height="16"/><rect class="cell blind" x="336" y="616" width="64" height="16"/><rect class="cell blind" x="408" y="616" width="64" height="16"/><rect class="cell blind" x="480" y="616" width="64" height="16"/><rect class="cell blind" x="552" y="616" width="64" height="16"/><rect class="cell blind" x="624" y="616" width="64" height="16"/><rect class="cell na" x="696" y="616" width="64" height="16"/><text class="tx k" x="780" y="629">right answer another way · pass</text></g>
+      <g id="r-yelp-7"><title>yelp/7 · held out · differs: keys, parse, filter, rank · join differs · answer fail</title><text class="tx s" x="20" y="649">yelp/7 · ho</text><rect class="cell same" x="264" y="636" width="64" height="16"/><rect class="cell diff" x="336" y="636" width="64" height="16"/><rect class="cell diff" x="408" y="636" width="64" height="16"/><rect class="cell diff" x="480" y="636" width="64" height="16"/><rect class="cell same" x="552" y="636" width="64" height="16"/><rect class="cell diff" x="624" y="636" width="64" height="16"/><rect class="cell na" x="696" y="636" width="64" height="16"/><text class="tx k" x="780" y="649">join differs · fail</text></g>
+      <g id="f2-totals"><line class="ax" x1="264" x2="760" y1="662" y2="662"/><text class="tx k strong" x="296" y="680" text-anchor="middle">4</text><text class="tx k strong" x="368" y="680" text-anchor="middle">14</text><text class="tx k strong" x="440" y="680" text-anchor="middle">14</text><text class="tx k strong" x="512" y="680" text-anchor="middle">15</text><text class="tx k strong" x="584" y="680" text-anchor="middle">7</text><text class="tx k strong" x="656" y="680" text-anchor="middle">14</text><text class="tx k strong" x="728" y="680" text-anchor="middle">—</text><text class="tx s" x="20" y="680">differs, of 31</text></g>
+    </svg>
+    <figcaption>
+      <span class="lg"><i class="sw diff"></i>sqlglot sees a difference</span><span class="lg"><i class="sw same"></i>sees none</span><span class="lg"><i class="sw blind"></i>sees none anywhere, yet the result differs (12 rows)</span><span class="lg"><i class="sw na"></i>not measured</span><span class="lg"><code>ho</code> held out</span><br>
+      <b>The diagnosis is blind on 12 of 31 and vague on the other 18</b>: where nothing differs the statements are alike in shape but return different rows (an extraction regex, an output column); where something differs it is usually three to six things at once, because a CTE alias makes a join "differ". The <code>shape</code> column (which columns come out, one row or many, the mode) is not measured at all. Source: <code>runs/20260924T053026Z_v2_sql_all_haiku_hints/scorecard.json</code>, field <code>structure</code>, aspects mapped tables → sources, joins → keys, patterns → parse, filters → filter, aggregates + grouped → metric, order + limit → rank.
+    </figcaption>
+  </figure>
+
+  <div class="hd" style="margin-top:var(--s6)">
+    <h3>Three held-out failures read by hand, component by component: the break is never where the category says</h3>
+    <p class="small">Written from the two statements in the explorer (the agent's on the trial page, the golden's in the Golden tab). This is the shape of what the round-2 <b>ledger</b> produces for every question: the golden's approach and the agent's, in words, per component, and the first one that differs.</p>
+  </div>
+  <div class="grid g3">
+    <div class="panel card">
+      <p class="label">yelp/4 · held out · category today: join differs</p>
+      <h3>The category with the most credit-card businesses, and its average rating</h3>
+      <ul class="tight">
+        <li><b>sources</b> · same: <code>yelp_business</code>, <code>yelp_review</code>.</li>
+        <li><b>keys</b> · same in effect: both strip <code>businessid_</code> / <code>businessref_</code> and match the number. sqlglot says "differs" because the agent named its column <code>numeric_id</code>.</li>
+        <li><b>parse</b> · <span class="v-warn">breaks here</span>: the golden cuts the description after the state code, splits on commas and keeps every Title-Case run; the agent anchors four regexes on the verbs <i>in / including / for / of</i>, then drops segments containing words like <i>offering</i>, <i>services</i>.</li>
+        <li><b>filter</b> · same: <code>BusinessAcceptsCreditCards = 'True'</code>.</li>
+        <li><b>rank</b> · same: most businesses per category.</li>
+      </ul>
+    </div>
+    <div class="panel card">
+      <p class="label">deps_dev_v1/1 · held out · category today: join differs</p>
+      <h3>Top-5 NPM packages by GitHub stars, latest release only, with versions</h3>
+      <ul class="tight">
+        <li><b>keys</b> · differs: the golden joins on the project name; the agent extracts a slug from <code>Project_Information</code> and lower-cases both sides, then also filters <code>ProjectType = 'GITHUB'</code>.</li>
+        <li><b>parse</b> · <span class="v-warn">breaks here</span>: the golden reads three star phrasings (<i>N stars</i>, <i>starred by N</i>, <i>stars count of N</i>); the agent reads one and defaults the rest to 0.</li>
+        <li><b>metric</b> · differs: the golden groups per package and takes the max; the agent takes one row per package by newest publish date.</li>
+        <li><b>rank</b> · differs: the golden breaks the tie at 5th (95 packages share 57,779 stars) by name; the agent has no tie-break.</li>
+      </ul>
+    </div>
+    <div class="panel card">
+      <p class="label">patents/1 · held out · category today: wrong tables</p>
+      <h3>Level-5 CPC groups whose filings EMA peaks in 2022</h3>
+      <ul class="tight">
+        <li><b>sources</b> · <span class="v-warn">breaks here</span>: the golden joins <code>patents_cpc_definition</code> at <code>level = 5</code> so only real subclasses count; the agent takes the 4-character prefix of every code and never opens the definition table.</li>
+        <li><b>parse</b> · same idea: the 4-digit year out of <code>filing_date</code>, <code>'None Date'</code> skipped; primary codes only.</li>
+        <li><b>metric</b> · differs: the golden counts patents per group and year (a code listed twice counts once); the agent counts <i>distinct codes</i> per group and year, a different measure.</li>
+        <li><b>shape</b> · the agent returns 60 rows; the golden 72.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid g2" style="margin-top:var(--s5)">
+    <div class="panel">
+      <p class="label">what round 1's optimiser saw and did · agents/v2_sql/optimise.json · runs/…v1_sql…/optimise/v2_sql/*.json</p>
+      <ul class="qa">
+        <li><b>Per dataset only.</b> 10 sessions, each with that dataset's 1–5 failed train questions (21 in all), the agent's SQL beside the golden, the result diff and the sqlglot line. A lesson that recurs across datasets (yelp's, bookreview's and crmarenapro's keys all need a prefix stripped) is seen three times by three sessions that cannot talk.</li>
+        <li><b>Facts, not method.</b> Every accepted note is a data fact (a join key's shape, a template, a date format). Useful, and it is what a per-dataset briefing invites. None says <i>how to get from a question to a plan</i>.</li>
+        <li><b>The cross-dataset pass is thin.</b> One session, at most 6 turns, no <code>query_db</code>, reads the ten notes and a category tally, never a question. It moved three lines into <code>system.md</code> (keys, mixed date formats, "with" attributes). That pass is the only place generalisation happens today.</li>
+        <li><b>Barely checked against the data.</b> yelp's session made 2 <code>query_db</code> calls in 6 turns; its briefing was 15 KB of failures.</li>
+        <li><b>The cap did the refusing.</b> All 26 refusals cite the 1,500-character limit; 11 also a leak. Every session still landed notes, at 1,284–1,500 characters, so the limit shaped the notes more than the guard did.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <p class="label">what to keep</p>
+      <ul class="qa">
+        <li><b>The guard, unchanged.</b> No run of 8 question words, no gold value written literally, no run of 6 golden SQL tokens; a second leak refusal drops the write. It caught 11 leaks in round 1 and let 10 clean notes through. Round 2 widens what the optimiser reads, so the guard matters more, not less.</li>
+        <li><b>The train / held-out split</b> (33 / 16, seed 20260924). Kept as is, so rounds stay comparable; held-out SQL is the number a round is judged on.</li>
+        <li><b>The golden as the reference.</b> It carries every component; the ledger reads it into words, and the words go to the optimiser. The golden's SQL itself still never reaches a trial.</li>
+        <li><b>Dataset notes.</b> They earned their place (github_repos 1 → 3 of 4, crmarenapro 6 → 7 of 13). Round 2 keeps them and adds the method above them.</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<!-- ================================================= ROUND 2 -->
+<section class="blk" id="round2">
+  <div class="hd">
+    <p class="label">03 · round 2 · the method</p>
+    <h2>03 · Round 2 — a ledger says where each statement broke, and the optimiser writes an SQL playbook across datasets</h2>
+    <p class="small">Three changes to the loop, in the order they run. A <b>reader</b> turns every golden and every submitted statement into seven lines of words (the ledger), so the diagnosis is "the parse broke: the golden reads three phrasings, the agent one" instead of "join differs". The optimiser gets <b>component sessions</b> that read every failed training question where that component broke, across all datasets, and write one section of a playbook in <code>system.md</code>: how to discern what the question needs at that step and how to write it in Postgres. The generator is told to <b>plan before it queries</b>, in the same seven lines, and the plan is recorded so a later diagnosis can tell "misread the question" from "mis-wrote the SQL".</p>
+  </div>
+
+  <figure class="fig" style="margin-top:0">
+    <p class="fig-title">Fig 3 · the round-2 loop: what is new is outlined in accent; dashed nodes are the parts a trial never sees</p>
+    <svg class="dia" viewBox="0 0 1160 470" role="img" aria-label="The round-2 optimisation loop: source run, ledger by a reader, component sessions and dataset sessions under the guard, the new version with a playbook and notes, the outcome run and promotion; the golden SQL and gold answers feed only the ledger and the optimiser"><title>The round-2 loop</title>
+      <defs><marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" style="fill:var(--ink-2)"/></marker></defs>
+      <text class="cap" x="20" y="22">1 · the run</text><text class="cap" x="300" y="22">2 · diagnose</text><text class="cap" x="580" y="22">3 · optimise</text><text class="cap" x="900" y="22">4 · the new version</text>
+      <g id="l-run"><title>the source run · 54 trials of the current champion · answers, statements, modes</title><rect class="nd" x="20" y="40" width="220" height="70" rx="6"/><text class="tx" x="130" y="66" text-anchor="middle">source run · 54 trials</text><text class="tx s" x="130" y="86" text-anchor="middle">agent SQL · result · mode · answer</text></g>
+      <g id="l-gold"><title>goldens · 49 statements and the gold answers · in the explorer, never in a prompt</title><rect class="nd gold" x="20" y="150" width="220" height="70" rx="6"/><text class="tx" x="130" y="176" text-anchor="middle">goldens · 49 statements</text><text class="tx s" x="130" y="196" text-anchor="middle">+ gold answers · never in a prompt</text></g>
+      <g id="l-e1"><path class="ed" d="M240,75 L298,75"/></g>
+      <g id="l-e2"><path class="ed" d="M240,185 C270,185 270,110 298,110"/></g>
+      <g id="l-ledger"><title>the ledger · a reader (Sonnet 5) writes seven lines per statement: sources, keys, parse, filter, metric, rank, shape · golden vs agent, first break named</title><rect class="nd hi" x="300" y="40" width="220" height="100" rx="6"/><text class="tx" x="410" y="66" text-anchor="middle">ledger · the reader</text><text class="tx s" x="410" y="86" text-anchor="middle">7 lines per statement, in words</text><text class="tx s" x="410" y="104" text-anchor="middle">golden vs agent · first break</text><text class="tx s" x="410" y="124" text-anchor="middle">new · dab diagnose</text></g>
+      <g id="l-card"><title>scorecard · answer, SQL, decision per question · category = the first broken component</title><rect class="nd" x="300" y="160" width="220" height="60" rx="6"/><text class="tx" x="410" y="185" text-anchor="middle">scorecard.json</text><text class="tx s" x="410" y="205" text-anchor="middle">answer · SQL · decision · where it broke</text></g>
+      <g id="l-e3"><path class="ed" d="M410,140 L410,158"/></g>
+      <g id="l-split"><title>the split · 33 train questions may be read; 16 held out are never shown; 5 without a golden stay outside</title><rect class="nd in" x="300" y="240" width="220" height="60" rx="6"/><text class="tx" x="410" y="265" text-anchor="middle">split · 33 train / 16 held out</text><text class="tx s" x="410" y="285" text-anchor="middle">only failed train questions go on</text></g>
+      <g id="l-e4"><path class="ed" d="M410,220 L410,238"/></g>
+      <g id="l-e5"><path class="ed" d="M520,270 L578,270"/></g>
+      <g id="l-comp"><title>component sessions · one per component with failures, across datasets · reads the ledger lines and both statements · writes one playbook section</title><rect class="nd hi" x="580" y="40" width="290" height="100" rx="6"/><text class="tx" x="725" y="66" text-anchor="middle">component sessions · ≤ 7</text><text class="tx s" x="725" y="86" text-anchor="middle">every failed train question where</text><text class="tx s" x="725" y="104" text-anchor="middle">that component broke, all datasets</text><text class="tx s" x="725" y="124" text-anchor="middle">new · writes a playbook section</text></g>
+      <g id="l-ds"><title>dataset sessions · one per dataset with failures, as in round 1 · writes the dataset notes</title><rect class="nd" x="580" y="160" width="290" height="60" rx="6"/><text class="tx" x="725" y="185" text-anchor="middle">dataset sessions · as round 1</text><text class="tx s" x="725" y="205" text-anchor="middle">data facts · notes ≤ 2,000 chars</text></g>
+      <g id="l-guard"><title>the guard · unchanged rules: no run of 8 question words, no gold value, no run of 6 golden SQL tokens, a length cap; second leak refusal drops the write</title><rect class="nd gold" x="580" y="240" width="290" height="60" rx="6"/><text class="tx" x="725" y="265" text-anchor="middle">guard · eval/guards.py · unchanged</text><text class="tx s" x="725" y="285" text-anchor="middle">refuse · resend once · drop on a 2nd leak</text></g>
+      <g id="l-e6"><path class="ed" d="M520,270 C550,270 550,90 578,90"/></g>
+      <g id="l-e7"><path class="ed" d="M520,270 C550,270 550,190 578,190"/></g>
+      <g id="l-e8"><path class="ed dash" d="M725,140 L725,158"/><path class="ed dash" d="M725,220 L725,238"/></g>
+      <g id="l-ver"><title>the new version · agents/v3_sql · system.md with the playbook + datasets/*.md · agent.yaml unchanged (haiku, medium)</title><rect class="nd hi" x="900" y="40" width="240" height="100" rx="6"/><text class="tx" x="1020" y="66" text-anchor="middle">v3_sql · the proposal</text><text class="tx s" x="1020" y="86" text-anchor="middle">system.md: how-to + playbook</text><text class="tx s" x="1020" y="104" text-anchor="middle">datasets/&lt;ds&gt;.md: facts</text><text class="tx s" x="1020" y="124" text-anchor="middle">plan-first submit_answer</text></g>
+      <g id="l-e9"><path class="ed" d="M870,270 C885,270 885,90 898,90"/></g>
+      <g id="l-out"><title>outcome run · 54 × 1 of v3_sql · scored on the answer, the SQL and the decision · the next round's source</title><rect class="nd" x="900" y="160" width="240" height="60" rx="6"/><text class="tx" x="1020" y="185" text-anchor="middle">outcome run · 54 × 1</text><text class="tx s" x="1020" y="205" text-anchor="middle">SQL of 49 · answers of 54 · held out</text></g>
+      <g id="l-e10"><path class="ed" d="M1020,140 L1020,158"/></g>
+      <g id="l-promote"><title>dab promote · the rule decides the champion; the MLflow prompt gets the champion alias</title><rect class="nd" x="900" y="240" width="240" height="60" rx="6"/><text class="tx" x="1020" y="265" text-anchor="middle">dab promote</text><text class="tx s" x="1020" y="285" text-anchor="middle">rule D36 · alias champion</text></g>
+      <g id="l-e11"><path class="ed" d="M1020,220 L1020,238"/></g>
+      <g id="l-loop"><path class="ed dash" d="M1020,300 L1020,360 L130,360 L130,112"/><text class="tx k" x="575" y="352" text-anchor="middle">the outcome run is the next round's source run · then v4_sql = v3_sql with model: sonnet</text></g>
+      <g id="l-legend"><text class="tx s" x="20" y="410">Accent outline: new in round 2. Amber: reads the goldens; its output is words and verdicts, stored beside the run. Dashed edges: every write passes the guard.</text><text class="tx s" x="20" y="430">The dataset sessions keep round 1's briefing, led by the ledger's lines instead of the sqlglot sets. Source: agent/optimise.py, eval/guards.py, eval/scorecard.py (today); eval/ledger.py (new).</text></g>
+    </svg>
+    <figcaption><b>Nothing a trial sees changes except the prompt files</b>: the ledger and the sessions run after a run, read the goldens, and write text that passes the same guard. The reader is a new caller of a model; CLAUDE.md's "four things call a model" becomes five (decision D33).</figcaption>
+  </figure>
+
+  <div class="hd" style="margin-top:var(--s6)">
+    <h3>The seven components: what the question asks, what the statement carries, and where round-1's failures sit</h3>
+    <p class="small">The same seven names are used everywhere: the ledger's lines, the playbook's sections, the generator's plan, the tab's matrix. They are in the order a statement is built, so "the first component that differs" is a well-defined place.</p>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th>Component</th><th>The question asks</th><th>The statement carries</th><th>Failed this way in v2_sql (of 31 SQL fails; sqlglot's count)</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">sources</td><td>which things it names, and where each lives</td><td>the tables, and the text or JSON field inside them (a category inside a description; a JSON array of codes)</td><td class="num">4 · patents/1, stockmarket/2, /3, crmarenapro/3</td></tr>
+      <tr><td class="sub">keys</td><td>how those things relate</td><td>the join keys, and what each side needs first: a prefix stripped, a number extracted, a case folded, a name matched exactly</td><td class="num">14</td></tr>
+      <tr><td class="sub">parse</td><td>which values are inside free text</td><td>the templates a field is written in, the regex or <code>jsonb</code> path that reads every template, the date formats in one column</td><td class="num">14</td></tr>
+      <tr><td class="sub">filter</td><td>which rows count</td><td>every condition read literally ("more than" is strict), the date window, exclusions, a state code with a word boundary</td><td class="num">15</td></tr>
+      <tr><td class="sub">metric</td><td>what is measured</td><td>the aggregate at its grain (pooled reviews, not a mean of means; a patent once per group), derived formulas (EMA, ratios, day counts)</td><td class="num">7</td></tr>
+      <tr><td class="sub">rank</td><td>which come first, and how many</td><td>the order, the tie-break, the limit; "earliest on ties"</td><td class="num">14</td></tr>
+      <tr><td class="sub">shape</td><td>what to return, and how</td><td>the columns the question names and only those, one row or a list, rounding, and the mode: <code>pass_through</code> or <code>derived</code></td><td class="num">not measured today · the 12 "right answer another way" rows live here</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="grid g2" style="margin-top:var(--s5)">
+    <div class="panel">
+      <p class="label">the ledger · eval/ledger.py · new · runs in dab diagnose</p>
+      <ul class="qa">
+        <li><b>One reader call per statement.</b> Input: the question, the statement, the tables it names. Output: seven lines of at most 30 words, technique only, no values. Sonnet 5 at medium; about 49 golden lines (cached by golden id in <code>dataagentbench_meta.golden_ledger</code>) plus 49 agent lines per run (in <code>scorecard.json</code>).</li>
+        <li><b>One comparison call per question</b>: golden lines beside agent lines, a verdict per component (<i>same · differs · absent</i>) and the first that differs. The category becomes that component; sqlglot's sets stay as the mechanical cross-check under it.</li>
+        <li><b>Never in a prompt.</b> The ledger lives beside the run and the golden; the guard is not needed on it, only on what the optimiser writes from it.</li>
+        <li><b>Cost</b>: about 100 short calls, roughly $1 per <code>dab diagnose --refresh</code>; the golden half is paid once.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <p class="label">the generator · plan first · agents/v3_sql/system.md + agent/tools.py</p>
+      <ul class="qa">
+        <li><b>"How to work" gains one step</b>: before the first query, write the plan as the seven lines; then build the CTEs in that order; then submit.</li>
+        <li><b><code>submit_answer</code> gains <code>plan</code></b> (the seven lines, required). It is recorded on the trace and shown on the trial page beside the golden's ledger, so the round can see whether the agent misread the question or mis-wrote the statement.</li>
+        <li><b>The playbook is the method part of <code>system.md</code></b>: a fixed skeleton of seven headed sections that the component sessions fill; the "How to work" list above it stays.</li>
+        <li><b>Budget</b>: <code>system.md</code> grows from 2.7 KB to about 5 KB; the cap moves from 3,000 to 5,000 characters. Dataset notes' cap 1,500 → 2,000, since the cap, not the guard, did the refusing.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="two" style="margin-top:var(--s4)">
+    <div class="code band">
+      <p class="label">agents/v3_sql/system.md · the playbook skeleton the component sessions fill (each section ≤ 600 chars)</p>
+<pre>## From the question to the statement
+Write the plan first, one line per step, then build the CTEs in this order.
+
+### 1 · sources — what the question names and where each thing lives
+(the section the `sources` session writes)
+### 2 · keys — how the rows match, and what each side needs first
+### 3 · parse — what must be read out of text or JSON, and every template it comes in
+### 4 · filter — every condition, read literally, with its window
+### 5 · metric — what is measured, at what grain, by what formula
+### 6 · rank — the order, the tie-break, the limit
+### 7 · shape — the columns the question names, one row or many, the mode</pre>
+    </div>
+    <div class="code">
+      <p class="label">agents/optimiser/component.md · the new session prompt, in short</p>
+<pre>You maintain one section of the SQL playbook an SQL-answering agent reads: the "&lt;component&gt;" step of going from a question to a statement.
+
+You see every failed training question, across datasets, where this component is the first to differ from the reference: the question, the ledger's two lines for this component (reference vs agent, in words), both statements, the result diff.
+
+Write the section as general instructions: how to discern what the question needs at this step, and how to write it in Postgres. Never a dataset fact (those belong in dataset notes), never a question, a value, or copied reference SQL. Check a claim with query_db before you make it. At most 600 characters.
+
+Call write_section(text, rationale) once; a refusal names what to fix; a second leak refusal drops the section.</pre>
+    </div>
+  </div>
+
+  <div class="hd" style="margin-top:var(--s6)">
+    <h3>D32 · at what level the optimiser reads and writes</h3>
+    <p class="small">The user's question: per dataset, or "see all the failed questions and generalise". The evidence (Fig 1, Fig 2) says both are needed, in different files.</p>
+  </div>
+  <div class="grid g3">
+    <div class="panel card dim">
+      <p class="label">A · per dataset only (round 1)</p>
+      <h3>10 sessions, dataset notes, a thin system pass</h3>
+      <p>Keeps the code as is; the briefing is led by the ledger instead of sqlglot. Expect more of round 1: facts that fix what was read. <b>Cost</b> ≈ $1.3. <b>Risk</b>: held-out SQL stays near 2 of 16, because nothing teaches the method.</p>
+    </div>
+    <div class="panel card pro">
+      <p class="label">B · components across datasets + datasets <span class="rec">recommended</span></p>
+      <h3>≤ 7 component sessions write the playbook; dataset sessions write facts</h3>
+      <p>Each component session reads every failed train question where that component broke, from every dataset, so a lesson seen three times is written once, as method. Dataset facts stay where they are useful. <b>Cost</b> ≈ $3 (component briefings are larger, 30–60 KB). <b>Risk</b>: a playbook section that is too general to change behaviour; measured on held-out SQL.</p>
+    </div>
+    <div class="panel card dim">
+      <p class="label">C · one session over every failure, system.md only</p>
+      <h3>Maximum generalisation, no dataset notes</h3>
+      <p>One Sonnet session reads all 21+ failures and rewrites <code>system.md</code>. Simplest, but it drops the facts that lifted github_repos 1 → 3 and crmarenapro 6 → 7, and one session with 100 KB of failures checks little against the data. <b>Cost</b> ≈ $0.8.</p>
+    </div>
+  </div>
+
+  <div class="tw" style="margin-top:var(--s5)"><table>
+    <caption>What round 2 costs, and what it is compared with (estimates from round 1's records; the Sonnet 5 price is assumed to be Sonnet 4.5's, 3 × Haiku 4.5's per token)</caption>
+    <thead><tr><th>Step</th><th>Model · calls</th><th class="num">Cost</th><th>Measured against</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">dab diagnose --refresh (ledger)</td><td>Sonnet 5 · ≈ 100 short calls</td><td class="num">≈ $1</td><td>the 31 SQL failures of v2_sql get a component each; 12 blind rows become readable</td></tr>
+      <tr><td class="sub">dab optimise → v3_sql</td><td>Sonnet 5 · ≤ 7 component + ≤ 10 dataset sessions + assembly</td><td class="num">≈ $3</td><td>round 1: $1.24 for 10 sessions + 1 pass</td></tr>
+      <tr><td class="sub">dab eval v3_sql, 54 × 1 (Haiku)</td><td>Haiku 4.5 · 54 trials</td><td class="num">≈ $4.5</td><td>v2_sql: 30/54 answers, 18/49 SQL, held-out SQL 2/16 ($4.51)</td></tr>
+      <tr><td class="sub">dab eval v4_sql, 54 × 1 (Sonnet)</td><td>Sonnet 5 · 54 trials</td><td class="num">≈ $14 (estimate)</td><td>v3_sql on the same prompt: the model's lift alone</td></tr>
+      <tr class="pro"><td class="sub">total</td><td>two subscription windows at most: Haiku steps ≈ $9 of a $42 window, the Sonnet run ≈ 13% of a $108 window</td><td class="num">≈ $23</td><td>McNemar on the 54 paired answers and the 49 paired SQL verdicts, as for v2_sql (p = 0.18 against v1_sql)</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ================================================= SONNET -->
+<section class="band-sec" id="sonnet"><div class="wrap">
+  <div class="hd">
+    <p class="label">04 · the model switch</p>
+    <h2>04 · Sonnet — after the round, on the same prompt, so the model's lift is one number and not a guess</h2>
+    <p class="small">If the model changes in the same step as the prompt, neither lift can be told from the other. So: <code>v3_sql</code> is round 2 on Haiku (prompt lift, v2 → v3), and <code>v4_sql</code> is <code>v3_sql</code>'s files with one line changed in <code>agent.yaml</code>, <code>model: sonnet</code> at <code>effort: medium</code> (model lift, v3 → v4). The fingerprint covers <code>agent.yaml</code>, so v4 is its own version with its own MLflow prompt; the lineage marks it "hand-built, measured against v3_sql", as v1_sql was against v0.</p>
+  </div>
+  <div class="grid g3">
+    <div class="panel card">
+      <p class="label">agents/v4_sql/agent.yaml · the only change</p>
+<pre class="sql"># v4_sql: v3_sql's prompt on Sonnet 5 (plan s08, D35)
+model: <span class="st">sonnet</span>      # was haiku
+effort: <span class="st">medium</span>     # unchanged
+max_turns: <span class="nu">30</span>
+timeout_s: <span class="nu">900</span>
+hints: true
+pack: false
+tools: [query_db, describe_table, submit_answer]
+measured_against: v3_sql</pre>
+      <p><code>agent/llm.py</code> already maps <code>sonnet</code> → <code>claude-sonnet-5</code>; nothing else is named. The playground and the Agent tab show the model from the file.</p>
+    </div>
+    <div class="panel card">
+      <p class="label">what to expect, and what would be a surprise</p>
+      <ul class="tight">
+        <li><b>Turns and cost.</b> Haiku's v2 trials cost $4.51 for 54; Sonnet at 3 × the token price and likely fewer turns lands around $12–16. One run fits a window (Sonnet divisor ≈ $108 from the window measurements).</li>
+        <li><b>The notes may be redundant for Sonnet.</b> A stronger model reads templates itself. If v4's held-out SQL rises but train SQL does not, the notes are carrying Haiku, not the method.</li>
+        <li><b>A surprise</b>: v4 below v3 on SQL. That would mean the prompt is tuned to Haiku's habits (step 4's key-normalisation rule, say) and a Sonnet-specific round is due (D35 C, later).</li>
+        <li><b>Never v0 again</b>; v0 stays the 27/54 baseline on the chart.</li>
+      </ul>
+    </div>
+    <div class="panel card">
+      <p class="label">how the two lifts are read</p>
+      <ul class="tight">
+        <li><b>Prompt lift</b> = v3_sql − v2_sql, both Haiku: SQL of 49 first (held-out of 16 beside it), answers of 54 second.</li>
+        <li><b>Model lift</b> = v4_sql − v3_sql, same prompt.</li>
+        <li><b>Champion</b> by D36 among v2, v3, v4; v0 and v1 stay candidates by the rule but cannot win on SQL (v0 has none, v1 has 13).</li>
+        <li><b>The Runs tab's champion chart</b> gets both points in order; the Optimise tab's rounds chart (Fig 5) shows v4 as a model switch, not a round.</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<!-- ================================================= THE TAB -->
+<section class="blk" id="tab">
+  <div class="hd">
+    <p class="label">05 · the Optimise tab · review and redesign</p>
+    <h2>05 · The tab — a reader should see how the loop works and where the SQL broke, before any table</h2>
+    <p class="small">The current tab (screenshots in <code>/private/tmp/…/scratchpad/shots/cur_*.png</code>, taken 2026-09-25 at 1280 px) is correct and complete, and it is tables about answers. The lead paragraph explains the loop in prose; the round's three steps are three tables; the proposal's rationale column wraps to thirty lines and the notes themselves sit in a disclosure; SQL appears once, in a step's subtitle; the outcome grid is keyed on the answer. Six things a reader asks, and what the page does with each:</p>
+  </div>
+  <div class="tw" style="margin-top:0"><table>
+    <thead><tr><th>The reader asks</th><th>Today (Optimise.tsx)</th><th>The redesign</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">How does a round work?</td><td>a 60-word lead paragraph; the lineage figure shows versions, not the loop</td><td><b>Fig 4</b>, the loop as a clickable figure at the top of the tab: seven stages, the round's real numbers on every edge, a panel under the stage you click, a step-through control</td></tr>
+      <tr><td class="sub">Did the SQL get better?</td><td>the headline, the table and the chart count answers; SQL is in a step subtitle</td><td>SQL of 49 first everywhere: the headline ("SQL 13 → 18 of 49; held out 1 → 2 of 16"), the rounds table's first number column, the rounds chart's first series</td></tr>
+      <tr><td class="sub">Where does the SQL go wrong?</td><td>a bar per sqlglot category; blind on 12 of 31, vague on the rest (Fig 2)</td><td>the <b>component matrix</b> from the ledger: questions × seven components, the first break marked; click a cell for the golden's line beside the agent's, then the trial and the golden</td></tr>
+      <tr><td class="sub">What did the optimiser write, and why?</td><td>an 8-column sessions table; the rationale wraps in a narrow cell; notes behind "the notes"</td><td>one card per session: the attempts as a timeline (refused: too long, 1,742 chars → refused: a gold value → accepted, 1,477 chars), the block as a diff against the parent, the questions it read as chips that link to their rows in the matrix</td></tr>
+      <tr><td class="sub">Did it generalise?</td><td>answers by split; the per-question grid on answers only</td><td>SQL and answers by split with held-out first; the grid toggles answer / SQL; each playbook section and note lists the questions it targeted and their change</td></tr>
+      <tr><td class="sub">What happened over rounds?</td><td>one round, so nothing yet; the lineage figure carries answers only</td><td><b>Fig 5</b>: SQL of 49 and answers of 54 per version in order, train and held-out beside them, a model switch drawn as a different edge, planned versions outlined</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="hd" style="margin-top:var(--s6)">
+    <h3>Fig 4 · the loop, live: click a stage, or step through it. The numbers are round 1's, from the committed records</h3>
+    <p class="small">This is the figure proposed for the top of the tab, working. In the explorer it reads <code>/api/optimise/&lt;version&gt;</code>; the stages marked <i>new</i> fill once round 2 has run.</p>
+  </div>
+  <div class="mock" id="mock-list">
+    <div class="mock-top"><span class="brand">DAB explorer</span><nav><span>Overview</span><span>Datasets &amp; queries</span><span>Validators</span><span>Leaderboard</span><span>Runs</span><span class="on">Optimise</span><span>Agent</span><span>Golden</span></nav></div>
+    <div class="mock-body">
+      <p class="label">optimise · 1 round · 3 versions · champion v2_sql</p>
+      <h1 style="margin:var(--s2) 0 var(--s3)">Round 1 moved SQL from 13 to 18 of 49 and held-out SQL from 1 to 2 of 16; answers 24 → 30 of 54</h1>
+      <p class="fig-title">Fig · how a round works · round v1_sql → v2_sql · click a stage</p>
+      <svg class="dia" id="loopfig" viewBox="0 0 1160 250" role="img" aria-label="The optimisation loop as seven clickable stages with round-1 counts on the edges: source run, diagnose, split, sessions, guard, new version, outcome run and promotion"><title>The loop, with round 1's numbers</title>
+        <defs><marker id="arr2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" style="fill:var(--ink-2)"/></marker></defs>
+        <g class="pick on" id="st-run" data-stage="0" role="button" tabindex="0" aria-label="stage 1: the source run"><title>1 · source run · v1_sql · 54 trials · answers 24/54 · SQL 13/49</title><rect class="nd" x="24" y="60" width="140" height="64" rx="6"/><text class="tx" x="94" y="86" text-anchor="middle">1 · source run</text><text class="tx s" x="94" y="106" text-anchor="middle">v1_sql · 54 trials</text></g>
+        <path class="ed" d="M164,92 L184,92" style="marker-end:url(#arr2)"/><text class="tx k" x="175" y="52" text-anchor="middle">SQL 13/49</text>
+        <g class="pick" id="st-diag" data-stage="1" role="button" tabindex="0" aria-label="stage 2: diagnose"><title>2 · diagnose · dab diagnose · scorecard + ledger · 36 SQL fails of 49</title><rect class="nd" x="186" y="60" width="140" height="64" rx="6"/><text class="tx" x="256" y="86" text-anchor="middle">2 · diagnose</text><text class="tx s" x="256" y="106" text-anchor="middle">scorecard · ledger</text></g>
+        <path class="ed" d="M326,92 L346,92" style="marker-end:url(#arr2)"/><text class="tx k" x="337" y="52" text-anchor="middle">36 fails</text>
+        <g class="pick" id="st-split" data-stage="2" role="button" tabindex="0" aria-label="stage 3: the split"><title>3 · split · 33 train / 16 held out / 5 no golden · 21 failed train questions go on</title><rect class="nd in" x="348" y="60" width="140" height="64" rx="6"/><text class="tx" x="418" y="86" text-anchor="middle">3 · split</text><text class="tx s" x="418" y="106" text-anchor="middle">33 train · 16 held out</text></g>
+        <path class="ed" d="M488,92 L508,92" style="marker-end:url(#arr2)"/><text class="tx k" x="499" y="52" text-anchor="middle">21 train fails</text>
+        <g class="pick" id="st-sess" data-stage="3" role="button" tabindex="0" aria-label="stage 4: the optimiser's sessions"><title>4 · sessions · 10 dataset sessions + 1 system pass · Sonnet 5 · $1.11</title><rect class="nd hi" x="510" y="60" width="140" height="64" rx="6"/><text class="tx" x="580" y="86" text-anchor="middle">4 · sessions</text><text class="tx s" x="580" y="106" text-anchor="middle">10 datasets + 1 pass</text></g>
+        <path class="ed" d="M650,92 L670,92" style="marker-end:url(#arr2)"/><text class="tx k" x="661" y="52" text-anchor="middle">37 writes</text>
+        <g class="pick" id="st-guard" data-stage="4" role="button" tabindex="0" aria-label="stage 5: the guard"><title>5 · guard · 26 refusals · 11 leaks caught · 0 dropped · 11 accepted</title><rect class="nd gold" x="672" y="60" width="140" height="64" rx="6"/><text class="tx" x="742" y="86" text-anchor="middle">5 · guard</text><text class="tx s" x="742" y="106" text-anchor="middle">26 refused · 0 dropped</text></g>
+        <path class="ed" d="M812,92 L832,92" style="marker-end:url(#arr2)"/><text class="tx k" x="823" y="52" text-anchor="middle">11 accepted</text>
+        <g class="pick" id="st-ver" data-stage="5" role="button" tabindex="0" aria-label="stage 6: the new version"><title>6 · v2_sql · 10 notes + system.md · fingerprint 2e057112fb2f · MLflow prompt v3</title><rect class="nd hi" x="834" y="60" width="140" height="64" rx="6"/><text class="tx" x="904" y="86" text-anchor="middle">6 · v2_sql</text><text class="tx s" x="904" y="106" text-anchor="middle">10 notes + system.md</text></g>
+        <path class="ed" d="M974,92 L994,92" style="marker-end:url(#arr2)"/><text class="tx k" x="985" y="52" text-anchor="middle">54 trials</text>
+        <g class="pick" id="st-out" data-stage="6" role="button" tabindex="0" aria-label="stage 7: the outcome run and promotion"><title>7 · outcome · v2_sql 30/54 · SQL 18/49 · +10 −4 · promoted 2026-09-24</title><rect class="nd" x="996" y="60" width="140" height="64" rx="6"/><text class="tx" x="1066" y="86" text-anchor="middle">7 · outcome</text><text class="tx s" x="1066" y="106" text-anchor="middle">SQL 18/49 · champion</text></g>
+        <path class="ed dash" d="M1066,124 L1066,170 L94,170 L94,126" style="marker-end:url(#arr2)"/><text class="tx k" x="580" y="190" text-anchor="middle">the outcome run is the next round's source (v2_sql → v3_sql, round 2)</text>
+        <text class="tx s" x="24" y="230">Accent: what the round wrote. Amber: reads the goldens. Every count is from agents/v2_sql/optimise.json, agents/promotions.jsonl and the two runs' scorecard.json.</text>
+      </svg>
+      <div class="stage-nav" role="group" aria-label="step through the round">
+        <button type="button" class="btn ghost" id="st-prev" data-lavish-action>◀ back</button>
+        <button type="button" class="btn" id="st-next" data-lavish-action>next stage ▶</button>
+        <span class="where" id="st-where">stage 1 of 7</span>
+      </div>
+      <div class="stage" id="stage-panel" aria-live="polite"></div>
+
+      <p class="fig-title" style="margin-top:var(--s5)">Fig 5 · SQL and answers per version, in order · a round is a solid edge, a model switch a dashed one, a planned version an outline</p>
+      <svg class="dia" viewBox="0 0 1000 260" role="img" aria-label="Two series per version: SQL passed of 49 and answers passed of 54, for v0, v1_sql and v2_sql, with v3_sql and v4_sql as planned outlines"><title>Rounds over time</title>
+        <g id="f5-axes">
+          <line class="ax" x1="80" x2="920" y1="200" y2="200"/>
+          <line class="gl" x1="80" x2="920" y1="40" y2="40"/><text class="tx k" x="72" y="44" text-anchor="end">54</text>
+          <line class="gl" x1="80" x2="920" y1="120" y2="120"/><text class="tx k" x="72" y="124" text-anchor="end">27</text>
+          <text class="tx k" x="72" y="204" text-anchor="end">0</text>
+        </g>
+        <!-- x: v0 160, v1 340, v2 520, v3 700, v4 880 ; y = 200 - passed*160/54 -->
+        <g id="f5-answers"><title>answers passed of 54: v0 27, v1_sql 24, v2_sql 30</title>
+          <polyline class="ln b" points="160,120 340,128.9 520,111.1"/>
+          <circle class="pt o" cx="160" cy="120" r="6"/><circle class="pt o" cx="340" cy="128.9" r="6"/><circle class="pt o" cx="520" cy="111.1" r="6"/>
+          <text class="tx k" x="160" y="106" text-anchor="middle">27/54</text><text class="tx k" x="340" y="146" text-anchor="middle">24/54</text><text class="tx k" x="520" y="97" text-anchor="middle">30/54</text></g>
+        <g id="f5-sql"><title>SQL passed of 49: v1_sql 13, v2_sql 18 (v0 has no statement)</title>
+          <polyline class="ln" points="340,161.5 520,146.7"/>
+          <circle class="pt" cx="340" cy="161.5" r="6"/><circle class="pt" cx="520" cy="146.7" r="6"/>
+          <text class="tx k strong" x="340" y="181" text-anchor="middle">SQL 13/49</text><text class="tx k strong" x="520" y="166" text-anchor="middle">SQL 18/49 · ho 2/16</text></g>
+        <g id="f5-planned"><title>planned: v3_sql (round 2, Haiku) and v4_sql (v3's prompt on Sonnet 5); no number until they run</title>
+          <rect class="nd ext" x="650" y="60" width="100" height="130" rx="6"/><text class="tx s" x="700" y="82" text-anchor="middle">v3_sql</text><text class="tx s" x="700" y="100" text-anchor="middle">round 2</text><text class="tx s" x="700" y="118" text-anchor="middle">not run</text>
+          <rect class="nd ext" x="830" y="60" width="100" height="130" rx="6"/><text class="tx s" x="880" y="82" text-anchor="middle">v4_sql</text><text class="tx s" x="880" y="100" text-anchor="middle">Sonnet 5</text><text class="tx s" x="880" y="118" text-anchor="middle">not run</text>
+          <path class="ed dash" d="M570,130 L648,130" style="marker-end:url(#arr2)"/><path class="ed dash" d="M750,130 L828,130" style="marker-end:url(#arr2)"/></g>
+        <g id="f5-x"><text class="tx" x="160" y="225" text-anchor="middle">v0</text><text class="tx" x="340" y="225" text-anchor="middle">v1_sql</text><text class="tx" x="520" y="225" text-anchor="middle">v2_sql · champion</text><text class="tx s" x="700" y="225" text-anchor="middle">v3_sql</text><text class="tx s" x="880" y="225" text-anchor="middle">v4_sql</text>
+          <text class="tx s" x="160" y="245" text-anchor="middle">hand-built</text><text class="tx s" x="340" y="245" text-anchor="middle">hand-built · dashed</text><text class="tx s" x="520" y="245" text-anchor="middle">round 1 · solid</text><text class="tx s" x="700" y="245" text-anchor="middle">round 2</text><text class="tx s" x="880" y="245" text-anchor="middle">model switch</text></g>
+      </svg>
+      <p class="small" style="margin-top:var(--s2)">Filled dots: SQL of 49 (the round's target). Open dots: answers of 54 (the leaderboard's number). The x axis is version order, as on the Runs tab's champion chart. Source: each version's newest complete 54 × 1 run.</p>
+
+      <div class="tw" style="margin-top:var(--s3)"><table style="min-width:980px">
+        <thead><tr><th>Round</th><th>Read</th><th class="num">SQL before → after</th><th class="num">Held-out SQL</th><th class="num">Answers</th><th>Wrote</th><th class="num">Cost</th><th>Promoted</th></tr></thead>
+        <tbody>
+          <tr><td class="sub">v1_sql → v2_sql<span class="path">2026-09-24 · claude-sonnet-5 @ medium</span></td><td class="nw">v1_sql's run<span class="path">20260924T050324Z</span></td><td class="num">13 → 18 / 49</td><td class="num">1 → 2 / 16</td><td class="num">24 → 30 / 54</td><td class="nw">10 notes + system.md<span class="path">26 refusals · 0 dropped</span></td><td class="num">$1.24</td><td><span class="chip ok">champion 2026-09-24</span></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="hd" style="margin-top:var(--s6)">
+    <h3>A round, opened: the diagnostic is the component matrix, the proposal is one card per session, the outcome puts held-out SQL first</h3>
+    <p class="small">The three-step strip stays (it is the round's grammar); what is under each step changes. The matrix below is drawn from Fig 2's rows for two datasets; in the build the cells come from the ledger and each shows the two lines on click.</p>
+  </div>
+  <div class="mock" id="mock-round">
+    <div class="mock-body">
+      <p class="label">round · v1_sql → v2_sql · 2026-09-24 · claude-sonnet-5 @ medium · 33 train / 16 held out · the agent · close</p>
+      <h2 style="margin:var(--s2) 0 0">v2_sql: SQL +5 of 49 (13 → 18), held out +1 of 16; answers +6 of 54; champion since 2026-09-24</h2>
+      <div class="steps3" role="tablist" aria-label="the round's three steps">
+        <div class="step on" role="tab" aria-selected="true"><span class="label">1 · diagnostic</span>v1_sql's run: SQL 13/49 · 36 failures, 21 read · the first break per component, from the ledger (R1)</div>
+        <div class="step" role="tab" aria-selected="false"><span class="label">2 · proposal</span>10 dataset notes + system.md (3 lines); 37 writes, 26 refused (26 too long, 11 leaks), 11 accepted; $1.24</div>
+        <div class="step" role="tab" aria-selected="false"><span class="label">3 · outcome</span>SQL 13 → 18 of 49, held out 1 → 2 of 16; answers +10 −4; promoted</div>
+      </div>
+            <p class="fig-title">Fig · where each statement broke · click a cell for the golden's line beside the agent's</p>
+      <svg class="dia" viewBox="0 0 1000 266" role="img" aria-label="Mock of the component matrix for the yelp and patents questions: rows are questions, columns the seven components, the first break marked"><title>Component matrix, two datasets</title>
+        <g id="m-head"><text class="cap" x="20" y="22">question</text><text class="tx k" x="296" y="22" text-anchor="middle">sources</text><text class="tx k" x="368" y="22" text-anchor="middle">keys</text><text class="tx k" x="440" y="22" text-anchor="middle">parse</text><text class="tx k" x="512" y="22" text-anchor="middle">filter</text><text class="tx k" x="584" y="22" text-anchor="middle">metric</text><text class="tx k" x="656" y="22" text-anchor="middle">rank</text><text class="tx k" x="728" y="22" text-anchor="middle">shape</text><text class="cap" x="780" y="22">SQL · answer</text></g>
+        <g id="m-yelp-2"><title>yelp/2 · train · read by the optimiser · breaks at keys (wrong join column), then parse (the state code needs a word boundary), filter (no US-state filter), metric (pooled vs per-business average)</title><text class="tx s" x="20" y="49">yelp/2 · read</text><rect class="cell same" x="264" y="36" width="64" height="16"/><rect class="cell diff" x="336" y="36" width="64" height="16"/><rect class="cell diff" x="408" y="36" width="64" height="16"/><rect class="cell diff" x="480" y="36" width="64" height="16"/><rect class="cell diff" x="552" y="36" width="64" height="16"/><rect class="cell same" x="624" y="36" width="64" height="16"/><rect class="cell same" x="696" y="36" width="64" height="16"/><text class="tx k" x="780" y="49">fail · fail</text></g>
+        <g id="m-yelp-4"><title>yelp/4 · held out · breaks at parse (categories: four verb anchors against every Title-Case run)</title><text class="tx s" x="20" y="69">yelp/4 · ho</text><rect class="cell same" x="264" y="56" width="64" height="16"/><rect class="cell same" x="336" y="56" width="64" height="16"/><rect class="cell diff" x="408" y="56" width="64" height="16"/><rect class="cell same" x="480" y="56" width="64" height="16"/><rect class="cell same" x="552" y="56" width="64" height="16"/><rect class="cell same" x="624" y="56" width="64" height="16"/><rect class="cell same" x="696" y="56" width="64" height="16"/><text class="tx k" x="780" y="69">fail · fail</text></g>
+        <g id="m-yelp-6"><title>yelp/6 · train · read · breaks at shape (the same rows, extra columns)</title><text class="tx s" x="20" y="89">yelp/6 · read</text><rect class="cell same" x="264" y="76" width="64" height="16"/><rect class="cell same" x="336" y="76" width="64" height="16"/><rect class="cell same" x="408" y="76" width="64" height="16"/><rect class="cell same" x="480" y="76" width="64" height="16"/><rect class="cell same" x="552" y="76" width="64" height="16"/><rect class="cell same" x="624" y="76" width="64" height="16"/><rect class="cell diff" x="696" y="76" width="64" height="16"/><text class="tx k" x="780" y="89">fail · pass</text></g>
+        <g id="m-yelp-7"><title>yelp/7 · held out · breaks at parse</title><text class="tx s" x="20" y="109">yelp/7 · ho</text><rect class="cell same" x="264" y="96" width="64" height="16"/><rect class="cell same" x="336" y="96" width="64" height="16"/><rect class="cell diff" x="408" y="96" width="64" height="16"/><rect class="cell diff" x="480" y="96" width="64" height="16"/><rect class="cell same" x="552" y="96" width="64" height="16"/><rect class="cell same" x="624" y="96" width="64" height="16"/><rect class="cell same" x="696" y="96" width="64" height="16"/><text class="tx k" x="780" y="109">fail · fail</text></g>
+        <g id="m-pat-1"><title>patents/1 · held out · breaks at sources (no join to the level-5 definition table)</title><text class="tx s" x="20" y="139">patents/1 · ho</text><rect class="cell diff" x="264" y="126" width="64" height="16"/><rect class="cell same" x="336" y="126" width="64" height="16"/><rect class="cell same" x="408" y="126" width="64" height="16"/><rect class="cell same" x="480" y="126" width="64" height="16"/><rect class="cell diff" x="552" y="126" width="64" height="16"/><rect class="cell same" x="624" y="126" width="64" height="16"/><rect class="cell diff" x="696" y="126" width="64" height="16"/><text class="tx k" x="780" y="139">fail · fail</text></g>
+        <g id="m-pat-2"><title>patents/2 · train · read · breaks at keys (citation joined by LIKE, not by the publication number)</title><text class="tx s" x="20" y="159">patents/2 · read</text><rect class="cell same" x="264" y="146" width="64" height="16"/><rect class="cell diff" x="336" y="146" width="64" height="16"/><rect class="cell diff" x="408" y="146" width="64" height="16"/><rect class="cell same" x="480" y="146" width="64" height="16"/><rect class="cell same" x="552" y="146" width="64" height="16"/><rect class="cell same" x="624" y="146" width="64" height="16"/><rect class="cell same" x="696" y="146" width="64" height="16"/><text class="tx k" x="780" y="159">fail · fail</text></g>
+        <g id="m-pat-3"><title>patents/3 · train · read · breaks at shape (4 rows against the golden's 3; the answer passes)</title><text class="tx s" x="20" y="179">patents/3 · read</text><rect class="cell same" x="264" y="166" width="64" height="16"/><rect class="cell same" x="336" y="166" width="64" height="16"/><rect class="cell same" x="408" y="166" width="64" height="16"/><rect class="cell same" x="480" y="166" width="64" height="16"/><rect class="cell same" x="552" y="166" width="64" height="16"/><rect class="cell same" x="624" y="166" width="64" height="16"/><rect class="cell diff" x="696" y="166" width="64" height="16"/><text class="tx k" x="780" y="179">fail · pass</text></g>
+        <g id="m-open"><title>the opened cell: yelp/4 · parse</title><rect x="20" y="192" width="960" height="62" rx="6" style="fill:var(--band)"/><text class="tx k strong" x="32" y="210">yelp/4 · parse · the opened cell · trial · golden #55</text><text class="tx k" x="32" y="228">golden</text><text class="tx s" x="100" y="228">cut after the state code, split on commas, keep every Title-Case run (joined by ' ', ' &amp; ', ' of ')</text><text class="tx k" x="32" y="246">agent</text><text class="tx s" x="100" y="246">four regexes anchored on in / including / for / of, then drop segments with words like offering, services</text></g>
+      </svg>
+      <p class="small" style="margin-top:var(--s2)"><i class="sw diff"></i>differs from the golden · <i class="sw same"></i>same · the first differing cell is the break · <code>read</code>: a failed train question the optimiser saw · <code>ho</code>: held out, never shown. The yelp rows follow Fig 2, the hand-read example and the yelp session's rationale; the patents rows follow the sqlglot line and the row counts. In the build every cell comes from the ledger.</p>
+
+      <p class="label" style="margin-top:var(--s4)">2 · proposal · one card per session · the yelp session, from agents/v2_sql/optimise.json</p>
+      <div class="grid g2" style="margin-top:var(--s2)">
+        <div class="panel" style="padding:var(--s4)">
+          <p class="label">session · yelp · dataset notes · 6 turns · 2 queries · $0.089</p>
+          <div class="tl">
+            <div><b>attempt 1</b><span><span class="warn">refused</span> · too long (the limit is 1,500) · redacted</span></div>
+            <div><b>attempt 2</b><span><span class="warn">refused</span> · too long · a gold value written literally</span></div>
+            <div><b>attempt 3</b><span><span class="ok">accepted</span> · 1,500 characters · 6 bullets</span></div>
+          </div>
+          <p class="small" style="margin:var(--s2) 0">Targets: <span class="chip">yelp/2 · join, state regex</span> <span class="chip">yelp/6 · categories, dates</span> · after the round: yelp/2 still failing, yelp/6 still failing (answer passes)</p>
+          <p class="small" style="margin:0">The notes, as a diff against v1_sql (six added lines) — the SQL box and the diff reader the Golden tab already has.</p>
+        </div>
+        <div class="panel" style="padding:var(--s4)">
+          <p class="label">session · system.md · the cross-dataset pass · 6 turns max · $0.041 (+ a superseded first pass)</p>
+          <div class="tl">
+            <div><b>attempt 1</b><span><span class="ok">accepted</span> · 2,734 characters · 3 lines added</span></div>
+          </div>
+          <p class="small" style="margin:var(--s2) 0">Moved: keys need extraction (from crmarenapro, bookreview, yelp, music_brainz_20k, deps_dev_v1) · one column, several date formats (yelp, googlelocal) · "with" attributes are columns too.</p>
+          <p class="small" style="margin:0">In round 2 this card becomes seven: one per playbook section, each with the questions it read across datasets.</p>
+        </div>
+      </div>
+
+      <p class="label" style="margin-top:var(--s4)">3 · outcome · held out first</p>
+      <div class="tw" style="margin-top:var(--s2)"><table>
+        <thead><tr><th>Questions</th><th class="num">n</th><th class="num">SQL before → after</th><th class="num">Answers before → after</th><th class="num">Improved · regressed (SQL)</th></tr></thead>
+        <tbody>
+          <tr class="pro"><td class="sub">held out · never shown</td><td class="num">16</td><td class="num">1 → 2 <span class="v-ok">(+1)</span></td><td class="num">6 → 8 (+2)</td><td class="num">from the scorecards</td></tr>
+          <tr><td class="sub">train · read</td><td class="num">33</td><td class="num">12 → 16 <span class="v-ok">(+4)</span></td><td class="num">17 → 21 (+4)</td><td class="num">from the scorecards</td></tr>
+          <tr><td class="sub">no golden · answer only</td><td class="num">5</td><td class="num">—</td><td class="num">1 → 1 (±0)</td><td class="num">—</td></tr>
+          <tr><td class="sub">all</td><td class="num">54</td><td class="num">13 → 18 / 49</td><td class="num">24 → 30 / 54</td><td class="num">+10 · −4 answers</td></tr>
+        </tbody>
+      </table></div>
+      <p class="small" style="margin:var(--s2) 0 0">Then the per-question grid (answer / SQL toggle), the dumbbell per dataset, and the category moves, as today, keyed on SQL.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================= BUILD -->
+<section class="band-sec" id="build"><div class="wrap">
+  <div class="hd">
+    <p class="label">06 · build list · R1–R16 · tick what to build</p>
+    <h2>06 · Build — sixteen items in four groups, run in this order; R10–R12 are the runs that spend money</h2>
+    <p class="small">Sizes: S under an hour of code, M a few hours, L a day. Every item lands on <code>challenger_v3</code>; the runs write to <code>runs/</code> and <code>agents/</code> as the CLI does, never by hand. The pipeline's rules stay: no smoke runs, no v0, no golden saved by anyone but you.</p>
+  </div>
+  <form class="q" data-lavish-question="build-r" onsubmit="event.preventDefault(); const selected=[...event.currentTarget.querySelectorAll('input[name=items]:checked')].map(i=>({id:i.value,label:i.dataset.label,disposition:'build'})); if(!selected.length){return;} window.lavish.queuePrompt('Build exactly the ticked items from s08 (round 2 on the SQL, then Sonnet, and the Optimise tab redesign), in R order, and return an item-by-item receipt. Account for every submitted ID before reporting completion. Items: '+selected.map(s=>s.id+' '+s.label).join('; '), {tag:'tracked-batch', text:'Build '+selected.length+' items from s08', element:event.currentTarget, data:{items:selected}}); event.currentTarget.querySelector('.queued').textContent='queued: '+selected.map(s=>s.id).join(', ');">
+    <h3>Tick the items to build</h3>
+    <p class="why">All ticked by default. Untick to drop an item; the receipt will name every ID.</p>
+    <div class="tw" style="box-shadow:none;border:1px solid var(--line)"><table style="min-width:900px">
+      <thead><tr><th>Item</th><th>What</th><th>Files</th><th class="num">Size</th></tr></thead>
+      <tbody>
+        <tr><td class="sub"><label style="display:flex;gap:var(--s2);border:0;padding:0;align-items:center"><input type="checkbox" name="items" value="R1" data-label="component ledger by a reader" checked> <span>R1</span></label></td><td><b>The ledger.</b> <code>eval/ledger.py</code>: seven lines per statement by a Sonnet 5 reader; golden lines cached in <code>dataagentbench_meta.golden_ledger</code> (by golden id), agent lines and the per-component verdicts in <code>scorecard.json</code>. A test with a fixed statement pair asserts the verdict shape and that no gold value appears in the lines.</td><td class="mono">eval/ledger.py · eval/scorecard.py · data/db (meta schema) · tests/test_ledger.py</td><td class="num">L</td></tr>
+        <tr><td class="sub"><label style="display:flex;gap:var(--s2);border:0;padding:0;align-items:center"><input type="checkbox" name="items" value="R2" data-label="category = first broken component" checked> <span>R2</span></label></td><td><b>The category becomes the first broken component</b>; sqlglot's sets stay as <code>structure</code>. <code>CATEGORY_HELP</code> and the trial page's checks table gain a "where it broke" row with the two lines.</td><td class="mono">eval/scorecard.py · frontend/src/lib/scorecard.tsx</td><td class="num">M</td></tr>
+        <tr><td class="sub"><label style="display:flex;gap:var(--s2);border:0;padding:0;align-items:center"><input type="checkbox" name="items" value="R3" data-label="CLAUDE.md: five things call a model" checked> <span>R3</span></label></td><td><b>Rules.</b> CLAUDE.md: five things call a model (the reader, inside <code>dab diagnose</code>, never inside a trial); the ledger's words are stored beside the run and the golden and never enter a prompt; AGENTS.md §7 the round-2 loop.</td><td class="mono">CLAUDE.md · AGENTS.md</td><td class="num">S</td></tr>
+        <tr><td class="sub"><label style="display:flex;gap:var(--s2);border:0;padding:0;align-items:center"><input type="checkbox" name="items" value="R4" data-label="component sessions across datasets" checked> <span>R4</span></label></td><td><b>Component sessions.</b> <code>agent/optimise.py</code>: a briefing per component from every failed train question where it is the first break, across datasets, with the ledger lines and both statements; tool <code>write_section</code>; runs before the dataset sessions, in parallel.</td><td class="mono">agent/optimise.py · agents/optimiser/component.md</td><td class="num">L</td></tr>
+        <tr><td class="sub"><label style="display:flex;gap:var(--s2);border:0;padding:0;align-items:center"><input type="checkbox" name="items" value="R5" data-label="the playbook in system.md" checked> <span>R5</span></label></td><td><b>The playbook.</b> A fixed skeleton in <code>system.md</code> with seven sections; the round assembles accepted sections into it; caps: a section ≤ 600, <code>system.md</code> ≤ 5,000, dataset notes ≤ 2,000. The cross-dataset pass is dropped (the component sessions are the generalisation).</td><td class="mono">agent/optimise.py · eval/guards.py · agents/v3_sql/system.md</td><td class="num">M</td></tr>
+        <tr><td class="sub"><label style="display:flex;gap:var(--s2);border:0;padding:0;align-items:center"><input type="checkbox" name="items" value="R6" data-label="dataset briefing led by the ledger" checked> <span>R6</span></label></td><td><b>Dataset sessions</b> keep round 1's briefing, with the ledger's lines in place of the sqlglot line, and a prompt that asks for at least one <code>query_db</code> check per note.</td><td class="mono">agent/optimise.py · agents/optimiser/system.md</td><td class="num">S</td></tr>
+        <tr><td class="sub"><label style="display:flex;gap:var(--s2);border:0;padding:0;align-items:center"><input type="checkbox" name="items" value="R7" data-label="plan-first generator + plan on submit_answer" checked> <span>R7</span></label></td><td><b>Plan first.</b> "How to work" gains the plan step; <code>submit_answer</code> gains <code>plan</code> (required, the seven lines), recorded in <code>results.jsonl</code> and the trace, shown on the trial page beside the golden's ledger. <code>tests/test_tools.py</code> covers the schema.</td><td class="mono">agent/tools.py · agents/v3_sql/system.md · eval/runner.py · frontend TracePage · lib/scorecard.tsx</td><td class="num">M</td></tr>
+        <tr><td class="sub"><label style="display:flex;gap:var(--s2);border:0;padding:0;align-items:center"><input type="checkbox" name="items" value="R8" data-label="promotion rule per D36" checked> <span>R8</span></label></td><td><b>Promotion rule</b> per D36 (SQL of 49 decides, answers of 54 break ties, then the older run); <code>promotions.jsonl</code> records the rule's name; a test for each branch.</td><td class="mono">eval/promote.py · tests/test_promote.py</td><td class="num">S</td></tr>
+        <tr><td class="sub"><label style="display:flex;gap:var(--s2);border:0;padding:0;align-items:center"><input type="checkbox" name="items" value="R9" data-label="dab diagnose --refresh on v2's run (the ledger)" checked> <span>R9</span></label></td><td><b>Run the ledger</b> on <code>20260924T053026Z_v2_sql…</code> (<code>dab diagnose --refresh</code>, ≈ $1) and on v1's run, so the round-1 page also reads by component.</td><td class="mono">runs/…/scorecard.json · MLflow re-log</td><td class="num">S · $2</td></tr>
+        <tr><td class="sub"><label style="display:flex;gap:var(--s2);border:0;padding:0;align-items:center"><input type="checkbox" name="items" value="R10" data-label="dab optimise v2 run → v3_sql" checked> <span>R10</span></label></td><td><b>Round 2</b>: <code>dab optimise 20260924T053026Z_v2_sql… --into v3_sql</code> (≈ $3). Stop and show the playbook and notes before R11.</td><td class="mono">agents/v3_sql/</td><td class="num">S · $3</td></tr>
+        <tr><td class="sub"><label style="display:flex;gap:var(--s2);border:0;padding:0;align-items:center"><input type="checkbox" name="items" value="R11" data-label="eval v3_sql 54×1 + promote" checked> <span>R11</span></label></td><td><b>v3_sql's run</b>: <code>dab eval --agent v3_sql --split all</code> (54 × 1, Haiku, ≈ $4.5), <code>dab diagnose</code>, <code>dab promote</code>.</td><td class="mono">runs/ · agents/promotions.jsonl</td><td class="num">S · $4.5</td></tr>
+        <tr><td class="sub"><label style="display:flex;gap:var(--s2);border:0;padding:0;align-items:center"><input type="checkbox" name="items" value="R12" data-label="v4_sql = v3_sql on Sonnet, eval 54×1, promote" checked> <span>R12</span></label></td><td><b>v4_sql</b>: copy v3_sql, <code>model: sonnet</code>, <code>measured_against: v3_sql</code>; <code>dab eval --agent v4_sql --split all</code> (≈ $14); diagnose; promote. McNemar on both pairs.</td><td class="mono">agents/v4_sql/ · runs/</td><td class="num">S · $14</td></tr>
+        <tr><td class="sub"><label style="display:flex;gap:var(--s2);border:0;padding:0;align-items:center"><input type="checkbox" name="items" value="R13" data-label="Optimise list: loop figure + rounds chart + SQL-first table" checked> <span>R13</span></label></td><td><b>The tab's list page</b>: Fig 4 (the loop, clickable, step-through, real counts from <code>/api/optimise</code>), Fig 5 (rounds over versions, SQL first, model switches dashed, planned outlined), the rounds table with SQL first. The lineage figure is folded into Fig 5.</td><td class="mono">frontend/src/pages/Optimise.tsx · serving/app.py (/api/optimise gains stage counts) · styles.css</td><td class="num">L</td></tr>
+        <tr><td class="sub"><label style="display:flex;gap:var(--s2);border:0;padding:0;align-items:center"><input type="checkbox" name="items" value="R14" data-label="Optimise round: matrix, session cards, held-out-first outcome" checked> <span>R14</span></label></td><td><b>The round page</b>: the component matrix with cell panels; session cards with the attempts timeline, the diff and target chips; outcome with held-out first, an answer / SQL toggle on the grid, and each section's or note's questions with their change.</td><td class="mono">frontend/src/pages/Optimise.tsx · eval/rounds.py · serving/app.py</td><td class="num">L</td></tr>
+        <tr><td class="sub"><label style="display:flex;gap:var(--s2);border:0;padding:0;align-items:center"><input type="checkbox" name="items" value="R15" data-label="Trial and Golden pages: ledger rows + the plan" checked> <span>R15</span></label></td><td><b>Trial and Golden pages</b>: the ledger's seven rows in the trial's checks table ("where it broke"), the agent's plan beside the golden's lines; the Golden tab shows a golden's ledger under its SQL.</td><td class="mono">frontend/src/lib/scorecard.tsx · pages/Golden.tsx · serving/app.py</td><td class="num">M</td></tr>
+        <tr><td class="sub"><label style="display:flex;gap:var(--s2);border:0;padding:0;align-items:center"><input type="checkbox" name="items" value="R16" data-label="s09 walkthrough receipt" checked> <span>R16</span></label></td><td><b>s09</b>, the receipt: screenshots of the new tab with v3 and v4 in it, the two lifts, and what changed on the way (as s07 did for round 1).</td><td class="mono">.lavish/s09_*.html</td><td class="num">S</td></tr>
+      </tbody>
+    </table></div>
+    <div class="row"><button type="submit" class="btn">Queue the ticked items</button><span class="queued"></span></div>
+  </form>
+
+  <div class="grid g2" style="margin-top:var(--s5)">
+    <div class="panel">
+      <p class="label">risks</p>
+      <ul class="qa">
+        <li><b>Sixteen held-out questions.</b> ±2 is noise; McNemar is reported, not a gate. A round that moves held-out SQL by 3 or more is the first real signal.</li>
+        <li><b>"Differs" is not "wrong".</b> The golden is one person's way; the ledger explains a fail, it does not define one. The SQL verdict stays result-based (the re-run statement returns the golden's rows).</li>
+        <li><b>A fifth model caller.</b> The reader sees goldens and gold answers. It runs only in <code>dab diagnose</code>, writes words with no values (a test asserts it), and nothing it writes enters a prompt; the guard still checks what the optimiser writes from it.</li>
+        <li><b>A longer prompt for Haiku.</b> <code>system.md</code> about doubles. If v3's trials cost more than v2's $4.51 by a third or turn counts rise, the playbook is too long; the caps come down.</li>
+        <li><b>Caps up, leak surface up.</b> 2,000 and 5,000 characters give the guard more text to check; the rules are unchanged and the drop rule still ends a session on a second leak.</li>
+        <li><b>Five questions stay outside</b> (agnews/1–4, crmarenapro/7): no golden, answer-scored only, as today.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <p class="label">open questions (answered below, or left open on purpose)</p>
+      <ul class="qa">
+        <li><b>Should the split change?</b> No: seed 20260924, 33 / 16, kept so v2, v3 and v4 are comparable. A reshuffle is a separate decision with its own reason.</li>
+        <li><b>Does <code>plan</code> cost turns?</b> One assistant turn of about 100 words; it is also what makes "misread vs mis-wrote" visible. D34 asks whether to record it.</li>
+        <li><b>Where does the golden's ledger live?</b> Beside the golden in <code>dataagentbench_meta</code>, keyed by golden id, so a new golden gets new lines; refused to <code>dab_agent</code> like everything in that schema.</li>
+        <li><b>Does the round-1 page change?</b> Yes, once R9 runs: its diagnostic reads by component too; its proposal cards show the same records, re-read.</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<!-- ================================================= DECIDE -->
+<section class="blk" id="decide">
+  <div class="hd">
+    <p class="label">07 · decisions · D32–D37</p>
+    <h2>07 · Decide — six choices; the recommended option is first in each, and the build follows what you queue</h2>
+  </div>
+
+  <form class="q" data-lavish-question="D32" onsubmit="event.preventDefault(); const c=new FormData(event.currentTarget).get('d32'); const n=event.currentTarget.querySelector('textarea').value.trim(); if(!c) return; window.lavish.queuePrompt('D32 (the optimiser level): option '+c+(n?'. Note: '+n:''), {tag:'decision', text:'D32: '+c, element:event.currentTarget, data:{question:'D32', answer:c, note:n}}); event.currentTarget.querySelector('.queued').textContent='queued: D32 '+c;">
+    <h3>D32 · At what level does the optimiser read and write?</h3>
+    <p class="why">Round 1's per-dataset sessions taught data facts; held-out SQL moved 1 → 2 of 16. The user's question: per dataset, or all failures at once.</p>
+    <label><input type="radio" name="d32" value="B" checked><span><b>B · components across datasets, plus dataset notes</b><span class="rec">recommended</span> — ≤ 7 component sessions write the playbook's sections from every failed train question where that component broke; dataset sessions keep writing facts. ≈ $3 a round.</span></label>
+    <label><input type="radio" name="d32" value="A"><span><b>A · per dataset only</b>, as round 1, with the ledger in the briefing. ≈ $1.3. Expect facts again.</span></label>
+    <label><input type="radio" name="d32" value="C"><span><b>C · one session over every failure, system.md only.</b> Drops the dataset notes. ≈ $0.8.</span></label>
+    <textarea placeholder="a note for the build (optional)"></textarea>
+    <div class="row"><button type="submit" class="btn">Queue D32</button><span class="queued"></span></div>
+  </form>
+
+  <form class="q" data-lavish-question="D33" onsubmit="event.preventDefault(); const c=new FormData(event.currentTarget).get('d33'); const n=event.currentTarget.querySelector('textarea').value.trim(); if(!c) return; window.lavish.queuePrompt('D33 (how the break is attributed): option '+c+(n?'. Note: '+n:''), {tag:'decision', text:'D33: '+c, element:event.currentTarget, data:{question:'D33', answer:c, note:n}}); event.currentTarget.querySelector('.queued').textContent='queued: D33 '+c;">
+    <h3>D33 · How is "where the statement broke" attributed?</h3>
+    <p class="why">Today: the first sqlglot set that differs; blind on 12 of 31, vague on 18 (Fig 2).</p>
+    <label><input type="radio" name="d33" value="B" checked><span><b>B · a reader writes the ledger</b><span class="rec">recommended</span> — Sonnet 5, seven lines of words per statement, a verdict per component; ≈ $1 per diagnose; a fifth model caller, so CLAUDE.md's rule is updated (R3). The words feed the optimiser and the tab.</span></label>
+    <label><input type="radio" name="d33" value="A"><span><b>A · sqlglot only, better normalised</b> — resolve CTE aliases before comparing joins, compare expression text; no model call. Still no <code>shape</code>, still blind where the shapes match.</span></label>
+    <textarea placeholder="a note for the build (optional)"></textarea>
+    <div class="row"><button type="submit" class="btn">Queue D33</button><span class="queued"></span></div>
+  </form>
+
+  <form class="q" data-lavish-question="D34" onsubmit="event.preventDefault(); const c=new FormData(event.currentTarget).get('d34'); const n=event.currentTarget.querySelector('textarea').value.trim(); if(!c) return; window.lavish.queuePrompt('D34 (plan first): option '+c+(n?'. Note: '+n:''), {tag:'decision', text:'D34: '+c, element:event.currentTarget, data:{question:'D34', answer:c, note:n}}); event.currentTarget.querySelector('.queued').textContent='queued: D34 '+c;">
+    <h3>D34 · Does the generator plan first, and is the plan recorded?</h3>
+    <p class="why">The user's framing: take the question and discern what SQL it needs. Making that step explicit is what the playbook teaches.</p>
+    <label><input type="radio" name="d34" value="B" checked><span><b>B · plan in the prompt and on <code>submit_answer</code></b><span class="rec">recommended</span> — the seven lines are required on submit, recorded on the trace, shown beside the golden's ledger. About 100 words of output per trial.</span></label>
+    <label><input type="radio" name="d34" value="A"><span><b>A · plan in the prompt only</b> — the instruction, no tool change; the plan is visible only in the transcript.</span></label>
+    <textarea placeholder="a note for the build (optional)"></textarea>
+    <div class="row"><button type="submit" class="btn">Queue D34</button><span class="queued"></span></div>
+  </form>
+
+  <form class="q" data-lavish-question="D35" onsubmit="event.preventDefault(); const c=new FormData(event.currentTarget).get('d35'); const n=event.currentTarget.querySelector('textarea').value.trim(); if(!c) return; window.lavish.queuePrompt('D35 (the Sonnet run): option '+c+(n?'. Note: '+n:''), {tag:'decision', text:'D35: '+c, element:event.currentTarget, data:{question:'D35', answer:c, note:n}}); event.currentTarget.querySelector('.queued').textContent='queued: D35 '+c;">
+    <h3>D35 · When does Sonnet 5 run, and on what?</h3>
+    <p class="why">The user's order: the round first, then the model. The options differ on what the Sonnet run measures.</p>
+    <label><input type="radio" name="d35" value="A" checked><span><b>A · after the round, on v3's prompt</b><span class="rec">recommended</span> — v4_sql = v3_sql + <code>model: sonnet</code>, medium, 54 × 1, ≈ $14. Two clean lifts: prompt (v2 → v3) and model (v3 → v4).</span></label>
+    <label><input type="radio" name="d35" value="C"><span><b>C · A, then a Sonnet-specific round</b> — if v4 wins, <code>dab optimise</code> on v4's run into v5_sql, so Sonnet's own failures teach the next playbook. Adds ≈ $3 + $14 later.</span></label>
+    <label><input type="radio" name="d35" value="B"><span><b>B · Sonnet before the round</b> — v3 on Sonnet with v2's prompt, then optimise Sonnet's failures. One confounded lift; not the user's order.</span></label>
+    <textarea placeholder="a note for the build (optional)"></textarea>
+    <div class="row"><button type="submit" class="btn">Queue D35</button><span class="queued"></span></div>
+  </form>
+
+  <form class="q" data-lavish-question="D36" onsubmit="event.preventDefault(); const c=new FormData(event.currentTarget).get('d36'); const n=event.currentTarget.querySelector('textarea').value.trim(); if(!c) return; window.lavish.queuePrompt('D36 (the promotion rule): option '+c+(n?'. Note: '+n:''), {tag:'decision', text:'D36: '+c, element:event.currentTarget, data:{question:'D36', answer:c, note:n}}); event.currentTarget.querySelector('.queued').textContent='queued: D36 '+c;">
+    <h3>D36 · What decides the champion, now that the goal is the statement?</h3>
+    <p class="why">D30 (2026-09-24): most answers of 54 wins; a tie keeps the incumbent. The user's stated goal is the right SQL, with the answer following.</p>
+    <label><input type="radio" name="d36" value="B" checked><span><b>B · SQL of 49 decides, answers of 54 break ties</b><span class="rec">recommended</span> — then the incumbent, then the older run. The leaderboard's number stays on every page; the title follows the goal.</span></label>
+    <label><input type="radio" name="d36" value="C"><span><b>C · answers decide, SQL breaks ties</b> — D30 with a tie-break; a version can win the title with worse SQL.</span></label>
+    <label><input type="radio" name="d36" value="A"><span><b>A · keep D30</b> — answers only.</span></label>
+    <textarea placeholder="a note for the build (optional)"></textarea>
+    <div class="row"><button type="submit" class="btn">Queue D36</button><span class="queued"></span></div>
+  </form>
+
+  <form class="q" data-lavish-question="D37" onsubmit="event.preventDefault(); const c=new FormData(event.currentTarget).get('d37'); const n=event.currentTarget.querySelector('textarea').value.trim(); if(!c) return; window.lavish.queuePrompt('D37 (the tab centrepiece): option '+c+(n?'. Note: '+n:''), {tag:'decision', text:'D37: '+c, element:event.currentTarget, data:{question:'D37', answer:c, note:n}}); event.currentTarget.querySelector('.queued').textContent='queued: D37 '+c;">
+    <h3>D37 · What is the Optimise tab's centrepiece?</h3>
+    <p class="why">Fig 4 above is option A, working. Both options read the same API.</p>
+    <label><input type="radio" name="d37" value="A" checked><span><b>A · the loop as clickable stages with a panel and a step-through</b><span class="rec">recommended</span> — one concept per stage, the round's counts on the edges, the panel names the files.</span></label>
+    <label><input type="radio" name="d37" value="B"><span><b>B · the questions flowing through the round</b> — 54 trials → 36 fails → 21 read → sessions → accepted / refused → +10 / −4, as a flow whose bands are questions (a Sankey). Tells the story of one round; says less about the mechanism.</span></label>
+    <label><input type="radio" name="d37" value="C"><span><b>C · both</b> — A at the top of the list page, B at the top of a round.</span></label>
+    <textarea placeholder="a note for the build (optional)"></textarea>
+    <div class="row"><button type="submit" class="btn">Queue D37</button><span class="queued"></span></div>
+  </form>
+
+  <p class="small" style="margin-top:var(--s5)">Sources read for this page: <code>agents/v2_sql/optimise.json</code>, <code>agents/optimiser/*.md</code>, <code>agents/v2_sql/system.md</code> and <code>datasets/*.md</code>, <code>src/dab_bench/agent/optimise.py</code>, <code>eval/guards.py</code>, <code>eval/scorecard.py</code>, <code>eval/rounds.py</code>, <code>eval/promote.py</code>, <code>agent/llm.py</code>, <code>frontend/src/pages/Optimise.tsx</code>, both 2026-09-24 scorecards, <code>/api/optimise/v2_sql</code>, and the yelp session's trace under <code>runs/20260924T050324Z_v1_sql_all_haiku_hints/optimise/v2_sql/</code>. Design source (2): the project's DESIGN.md, tokens verbatim.</p>
+</section>
+</div>
+
+<script>
+(function(){
+  var STAGES = [
+    {t:'1 · the source run — the champion answers the 54, once each', p:'<code>dab eval --agent v1_sql --split all</code>: 54 trials, each ending in <code>submit_answer(sql, mode, answer, step)</code>. The harness re-runs the statement and keeps its rows; the answer goes to the validator. This run is the round\'s <i>diagnostic</i>.', r:['v1_sql · 20260924T050324Z','answers 24/54','SQL 13/49','decision 40/41','$4.60'], n:'', f:'agent/session.py · eval/runner.py · runs/&lt;run&gt;/results.jsonl'},
+    {t:'2 · diagnose — every question scored three ways, and where its statement broke', p:'<code>dab diagnose &lt;run&gt;</code> compares the agent\'s rows with the golden\'s (SQL pass/fail), the mode with the golden\'s kind (decision), and the answer with the gold (the leaderboard\'s score). Round 1 named a sqlglot category; round 2 adds the ledger: seven lines of words per statement and the first component that differs.', r:['49 goldened · 5 without','36 SQL fails of 49','categories: join 11 · no SQL 8 · another way 8 · tables 6 · parse 3'], n:'new in round 2: the ledger (R1), category = first broken component (R2)', f:'eval/scorecard.py · eval/ledger.py (new) · runs/&lt;run&gt;/scorecard.json'},
+    {t:'3 · the split — what the optimiser may read', p:'33 training questions may be shown; 16 held out are never shown and are the test of generalisation; 5 without a golden stay outside. Only failed training questions go on. Seed 20260924, kept across rounds.', r:['33 train · 16 held out','21 failed train questions go on','held-out SQL before: 1/16'], n:'', f:'data/splits/train.json · heldout.json · eval/scorecard.py: load_optimise_split'},
+    {t:'4 · the optimiser\'s sessions — isolated Sonnet 5 sessions that write prompt text', p:'Round 1: one session per dataset with failures (10), each reading that dataset\'s failed train questions with the agent\'s SQL beside the golden\'s, then one 6-turn pass over <code>system.md</code>. Tools: <code>query_db</code> to check a claim, <code>write_notes</code> to finish. Round 2 adds component sessions across datasets that write the playbook.', r:['10 dataset sessions + 1 pass','yelp: 6 turns · 2 queries · $0.089','745 K input tokens','$1.11 recorded ($1.24 spent)'], n:'new in round 2: ≤ 7 component sessions (R4), the playbook (R5)', f:'agent/optimise.py · agents/optimiser/*.md · runs/&lt;run&gt;/optimise/&lt;version&gt;/*.json'},
+    {t:'5 · the guard — every write is checked before it exists', p:'No run of 8 words from any question, no gold value written literally, no run of 6 tokens from any golden SQL, and a length cap. A refusal names the problem and the session tries again; a second <i>leak</i> refusal drops the write. Round 1\'s refusals were mostly the cap.', r:['26 refusals','26 too long · 6 gold values · 5 golden SQL','0 dropped · 11 accepted'], n:'unchanged in round 2; caps 2,000 / 5,000', f:'eval/guards.py · tests/test_scorecard.py'},
+    {t:'6 · the new version — a copy of the parent with new prompt files', p:'<code>agents/v2_sql/</code>: <code>system.md</code> (3 lines added), ten <code>datasets/&lt;ds&gt;.md</code>, <code>agent.yaml</code> unchanged but for <code>challenger_of</code>. The fingerprint covers every prompt surface, so the version is registered as a new MLflow prompt version.', r:['10 notes · 1,284–1,500 chars','system.md 2,734 chars','fingerprint 2e057112fb2f','MLflow prompt v3'], n:'new in round 2: the playbook section and plan-first "How to work" (R5, R7)', f:'agents/v2_sql/ · tracking/prompts.py'},
+    {t:'7 · the outcome run and the promotion — the same 54, then the rule', p:'<code>dab eval --agent v2_sql --split all</code>, diagnosed the same way, then <code>dab promote</code>: the rule picks the champion among every version\'s newest complete run and moves the <code>champion</code> alias. This run is the next round\'s source.', r:['answers 30/54 (+10 −4)','SQL 18/49','held-out SQL 2/16','promoted 2026-09-24 (D30)'], n:'round 2: rule D36, SQL first (R8)', f:'eval/promote.py · agents/promotions.jsonl · eval/rounds.py'}
+  ];
+  var picks = Array.prototype.slice.call(document.querySelectorAll('#loopfig g.pick'));
+  var panel = document.getElementById('stage-panel');
+  var where = document.getElementById('st-where');
+  var cur = 0;
+  function esc(s){ return s; }
+  function show(i){
+    cur = (i + STAGES.length) % STAGES.length;
+    picks.forEach(function(g, j){ g.classList.toggle('on', j === cur); });
+    var s = STAGES[cur];
+    panel.innerHTML = '<p class="label">stage ' + (cur + 1) + ' of 7 · round v1_sql → v2_sql</p>' +
+      '<h4>' + s.t + '</h4><p>' + s.p + '</p>' +
+      '<div class="row">' + s.r.map(function(x){ return '<span class="ok">' + x + '</span>'; }).join('') + (s.n ? '<span class="new">' + s.n + '</span>' : '') + '</div>' +
+      '<p class="small" style="margin:0"><span class="label">files</span> <code>' + s.f + '</code></p>';
+    where.textContent = 'stage ' + (cur + 1) + ' of 7';
+  }
+  picks.forEach(function(g){
+    var i = +g.getAttribute('data-stage');
+    g.addEventListener('click', function(){ show(i); });
+    g.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(i); } });
+  });
+  document.getElementById('st-prev').addEventListener('click', function(){ show(cur - 1); });
+  document.getElementById('st-next').addEventListener('click', function(){ show(cur + 1); });
+  show(0);
+})();
+</script>
+</body>
+</html>

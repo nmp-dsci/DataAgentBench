@@ -1,0 +1,9 @@
+- Two histology columns in `pancancer_atlas_clinical_info`, chosen by the question's wording:
+  - "histological type(s)": use the free-text `histological_type` column (e.g. "Infiltrating Ductal Carcinoma", "Astrocytoma").
+  - "histology type(s)", "histology annotations" or "histology codes": use the ICD-O-3 code column `icd_o_3_histology` (values look like `8500/3`).
+  The two columns are many-to-many. In LGG, for example, 3 free-text words map across 5 ICD-O-3 codes, and Astrocytoma splits across three codes. Grouping by the wrong column changes the number of groups and every statistic.
+- Both columns (and other coded clinical fields) hold bracketed sentinel values such as `[Not Available]`. Valid, known or "not in square brackets" means the column is NOT NULL and does not match `^\[.*\]$`. Apply this to the column you actually group by.
+- Every `Patient_description` holds exactly one participant barcode matching `TCGA-[A-Z0-9]{2}-[A-Z0-9]{4}`, which equals `ParticipantBarcode` in the molecular tables. The cancer type is written out in full in the description (e.g. "Brain lower grade glioma", "Breast invasive carcinoma"), not as an acronym. A case-insensitive match on the full name finds 513 LGG and 1,087 BRCA rows.
+- Get sex from `Patient_description` with a word-boundary regex (`\mFEMALE\M` / `\mMALE\M`). Never use a substring match on MALE, because "FEMALE" contains "MALE".
+- `pancancer_atlas_rnaseq_expression.normalized_count` has NULLs (~177k) and small negative values (min ≈ -0.99, ~54k rows). For log10(normalized_count + 1) (Postgres `log(x)` is base 10), valid expression means NOT NULL and normalized_count > -1. Filter the gene with `"Symbol"` equality.
+- For chi-square questions, build the full category grid so that empty cells count as 0. Drop the rows and columns whose marginal total fails the cutoff, then recompute the expected values E = row*col/grand from the grid that is kept.

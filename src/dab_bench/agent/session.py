@@ -148,8 +148,9 @@ async def solve(
         trial_key=key,
         sandbox=sandbox,
         exec_timeout_s=cfg.exec_timeout_s,
+        plan_required=cfg.plan,
     )
-    server = make_tool_server(state, list(cfg.tools))
+    server = make_tool_server(state, list(cfg.tools), cfg.plan)
     cwd = isolated_cwd()
     options = session_options(version, system_prompt, server, cwd, model_id, eff)
     prompt = user_message(query.question)
@@ -290,7 +291,7 @@ async def isolation_check(version: AgentVersion, ctx: DatasetContext) -> dict[st
     options = session_options(
         version,
         system_prompt,
-        make_tool_server(state, list(cfg.tools)),
+        make_tool_server(state, list(cfg.tools), cfg.plan),
         cwd,
         resolve_model(cfg.model),
         cfg.effort or EFFORT,

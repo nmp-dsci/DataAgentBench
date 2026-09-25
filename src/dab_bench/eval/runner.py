@@ -137,6 +137,7 @@ def _result_from(query: Query, trial: int, s: Solve, verdict: dict[str, Any]) ->
         mode=sub.get("mode"),
         step=sub.get("step") or None,
         result_rows=sub.get("row_count"),
+        plan=sub.get("plan"),
     )
 
 

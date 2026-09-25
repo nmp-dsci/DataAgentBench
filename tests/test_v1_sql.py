@@ -6,6 +6,7 @@ which these tests replace with a fixed result, so the contract is checked, not t
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
 import pytest
@@ -144,3 +145,51 @@ def test_the_last_good_submission_wins(fixed_result: list[str]) -> None:
     call_tool(st, "submit_answer", {"sql": "select x", "mode": "derived", "answer": "a/b"})
     call_tool(st, "submit_answer", {"sql": "select boom", "mode": "pass_through"})
     assert st.answer == "a/b"  # a failed resubmission does not erase the recorded one
+
+
+# ── plan first (s08, D34) ────────────────────────────────────────────────────
+
+PLAN = {
+    "sources": "repos table",
+    "keys": "none",
+    "parse": "stars after 'starred by', commas stripped",
+    "filter": "language is Swift",
+    "metric": "none",
+    "rank": "stars descending, name as tie-break",
+    "shape": "name and stars, five rows, pass_through",
+}
+
+
+def test_a_plan_version_needs_the_seven_steps_and_records_them(fixed_result: list[str]) -> None:
+    st = _state()
+    st.plan_required = True
+    out, err = call_tool(st, "submit_answer", {"sql": "select x", "mode": "pass_through"})
+    assert err and "`plan` is required" in out and st.submission is None
+    half = {k: v for k, v in PLAN.items() if k != "rank"}
+    out, err = call_tool(
+        st, "submit_answer", {"sql": "select x", "mode": "pass_through", "plan": half}
+    )
+    assert err and "lacks rank" in out and st.submission is None
+    out, err = call_tool(
+        st, "submit_answer", {"sql": "select x", "mode": "pass_through", "plan": PLAN}
+    )
+    assert not err and (st.submission or {})["plan"] == PLAN
+
+
+def test_a_plan_as_a_json_string_is_read_too(fixed_result: list[str]) -> None:
+    st = _state()
+    st.plan_required = True
+    args = {"sql": "select x", "mode": "pass_through", "plan": json.dumps(PLAN)}
+    out, err = call_tool(st, "submit_answer", args)
+    assert not err and (st.submission or {})["plan"]["rank"] == PLAN["rank"]
+
+
+def test_only_a_plan_version_sees_the_plan_in_the_schema() -> None:
+    tools = list(load_version("v1_sql").config.tools)
+    plain = {s.name: s for s in specs_for(tools)}["submit_answer"]
+    assert "plan" not in plain.schema["properties"]
+    planned = {s.name: s for s in specs_for(tools, plan=True)}["submit_answer"]
+    assert "plan" in planned.schema["properties"] and "plan" in planned.schema["required"]
+    assert set(planned.schema["properties"]["plan"]["required"]) == set(PLAN)
+    st = _state()  # a version without plan submits as before
+    assert st.plan_required is False

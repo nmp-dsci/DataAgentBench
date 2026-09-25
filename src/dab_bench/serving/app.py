@@ -329,6 +329,8 @@ def create_app(index: Index | None = None) -> FastAPI:
             "current": hist[0] if hist else None,
             "history": hist,
             "proposal": _golden_db(golden.proposals).get(q["id"]),
+            # the reader's seven lines for the current golden (s08), when `dab diagnose --ledger` ran
+            "ledger": _golden_ledger(hist[0]["id"]) if hist else None,
         }
 
     def _golden_attempt(q: dict[str, Any], sql: str, kind: str = "answer") -> dict[str, Any]:
@@ -390,8 +392,13 @@ def create_app(index: Index | None = None) -> FastAPI:
                 {
                     "version": name,
                     "parent": v.config.challenger_of,
-                    # a hand-built challenger names no parent; its run says what it was measured against
-                    "measured_against": agent_of.get(meta.challenger_of or "") if meta else None,
+                    # a hand-built challenger names no parent: its agent.yaml (a model switch, s08)
+                    # or its run says what it was measured against
+                    "measured_against": v.config.measured_against
+                    or (agent_of.get(meta.challenger_of or "") if meta else None),
+                    "model": v.config.model,
+                    "sql": (c.scorecard or {}).get("sql") if not c.why_not else None,
+                    "heldout": c.heldout if not c.why_not else None,
                     "started_at": meta.started_at if meta else None,
                     "run_id": c.run_id if not c.why_not else None,
                     "passed": c.passed if not c.why_not else None,
@@ -468,7 +475,7 @@ def create_app(index: Index | None = None) -> FastAPI:
                     if t.name == "return_answer"
                     else "on",
                 }
-                for t in specs_for(list(v.config.tools))
+                for t in specs_for(list(v.config.tools), v.config.plan)
             ],
             "sandbox_built": image_exists(),
             "playground_llm": s.playground_llm,
@@ -547,6 +554,7 @@ def create_app(index: Index | None = None) -> FastAPI:
             trial_key=f"playground_{body.dataset}",
             sandbox=sandbox,
             exec_timeout_s=v.config.exec_timeout_s,
+            plan_required=v.config.plan,
         )
         out, err = call_tool(state, name, body.input)
         call = state.calls[-1]
@@ -835,6 +843,15 @@ def _compare(ix: Index, ids: list[str], group: str, scope: str) -> dict[str, Any
         "fixed": fixed,
         "broken": broken,
     }
+
+
+def _golden_ledger(golden_id: int) -> dict[str, str] | None:
+    from dab_bench.data.pg import reachable
+    from dab_bench.eval.ledger import cached
+
+    if not reachable():
+        return None
+    return cached([int(golden_id)]).get(int(golden_id))
 
 
 def _trial_score(run_id: str, query_id: str, trial: int) -> dict[str, Any] | None:

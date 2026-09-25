@@ -147,6 +147,37 @@ Plan `.lavish/s06_golden-from-gold-and-hints.html`, decisions D26–D31:
   version lineage and each question before and after; the Runs tab opens with the
   champion over time (the reigns in `agents/promotions.jsonl` and every full-split run).
 
+### Round 2: the statement is the goal (s08, 2026-09-25)
+
+Plan `.lavish/s08_round2-sql-then-sonnet.html`, decisions D32–D37. Round 1 lifted answers
+24 → 30 of 54 but SQL only 13 → 18 of 49 (held out 1 → 2 of 16): it taught data facts, and
+its diagnosis named a `sqlglot` category rather than the part of the statement that broke.
+
+- **The ledger** (`eval/ledger.py`, `agents/reader/`, D33): `dab diagnose <run> --ledger`
+  has a Sonnet 5 reader describe each statement as seven steps in words (sources, keys,
+  parse, filter, metric, rank, shape). A golden's lines are cached by golden id in
+  `dataagentbench_meta.golden_ledger`; for every trial whose SQL fails, the agent's lines,
+  a verdict per step and the step it `breaks_at` go to `runs/<id>/ledger.json`, and the
+  trial's category becomes `breaks at <step>`.
+- **The optimiser** (D32 B): component sessions, one per step at which failed training
+  statements break, read those questions across every dataset and write that step's
+  section of an SQL playbook in `system.md` (skeleton `agents/optimiser/playbook.md`,
+  prompt `agents/optimiser/component.md`, tool `write_section`, at most 600 characters a
+  section, `system.md` at most 8,000); dataset sessions write
+  the notes as before, led by the ledger, up to 2,000 characters. The cross-dataset
+  system pass is not run. Every write passes the same guard.
+- **Plan first** (D34): the playbook asks for the plan before the first query;
+  `agent.yaml` `plan: true` makes `submit_answer` require `plan`, the statement's seven
+  steps, recorded in `results.jsonl`, the trace and MLflow.
+- **Sonnet after the round** (D35 A): `v4_sql` is `v3_sql` with `model: sonnet` and
+  `measured_against: v3_sql`, so the prompt's lift (v2 → v3, both Haiku) and the model's
+  (v3 → v4) are measured apart.
+- **Promotion** (D36 B): the most SQL passed of the questions with a golden wins; answers
+  of the 54 break a tie; then the incumbent; then the older run.
+- **The Optimise tab** (D37 A): the loop as seven clickable stages with the round's own
+  counts, the rounds over versions with SQL first, and a round opened as a component
+  matrix, one card per session and held-out SQL first.
+
 ## 8 · The agent build — decisions, layout, contract
 
 Decided in the s01 review (all queued by the reviewer):

@@ -1,4 +1,4 @@
-import type { GoldenBriefSql, Rate, ScoreRow, ScoreTotals } from './api';
+import { COMPONENTS, type GoldenBriefSql, type Lines, type Rate, type ScoreRow, type ScoreTotals } from './api';
 import { GoldDiff } from './golddiff';
 import { SqlBlock } from './sql';
 
@@ -62,14 +62,68 @@ export const CATEGORY_HELP: Record<string, string> = {
   aggregation: 'The agent aggregated or grouped differently.',
   'order / tie': 'The agent ranked, limited or broke ties differently (ORDER BY / LIMIT).',
   'result differs': 'The statements look alike, but the results differ.',
+  // s08: the reader's ledger names the step of the statement that first goes a different way
+  'breaks at sources': "The agent read a different table or field for something the question names: the golden's source is elsewhere.",
+  'breaks at keys': 'The agent matched rows across tables differently: another key, or a key not normalised the way the golden does.',
+  'breaks at parse': 'The agent read values out of text or JSON differently: fewer phrasings, another pattern or another date format.',
+  'breaks at filter': 'The agent kept different rows: a condition, a window or an exclusion differs from the golden.',
+  'breaks at metric': 'The agent measured something else, or at another grain: the aggregate, the grouping or the formula differs.',
+  'breaks at rank': 'The agent ordered, tie-broke or limited differently.',
+  'breaks at shape': "The agent's rows are right but come out in another shape: other columns, more rows, other rounding.",
 };
+
+const VERDICT_TONE: Record<string, string> = { same: 'ok', differs: 'warn', none: 'no' };
+
+/** The statement as seven steps (the ledger, s08): the golden's line, the agent's (or its submitted
+ *  plan, when its statement passed and the reader did not read it), and the verdict per step. */
+export function StepsTable({ golden, agent, plan, verdicts, breaksAt }: { golden?: Lines | null; agent?: Lines | null; plan?: Lines | null; verdicts?: Partial<Record<string, string>> | null; breaksAt?: string | null }) {
+  if (!golden && !plan) return null;
+  const other = agent ?? plan;
+  return (
+    <div className="tw">
+      <table className="checks steps">
+        <caption>
+          The statement, step by step: {golden ? "the golden's steps as the reader wrote them" : ''}
+          {golden && other ? ', beside ' : ''}
+          {agent ? "the agent's" : plan ? "the plan the agent submitted" : ''}
+          {breaksAt ? `; it first breaks at ${breaksAt}` : ''}
+        </caption>
+        <thead>
+          <tr>
+            <th>Step</th>
+            {golden && <th>Golden</th>}
+            {other && <th>{agent ? 'Agent' : 'Agent’s plan'}</th>}
+            {verdicts && <th>Verdict</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {COMPONENTS.map((c) => (
+            <tr key={c} className={breaksAt === c ? 'warnrow' : ''}>
+              <td className="sub">
+                {c}
+                {breaksAt === c ? ' ◀' : ''}
+              </td>
+              {golden && <td className="small">{golden[c]}</td>}
+              {other && <td className="small">{other[c]}</td>}
+              {verdicts && (
+                <td>
+                  <span className={`chip ${VERDICT_TONE[verdicts[c] ?? ''] ?? ''}`}>{verdicts[c] ?? '—'}</span>
+                </td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 const verdictWord = (v: boolean | null | undefined) => (v == null ? 'not scored' : v ? 'pass' : 'fail');
 
 /** The agent's submitted SQL beside the question's golden SQL: the three checks as a table (what each
  *  compares, its verdict, why), the failure category in words, then the two statements and what differs.
  *  Nothing here ever reaches an agent; the scorecard is read after the run. */
-export function SqlVersus({ score, agentSql, golden, mode, step, reason }: { score: ScoreRow; agentSql: string | null | undefined; golden: GoldenBriefSql | null | undefined; mode?: string | null; step?: string | null; reason?: string | null }) {
+export function SqlVersus({ score, agentSql, golden, mode, step, reason, plan }: { score: ScoreRow; agentSql: string | null | undefined; golden: GoldenBriefSql | null | undefined; mode?: string | null; step?: string | null; reason?: string | null; plan?: Lines | null }) {
   const structure = Object.entries(score.structure ?? {});
   const solved = score.category === 'solved';
   const noGolden = score.golden_id == null;
@@ -90,6 +144,7 @@ export function SqlVersus({ score, agentSql, golden, mode, step, reason }: { sco
       why: noGolden ? 'no golden to compare with' : score.decision_detail || (mode ? `chose ${mode}` : 'no mode: nothing was submitted'),
     },
   ];
+  const led = score.ledger;
   return (
     <div className="versus">
       <div className="tw">
@@ -116,6 +171,12 @@ export function SqlVersus({ score, agentSql, golden, mode, step, reason }: { sco
           </tbody>
         </table>
       </div>
+      {led?.agent && (
+        <p className="diagnosis">
+          <span className="label">where it broke</span> <b>{led.breaks_at ?? 'no single step'}</b>
+          {led.why ? ` — ${led.why}` : ''}
+        </p>
+      )}
       <p className="diagnosis">
         <span className="label">diagnosis</span> <b>{solved ? 'solved the golden way' : score.category}</b>
         {' — '}
@@ -140,6 +201,7 @@ export function SqlVersus({ score, agentSql, golden, mode, step, reason }: { sco
           </div>
         )}
       </div>
+      {(led?.golden || plan) && <StepsTable golden={led?.golden} agent={led?.agent} plan={plan} verdicts={led?.verdicts} breaksAt={led?.breaks_at} />}
       {structure.length > 0 && (
         <div className="tw">
           <table className="structure">

@@ -153,6 +153,7 @@ def log_trial_trace(
                 "mode": result.mode,
                 "step": result.step or "",
             }
+            | ({"plan": result.plan} if result.plan else {})
             if result.mode
             else {}
         ),

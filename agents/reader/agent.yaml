@@ -1,0 +1,10 @@
+# The reader writes the SQL ledger in `dab diagnose --ledger` (plan s08, D33), never inside an eval.
+# It reads a question and a statement (a golden, or a golden beside a trial's) and writes what the
+# statement does at each of the seven steps, in words. Its output is stored beside the golden and
+# the run; it never reaches a trial's prompt.
+model: sonnet
+effort: medium
+max_turns: 3
+timeout_s: 300
+tools:
+  - mcp__dab__write_ledger

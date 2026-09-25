@@ -10,30 +10,32 @@
 - `make dev` + `cd frontend && npm run dev` (explorer on :5173, API on :8091)
 - agent build: `make platform-up` · `make db-roles` · `make data` · `make context` ·
   `make curate` · `make sandbox` · `make eval SPLIT=smoke|all TRIALS=n`
-- the loop (s06): `dab eval --agent v1_sql --split all` · `dab diagnose <run>` ·
-  `dab optimise <run> --into <version>` · `dab promote`
+- the loop (s06, s08): `dab eval --agent <version> --split all` ·
+  `dab diagnose <run> --ledger` · `dab optimise <run> --into <version>` · `dab promote`
 - `uv run pytest -q` · `make lint` · `make fmt` (`DAB_TEST_PG=1` adds the live role test)
 
 ## Rules
 
-- **Only four things call a model**, all through the Agent SDK on the
+- **Only five things call a model**, all through the Agent SDK on the
   subscription: the eval agent (`dab eval`), the curator (`dab context curate`),
-  the optimiser (`dab optimise`, s06) and `llm_extract` inside a v0 trial (the SQL
-  versions have no `llm_extract`). `agent/llm.py` is the one place a model is
+  the optimiser (`dab optimise`, s06), the reader (`dab diagnose --ledger`, s08,
+  never inside a trial) and `llm_extract` inside a v0 trial (the SQL versions have
+  no `llm_extract`). `agent/llm.py` is the one place a model is
   named; `require_live()` refuses to start with a per-token key present.
   The explorer, the ingest, the rescore and the context *build* never do —
   the Agent tab's playground runs every tool *except* `llm_extract`, which
   stays display-only (decision D8-A; `DAB_PLAYGROUND_LLM=1` is the only way
   to change that, and it is not wired).
 - **A session sees its prompt and its `dab` tools, nothing else.**
-  `agent/isolation.py`: every eval, curator and optimiser session starts in an empty
+  `agent/isolation.py`: every eval, curator, optimiser and reader session starts in an empty
   directory outside the repo, with auto-memory, CLAUDE.md and the `agents-md`
   plugin off, no settings sources, no built-in tools and a strict MCP config.
   The CLI's `init` message is recorded on each trace, and any tool, server or
   plugin beyond the version's own stops the run. `dab isolation-check` (one
   short turn) also reads the session transcript against an allowlist of the
-  context the CLI adds. The account email is on that list because the CLI
-  offers no switch for it; it never reaches a trace or MLflow. Each trial's
+  context the CLI adds. The account email and (CLI 2.1.281) organisation id are on
+  that list because the CLI offers no switch for them; neither reaches a trace
+  or MLflow. The CLI's built-in `agents-md` and `telemetry` plugins are off. Each trial's
   `execute_python` runs in its own container with only its own `/work`
   folder mounted (`tests/test_sandbox.py`).
 - **The pack is the knowledge base, and it is legitimate by construction.**
@@ -86,8 +88,14 @@
   result diff of the *train* questions (`data/splits/train.json`), never a held-out
   one, and every note it writes passes `eval/guards.py` (no run of 8 question words,
   no gold value written literally, no run of 6 golden SQL tokens, ≤ 1,500
-  characters) or is refused. The scorecard (`dab diagnose`) reads goldens after a
-  run; nothing it computes reaches a trial.
+  characters; from s08, 2,000 for notes, 600 for a playbook section and 8,000 for
+  `system.md`) or is refused. The scorecard (`dab diagnose`) reads goldens after a
+  run; nothing it computes reaches a trial. The reader (s08, `eval/ledger.py`)
+  describes goldens and failed statements in words, seven steps each: its lines
+  are stored beside the golden (`dataagentbench_meta.golden_ledger`, refused to
+  `dab_agent`) and the run (`runs/<id>/ledger.json`) with any gold value written
+  literally redacted, and never enter a prompt; the optimiser reads them, and what
+  it writes from them passes the same guard.
 - **One address per thing** (`frontend/src/lib/url.ts`; test
   `frontend/src/routes.test.tsx`). One id, spelled the same everywhere:
   question `deps_dev_v1/1`, trial `deps_dev_v1/1/t1`; the trace file's flat

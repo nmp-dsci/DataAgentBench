@@ -21,7 +21,7 @@ from dab_bench.config import AGENTS_DIR
 SURFACES = ("system.md", "helper.py")
 FROZEN = ("agent.yaml",)
 CHAMPION_FILE = AGENTS_DIR / "champion"
-NOT_EVAL_AGENTS = ("curator", "optimiser")  # agents that never answer a question
+NOT_EVAL_AGENTS = ("curator", "optimiser", "reader")  # agents that never answer a question
 
 
 @dataclass(frozen=True)
@@ -49,6 +49,10 @@ class AgentConfig:
     )
     pack: bool = True  # the curated summary.md + pitfalls.md in the prompt (off for v1_sql, D26)
     challenger_of: str | None = None  # the version this one was optimised from
+    # a hand-built version measured against another (v4_sql against v3_sql: a model switch, s08)
+    measured_against: str | None = None
+    # plan first (s08, D34): submit_answer requires `plan`, the statement's seven steps in words
+    plan: bool = False
 
 
 @dataclass(frozen=True)
@@ -148,3 +152,34 @@ def list_versions() -> list[str]:
         for p in AGENTS_DIR.iterdir()
         if p.is_dir() and (p / "system.md").exists() and p.name not in NOT_EVAL_AGENTS
     )
+
+
+def copy_with_model(src: str, into: str, model: str, agents_dir: Path = AGENTS_DIR) -> Path:
+    """A hand-built version that differs from `src` only in its model (plan s08, D35 A): the same
+    prompt files, `model` changed, `measured_against: src`, no `challenger_of` (it is not an
+    optimisation round). Never overwrites a version."""
+    import shutil
+
+    source, target = agents_dir / src, agents_dir / into
+    if not (source / "system.md").exists():
+        raise FileNotFoundError(f"no agent at {source}")
+    if target.exists():
+        raise FileExistsError(f"{target} exists; a version is never overwritten")
+    shutil.copytree(source, target, ignore=shutil.ignore_patterns("optimise.json"))
+    cfg = yaml.safe_load((source / "agent.yaml").read_text()) or {}
+    was = cfg.get("model", "haiku")
+    cfg["model"] = model
+    cfg.pop("challenger_of", None)
+    cfg["measured_against"] = src
+    header = [ln for ln in (source / "agent.yaml").read_text().split("\n") if ln.startswith("#")]
+    (target / "agent.yaml").write_text(
+        "\n".join(
+            [
+                f"# {into}: {src}'s prompt files on {model} (was {was}); a model switch, not a round",
+                *header,
+            ]
+        )
+        + "\n"
+        + yaml.safe_dump(cfg, sort_keys=False)
+    )
+    return target

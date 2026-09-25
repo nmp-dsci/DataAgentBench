@@ -162,6 +162,7 @@ def log_run(run_dir: Path, meta: RunMeta, results: list[TrialResult]) -> str:
                     "trial": [r.trial for r in submitted],
                     "mode": [r.mode for r in submitted],
                     "step": [r.step or "" for r in submitted],
+                    "plan": [json.dumps(r.plan) if r.plan else "" for r in submitted],
                     "agent_sql": [r.agent_sql or "" for r in submitted],
                     "agent_result": [(r.agent_result or "")[:2000] for r in submitted],
                     "answer": [r.answer[:2000] for r in submitted],
@@ -200,6 +201,15 @@ def log_scorecard(mlflow_run_id: str, run_dir: Path) -> None:
     for k, v in scorecard_metrics(card).items():
         client.log_metric(mlflow_run_id, k, v)
     client.log_artifact(mlflow_run_id, str(run_dir / "scorecard.json"))
+    if (run_dir / "ledger.json").exists():
+        client.log_artifact(mlflow_run_id, str(run_dir / "ledger.json"))
+        breaks: dict[str, float] = {}
+        for q in card.get("questions") or []:
+            b = q.get("breaks_at")
+            if b:
+                breaks[f"scorecard_breaks_at_{b}"] = breaks.get(f"scorecard_breaks_at_{b}", 0.0) + 1
+        for k, v in breaks.items():
+            client.log_metric(mlflow_run_id, k, v)
 
 
 def _total_tokens(r: TrialResult) -> int:

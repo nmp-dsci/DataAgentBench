@@ -390,13 +390,40 @@ def runs_log(run_id: str) -> None:
 
 
 @app.command()
-def diagnose(run_id: str, refresh: bool = False, show: int = 60) -> None:
+def diagnose(
+    run_id: str,
+    refresh: bool = False,
+    show: int = 60,
+    ledger: bool = typer.Option(
+        False, help="also run the reader (Sonnet 5): the SQL ledger, where each statement breaks"
+    ),
+    model: str | None = typer.Option(
+        None, help="the reader's model for this ledger (haiku | sonnet | opus); default agent.yaml"
+    ),
+) -> None:
     """The scorecard of a run: answer / SQL / decision per question, a category per failure,
     and what to optimise first. Computed after the run (goldens re-run as dab_agent) and kept
-    in runs/<id>/scorecard.json; --refresh recomputes it."""
+    in runs/<id>/scorecard.json; --refresh recomputes it. --ledger (plan s08) has the reader
+    write seven lines per golden (cached) and per failed statement into runs/<id>/ledger.json,
+    and a failed trial's category becomes the step it breaks at; with --refresh the ledger's
+    comparisons are re-read too."""
     from dab_bench.eval.scorecard import load_scorecard, score_run
 
-    card = None if refresh else load_scorecard(run_id)
+    card = None if refresh or ledger else load_scorecard(run_id)
+    if ledger:
+        import asyncio
+
+        from dab_bench.eval.ledger import build
+
+        score_run(run_id)  # the comparisons read the fresh SQL verdicts
+        led = asyncio.run(build(run_id, refresh=refresh, model=model))
+        console.print(
+            f"ledger: {len(led['goldens'])} goldens, {len(led['questions'])} comparisons, "
+            f"${led['cost_usd']:.2f}"
+            + (f", [red]{len(led['errors'])} error(s)[/]" if led["errors"] else "")
+        )
+        for e in led["errors"]:
+            console.print(f"  [red]{e}[/]")
     if card is None:
         card = score_run(run_id)
         from dab_bench.config import RUNS_DIR
@@ -450,10 +477,20 @@ def optimise(
     system_pass_only: bool = typer.Option(
         False, help="re-run only the cross-dataset system.md pass for an existing INTO"
     ),
+    components: bool = typer.Option(
+        True,
+        help="s08 (D32 B): component sessions write the SQL playbook in system.md; "
+        "--no-components runs round 1's per-dataset sessions and system pass",
+    ),
+    model: str | None = typer.Option(
+        None,
+        help="the optimiser's model for this round (haiku | sonnet | opus); default agent.yaml",
+    ),
 ) -> None:
     """One optimisation round: the optimiser (Sonnet 5, medium) reads RUN's failed train
-    questions per dataset and writes agents/INTO/ = the run's version + dataset notes (+ a
-    guarded system.md pass). Every edit is checked for question text, gold values and golden
+    questions and writes agents/INTO/ = the run's version + a playbook section per step at
+    which statements break (across datasets, from the ledger: run `dab diagnose RUN --ledger`
+    first) + dataset notes. Every edit is checked for question text, gold values and golden
     SQL; the held-out questions are never shown."""
     import asyncio
 
@@ -470,7 +507,9 @@ def optimise(
 
         rec = asyncio.run(rerun_system_pass(into))
     else:
-        rec = asyncio.run(_optimise(run_id, into, workers=workers))
+        rec = asyncio.run(
+            _optimise(run_id, into, workers=workers, components=components, model=model)
+        )
     for s in rec["sessions"]:
         state = (
             "[red]error[/] " + s["error"]
@@ -480,7 +519,9 @@ def optimise(
             else "[yellow]dropped[/]"
         )
         console.print(
-            f"  {s['scope']:<18} {state}  {len(s['notes'] or ''):>5} chars  "
+            f"  {s['scope']:<18} {state}  {len(s['notes'] or ''):>5} chars"
+            + (f"/{s['budget']}" if s.get("budget") else "")
+            + "  "
             f"{len(s['refusals'])} refusal(s)  {s['n_turns']} turns  ${s['cost_usd'] or 0:.3f}"
         )
     console.print(
@@ -491,9 +532,11 @@ def optimise(
 
 @app.command()
 def promote(candidates: str | None = None, dry_run: bool = False) -> None:
-    """Crown the version with the most answers passed on the 54 (D30; a tie keeps the
-    incumbent). Each candidate is its newest complete full-split run. Moves agents/champion,
-    sets the MLflow prompt alias `champion` and appends the verdict to agents/promotions.jsonl."""
+    """Crown the version whose statements are right most often (D36): the most SQL passed
+    of the questions with a golden; answers passed of the 54 break a tie; then the incumbent;
+    then the older run. Each candidate is its newest complete full-split run. Moves
+    agents/champion, sets the MLflow prompt alias `champion` and appends the verdict to
+    agents/promotions.jsonl."""
     from dab_bench.eval.promote import promote as _promote
 
     rec = _promote(_datasets_arg(candidates), dry_run=dry_run)
@@ -516,6 +559,23 @@ def promote(candidates: str | None = None, dry_run: bool = False) -> None:
         )
     console.print(t)
     console.print(("[dim]dry run[/] " if dry_run else "") + rec["reason"])
+
+
+@app.command("version-model")
+def version_model(
+    src: str,
+    into: str = typer.Option(..., help="the new version's name, e.g. v4_sql"),
+    model: str = typer.Option(..., help="haiku | sonnet | opus, or a full model id"),
+) -> None:
+    """A hand-built version that is SRC with another model (plan s08, D35 A): the same prompt
+    files, `measured_against: SRC`, so the model's lift is measured apart from the prompt's."""
+    from dab_bench.agent.versions import copy_with_model, load_version
+
+    copy_with_model(src, into, model)
+    v = load_version(into)
+    console.print(
+        f"agents/{into} · {v.config.model} · measured against {src} · fingerprint {v.fingerprint}"
+    )
 
 
 @app.command("split-optimise")

@@ -81,3 +81,20 @@ async def test_a_dropped_session_redacts_the_stored_rationale_too() -> None:
         assert "notes" not in entry and "rationale" not in entry
     blob = str(asdict(sess))
     assert QUESTION not in blob
+
+
+@pytest.mark.anyio
+async def test_a_long_rationale_is_not_a_refusal_but_a_leaking_one_is() -> None:
+    sess = Session(scope="playbook:keys", kind="component")
+    guard = Guard(questions=[QUESTION], golds=[], golden_sqls=[], max_chars=100)
+    state = ToolState(dataset="", ctx=load_context("yelp"), trial_key="t", sandbox=None)
+    server = _server(state, sess, guard, None, "write_section", True)["instance"]
+    r = await _mcp_call(
+        server, "write_section", {"notes": "- strip the prefix", "rationale": "x " * 200}
+    )
+    assert not r.is_error and sess.notes == "- strip the prefix"  # a 400-char rationale is fine
+    assert sess.attempts == [{"ok": True, "chars": 18, "problems": []}]
+    sess2 = Session(scope="playbook:keys", kind="component")
+    server = _server(state, sess2, guard, None, "write_section", True)["instance"]
+    r = await _mcp_call(server, "write_section", {"notes": "- ok", "rationale": LEAK_NOTES})
+    assert r.is_error and sess2.notes is None and sess2.attempts[0]["ok"] is False
