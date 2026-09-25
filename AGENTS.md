@@ -26,8 +26,9 @@ databases at once (SQLite, DuckDB, PostgreSQL, MongoDB), each with a
 The agent build (§8, plan `.lavish/s01_agent-blueprint.html`, approved for
 M0–M3 on 2026-09-21) adds one Claude Agent SDK analyst over the same 54
 questions, the data re-hosted in Postgres, a generated-then-curated context
-pack, and runs judged by the same validators. Only the agent, the curator and
-`llm_extract` call a model, all on the subscription through the Agent SDK.
+pack, and runs judged by the same validators. Six things call a model — the
+eval agent, the curator, the optimiser, the reader, the reviewer and
+`llm_extract` — all on the subscription through the Agent SDK (`CLAUDE.md`).
 
 ## 2 · Decisions, and the reasons
 
