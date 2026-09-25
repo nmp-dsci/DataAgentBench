@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>s09 · Round 2, three models</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Design source (2): the project's own system — DESIGN.md ("Field Guide"), tokens verbatim,
+   the same block s00–s03 and frontend/src/tokens.css carry. */
+:root{
+  --bg:#F7F6F2; --panel:#FFFFFF; --band:#EFEEE8;
+  --ink:#1A1D1B; --ink-2:#3B403D; --muted:#4A514D; --faint:#5C635E;
+  --line:#DCDAD2; --line-2:#C7C5BC; --line-3:#8A8880;
+  --accent:#0A6552; --accent-ink:#FFFFFF; --accent-soft:#DFEFE8;
+  --amber:#8A5006; --amber-soft:#F6E6CF;
+  --red:#A2342B; --red-soft:#F6DEDB;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --t-2:0.8rem; --t-1:0.875rem; --t0:1rem; --t1:1.125rem; --t2:1.406rem; --t3:1.758rem; --t4:2.197rem;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --r:10px; --r-sm:6px;
+  --shadow:0 1px 2px rgb(20 25 22 / .05), 0 12px 28px -18px rgb(20 25 22 / .22);
+  --dur:300ms; --ease:cubic-bezier(.2,.7,.2,1); --focus:var(--accent);
+  --w:1140px; --measure:68ch; --track-label:.08em;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121614; --panel:#191E1B; --band:#161A18;
+    --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+    --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+    --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+    --amber:#D99A4E; --amber-soft:#3A2A14;
+    --red:#E8776B; --red-soft:#3D1D1A;
+    --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121614; --panel:#191E1B; --band:#161A18;
+  --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+  --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+  --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+  --amber:#D99A4E; --amber-soft:#3A2A14;
+  --red:#E8776B; --red-soft:#3D1D1A;
+  --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+}
+@media (prefers-reduced-motion: reduce){ :root{ --dur:0.01ms; } }
+*,*::before,*::after{box-sizing:border-box}
+:where(.grid,.flex,.kpi,.cards,.mock-body,.mock-cols,.mock-top,.ladder)>*{min-width:0}
+:where(p,h1,h2,h3,h4,li,dd,figcaption,td,th,.chip,.label){overflow-wrap:anywhere}
+:where(img,svg,video,iframe){max-width:100%;height:auto}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink-2);font-family:var(--sans);font-size:var(--t0);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{color:var(--ink);margin:0;line-height:1.15;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+h1{font-size:var(--t4);font-family:var(--serif);font-weight:400} h1 em{font-style:italic;font-weight:400;color:var(--accent)}
+h2{font-size:var(--t3)} h3{font-size:var(--t1)} h4{font-size:var(--t0)}
+p{margin:0 0 var(--s4);text-wrap:pretty}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:.2em} a:hover{text-decoration-thickness:2px}
+strong,b{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:max(var(--t-2),.86em);background:var(--band);padding:.08em .32em;border-radius:var(--r-sm);color:var(--ink-2)}
+pre{margin:0;font-family:var(--mono);font-size:var(--t-2);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.wrap{max-width:var(--w);margin-inline:auto;padding-inline:var(--s5)}
+.label{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0}
+.lead{font-family:var(--serif);font-size:var(--t1);line-height:1.5;color:var(--ink-2);max-width:72ch}
+.small{font-size:var(--t-1);color:var(--muted)}
+.top{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:var(--w);margin-inline:auto;padding:var(--s3) var(--s5);display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.top b{font-family:var(--mono);font-size:var(--t-1);color:var(--ink);white-space:nowrap}
+.top nav{display:flex;gap:var(--s4);margin-left:auto;flex-wrap:wrap;font-size:var(--t-1);font-weight:500}
+.top nav a{color:var(--ink-2);text-decoration:none;padding:var(--s1) 0} .top nav a:hover{color:var(--accent)}
+header.hero{padding:var(--s7) 0 var(--s5)}
+.chips{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s4) 0 0}
+.chip{font-family:var(--mono);font-size:var(--t-2);padding:.3em .6em;border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--ink-2);background:var(--panel)}
+.chip.ok{border-color:var(--accent);color:var(--accent)} .chip.warn{border-color:var(--amber);color:var(--amber)}
+section.blk{padding-top:var(--s8)} section.blk:last-of-type{padding-bottom:var(--s9)}
+section.band-sec{background:var(--band);margin-top:var(--s8);padding:var(--s7) 0}
+section.band-sec + section.blk{padding-top:var(--s7)}
+.hd{margin-bottom:var(--s5);max-width:80ch} .hd .label{margin-bottom:var(--s2)} .hd h2{margin-bottom:var(--s3)}
+.panel{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5)}
+.grid{display:grid;gap:var(--s4)} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.g3,.g2{grid-template-columns:minmax(0,1fr)}}
+.card h3{margin-bottom:var(--s2)} .card p{margin-bottom:var(--s2);font-size:var(--t-1)} .card p:last-child{margin:0}
+.card.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r);box-shadow:var(--shadow);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:var(--t-1)}
+caption{text-align:left;padding:var(--s4) var(--s5) var(--s2);color:var(--muted);font-size:var(--t-1);caption-side:top}
+th,td{text-align:left;padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}
+thead th{font-family:var(--mono);font-size:var(--t-2);font-weight:500;color:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase;border-bottom:1px solid var(--line-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.sub{font-weight:600;color:var(--ink);white-space:nowrap}
+td.num{font-family:var(--mono);font-size:var(--t-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+td .path{display:block;font-family:var(--mono);font-size:var(--t-2);color:var(--faint);font-weight:400;margin-top:2px}
+td.mono,td code.u{font-family:var(--mono);font-size:var(--t-2)}
+code.u{background:none;padding:0;color:var(--ink)} code.u s{color:var(--faint);text-decoration:line-through}
+tr.pro td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+tr.dim td{color:var(--muted)}
+.v-ok{color:var(--accent);font-weight:600} .v-no{color:var(--muted)} .v-warn{color:var(--amber);font-weight:600}
+blockquote{margin:0;padding:var(--s3) var(--s4);border-left:2px solid var(--accent);background:var(--band);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:var(--t-1)}
+blockquote.warn{border-left-color:var(--amber)}
+.fig{margin:var(--s5) 0 0}
+.fig-title{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0 0 var(--s3);text-wrap:balance}
+.fig figcaption{font-family:var(--sans);font-size:var(--t-1);color:var(--muted);line-height:1.5;margin-top:var(--s3)}
+.fig figcaption b{color:var(--ink);font-weight:600}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:var(--s3)}
+.steps li{position:relative;padding-left:2.75rem;font-size:var(--t-1)}
+.steps li::before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:0;top:2px;font-family:var(--mono);color:var(--accent);font-weight:500}
+form.q{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5);display:grid;gap:var(--s3);margin-top:var(--s4)}
+form.q h3{margin:0} form.q .why{font-size:var(--t-1);color:var(--muted);margin:0}
+form.q label{display:grid;grid-template-columns:1.2rem minmax(0,1fr);gap:var(--s2);align-items:start;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;min-height:24px}
+form.q label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+form.q input[type=radio],form.q input[type=checkbox]{margin:3px 0 0;accent-color:var(--accent);width:16px;height:16px}
+form.q textarea{width:100%;font:inherit;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);color:var(--ink-2);min-height:3.2rem;resize:vertical}
+form.q .row{display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap}
+.btn{font:500 var(--t-1) var(--sans);background:var(--accent);color:var(--accent-ink);border:0;border-radius:var(--r-sm);padding:.55em 1em;cursor:pointer;min-height:24px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.08)} .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.queued{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);min-height:1.2em}
+.rec{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);margin-left:.4em}
+.tag{font-family:var(--mono);font-size:var(--t-2);padding:.15em .45em;border-radius:var(--r-sm);border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.tag.ok{border-color:var(--accent);color:var(--accent)} .tag.warn{border-color:var(--amber);color:var(--amber)} .tag.no{border-color:var(--line-3);color:var(--muted)}
+ul.tight{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.tight li{margin-bottom:var(--s1)}
+ul.qa{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.qa li{margin-bottom:var(--s2)}
+.code{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);margin-top:var(--s3);overflow-x:auto}
+.code .label{margin-bottom:var(--s2)}
+.code.band{background:var(--band)}
+.kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4);margin-top:var(--s5)}
+@media (max-width:900px){.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi .n{font-family:var(--serif);font-size:var(--t3);color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:var(--t-1);color:var(--muted);margin-top:var(--s1)}
+
+/* the hackable-address ladder */
+.ladder{display:grid;gap:var(--s2);margin-top:var(--s3)}
+.ladder .rung{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--s3);align-items:baseline;padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel);font-family:var(--mono);font-size:var(--t-2)}
+.ladder .rung .u{color:var(--ink)} .ladder .rung .u b{color:var(--accent);font-weight:500}
+.ladder .rung .w{font-family:var(--sans);color:var(--muted);font-size:var(--t-2);text-align:right;white-space:nowrap}
+@media (max-width:640px){.ladder .rung{grid-template-columns:minmax(0,1fr)} .ladder .rung .w{text-align:left;white-space:normal}}
+
+/* the mock of the explorer page, in the explorer's own styles */
+.addr{font-family:var(--mono);font-size:var(--t-2);color:var(--ink);background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:var(--s2) var(--s3);margin-top:var(--s4);display:flex;gap:var(--s2);align-items:center}
+.addr .lock{color:var(--faint)} .addr b{color:var(--accent);font-weight:500}
+.mock{background:var(--bg);border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin-top:var(--s2)}
+.mock-top{display:flex;gap:var(--s4);align-items:center;padding:var(--s2) var(--s4);border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 88%,transparent);font-size:var(--t-2);flex-wrap:wrap}
+.mock-top .brand{font-family:var(--mono);color:var(--ink);font-weight:500}
+.mock-top nav{display:flex;gap:var(--s3);flex-wrap:wrap} .mock-top nav span{color:var(--ink-2)} .mock-top nav span.on{color:var(--accent);border-bottom:2px solid var(--accent)}
+.mock-body{padding:var(--s4)}
+.mock h1{font-size:var(--t2)} .mock .label{font-size:.7rem}
+.mock .ed{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent);padding:var(--s4);margin:var(--s3) 0 var(--s4);display:grid;gap:var(--s2)}
+.mock .ed .hdr{display:flex;gap:var(--s3);align-items:baseline;flex-wrap:wrap;font-size:var(--t-1)}
+.mock .ed .hdr b{font-family:var(--mono);font-weight:500;color:var(--ink)} .mock .ed .hdr .nav{margin-left:auto;display:flex;gap:var(--s3);font-size:var(--t-2)}
+.mock .ed .hdr .nav a{text-decoration:underline}
+.mock .ed .qtext{font-size:var(--t-1);color:var(--ink-2);margin:0}
+.mock .ed .ta{font-family:var(--mono);font-size:var(--t-2);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);padding:var(--s2) var(--s3);min-height:4.4rem;color:var(--ink-2);white-space:pre-wrap}
+.mock .ed .row{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}
+.mock .ed .btn{font-size:var(--t-2);padding:.4em .8em} .mock .ed .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.mock table{min-width:0;font-size:var(--t-2)} .mock th,.mock td{padding:var(--s2) var(--s3)}
+.mock tr.cur td{background:var(--accent-soft)} .mock tr.cur td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.mock .tw{box-shadow:none;border:1px solid var(--line)}
+.cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.cmp{grid-template-columns:minmax(0,1fr)}}
+.cmp .side{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s4)}
+.cmp .side h4{margin-bottom:var(--s2)} .cmp .side .label{margin-bottom:var(--s2)}
+.cmp .side pre{background:var(--band);border-radius:var(--r-sm);padding:var(--s3)}
+.cmp .side.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.src{font-size:var(--t-1);color:var(--muted)} .src li{margin-bottom:var(--s1)}
+
+.bar{display:flex;height:34px;border-radius:var(--r-sm);overflow:hidden;margin-top:var(--s3);box-shadow:var(--shadow)}
+.bar span{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:var(--t-2);color:var(--ink);min-width:0;white-space:nowrap;overflow:hidden}
+.bar .a{background:var(--accent-soft)} .bar .b{background:color-mix(in srgb,var(--accent-soft) 45%,var(--panel))} .bar .c{background:var(--amber-soft)}
+.legend{display:flex;gap:var(--s4);flex-wrap:wrap;font-size:var(--t-1);color:var(--muted);margin-top:var(--s2)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+pre.sql{background:var(--band);border-radius:var(--r-sm);padding:var(--s4);font-size:var(--t-2);white-space:pre;overflow-x:auto}
+.copyrow{display:flex;gap:var(--s3);align-items:center;margin-top:var(--s2);flex-wrap:wrap}
+
+/* impact chart: the .dia contract, green / amber / red composition (DESIGN.md §2 Colour) */
+.dia{width:100%;height:auto;display:block;background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow)}
+.dia .ax{stroke:var(--line-2);stroke-width:1}
+.dia .tx{font:500 13px var(--sans);fill:var(--ink)} .dia .tx.all{font-weight:600}
+.dia .tx.k{font:500 13px var(--mono);fill:var(--faint)} .dia .tx.k.strong{fill:var(--ink)}
+.dia .tx.in{font:600 12.8px var(--mono);fill:var(--accent-ink)}
+.dia .trk{fill:var(--line-2)} .dia .agt{fill:var(--ink-2)}
+.dia .seg.ok{fill:var(--accent)} .dia .seg.mid{fill:var(--amber)} .dia .seg.bad{fill:var(--red)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+.sw.b{background:var(--ink-2)} .sw.ok{background:var(--accent)} .sw.mid{background:var(--amber)} .sw.bad{background:var(--red)}
+.lg{white-space:nowrap;margin-right:var(--s3)}
+
+/* the challenger flow figure (.dia contract; nodes follow the page tokens) */
+.dia.flow .nd{fill:var(--panel);stroke:var(--line-3);stroke-width:1}
+.dia.flow .nd.in{fill:var(--band)}
+.dia.flow .nd.hi{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.dia.flow .nd.gold{fill:var(--amber-soft);stroke:var(--amber)}
+.dia.flow .ed{stroke:var(--ink-2);stroke-width:1.25;fill:none;marker-end:url(#arr)}
+.dia.flow .ed.both{marker-start:url(#arr)}
+.dia.flow .ed.dash{stroke-dasharray:5 4}
+.dia.flow .tx.s{font:400 12.8px var(--sans);fill:var(--muted)}
+td.nw{white-space:nowrap}
+.dia.flow .cap{font:500 12.8px var(--mono);fill:var(--faint);letter-spacing:.08em;text-transform:uppercase}
+</style>
+<style>
+.shot{margin:var(--s5) 0 0}
+.shot img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+.shot figcaption{font-size:var(--t-1);color:var(--muted);margin-top:var(--s2);max-width:var(--measure)}
+.shot .src{font-family:var(--mono);font-size:var(--t-2);color:var(--faint)}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4)}
+@media (max-width:760px){.pair{grid-template-columns:minmax(0,1fr)}}
+td.up{color:var(--accent);font-weight:600}
+td.down{color:var(--amber);font-weight:600}
+.top b{min-width:0;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in">
+  <b>s09 · round 2 on three models</b>
+  <nav aria-label="Sections"><a href="#verdict">Verdict</a><a href="#lifts">Lifts</a><a href="#components">Where it breaks</a><a href="#plan">Plan-first</a><a href="#tab">Optimise tab</a><a href="#receipt">Receipt</a><a href="#changed">On the way</a><a href="#next">Next</a></nav>
+</div></div>
+<div class="wrap">
+<header class="hero">
+  <p class="label">DataAgentBench · build receipt · 2026-09-25 · plan s08 (R1–R16, D32–D37) + v5_sql on request · branch challenger_v3 · one trial per question · figures are screenshots of the explorer on :8091</p>
+  <h1>Round 2's prompts on three models: Haiku writes the golden's SQL for 19 of 49, Sonnet 5 for 27, Opus 5.5 for 28: <em>the jump is Haiku to Sonnet; Opus is cheaper, faster and submits cleanly, but not measurably better</em></h1>
+  <p class="lead">Round 2 ran as decided: a Sonnet reader wrote the seven-step ledger for every golden and failed statement, five component sessions wrote the SQL playbook into <code>system.md</code>, ten dataset sessions rewrote their notes, and the generator now submits a plan with its statement. The same prompt files then ran the 54 once on each model, all at medium effort: v3_sql (Haiku 4.5), v4_sql (Sonnet 5) and v5_sql (Opus 5.5). Only the model differs between them.</p>
+</header>
+
+<section class="blk" id="verdict">
+  <div class="hd"><p class="label">01 · verdict · dab promote (D36) · agents/promotions.jsonl</p>
+  <h2>v5_sql leads on SQL and answers but trails v4 on held-out SQL; only Haiku → Sonnet is a gain one trial can see</h2></div>
+  <div class="kpi" style="margin-top:0">
+    <div><div class="n">19 → 27 → 28</div><div class="d">SQL passed of 49 with a golden: Haiku → Sonnet → Opus (v2_sql, the last round-1 version: 18)</div></div>
+    <div><div class="n">32 → 41 → 45</div><div class="d">answers passed of 54, same three runs (v0, never re-run: 27)</div></div>
+    <div><div class="n">2 → 6 → 4 of 16</div><div class="d">held-out SQL passed: questions no optimiser session ever saw</div></div>
+    <div><div class="n">$5.20 · $6.59 · $5.04</div><div class="d">per 54-question run; 22 · 16 · 6 minutes wall; median 16 · 11 · 5 turns</div></div>
+  </div>
+  <div class="tw" style="margin-top:var(--s5)"><table>
+    <caption>Every candidate's newest complete full-split run, as <code>dab promote --dry-run</code> printed it. Rule D36: most SQL passed of the questions with a golden; answers of the 54 break a tie; then the incumbent; then the older run. v4_sql is champion (promoted before v5 ran); by the rule v5_sql would take it, 28 to 27. Not promoted yet: that is your call.</caption>
+    <thead><tr><th>version</th><th>model</th><th>answer</th><th>SQL</th><th>decision</th><th>held-out answer</th><th>held-out SQL</th></tr></thead>
+    <tbody>
+      <tr class="dim"><td class="sub">v0</td><td>haiku</td><td class="num">27/54</td><td class="num">—</td><td class="num">—</td><td class="num">10/16</td><td class="num">—</td></tr>
+      <tr class="dim"><td class="sub">v1_sql</td><td>haiku</td><td class="num">24/54</td><td class="num">13/49</td><td class="num">40/41</td><td class="num">6/16</td><td class="num">1/16</td></tr>
+      <tr class="dim"><td class="sub">v2_sql</td><td>haiku</td><td class="num">30/54</td><td class="num">18/49</td><td class="num">44/48</td><td class="num">8/16</td><td class="num">2/16</td></tr>
+      <tr><td class="sub">v3_sql</td><td>haiku 4.5</td><td class="num">32/54</td><td class="num">19/49</td><td class="num">42/45</td><td class="num">9/16</td><td class="num">2/16</td></tr>
+      <tr><td class="sub">v4_sql <span class="tag ok">champion</span></td><td>sonnet 5</td><td class="num">41/54</td><td class="num">27/49</td><td class="num">43/49</td><td class="num">10/16</td><td class="num">6/16</td></tr>
+      <tr class="pro"><td class="sub">v5_sql <span class="tag no">rule's pick</span></td><td>opus 5.5</td><td class="num">45/54</td><td class="num">28/49</td><td class="num">46/49</td><td class="num">12/16</td><td class="num">4/16</td></tr>
+    </tbody></table></div>
+</section>
+
+<section class="blk" id="lifts">
+  <div class="hd"><p class="label">02 · lifts · paired on the same questions · exact two-sided McNemar</p>
+  <h2>Haiku → Sonnet is the one step clear of noise; Sonnet → Opus is not</h2>
+  <p class="small">Won = passed after and not before; lost = the reverse. p counts only the questions that changed. One trial each, so a single flip is one question.</p></div>
+  <div class="tw"><table>
+    <thead><tr><th>comparison</th><th>measure</th><th>before → after</th><th>won</th><th>lost</th><th>p</th></tr></thead>
+    <tbody>
+      <tr><td class="sub" rowspan="4">v2 → v3<span class="path">round 2's prompts, Haiku both</span></td><td>SQL, all</td><td class="num">18/49 → 19/49</td><td class="num">4</td><td class="num">3</td><td class="num">1.0</td></tr>
+      <tr><td>SQL, held out</td><td class="num">2/16 → 2/16</td><td class="num">0</td><td class="num">0</td><td class="num">1.0</td></tr>
+      <tr><td>answers, all</td><td class="num">30/54 → 32/54</td><td class="num">8</td><td class="num">6</td><td class="num">0.79</td></tr>
+      <tr><td>answers, held out</td><td class="num">8/16 → 9/16</td><td class="num">3</td><td class="num">2</td><td class="num">1.0</td></tr>
+      <tr class="pro"><td class="sub" rowspan="4">v3 → v4<span class="path">Haiku → Sonnet 5</span></td><td>SQL, all</td><td class="num">19/49 → 27/49</td><td class="num">10</td><td class="num">2</td><td class="num">0.039</td></tr>
+      <tr class="pro"><td>SQL, held out</td><td class="num">2/16 → 6/16</td><td class="num">4</td><td class="num">0</td><td class="num">0.125</td></tr>
+      <tr class="pro"><td>answers, all</td><td class="num">32/54 → 41/54</td><td class="num">12</td><td class="num">3</td><td class="num">0.035</td></tr>
+      <tr class="pro"><td>answers, held out</td><td class="num">9/16 → 10/16</td><td class="num">4</td><td class="num">3</td><td class="num">1.0</td></tr>
+      <tr><td class="sub" rowspan="4">v4 → v5<span class="path">Sonnet 5 → Opus 5.5</span></td><td>SQL, all</td><td class="num">27/49 → 28/49</td><td class="num">4</td><td class="num">3</td><td class="num">1.0</td></tr>
+      <tr><td>SQL, held out</td><td class="num">6/16 → 4/16</td><td class="num">0</td><td class="num">2</td><td class="num">0.5</td></tr>
+      <tr><td>answers, all</td><td class="num">41/54 → 45/54</td><td class="num">6</td><td class="num">2</td><td class="num">0.29</td></tr>
+      <tr><td>answers, held out</td><td class="num">10/16 → 12/16</td><td class="num">3</td><td class="num">1</td><td class="num">0.63</td></tr>
+      <tr><td class="sub" rowspan="2">v3 → v5<span class="path">Haiku → Opus 5.5</span></td><td>SQL, all</td><td class="num">19/49 → 28/49</td><td class="num">9</td><td class="num">0</td><td class="num">0.004</td></tr>
+      <tr><td>answers, all</td><td class="num">32/54 → 45/54</td><td class="num">14</td><td class="num">1</td><td class="num">0.001</td></tr>
+    </tbody></table></div>
+  <blockquote class="warn" style="margin-top:var(--s4)">The v2 → v3 row is confounded: v3 is the first version with a required plan, and that change cost Haiku seven submissions (section 04). The playbook's own effect on Haiku is not measured here.</blockquote>
+  <figure class="shot"><p class="fig-title">Optimise tab · every version in order</p><img src="s09_1_tab.png" alt="Optimise tab: the loop figure for round v2_sql → v3_sql and the chart of SQL and answers for every version from v0 to v5_sql" loading="lazy"><figcaption>The filled line (SQL) climbs at the Haiku → Sonnet edge and flattens at Sonnet → Opus; the open line (answers) keeps climbing. Dashed edges are model switches, solid ones rounds. <span class="src">/optimise</span></figcaption></figure>
+</section>
+
+<section class="blk" id="components">
+  <div class="hd"><p class="label">03 · where statements break · the reader's ledger · runs/&lt;id&gt;/ledger.json</p>
+  <h2>Sources stays the first break most often on every model; parse falls from 10 to 3</h2></div>
+  <div class="tw"><table>
+    <caption>First component where the agent's statement differs from the golden's, over the 49 with a golden. "No SQL" = no statement submitted (v3 had 7 of 54; 3 were questions with no golden); "decision / format" = SQL passed but filed under the mode or the answer's format.</caption>
+    <thead><tr><th>category</th><th>v2_sql · haiku</th><th>v3_sql · haiku</th><th>v4_sql · sonnet</th><th>v5_sql · opus</th></tr></thead>
+    <tbody>
+      <tr class="pro"><td class="sub">solved</td><td class="num">17/49</td><td class="num">19/49</td><td class="num">25/49</td><td class="num">28/49</td></tr>
+      <tr><td>breaks at sources</td><td class="num">10</td><td class="num">7</td><td class="num">9</td><td class="num">7</td></tr>
+      <tr><td>breaks at keys</td><td class="num">3</td><td class="num">1</td><td class="num">0</td><td class="num">0</td></tr>
+      <tr><td>breaks at parse</td><td class="num">7</td><td class="num">10</td><td class="num">4</td><td class="num">3</td></tr>
+      <tr><td>breaks at filter</td><td class="num">6</td><td class="num">3</td><td class="num">3</td><td class="num">2</td></tr>
+      <tr><td>breaks at metric</td><td class="num">0</td><td class="num">0</td><td class="num">1</td><td class="num">3</td></tr>
+      <tr><td>breaks at rank</td><td class="num">0</td><td class="num">1</td><td class="num">1</td><td class="num">3</td></tr>
+      <tr><td>breaks at shape</td><td class="num">4</td><td class="num">4</td><td class="num">4</td><td class="num">3</td></tr>
+      <tr><td>no SQL</td><td class="num">1</td><td class="num down">4</td><td class="num">0</td><td class="num">0</td></tr>
+      <tr><td>decision / format</td><td class="num">1</td><td class="num">0</td><td class="num">2</td><td class="num">0</td></tr>
+    </tbody></table></div>
+  <p class="small" style="margin-top:var(--s4)">The five playbook sections targeted 16 failed train questions (sources 5, keys 1, parse 3, filter 4, shape 3); after the round 4 of 16 pass SQL on Haiku and 7 of 16 on Sonnet. Metric and rank got no section, since no failed train question broke there first in v2, and they are now where Opus fails 6 of its 21. Round 3's evidence should come from the champion's run.</p>
+  <figure class="shot"><p class="fig-title">Round v2_sql → v3_sql · the component matrix</p><img src="s09_2_matrix.png" alt="Matrix of the 31 failed statements by seven components, with the first break outlined" loading="lazy"><figcaption>One row per statement whose rows differ from the golden's; amber where the agent's step differs, outlined where it first breaks. Held-out rows are shown but were never read. A cell opens both ledger lines. <span class="src">/optimise/v3_sql</span></figcaption></figure>
+</section>
+
+<section class="band-sec" id="plan"><div class="wrap">
+  <div class="hd"><p class="label">04 · plan-first (D34) · traces</p>
+  <h2>The plan object's shape trips Haiku and Sonnet; Opus sends it right every time</h2></div>
+  <div class="grid g2">
+    <div class="panel card"><h3>v2_sql · Haiku, no plan</h3><p><b>0 of 54</b> trials with an unparsed <code>submit_answer</code>; 55 submit calls; 2 never submitted.</p></div>
+    <div class="panel card"><h3>v3_sql · Haiku + plan</h3><p><b>43 of 54</b> trials with an unparsed submit; 123 submit calls; 5 answered in prose without submitting, 2 more ran out of the 30 turns. No SQL: 7 of 54.</p></div>
+    <div class="panel card"><h3>v4_sql · Sonnet + plan</h3><p><b>26 of 54</b> trials with an unparsed submit; 84 submit calls; every trial recovered and submitted.</p></div>
+    <div class="panel card pro"><h3>v5_sql · Opus + plan</h3><p><b>0 of 54</b> unparsed; 54 submit calls, one per trial; plan recorded 54 of 54; median 5 turns.</p></div>
+  </div>
+  <p style="margin-top:var(--s5);max-width:80ch">Of the 76 unparsed calls in v3, the 39 fully visible in the trace fail at the same place: <code>"plan":</code> followed by seven plain lines (<code>sources: …</code>) where the schema wants an object with seven keys. The other 37 are cut at 2,048 characters by the trace's span trimming. The retries cost turns and money, and for Haiku whole answers; part of Sonnet's extra cost over Opus ($6.59 against $5.04) is 30 extra submit calls.</p>
+  <blockquote>Fix to decide: take <code>plan</code> as one string of seven labelled lines (what the smaller models write anyway) and parse it in <code>read_plan</code>, or accept both shapes. It matters for Haiku and Sonnet, not for Opus.</blockquote>
+</div></section>
+
+<section class="blk" id="tab">
+  <div class="hd"><p class="label">05 · the new Optimise tab (D37 A) · /optimise</p>
+  <h2>The loop is the page: seven stages, one panel, the rounds chart leading with SQL</h2></div>
+  <p style="max-width:80ch">The figure in section 02 is the tab's top half: the seven-stage loop (source run, diagnose, split, sessions, guard, new version, outcome) with this round's counts on each stage (31 SQL fails, 18 read, 44 writes, 29 refused, 15 accepted), a step-through control and a stage panel; below it the chart of every version. A round's page (section 03's matrix) adds session cards with each write attempt, and the outcome with an SQL / answers toggle and held-out first. The chart's labels now sit centred under each point on two lines, so versions one question apart (v4, v5) no longer overlap.</p>
+</section>
+
+<section class="blk" id="receipt">
+  <div class="hd"><p class="label">06 · receipt · model spend on the subscription</p>
+  <h2>$24.22 of model time for the round and three runs</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>step</th><th>model</th><th>cost</th><th>what</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">ledger, v1 + v2 runs (R9)</td><td>sonnet 5</td><td class="num">$1.97</td><td>49 goldens read once and cached; 30 failed v2 statements compared</td></tr>
+      <tr><td class="sub">round 2 at 282 chars</td><td>sonnet 5</td><td class="num">$1.52</td><td>superseded; archived in the scratchpad, never evaluated to the end</td></tr>
+      <tr><td class="sub">round 2 at 600 chars → v3_sql</td><td>sonnet 5</td><td class="num">$1.25</td><td>5 sections (589–598 of 600), 10 notes, 44 writes, 29 refused (5 for leaks), stockindex dropped</td></tr>
+      <tr><td class="sub">v3_sql eval</td><td>haiku 4.5</td><td class="num">$5.20</td><td>54 × 1, 22 min, prompt version 6</td></tr>
+      <tr><td class="sub">v4_sql eval</td><td>sonnet 5 · medium</td><td class="num">$6.59</td><td>54 × 1, 16 min, prompt version 7</td></tr>
+      <tr><td class="sub">v5_sql eval</td><td>opus 5.5 · medium</td><td class="num">$5.04</td><td>54 × 1, 6 min, prompt version 8</td></tr>
+      <tr><td class="sub">ledger, v3 + v4 + v5 runs</td><td>sonnet 5</td><td class="num">$2.65</td><td>$0.91 + $0.86 + $0.88; goldens from cache</td></tr>
+    </tbody></table></div>
+  <p class="small" style="margin-top:var(--s3)">Not counted: the two partial evals of the 282-char versions (stopped at 11 and 12 of 54) and a first v5_sql attempt whose 32 trials failed with the bundled CLI's "model not supported" error; all three are still logged in MLflow, their folders in the scratchpad.</p>
+</section>
+
+<section class="blk" id="changed">
+  <div class="hd"><p class="label">07 · what changed on the way from the s08 plan</p>
+  <h2>Ten departures, each recorded where it happened</h2></div>
+  <ul class="qa">
+    <li><b>Section cap 282 → 600.</b> A 5,000-char <code>system.md</code> cap left 282 chars a section; raised to 8,000 on request and the round re-run. v3_sql's <code>system.md</code> is 6,573 chars.</li>
+    <li><b>The rationale is leak-checked only.</b> The guard had length-capped the optimiser's rationale; 2 of 33 refusals came from that. Now only leaks refuse a rationale (<code>tests/test_optimise_guard.py</code>).</li>
+    <li><b>stockindex has no notes.</b> Two leak refusals dropped them, as the guard's rule says; it had none in v2_sql either.</li>
+    <li><b>The reader writes the agent's lines and the verdicts in one call</b> per failed statement, not two.</li>
+    <li><b>The section tool is <code>write_section</code></b>; dataset sessions keep <code>write_notes</code>.</li>
+    <li><b><code>dab version-model SRC --into NEW --model M</code></b> made v4_sql and v5_sql: copies with only the model changed and <code>measured_against</code> set.</li>
+    <li><b>Round 1 had 9 leak refusals, not 11.</b> s08 counted 11 leak problems spread over 9 refusals; the tab counts refusals.</li>
+    <li><b>v5_sql (added on request).</b> The <code>opus</code> alias now resolves to <code>claude-opus-5-5</code> (was <code>claude-opus-5</code>).</li>
+    <li><b>Agent SDK 0.2.157 → 0.2.159</b>, for a bundled CLI (2.1.281) that accepts Opus 5.5.</li>
+    <li><b>Isolation for CLI 2.1.281.</b> Its new built-in <code>telemetry</code> plugin is switched off as <code>agents-md</code> is; the account's organisation id (<code>credential_org</code>) joins the email on the allowlist, since the CLI has no switch for it. <code>dab isolation-check</code> passes on v5_sql.</li>
+  </ul>
+</section>
+
+<section class="blk" id="next">
+  <div class="hd"><p class="label">08 · open items · nothing committed on challenger_v3</p>
+  <h2>Decide the champion and the plan's shape, then run three trials before round 3</h2></div>
+  <ol class="steps">
+    <li>Promote v5_sql (the rule's pick: SQL 28 to 27, answers 45 to 41, cheaper and 2.7× faster) or keep v4_sql. One trial cannot tell them apart on SQL.</li>
+    <li>Plan as a string of seven lines (section 04) if Haiku or Sonnet stays in use; Opus does not need it.</li>
+    <li>Three trials per question on v4_sql and v5_sql before calling either's held-out SQL real (6/16 against 4/16).</li>
+    <li>Round 3 from the champion's run: sources is still the largest first break, and metric and rank need their first playbook sections.</li>
+    <li>Commit the branch and open a PR when asked; <code>.lavish/</code> pages s08 and s09 go with it.</li>
+  </ol>
+</section>
+</div>
+</body>
+</html>

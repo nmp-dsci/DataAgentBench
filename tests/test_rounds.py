@@ -41,3 +41,38 @@ def test_summary_counts_per_split_per_dataset_and_category_moves() -> None:
     assert s["by_dataset"]["patents"]["n"] == 2 and s["by_dataset"]["patents"]["held"] == 1
     moves = {(m["from"], m["to"]): m["n"] for m in s["category_moves"]}
     assert moves[("join differs", "solved")] == 1 and moves[("solved", "solved")] == 1
+
+
+def test_sql_is_tallied_beside_the_answer_over_the_goldened_questions() -> None:
+    rows = [
+        _q("yelp/1", False, True, "train", "breaks at keys", "solved"),
+        _q("yelp/2", True, True, "heldout", "solved", "solved"),
+        _q("agnews/1", True, True, "no golden", "no golden", "no golden"),
+    ]
+    for r, (b, a) in zip(rows, [(False, True), (True, True), (None, None)], strict=True):
+        r["before"]["sql"], r["after"]["sql"] = b, a
+        r["sql_change"] = change(b, a)
+    s = summarise_changes(rows)["all"]["sql"]
+    assert (s["n"], s["before"], s["after"], s["improved"], s["held"]) == (2, 1, 2, 1, 1)
+
+
+def test_a_round_one_record_reads_as_refusals_then_one_accepted_write() -> None:
+    from dab_bench.eval.rounds import attempts, session_kind
+
+    old = {
+        "scope": "yelp",
+        "notes": "x" * 1500,
+        "refusals": [
+            {"problems": ["1,742 characters; the limit is 1,500"], "notes_chars": 1742},
+            {"problems": ["gold values written literally: a"], "notes_chars": 1400},
+        ],
+    }
+    got = attempts(old)
+    assert [a["ok"] for a in got] == [False, False, True] and got[-1]["chars"] == 1500
+    assert session_kind(old) == "dataset" and session_kind({"scope": "system.md"}) == "system"
+    new = {
+        "scope": "playbook:keys",
+        "kind": "component",
+        "attempts": [{"ok": True, "chars": 9, "problems": []}],
+    }
+    assert attempts(new) == new["attempts"] and session_kind(new) == "component"

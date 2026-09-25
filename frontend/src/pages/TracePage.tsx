@@ -111,7 +111,7 @@ export function TracePage() {
           <p>
             After the run, <code>dab diagnose {id}</code> checks this trial three ways against the question's golden SQL and gives the failure one category. None of it reaches the agent.
           </p>
-          <SqlVersus score={t.score} agentSql={t.submission?.sql} golden={t.golden} mode={t.submission?.mode} step={t.submission?.step} reason={t.reason} />
+          <SqlVersus score={t.score} agentSql={t.submission?.sql} golden={t.golden} mode={t.submission?.mode} step={t.submission?.step} reason={t.reason} plan={t.submission?.plan} />
         </>
       )}
 

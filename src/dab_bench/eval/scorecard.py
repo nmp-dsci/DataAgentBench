@@ -19,6 +19,12 @@ another way, then the first structural difference `sqlglot` finds between the tw
 statements: wrong tables, join differs, parse differs, filter differs, aggregation,
 order / tie, else result differs. The categories are what the optimiser works down.
 
+When the run has a ledger (`dab diagnose --ledger`, plan s08, `eval/ledger.py`), a trial
+whose SQL fails is categorised by the step its statement breaks at instead: `breaks at
+sources` … `breaks at shape`, whether or not the validator accepted the answer, since the
+statement is the goal. The sqlglot sets stay on the row as `structure`, a mechanical
+cross-check under the reader's words, and each row carries the ledger's lines (`ledger`).
+
 The scorecard reads goldens from `dataagentbench_meta` as `dab_owner`, and it is
 computed after the run: nothing in it ever reaches a trial. It writes
 `runs/<id>/scorecard.json` beside `results.jsonl`, without the golden SQL text (the
@@ -65,6 +71,7 @@ CATEGORIES = (
     "aggregation",
     "order / tie",
     "result differs",
+    *(f"breaks at {c}" for c in ("sources", "keys", "parse", "filter", "metric", "rank", "shape")),
 )
 NOT_OPTIMISED = ("solved", "no golden", "right answer another way")
 
@@ -517,6 +524,13 @@ def score_run(run_id: str, runs_dir: Path = RUNS_DIR) -> dict[str, Any]:
         tp = run_dir / (r.get("trace_file") or "")
         trace = json.loads(tp.read_text()) if r.get("trace_file") and tp.exists() else {}
         rows.append(score_trial(r, trace, goldens.get(r["query_id"]), submits))
+    from dab_bench.eval.ledger import attach, load_ledger
+
+    attach(
+        rows,
+        load_ledger(run_id, runs_dir),
+        {r["query_id"]: r.get("agent_sql") or "" for r in results if r["trial"] == 1},
+    )
     split = load_optimise_split()
     card = {"run_id": run_id, "agent": meta["agent"], "submits_sql": submits} | summarise(
         rows, split, submits

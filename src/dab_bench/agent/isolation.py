@@ -18,10 +18,11 @@ and checks the result:
 
 The CLI's built-in skills, sub-agents and slash commands appear in `init` but
 are unreachable: a model can only use them through the Skill or Agent tool,
-and a session has neither, so they are recorded, not refused. One thing the
+and a session has neither, so they are recorded, not refused. Two things the
 CLI adds cannot be switched off: the logged-in account's email, as session
-context. It never reaches a run's trace or MLflow, which record only the
-prompt and messages this code passes and receives.
+context, and (from CLI 2.1.281) its organisation id, `credential_org`. Neither
+reaches a run's trace or MLflow, which record only the prompt and messages this
+code passes and receives.
 """
 
 from __future__ import annotations
@@ -41,8 +42,9 @@ ISOLATION_ENV: dict[str, str] = {
 }
 
 # Passed as the session's only settings: the CLI's one built-in plugin that loads instruction
-# files (AGENTS.md, where CLAUDE.md would be) is switched off, not merely left with nothing to find.
-SESSION_SETTINGS = '{"enabledPlugins": {"agents-md@builtin": false}}'
+# files (AGENTS.md, where CLAUDE.md would be) is switched off, not merely left with nothing to find;
+# so is the telemetry plugin the CLI loads from 2.1.281 (plugins may bring tools and hooks).
+SESSION_SETTINGS = '{"enabledPlugins": {"agents-md@builtin": false, "telemetry@builtin": false}}'
 
 # Plugins can bring tools and hooks with them, so none may load.
 _MUST_BE_EMPTY = ("plugins",)
@@ -50,7 +52,7 @@ _MUST_BE_EMPTY = ("plugins",)
 _UNREACHABLE = ("agents", "skills", "slash_commands")
 
 # What the CLI may add to the model's context beyond the system prompt and the question,
-# as seen in a session transcript (2.1.277): the attachment type, and for session context
+# as seen in a session transcript (2.1.281): the attachment type, and for session context
 # the keys it may carry. Anything else (a CLAUDE.md, memory, a skill listing, git status)
 # fails `dab isolation-check`.
 ALLOWED_ATTACHMENTS = {
@@ -60,6 +62,7 @@ ALLOWED_ATTACHMENTS = {
     "date",
     "prompt_snapshot",  # the system prompt this code passed
     "session_context",
+    "credential_org",  # 2.1.281: the account's organisation id, as the email below; no switch
 }
 ALLOWED_SESSION_CONTEXT = {"userEmail"}
 

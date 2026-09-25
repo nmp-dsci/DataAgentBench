@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate, useOutletContext, useParams } f
 import { type Board, type GoldMatch, type GoldenAttempt, type GoldenKind, type GoldenList, type GoldenOne, type ProposalBrief, type RunDetail, type RunSummary, type ToolCall, type Trace, type TrialRow, ROLE_LABEL, STYLE_LABEL, fmtInt, post, useGet } from '../lib/api';
 import { Clip, Gold, Loading } from '../lib/ui';
 import { GoldDiff } from '../lib/golddiff';
-import { SqlVersus } from '../lib/scorecard';
+import { SqlVersus, StepsTable } from '../lib/scorecard';
 import { SqlBlock, SqlEditor } from '../lib/sql';
 import { apiTrialPath, datasetPath, goldenPath, questionPath, trialId, trialPath, useLens } from '../lib/url';
 
@@ -555,7 +555,7 @@ export function GoldenEditor() {
             </p>
             <pre className="wrap-any">{trial.answer || '(no answer)'}</pre>
             {!trial.passed && trial.reason && <p className="reason">{trial.reason}</p>}
-            {trace?.score && trace.score.golden_id != null && <SqlVersus score={trace.score} agentSql={trace.submission?.sql} golden={trace.golden} mode={trace.submission?.mode} step={trace.submission?.step} reason={trial.reason} />}
+            {trace?.score && trace.score.golden_id != null && <SqlVersus score={trace.score} agentSql={trace.submission?.sql} golden={trace.golden} mode={trace.submission?.mode} step={trace.submission?.step} reason={trial.reason} plan={trace.submission?.plan} />}
             <p className="small">
               {trace ? `${calls.length} query_db call${calls.length === 1 ? '' : 's'}` : 'loading its SQL…'}
               {submitted && ', then one submitted statement (the editor starts from it)'}
@@ -750,6 +750,12 @@ export function GoldenEditor() {
         </>
       )}
 
+      {data.ledger && cur && (
+        <details className="golden-steps">
+          <summary>The current golden (#{cur.id}), step by step, as the reader wrote it</summary>
+          <StepsTable golden={data.ledger} />
+        </details>
+      )}
       <h3>{data.history.length === 0 ? 'No saves yet' : `${data.history.length} save${data.history.length === 1 ? '' : 's'}, newest first; the top one is current`}</h3>
       {data.history.length > 0 && (
         <div className="tw">

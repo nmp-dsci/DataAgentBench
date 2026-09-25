@@ -1,0 +1,18 @@
+# v4_sql: v3_sql's prompt files on sonnet (was haiku); a model switch, not a round
+# v3_sql: v2_sql after one optimisation round of run 20260924T053026Z_v2_sql_all_haiku_hints (component sessions write the playbook, dataset sessions the notes (s08, D32 B))
+# v2_sql: v1_sql after one optimisation round of run 20260924T050324Z_v1_sql_all_haiku_hints (s06, B9)
+# v1_sql — the SQL-answer challenger (plan s06, D26–D28). Frozen across a comparison: only
+# system.md and datasets/<ds>.md move. Haiku, as v0, so the comparison isolates the build.
+model: sonnet
+effort: medium
+max_turns: 30
+timeout_s: 900
+exec_timeout_s: 600
+hints: true
+pack: false
+tools:
+- mcp__dab__query_db
+- mcp__dab__describe_table
+- mcp__dab__submit_answer
+plan: true
+measured_against: v3_sql

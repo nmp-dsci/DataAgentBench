@@ -1,0 +1,1028 @@
+{
+ "version": "v7_sql",
+ "challenger_of": "v6_sql",
+ "source_run": "20260925T015204Z_v6_sql_all_opus_hints",
+ "source_fingerprint": "91a13fe73672",
+ "fingerprint": "b464145347eb",
+ "started_at": "2026-09-25T03:58:27.129779+00:00",
+ "finished_at": "2026-09-25T04:01:52.530182+00:00",
+ "method": "component sessions write the playbook, dataset sessions the notes (s08, D32 B); every error of the 54 read (s11, D38); guards G1–G4 (s11, D40 B)",
+ "optimiser": {
+  "model": "claude-opus-5-5",
+  "effort": "medium"
+ },
+ "split": {
+  "train": 54,
+  "heldout": 0
+ },
+ "trained_on": "all",
+ "source_scorecard": {
+  "answer": {
+   "passed": 46,
+   "n": 54
+  },
+  "sql": {
+   "passed": 33,
+   "n": 49
+  },
+  "decision": {
+   "passed": 49,
+   "n": 49
+  }
+ },
+ "caps": {
+  "notes": 2000,
+  "section": 600,
+  "system_md": 8000
+ },
+ "playbook": {
+  "sources": [
+   "github_repos/1",
+   "crmarenapro/1",
+   "crmarenapro/3",
+   "crmarenapro/13",
+   "stockmarket/3"
+  ],
+  "parse": [
+   "crmarenapro/2",
+   "crmarenapro/6",
+   "stockmarket/4",
+   "stockmarket/5",
+   "yelp/4"
+  ],
+  "shape": [
+   "bookreview/1",
+   "googlelocal/3",
+   "music_brainz_20k/3",
+   "yelp/6"
+  ]
+ },
+ "plan_first": true,
+ "guards": {
+  "literal": true,
+  "g1_review": true,
+  "g2_audit": true,
+  "g3_breadth": true,
+  "g4_routing": true
+ },
+ "playbook_skipped_g3": {
+  "filter": [
+   "pancancer_atlas/2"
+  ],
+  "rank": [
+   "deps_dev_v1/1"
+  ]
+ },
+ "audit_g2": {
+  "units_with_gold": {}
+ },
+ "reviews_cost_usd": 1.1578528000000001,
+ "cost_usd": 4.394031200000001,
+ "sessions": [
+  {
+   "scope": "playbook:sources",
+   "kind": "component",
+   "notes": "- Pick columns by meaning from the hints, not by name. If a free-text label and a code both fit, use the code the hints define.\n- If the question defines a metric over named objects (e.g. qty×price per order), read exactly those, even via a longer join. Never swap in a similar precomputed field. Take attributes from the table that owns them, not a sample copy.\n- A stored union can omit sibling tables: group information_schema.columns by data_type; add each one missed.\n- A verdict needs the subject's own row (id, name, status), related rows with ids, and rule text. Submit derived. Type no ids.",
+   "rationale": "Bullet 1: stockmarket/3 (Listing Exchange vs the hinted Market Category code). Bullet 2: crmarenapro/13 (opportunity Amount vs order-item qty×price) and github_repos/1 (contents sample columns vs the files table). Bullet 3: stockmarket/3 (2 of 38 omitted tables unioned). I checked that information_schema shows 38 double vs 2716 bigint Volume tables. Bullet 4: crmarenapro/1 (no lead row) and crmarenapro/3 (no opportunity row, no task ids).",
+   "refusals": [
+    {
+     "problems": [
+      "640 characters; the limit is 600"
+     ],
+     "notes_chars": 640,
+     "rationale_chars": 590,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "617 characters; the limit is 600"
+     ],
+     "notes_chars": 617,
+     "rationale_chars": 522,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "602 characters; the limit is 600"
+     ],
+     "notes_chars": 602,
+     "rationale_chars": 442,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "github_repos/1",
+    "crmarenapro/1",
+    "crmarenapro/3",
+    "crmarenapro/13",
+    "stockmarket/3"
+   ],
+   "n_turns": 6,
+   "duration_ms": 47683,
+   "cost_usd": 0.2657616,
+   "input_tokens": 117243,
+   "output_tokens": 3286,
+   "error": null,
+   "dropped": false,
+   "reviews": [
+    {
+     "chars": 599,
+     "cost_usd": 0.10188080000000001,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": false,
+     "question": "",
+     "what": "",
+     "reason": "Every bullet is general method: choose columns by meaning, compute metrics exactly as the question defines them, check that unions include every table, and get verdict evidence from the source rows. The qty×price example only repeats a definition already given in crmarenapro/13's own policy text, and nothing states a value, threshold, row count or winner from any gold answer."
+    }
+   ],
+   "budget": 600,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 640,
+     "problems": [
+      "640 characters; the limit is 600"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 617,
+     "problems": [
+      "617 characters; the limit is 600"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 602,
+     "problems": [
+      "602 characters; the limit is 600"
+     ]
+    },
+    {
+     "ok": true,
+     "chars": 599,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "playbook:parse",
+   "kind": "component",
+   "notes": "- A named attribute (name, category) with no column is extracted from text; never return the id instead. Read a name by its shape (leading capitalised words plus connectors), not a list of following verbs; strip trailing '.'/',' from it.\n- A list inside prose: cut the list's tail, split it on commas, then match each segment. Keep lowercase items too, normalised with initcap. Count NULL/unmatched rows over the whole table.\n- Rule documents: split the body into paragraphs (`regexp_split_to_table(x,'\\n\\s*\\n')`), keep the numbered ones, collapse whitespace. Cast numbers stored as text to numeric.",
+   "rationale": "Bullet 1: stockmarket/4 and stockmarket/5 (the verb-list cut kept the trailing period on names like Inc.). Bullet 2: yelp/4 (one regex over the whole tail missed bare lowercase items); it keeps the old whole-table NULL check. Bullet 3: crmarenapro/2 and crmarenapro/6 (whole article bodies were returned instead of numbered rule paragraphs, and quantities and prices stayed as text). Checked: the paragraph split on crmarenapro knowledge bodies gives 32 numbered paragraphs.",
+   "refusals": [],
+   "questions": [
+    "crmarenapro/2",
+    "crmarenapro/6",
+    "stockmarket/4",
+    "stockmarket/5",
+    "yelp/4"
+   ],
+   "n_turns": 3,
+   "duration_ms": 26525,
+   "cost_usd": 0.21772660000000002,
+   "input_tokens": 62102,
+   "output_tokens": 1296,
+   "error": null,
+   "dropped": false,
+   "reviews": [
+    {
+     "chars": 599,
+     "cost_usd": 0.1140922,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": false,
+     "question": "",
+     "what": "",
+     "reason": "The text gives general extraction methods: read names by their shape, split lists found in prose, normalise case, split rule documents into paragraphs and cast numeric text. It states no value, threshold, label or question-specific solution that decides any gold answer."
+    }
+   ],
+   "budget": 600,
+   "attempts": [
+    {
+     "ok": true,
+     "chars": 599,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "playbook:shape",
+   "kind": "component",
+   "notes": "- Output values exactly as computed: no round() or ::text cast unless the question asks for rounding, and no string-building around a number (suffixes, units, labels). A rounded 5.00 does not match 5.\n- Keep the named columns and add the metric used to rank or filter. Extra columns are fine; changed values are not.\n- One row per entity after grouping. To pick one row per key, use a window or DISTINCT ON with an explicit order.\n- Quote a CSV text value only if it contains a comma or a double quote.\n- Leave join keys and flags out of the final SELECT.",
+   "rationale": "Bullet 1 comes from googlelocal/3 and bookreview/1. In googlelocal/3 the agent returned round(avg,2)::text, which gives '5.00' while the reference has 5; I checked this with a query. In bookreview/1 the agent turned a computed number into decorated text by adding a suffix. The rule now says only to leave computed values alone and no longer states a format for any one answer. Bullet 2 comes from both diffs, which show the grader tolerates extra columns but not changed values. The other bullets are the current ones, shortened.",
+   "refusals": [
+    {
+     "problems": [
+      "G1 decisive for bookreview/1: The rule that a decade should be output as a bare integer start year. The question's own example uses the \"1980s\" style, so this rule settles the answer format for that one question.; teach the method or the property of the data, not the choice that decides one answer"
+     ],
+     "notes_chars": 569,
+     "rationale_chars": 845,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "bookreview/1",
+    "googlelocal/3",
+    "music_brainz_20k/3",
+    "yelp/6"
+   ],
+   "n_turns": 4,
+   "duration_ms": 45133,
+   "cost_usd": 0.2064872,
+   "input_tokens": 65771,
+   "output_tokens": 2334,
+   "error": null,
+   "dropped": false,
+   "reviews": [
+    {
+     "chars": 569,
+     "cost_usd": 0.1098328,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": true,
+     "question": "bookreview/1",
+     "what": "The rule that a decade should be output as a bare integer start year. The question's own example uses the \"1980s\" style, so this rule settles the answer format for that one question.",
+     "reason": "Most of the bullets are general output habits. The decade rule is different: only one question asks about decades, and the question's wording points to the \"1980s\" format. The data can't settle which format is wanted, so the rule decides the answer's format for that question in the gold answer's favour."
+    },
+    {
+     "chars": 555,
+     "cost_usd": 0.10093759999999999,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": false,
+     "question": "",
+     "what": "",
+     "reason": "The text gives only general output-formatting and method advice: don't round, keep the named columns plus the ranking metric, one row per entity, CSV quoting, and leave keys out. It states no value, threshold, label or interpretation choice specific to any one question's gold answer."
+    }
+   ],
+   "budget": 600,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 569,
+     "problems": [
+      "G1 decisive for bookreview/1: The rule that a decade should be output as a bare integer start year. The question's own example uses the \"1980s\" style, so this rule settles the answer format for that one question.; teach the method or the property of the data, not the choice that decides one answer"
+     ]
+    },
+    {
+     "ok": true,
+     "chars": 555,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "agnews",
+   "kind": "dataset",
+   "notes": "- There is NO category column. World / Sports / Business / Science/Technology must be inferred from `agnews_articles.title` + `description` (the AG News corpus). `doc` is just a JSON copy of those two fields.\n- Joins are clean and 1:1: `agnews_article_metadata.article_id` covers all 127,600 articles; `agnews_authors.name` is unique, so filtering on the exact name is safe.\n- `publication_date` is varchar, always 'YYYY-MM-DD', so string range comparisons work. Dates span 2004-01-01 to 2022-12-30 in every region.\n- `region` has 5 continent values, each with about 25.4k–25.7k rows. Region totals are nearly equal, so a ranking of regions depends on classifying the category well. Return every region with its count, not only the top one.\n- Category signals: a source tag in parentheses at the end of the title (about 18k titles have one). PC World, SPACE.com, Ziff Davis, InfoWorld, MacCentral, NewsFactor, TechWeb and SiliconValley.com mean Science/Technology. Forbes.com, Investor's Business Daily, TheDeal.com, The Motley Fool and FT.com mean Business. AP, Reuters, AFP, Canadian Press and UpdateN appear in every category and tell you nothing.\n- Science/Technology covers computing, internet, software, telecom, space and science. A tech company's earnings or merger story is usually Business. Sports covers games, teams, athletes and the Olympics. World covers politics, conflict, diplomacy and disasters.\n- For a small set of rows (for example one author's articles), SELECT every title+description, classify each row by meaning, and answer in derived mode. Keep a careful tally and check that the four category counts add up to the total.\n- \"Per year from Y1 to Y2 inclusive\": divide by the number of calendar years (Y2−Y1+1). The window is `>= 'Y1-01-01'` and `< '(Y2+1)-01-01'`.",
+   "rationale": "All three failures come from having to infer the category with no label column. The notes say this plainly and list the source tags I checked that signal Tech or Business. They also give the boundaries between categories and a careful per-row tally for small sets such as one author's articles (q2). The region and date facts I checked cover the windowing and per-year averaging (q3), and the warning about close region counts covers q4.",
+   "refusals": [
+    {
+     "problems": [
+      "2,152 characters; the limit is 2,000",
+      "gold values written literally: africa"
+     ],
+     "notes_chars": 2152,
+     "rationale_chars": 699,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "agnews/2",
+    "agnews/3",
+    "agnews/4"
+   ],
+   "n_turns": 8,
+   "duration_ms": 57774,
+   "cost_usd": 0.2070386,
+   "input_tokens": 65018,
+   "output_tokens": 4162,
+   "error": null,
+   "dropped": false,
+   "reviews": [
+    {
+     "chars": 1790,
+     "cost_usd": 0.0360584,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": false,
+     "question": "",
+     "what": "",
+     "reason": "The notes give data properties anyone could find by profiling (no category column, clean joins, date format and range, region sizes) and general ways to classify categories and count per year. No part states a gold value, a winning region, a count, or one question's specific solution; the per-year division is the plain reading of \"inclusive\", not a contested choice."
+    }
+   ],
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 2152,
+     "problems": [
+      "2,152 characters; the limit is 2,000",
+      "gold values written literally: africa"
+     ]
+    },
+    {
+     "ok": true,
+     "chars": 1790,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "bookreview",
+   "kind": "dataset",
+   "notes": null,
+   "rationale": "bookreview/1 failed at the shape step: it returned the decade as '2020s' plus an extra column, where the gold expects the integer 2020 alone. The note on year groupings covers that. I checked the publication-date extraction: 189 books have a month-anchored date in details, 1 more only in subtitle, and no details text has a bare year without a month name. I checked that all 200 books have reviews. The other notes (CSV-quoting titles, join key, categories, language, review_time, average rating) are kept from the earlier notes because they support the questions that passed.",
+   "refusals": [
+    {
+     "problems": [
+      "golden SQL copied (6+ tokens): from '[0-9]+$' ) : : int; describe the pattern in words instead"
+     ],
+     "notes_chars": 1746,
+     "rationale_chars": 577,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "G1 decisive for bookreview/1: The year-grouping rule says to return the decade as an integer start year instead of a text label like the question's own \"1980s\" example, and to return only the winning decade with no metric column. Only the decade question depends on this, and it settles the output format to match the gold answer.; teach the method or the property of the data, not the choice that decides one answer"
+     ],
+     "notes_chars": 1743,
+     "rationale_chars": 577,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "bookreview/1"
+   ],
+   "n_turns": 6,
+   "duration_ms": 40226,
+   "cost_usd": 0.1481994,
+   "input_tokens": 50047,
+   "output_tokens": 2706,
+   "error": null,
+   "dropped": true,
+   "reviews": [
+    {
+     "chars": 1743,
+     "cost_usd": 0.042689000000000005,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": true,
+     "question": "bookreview/1",
+     "what": "The year-grouping rule says to return the decade as an integer start year instead of a text label like the question's own \"1980s\" example, and to return only the winning decade with no metric column. Only the decade question depends on this, and it settles the output format to match the gold answer.",
+     "reason": "The question's own example points to a text label such as \"1980s\", and the data can't tell the agent otherwise. The note overrides that reading in favour of the gold's integer, single-column format. Only one question needs this rule, so it hands over an interpretation choice rather than teaching a general method."
+    }
+   ],
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 1746,
+     "problems": [
+      "golden SQL copied (6+ tokens): from '[0-9]+$' ) : : int; describe the pattern in words instead"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 1743,
+     "problems": [
+      "G1 decisive for bookreview/1: The year-grouping rule says to return the decade as an integer start year instead of a text label like the question's own \"1980s\" example, and to return only the winning decade with no metric column. Only the decade question depends on this, and it settles the output format to match the gold answer.; teach the method or the property of the data, not the choice that decides one answer"
+     ]
+    }
+   ]
+  },
+  {
+   "scope": "crmarenapro",
+   "kind": "dataset",
+   "notes": null,
+   "rationale": "Q13: the order-to-contract key and the sales measure (checked). Q2, Q6 and Q1: the evidence shape of split rule paragraphs (checked). Q1 and Q3: the entity row, the task ids and trimming. I kept the old notes that the passing questions rely on.",
+   "refusals": [
+    {
+     "problems": [
+      "2,303 characters; the limit is 2,000",
+      "golden SQL copied (6+ tokens): faq_answer__c , '\\n\\s*\\n' ) with ordinality; describe the pattern in words instead"
+     ],
+     "notes_chars": 2303,
+     "rationale_chars": 549,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "2,095 characters; the limit is 2,000"
+     ],
+     "notes_chars": 2095,
+     "rationale_chars": 386,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "2,027 characters; the limit is 2,000"
+     ],
+     "notes_chars": 2027,
+     "rationale_chars": 283,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "G1 decisive for crmarenapro/13: The order-sales note lays out the whole solution for the one sales question. It says how to link orders to contracts (account plus start date equal to effective date, then dedupe). It also says to credit sales to the order's owner and not to use the opportunity amount. These are interpretation choic; teach the method or the property of the data, not the choice that decides one answer"
+     ],
+     "notes_chars": 1994,
+     "rationale_chars": 244,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "crmarenapro/1",
+    "crmarenapro/2",
+    "crmarenapro/3",
+    "crmarenapro/6",
+    "crmarenapro/7",
+    "crmarenapro/13"
+   ],
+   "n_turns": 8,
+   "duration_ms": 86667,
+   "cost_usd": 0.7764596000000001,
+   "input_tokens": 453377,
+   "output_tokens": 6238,
+   "error": null,
+   "dropped": true,
+   "reviews": [
+    {
+     "chars": 1994,
+     "cost_usd": 0.0715254,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": true,
+     "question": "crmarenapro/13",
+     "what": "The order-sales note lays out the whole solution for the one sales question. It says how to link orders to contracts (account plus start date equal to effective date, then dedupe). It also says to credit sales to the order's owner and not to use the opportunity amount. These are interpretation choic",
+     "reason": "Only one question asks about agent sales totals, so this note works as its answer recipe. It settles which agent gets credit and how orders count toward the contract window, and the data alone would not settle either choice. The other notes are general data facts or repeat the stated policies."
+    }
+   ],
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 2303,
+     "problems": [
+      "2,303 characters; the limit is 2,000",
+      "golden SQL copied (6+ tokens): faq_answer__c , '\\n\\s*\\n' ) with ordinality; describe the pattern in words instead"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 2095,
+     "problems": [
+      "2,095 characters; the limit is 2,000"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 2027,
+     "problems": [
+      "2,027 characters; the limit is 2,000"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 1994,
+     "problems": [
+      "G1 decisive for crmarenapro/13: The order-sales note lays out the whole solution for the one sales question. It says how to link orders to contracts (account plus start date equal to effective date, then dedupe). It also says to credit sales to the order's owner and not to use the opportunity amount. These are interpretation choic; teach the method or the property of the data, not the choice that decides one answer"
+     ]
+    }
+   ]
+  },
+  {
+   "scope": "deps_dev_v1",
+   "kind": "dataset",
+   "notes": "- Repo metrics (stars, forks, open issues) exist ONLY as free text in `deps_dev_v1_project_info.\"Project_Information\"`. Take the `owner/repo` slug as the first slash-joined token (regex like `[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]*[A-Za-z0-9_-]`), lowercase it, and join it to lowercased `deps_dev_v1_project_packageversion.\"ProjectName\"`. Don't LIKE-match the whole text.\n- Numbers can have thousands commas. Strip them, then cast to bigint.\n- Forks come in 3 phrasings: \"forks count of N\", \"forked N times\", \"N forks\". Use coalesce over all three, case-insensitive.\n- Stars: \"stars count of N\", \"N stars\", \"starred by N users\". Use all three.\n- Open issues: \"open issues count of N\" or \"N open issues\".\n- `Licenses` (project and package) and `VersionInfo` are JSON stored as text. Parse as jsonb (key-exists test for 'MIT'; read IsRelease and Ordinal as text, then cast). \"Project license\" means `project_info.\"Licenses\"`.\n- Join path: packageinfo(System,Name,Version) = project_packageversion(System,Name,Version), then ProjectName = slug.\n- `VersionInfo` Ordinal is the registry's version order within a package. `UpstreamPublishedAt` (ms epoch) has nulls, and ordering by it picks a different top version than Ordinal for ~500 NPM release packages.\n- One repo maps to many package names and versions (several repos have 75-900 NPM package names), so star/fork rankings over packages have large ties at equal values, and one project has many package-version rows.",
+   "rationale": "Failure deps_dev_v1/1 was about which version counts as latest and about ties. I checked that Ordinal and UpstreamPublishedAt disagree for 526 NPM packages and that repos have many package names (lodash has 95, others up to 913). I removed the rule that fixed output shape and ordering because the checker said it decided a training answer.",
+   "refusals": [
+    {
+     "problems": [
+      "G1 decisive for deps_dev_v1/2: The output-shape rule for project rankings: add a Version column and choose one row per project with a specific ordering (newest publish time with nulls last, then highest ordinal, then version descending). This fixes which version shows up in the answer, and it also tells the agent which table \"pro; teach the method or the property of the data, not the choice that decides one answer"
+     ],
+     "notes_chars": 1955,
+     "rationale_chars": 393,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "deps_dev_v1/1"
+   ],
+   "n_turns": 6,
+   "duration_ms": 63356,
+   "cost_usd": 0.1860502,
+   "input_tokens": 59622,
+   "output_tokens": 3620,
+   "error": null,
+   "dropped": false,
+   "reviews": [
+    {
+     "chars": 1955,
+     "cost_usd": 0.0395142,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": true,
+     "question": "deps_dev_v1/2",
+     "what": "The output-shape rule for project rankings: add a Version column and choose one row per project with a specific ordering (newest publish time with nulls last, then highest ordinal, then version descending). This fixes which version shows up in the answer, and it also tells the agent which table \"pro",
+     "reason": "The question doesn't ask for a version or say how to pick one per project, and the data can't settle it. The note spells out the exact tie-breaking order that produces the gold Version values, which amounts to one question's solution. The \"latest version = Ordinal only\" rule does the same thing for question 1."
+    },
+    {
+     "chars": 1459,
+     "cost_usd": 0.037364800000000004,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": false,
+     "question": "",
+     "what": "",
+     "reason": "The notes describe properties of the data that hold for every question: how the free text is phrased, number formats, JSON columns, the join path, and ties across packages. The agent would find all of these by profiling. The license line only maps the question's own term 'project license' to the matching table. The Ordinal note says how the two ordering fields differ but doesn't tell the agent whi"
+    }
+   ],
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 1955,
+     "problems": [
+      "G1 decisive for deps_dev_v1/2: The output-shape rule for project rankings: add a Version column and choose one row per project with a specific ordering (newest publish time with nulls last, then highest ordinal, then version descending). This fixes which version shows up in the answer, and it also tells the agent which table \"pro; teach the method or the property of the data, not the choice that decides one answer"
+     ]
+    },
+    {
+     "ok": true,
+     "chars": 1459,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "github_repos",
+   "kind": "dataset",
+   "notes": null,
+   "rationale": "Targets github_repos/1: the agent took README files from contents.sample_path instead of joining files to contents on id (checked: 204 README rows in contents vs 4 reached through files→contents), and missed the © symbol. I added the proportion shape and kept the general notes on templates and dedupe.",
+   "refusals": [
+    {
+     "problems": [
+      "2,226 characters; the limit is 2,000"
+     ],
+     "notes_chars": 2226,
+     "rationale_chars": 388,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "G1 decisive for github_repos/4: The second note is a rule written for the exact wording \"main language (not) X\". It says to treat it the same as \"does not use X\": inner-join to the languages table and drop a repo if any of its language rows names X. That settles whether \"main language\" means the primary language or any language th; teach the method or the property of the data, not the choice that decides one answer"
+     ],
+     "notes_chars": 1861,
+     "rationale_chars": 337,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "G1 decisive for github_repos/1: The note says repos with no languages row have no known language and count neither for nor against a language. That settles whether such repos belong in \"repositories that do not use Python\", which fixes Q1's denominator.; teach the method or the property of the data, not the choice that decides one answer"
+     ],
+     "notes_chars": 1831,
+     "rationale_chars": 302,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "github_repos/1"
+   ],
+   "n_turns": 6,
+   "duration_ms": 72011,
+   "cost_usd": 0.1898656,
+   "input_tokens": 69075,
+   "output_tokens": 3738,
+   "error": null,
+   "dropped": true,
+   "reviews": [
+    {
+     "chars": 1861,
+     "cost_usd": 0.0398172,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": true,
+     "question": "github_repos/4",
+     "what": "The second note is a rule written for the exact wording \"main language (not) X\". It says to treat it the same as \"does not use X\": inner-join to the languages table and drop a repo if any of its language rows names X. That settles whether \"main language\" means the primary language or any language th",
+     "reason": "\"Main language is not Python\" could reasonably mean that the repo's primary language isn't Python. The note settles that ambiguity as a rule, choosing the reading the gold answer depends on (any mention excludes the repo, and repos without a languages row are dropped). The data alone would not decide this, so the agent would follow the note to the answer instead of working it out."
+    },
+    {
+     "chars": 1831,
+     "cost_usd": 0.053606799999999996,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": true,
+     "question": "github_repos/1",
+     "what": "The note says repos with no languages row have no known language and count neither for nor against a language. That settles whether such repos belong in \"repositories that do not use Python\", which fixes Q1's denominator.",
+     "reason": "Whether repos with no language data count as \"not using Python\" is a real ambiguity, and the data can't settle it. The note resolves it as a rule, which leads straight to the gold README count for Q1. The other items are general data-format facts or output conventions."
+    }
+   ],
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 2226,
+     "problems": [
+      "2,226 characters; the limit is 2,000"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 1861,
+     "problems": [
+      "G1 decisive for github_repos/4: The second note is a rule written for the exact wording \"main language (not) X\". It says to treat it the same as \"does not use X\": inner-join to the languages table and drop a repo if any of its language rows names X. That settles whether \"main language\" means the primary language or any language th; teach the method or the property of the data, not the choice that decides one answer"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 1831,
+     "problems": [
+      "G1 decisive for github_repos/1: The note says repos with no languages row have no known language and count neither for nor against a language. That settles whether such repos belong in \"repositories that do not use Python\", which fixes Q1's denominator.; teach the method or the property of the data, not the choice that decides one answer"
+     ]
+    }
+   ]
+  },
+  {
+   "scope": "googlelocal",
+   "kind": "dataset",
+   "notes": null,
+   "rationale": "googlelocal/3 failed only at shape: the agent returned the raw double-quoted JSON hours, but the expected output is a single-quoted Python-list rendering. I added a checked note on the hours format and rendering. The trade-search note is now generic. I kept the other notes, shortened, and added the state/location fact.",
+   "refusals": [
+    {
+     "problems": [
+      "G1 decisive for googlelocal/2: The first bullet uses massage as its example trade, quotes the exact paraphrases the relevant business descriptions use, and prescribes a synonym regex (including the 'therap' stem). That tells the agent which extra rows to count as massage businesses, beyond those whose name says massage.; teach the method or the property of the data, not the choice that decides one answer"
+     ],
+     "notes_chars": 1756,
+     "rationale_chars": 563,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "G1 decisive for googlelocal/3: The note tells the agent exactly how the hours column must look in the answer: a Python-style list with single quotes instead of the stored JSON. Its example is copied from the start of the gold row for the winning business, and it spells out how to build that string.; teach the method or the property of the data, not the choice that decides one answer"
+     ],
+     "notes_chars": 1734,
+     "rationale_chars": 320,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "googlelocal/3"
+   ],
+   "n_turns": 6,
+   "duration_ms": 67366,
+   "cost_usd": 0.19026120000000002,
+   "input_tokens": 63026,
+   "output_tokens": 3453,
+   "error": null,
+   "dropped": true,
+   "reviews": [
+    {
+     "chars": 1756,
+     "cost_usd": 0.05302160000000001,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": true,
+     "question": "googlelocal/2",
+     "what": "The first bullet uses massage as its example trade, quotes the exact paraphrases the relevant business descriptions use, and prescribes a synonym regex (including the 'therap' stem). That tells the agent which extra rows to count as massage businesses, beyond those whose name says massage.",
+     "reason": "Only the massage question depends on this. The bullet settles how broadly \"massage therapy business\" should be read, and it quotes the specific description phrases that pull in the gold rows. The agent is told the matching rule and the rows it catches instead of working them out from the data."
+    },
+    {
+     "chars": 1734,
+     "cost_usd": 0.04418180000000001,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": true,
+     "question": "googlelocal/3",
+     "what": "The note tells the agent exactly how the hours column must look in the answer: a Python-style list with single quotes instead of the stored JSON. Its example is copied from the start of the gold row for the winning business, and it spells out how to build that string.",
+     "reason": "Only this question outputs hours, so the required answer format is a choice for this one question, not a fact about the data. The agent would copy it rather than work it out, and the example itself is taken from the gold answer."
+    }
+   ],
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 1756,
+     "problems": [
+      "G1 decisive for googlelocal/2: The first bullet uses massage as its example trade, quotes the exact paraphrases the relevant business descriptions use, and prescribes a synonym regex (including the 'therap' stem). That tells the agent which extra rows to count as massage businesses, beyond those whose name says massage.; teach the method or the property of the data, not the choice that decides one answer"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 1734,
+     "problems": [
+      "G1 decisive for googlelocal/3: The note tells the agent exactly how the hours column must look in the answer: a Python-style list with single quotes instead of the stored JSON. Its example is copied from the start of the gold row for the winning business, and it spells out how to build that string.; teach the method or the property of the data, not the choice that decides one answer"
+     ]
+    }
+   ]
+  },
+  {
+   "scope": "music_brainz_20k",
+   "kind": "dataset",
+   "notes": null,
+   "rationale": "These notes are general facts about the data: the per-source title templates, accent folding in source 4, the year variants, the '[unknown]' artists, and how to resolve duplicates, all checked with queries in this session. They target whole-catalogue rankings like the one q3 needs, and keep the named-song matching that q1 and q2 rely on. I dropped the prescriptive output-shape bullet the checker flagged.",
+   "refusals": [
+    {
+     "problems": [
+      "G1 decisive for music_brainz_20k/3: The bullet on whole-catalogue rankings fixes the output shape for the single \"which song earned the most\" question. It says to return the raw stored title of every duplicate record in the winning cluster, one row each, ordered by track_id, and not one cleaned-up title.; teach the method or the property of the data, not the choice that decides one answer"
+     ],
+     "notes_chars": 1875,
+     "rationale_chars": 523,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "G1 decisive for music_brainz_20k/3: The closing note says no single stored title is the song's name and that each record's raw title is that source's spelling. This pushes the agent to return every raw title variant in the duplicate cluster instead of one clean song name, which is exactly the answer format the gold for Q3 uses.; teach the method or the property of the data, not the choice that decides one answer"
+     ],
+     "notes_chars": 1512,
+     "rationale_chars": 407,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "music_brainz_20k/3"
+   ],
+   "n_turns": 6,
+   "duration_ms": 56453,
+   "cost_usd": 0.18290720000000002,
+   "input_tokens": 61857,
+   "output_tokens": 3161,
+   "error": null,
+   "dropped": true,
+   "reviews": [
+    {
+     "chars": 1875,
+     "cost_usd": 0.03401320000000001,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": true,
+     "question": "music_brainz_20k/3",
+     "what": "The bullet on whole-catalogue rankings fixes the output shape for the single \"which song earned the most\" question. It says to return the raw stored title of every duplicate record in the winning cluster, one row each, ordered by track_id, and not one cleaned-up title.",
+     "reason": "\"Which song\" would normally be read as asking for one song name. Only one question is this kind of catalogue ranking, and the text settles that ambiguity in favour of the gold's multi-row raw-title format. The agent would copy that format rather than work it out from the data."
+    },
+    {
+     "chars": 1512,
+     "cost_usd": 0.0380742,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": true,
+     "question": "music_brainz_20k/3",
+     "what": "The closing note says no single stored title is the song's name and that each record's raw title is that source's spelling. This pushes the agent to return every raw title variant in the duplicate cluster instead of one clean song name, which is exactly the answer format the gold for Q3 uses.",
+     "reason": "Q3's answer can reasonably be read as one song name, and the data can't settle that choice. Q3 is the only question that returns a song name, and the note settles the choice toward the gold's list of all raw variants. The rest of the text is general entity-resolution method and facts about the data."
+    }
+   ],
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 1875,
+     "problems": [
+      "G1 decisive for music_brainz_20k/3: The bullet on whole-catalogue rankings fixes the output shape for the single \"which song earned the most\" question. It says to return the raw stored title of every duplicate record in the winning cluster, one row each, ordered by track_id, and not one cleaned-up title.; teach the method or the property of the data, not the choice that decides one answer"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 1512,
+     "problems": [
+      "G1 decisive for music_brainz_20k/3: The closing note says no single stored title is the song's name and that each record's raw title is that source's spelling. This pushes the agent to return every raw title variant in the duplicate cluster instead of one clean song name, which is exactly the answer format the gold for Q3 uses.; teach the method or the property of the data, not the choice that decides one answer"
+     ]
+    }
+   ]
+  },
+  {
+   "scope": "pancancer_atlas",
+   "kind": "dataset",
+   "notes": null,
+   "rationale": "The failure in pancancer_atlas/2 came from ignoring the mutation FILTER column. I now describe FILTER as a data property: PASS is the real-call flag and the other values are artifact flags. This rests on the FILTER value counts and the distinct-patient drop I checked. I also added the vital-status token (checked) and a note on the rate's denominator and output columns. The existing notes are condensed.",
+   "refusals": [
+    {
+     "problems": [
+      "2,254 characters; the limit is 2,000"
+     ],
+     "notes_chars": 2254,
+     "rationale_chars": 394,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "G1 decisive for pancancer_atlas/2: A rule to always keep only PASS-filtered mutation rows, even when the question never asks for reliable calls. It is backed by a CDH1-specific patient count for comparison. This settles which rows count for the BRCA CDH1 question that never mentions reliability.; teach the method or the property of the data, not the choice that decides one answer"
+     ],
+     "notes_chars": 1799,
+     "rationale_chars": 386,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "G1 decisive for pancancer_atlas/1: The first note maps specific question wordings to columns. It says the wording \"histology type(s)/annotations\" means the ICD-O-3 code column, and \"histological type(s)\" means the free-text column. This settles which column question 1 groups by.; teach the method or the property of the data, not the choice that decides one answer"
+     ],
+     "notes_chars": 1838,
+     "rationale_chars": 405,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "pancancer_atlas/2"
+   ],
+   "n_turns": 7,
+   "duration_ms": 67722,
+   "cost_usd": 0.2179192,
+   "input_tokens": 79436,
+   "output_tokens": 4183,
+   "error": null,
+   "dropped": true,
+   "reviews": [
+    {
+     "chars": 1799,
+     "cost_usd": 0.044712600000000005,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": true,
+     "question": "pancancer_atlas/2",
+     "what": "A rule to always keep only PASS-filtered mutation rows, even when the question never asks for reliable calls. It is backed by a CDH1-specific patient count for comparison. This settles which rows count for the BRCA CDH1 question that never mentions reliability.",
+     "reason": "Question 2 doesn't say to filter for reliable calls, and the data can't settle whether to apply that filter. The text settles it with a rule tuned to CDH1 that matches the gold answer. Separately, the phrase-to-column mapping (\"histology type(s)/annotations\" means the ICD-O-3 codes) settles question 1's wording the same way."
+    },
+    {
+     "chars": 1838,
+     "cost_usd": 0.0430182,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": true,
+     "question": "pancancer_atlas/1",
+     "what": "The first note maps specific question wordings to columns. It says the wording \"histology type(s)/annotations\" means the ICD-O-3 code column, and \"histological type(s)\" means the free-text column. This settles which column question 1 groups by.",
+     "reason": "Question 1 says \"histology types\", and that could just as well mean the free-text histological_type column. The data doesn't settle it, but the note gives a wording rule that sends the agent to the ICD-O-3 codes the gold answer uses. That is an interpretation choice handed to the agent, not something it would find by profiling the data."
+    }
+   ],
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 2254,
+     "problems": [
+      "2,254 characters; the limit is 2,000"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 1799,
+     "problems": [
+      "G1 decisive for pancancer_atlas/2: A rule to always keep only PASS-filtered mutation rows, even when the question never asks for reliable calls. It is backed by a CDH1-specific patient count for comparison. This settles which rows count for the BRCA CDH1 question that never mentions reliability.; teach the method or the property of the data, not the choice that decides one answer"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 1838,
+     "problems": [
+      "G1 decisive for pancancer_atlas/1: The first note maps specific question wordings to columns. It says the wording \"histology type(s)/annotations\" means the ICD-O-3 code column, and \"histological type(s)\" means the free-text column. This settles which column question 1 groups by.; teach the method or the property of the data, not the choice that decides one answer"
+     ]
+    }
+   ]
+  },
+  {
+   "scope": "stockmarket",
+   "kind": "dataset",
+   "notes": null,
+   "rationale": "All 3 failures were SQL-value mismatches: names kept periods (q3,q4,q5) → strip periods from company names; q3 unioned only 2 of 38 separate tables and did not round → stronger union note plus rounding; q4/q5 added count columns → names-only shape note. Removed the list+total layout rule as refused. Checked Market Category Q/G/S = Listing Exchange Q and how often periods appear, using queries.",
+   "refusals": [
+    {
+     "problems": [
+      "G1 decisive for stockmarket/2: The rule for questions asking for a list plus \"the total number\": return one name column, sort the list by Symbol, and add a final row holding the total. The question doesn't specify any of this layout, and it matches the one question that needs it.; teach the method or the property of the data, not the choice that decides one answer"
+     ],
+     "notes_chars": 1872,
+     "rationale_chars": 347,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "G1 decisive for stockmarket/3: The rule to strip periods from company names, with a worked example for the 'Co., Ltd.' suffix. Nothing in the data calls for this output format. It reproduces the exact spelling of the gold names, including one specific Q3 entry, and ETF names are exempted so that they still match.; teach the method or the property of the data, not the choice that decides one answer"
+     ],
+     "notes_chars": 1730,
+     "rationale_chars": 396,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "stockmarket/3",
+    "stockmarket/4",
+    "stockmarket/5"
+   ],
+   "n_turns": 5,
+   "duration_ms": 73415,
+   "cost_usd": 0.24904320000000002,
+   "input_tokens": 75950,
+   "output_tokens": 3595,
+   "error": null,
+   "dropped": true,
+   "reviews": [
+    {
+     "chars": 1872,
+     "cost_usd": 0.052974200000000006,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": true,
+     "question": "stockmarket/2",
+     "what": "The rule for questions asking for a list plus \"the total number\": return one name column, sort the list by Symbol, and add a final row holding the total. The question doesn't specify any of this layout, and it matches the one question that needs it.",
+     "reason": "Only stockmarket/2 asks for a list together with a total. The note hands over its exact output layout (a single column, rows ordered by symbol, a closing total row), which is an interpretation the data can't settle. The rule for stripping periods from company names also looks fitted to the gold answers of Q3 and Q4."
+    },
+    {
+     "chars": 1730,
+     "cost_usd": 0.0598788,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": true,
+     "question": "stockmarket/3",
+     "what": "The rule to strip periods from company names, with a worked example for the 'Co., Ltd.' suffix. Nothing in the data calls for this output format. It reproduces the exact spelling of the gold names, including one specific Q3 entry, and ETF names are exempted so that they still match.",
+     "reason": "No data property justifies removing the periods. It is an output-format choice copied from the gold strings, and the agent would follow it to reproduce Q3's (and Q4's) answer text rather than work it out. The rest of the text (ticker tables, date format, exchange and status codes) is data profiling or general method."
+    }
+   ],
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 1872,
+     "problems": [
+      "G1 decisive for stockmarket/2: The rule for questions asking for a list plus \"the total number\": return one name column, sort the list by Symbol, and add a final row holding the total. The question doesn't specify any of this layout, and it matches the one question that needs it.; teach the method or the property of the data, not the choice that decides one answer"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 1730,
+     "problems": [
+      "G1 decisive for stockmarket/3: The rule to strip periods from company names, with a worked example for the 'Co., Ltd.' suffix. Nothing in the data calls for this output format. It reproduces the exact spelling of the gold names, including one specific Q3 entry, and ETF names are exempted so that they still match.; teach the method or the property of the data, not the choice that decides one answer"
+     ]
+    }
+   ]
+  },
+  {
+   "scope": "yelp",
+   "kind": "dataset",
+   "notes": null,
+   "rationale": "yelp/4: lowercase category items (businessid_93) were missed, and the average was rounded. The notes add the lowercase-segment rule (checked by query) and say not to round. yelp/6: shape. The notes say to return the name plus categories as one string, with no extra columns. The credit-card attribute values were checked by query. The existing verified notes on join, state and dates are kept.",
+   "refusals": [
+    {
+     "problems": [
+      "2,122 characters; the limit is 2,000",
+      "gold values written literally: restaurants",
+      "golden SQL copied (6+ tokens): name | | ', ' | |; describe the pattern in words instead"
+     ],
+     "notes_chars": 2122,
+     "rationale_chars": 400,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "G1 decisive for yelp/6: The note says to answer \"which business and what is its category\" as one text column: the name, a comma and space, then every category joined with ', '. It also gives a tie-break order that picks the winning business. Only this question asks for that output, and the gold answer is in exactly that fo; teach the method or the property of the data, not the choice that decides one answer"
+     ],
+     "notes_chars": 1888,
+     "rationale_chars": 393,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "yelp/4",
+    "yelp/6"
+   ],
+   "n_turns": 5,
+   "duration_ms": 41917,
+   "cost_usd": 0.19845880000000002,
+   "input_tokens": 60868,
+   "output_tokens": 2917,
+   "error": null,
+   "dropped": true,
+   "reviews": [
+    {
+     "chars": 1888,
+     "cost_usd": 0.040659,
+     "n_turns": 2,
+     "reviewed": true,
+     "decisive": true,
+     "question": "yelp/6",
+     "what": "The note says to answer \"which business and what is its category\" as one text column: the name, a comma and space, then every category joined with ', '. It also gives a tie-break order that picks the winning business. Only this question asks for that output, and the gold answer is in exactly that fo",
+     "reason": "The note settles questions the data can't answer for this one case: whether \"category\" means one category or all of them, and whether the result is one combined column or several. The agent would copy the gold shape instead of working it out."
+    }
+   ],
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 2122,
+     "problems": [
+      "2,122 characters; the limit is 2,000",
+      "gold values written literally: restaurants",
+      "golden SQL copied (6+ tokens): name | | ', ' | |; describe the pattern in words instead"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 1888,
+     "problems": [
+      "G1 decisive for yelp/6: The note says to answer \"which business and what is its category\" as one text column: the name, a comma and space, then every category joined with ', '. It also gives a tie-break order that picks the winning business. Only this question asks for that output, and the gold answer is in exactly that fo; teach the method or the property of the data, not the choice that decides one answer"
+     ]
+    }
+   ]
+  }
+ ],
+ "system_md_changed": true,
+ "mlflow_run_id": "ac7a06d634bc4ab89112c0d1de8251e9",
+ "prompt_version": 10
+}

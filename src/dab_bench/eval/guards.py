@@ -15,7 +15,18 @@ writes could carry answers into a prompt. An edit is refused when it holds:
   `count ( * ) as n` is not a leak);
 - **too much**: more than `max_chars` characters.
 
-Each check returns readable reasons; an empty list means the text is clean.
+From s11 (D40 B) a round may also run with `routing` on:
+
+- **G4, a question named**: a question id (`yelp/2`) or "query 3" / "question 3" in text that
+  enters a prompt; one prompt serves every question of a dataset, so no text may condition
+  on one. The rationale may cite ids (G3 asks it to), so G4 checks prompt text only.
+
+`audit` (G2) runs after a round over every unit the optimiser wrote (each playbook section,
+each dataset's notes, inherited ones included): every gold value of the 54 searched in the
+assembled text, as LabRat's reverse gate does. The model-backed check G1 is `eval/review.py`.
+
+Each check returns readable reasons; an empty list means the text is clean. A refusal is a
+leak unless it is a format fix (`is_leak`): a length overrun, or G3's missing citation.
 """
 
 from __future__ import annotations
@@ -31,6 +42,7 @@ SQL_RUN = 6
 NOTES_MAX_CHARS = 1_500
 
 _WORD = re.compile(r"[a-z0-9]+")
+_NAMED = re.compile(r"\b(?:query|question)\s*(?:no\.?|number|#)?\s*\d+\b", re.I)
 _SQL_TOKEN = re.compile(r"'[^']*'|\"[^\"]*\"|[a-z_][a-z0-9_]*|\d+(?:\.\d+)?|[^\sa-z0-9_]")
 _SQL_WORDS = frozenset(
     [
@@ -185,6 +197,33 @@ def golden_fragments(text: str, golden_sqls: Iterable[str], n: int = SQL_RUN) ->
     return sorted(hits)
 
 
+def question_refs(text: str, datasets: Iterable[str]) -> list[str]:
+    """G4: the questions `text` names: an id such as `yelp/2`, or "query 3" / "question 3"."""
+    hits = [m.group(0) for m in _NAMED.finditer(text)]
+    names = sorted({d for d in datasets if d}, key=len, reverse=True)
+    if names:
+        ids = re.compile(r"\b(?:" + "|".join(map(re.escape, names)) + r")\s*/\s*\d+\b", re.I)
+        hits += [m.group(0) for m in ids.finditer(text)]
+    return sorted(set(hits))
+
+
+def is_leak(problem: str) -> bool:
+    """A refusal that counts toward dropping a write: anything but a format fix (a length
+    overrun, or G3's missing citation, s11)."""
+    return "characters; the limit is" not in problem and not problem.startswith("G3 ")
+
+
+def audit(units: dict[str, str], golds: Iterable[tuple[str, str]]) -> dict[str, int]:
+    """G2 (s11): how many gold values each unit of optimiser-written text holds (only units
+    with any). Counts, never the values: the record is committed beside the prompt."""
+    golds = list(golds)
+    out = {}
+    for name, text in units.items():
+        if text and (hits := gold_literals(text, golds)):
+            out[name] = len(hits)
+    return out
+
+
 @dataclass
 class Guard:
     """Everything an edit is checked against, loaded once per optimisation round."""
@@ -193,12 +232,15 @@ class Guard:
     golds: list[tuple[str, str]] = field(default_factory=list)
     golden_sqls: list[str] = field(default_factory=list)
     max_chars: int = NOTES_MAX_CHARS
+    datasets: list[str] = field(default_factory=list)
+    routing: bool = False  # G4 (s11, D40 B): refuse prompt text that names a question
 
     def leaks(self, problems: list[str]) -> list[str]:
-        """The problems that are leaks (question text, gold values, golden SQL), not length."""
-        return [p for p in problems if not p.endswith(f"the limit is {self.max_chars:,}")]
+        """The problems that are leaks, not format fixes (`is_leak`)."""
+        return [p for p in problems if is_leak(p)]
 
-    def check(self, text: str) -> list[str]:
+    def check(self, text: str, prompt_text: bool = True) -> list[str]:
+        """Every problem with `text`; `prompt_text` False (a rationale) skips G4."""
         problems = []
         if len(text) > self.max_chars:
             problems.append(f"{len(text):,} characters; the limit is {self.max_chars:,}")
@@ -213,10 +255,15 @@ class Guard:
                 f"golden SQL copied ({SQL_RUN}+ tokens): {'; '.join(frags[:3])}; describe the "
                 "pattern in words instead"
             )
+        if self.routing and prompt_text and (refs := question_refs(text, self.datasets)):
+            problems.append(
+                f"G4 a question named ({', '.join(refs[:3])}): write for every question of the "
+                "dataset, never for one"
+            )
         return problems
 
 
-def load_guard(max_chars: int = NOTES_MAX_CHARS) -> Guard:
+def load_guard(max_chars: int = NOTES_MAX_CHARS, routing: bool = False) -> Guard:
     """The 54 questions with their gold, and every current golden's SQL."""
     from dab_bench.data.index import load
     from dab_bench.eval import golden
@@ -228,4 +275,6 @@ def load_guard(max_chars: int = NOTES_MAX_CHARS) -> Guard:
         golds=[(q["question"], q.get("gold_text") or "") for q in qs],
         golden_sqls=[g["sql"] for g in golden.current().values()],
         max_chars=max_chars,
+        datasets=sorted({str(q["id"]).split("/")[0] for q in qs}),
+        routing=routing,
     )

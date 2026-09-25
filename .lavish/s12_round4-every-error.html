@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Round 4, every error</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Design source (2): the project's own system — DESIGN.md ("Field Guide"), tokens verbatim,
+   the same block s00–s03 and frontend/src/tokens.css carry. */
+:root{
+  --bg:#F7F6F2; --panel:#FFFFFF; --band:#EFEEE8;
+  --ink:#1A1D1B; --ink-2:#3B403D; --muted:#4A514D; --faint:#5C635E;
+  --line:#DCDAD2; --line-2:#C7C5BC; --line-3:#8A8880;
+  --accent:#0A6552; --accent-ink:#FFFFFF; --accent-soft:#DFEFE8;
+  --amber:#8A5006; --amber-soft:#F6E6CF;
+  --red:#A2342B; --red-soft:#F6DEDB;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --t-2:0.8rem; --t-1:0.875rem; --t0:1rem; --t1:1.125rem; --t2:1.406rem; --t3:1.758rem; --t4:2.197rem;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --r:10px; --r-sm:6px;
+  --shadow:0 1px 2px rgb(20 25 22 / .05), 0 12px 28px -18px rgb(20 25 22 / .22);
+  --dur:300ms; --ease:cubic-bezier(.2,.7,.2,1); --focus:var(--accent);
+  --w:1140px; --measure:68ch; --track-label:.08em;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121614; --panel:#191E1B; --band:#161A18;
+    --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+    --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+    --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+    --amber:#D99A4E; --amber-soft:#3A2A14;
+    --red:#E8776B; --red-soft:#3D1D1A;
+    --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121614; --panel:#191E1B; --band:#161A18;
+  --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+  --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+  --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+  --amber:#D99A4E; --amber-soft:#3A2A14;
+  --red:#E8776B; --red-soft:#3D1D1A;
+  --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+}
+@media (prefers-reduced-motion: reduce){ :root{ --dur:0.01ms; } }
+*,*::before,*::after{box-sizing:border-box}
+:where(.grid,.flex,.kpi,.cards,.mock-body,.mock-cols,.mock-top,.ladder)>*{min-width:0}
+:where(p,h1,h2,h3,h4,li,dd,figcaption,td,th,.chip,.label){overflow-wrap:anywhere}
+:where(img,svg,video,iframe){max-width:100%;height:auto}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink-2);font-family:var(--sans);font-size:var(--t0);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{color:var(--ink);margin:0;line-height:1.15;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+h1{font-size:var(--t4);font-family:var(--serif);font-weight:400} h1 em{font-style:italic;font-weight:400;color:var(--accent)}
+h2{font-size:var(--t3)} h3{font-size:var(--t1)} h4{font-size:var(--t0)}
+p{margin:0 0 var(--s4);text-wrap:pretty}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:.2em} a:hover{text-decoration-thickness:2px}
+strong,b{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:max(var(--t-2),.86em);background:var(--band);padding:.08em .32em;border-radius:var(--r-sm);color:var(--ink-2)}
+pre{margin:0;font-family:var(--mono);font-size:var(--t-2);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.wrap{max-width:var(--w);margin-inline:auto;padding-inline:var(--s5)}
+.label{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0}
+.lead{font-family:var(--serif);font-size:var(--t1);line-height:1.5;color:var(--ink-2);max-width:72ch}
+.small{font-size:var(--t-1);color:var(--muted)}
+.top{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:var(--w);margin-inline:auto;padding:var(--s3) var(--s5);display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.top b{font-family:var(--mono);font-size:var(--t-1);color:var(--ink);white-space:nowrap}
+.top nav{display:flex;gap:var(--s4);margin-left:auto;flex-wrap:wrap;font-size:var(--t-1);font-weight:500}
+.top nav a{color:var(--ink-2);text-decoration:none;padding:var(--s1) 0} .top nav a:hover{color:var(--accent)}
+header.hero{padding:var(--s7) 0 var(--s5)}
+.chips{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s4) 0 0}
+.chip{font-family:var(--mono);font-size:var(--t-2);padding:.3em .6em;border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--ink-2);background:var(--panel)}
+.chip.ok{border-color:var(--accent);color:var(--accent)} .chip.warn{border-color:var(--amber);color:var(--amber)}
+section.blk{padding-top:var(--s8)} section.blk:last-of-type{padding-bottom:var(--s9)}
+section.band-sec{background:var(--band);margin-top:var(--s8);padding:var(--s7) 0}
+section.band-sec + section.blk{padding-top:var(--s7)}
+.hd{margin-bottom:var(--s5);max-width:80ch} .hd .label{margin-bottom:var(--s2)} .hd h2{margin-bottom:var(--s3)}
+.panel{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5)}
+.grid{display:grid;gap:var(--s4)} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.g3,.g2{grid-template-columns:minmax(0,1fr)}}
+.card h3{margin-bottom:var(--s2)} .card p{margin-bottom:var(--s2);font-size:var(--t-1)} .card p:last-child{margin:0}
+.card.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r);box-shadow:var(--shadow);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:var(--t-1)}
+caption{text-align:left;padding:var(--s4) var(--s5) var(--s2);color:var(--muted);font-size:var(--t-1);caption-side:top}
+th,td{text-align:left;padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}
+thead th{font-family:var(--mono);font-size:var(--t-2);font-weight:500;color:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase;border-bottom:1px solid var(--line-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.sub{font-weight:600;color:var(--ink);white-space:nowrap}
+td.num{font-family:var(--mono);font-size:var(--t-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+td .path{display:block;font-family:var(--mono);font-size:var(--t-2);color:var(--faint);font-weight:400;margin-top:2px}
+td.mono,td code.u{font-family:var(--mono);font-size:var(--t-2)}
+code.u{background:none;padding:0;color:var(--ink)} code.u s{color:var(--faint);text-decoration:line-through}
+tr.pro td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+tr.dim td{color:var(--muted)}
+.v-ok{color:var(--accent);font-weight:600} .v-no{color:var(--muted)} .v-warn{color:var(--amber);font-weight:600}
+blockquote{margin:0;padding:var(--s3) var(--s4);border-left:2px solid var(--accent);background:var(--band);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:var(--t-1)}
+blockquote.warn{border-left-color:var(--amber)}
+.fig{margin:var(--s5) 0 0}
+.fig-title{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0 0 var(--s3);text-wrap:balance}
+.fig figcaption{font-family:var(--sans);font-size:var(--t-1);color:var(--muted);line-height:1.5;margin-top:var(--s3)}
+.fig figcaption b{color:var(--ink);font-weight:600}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:var(--s3)}
+.steps li{position:relative;padding-left:2.75rem;font-size:var(--t-1)}
+.steps li::before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:0;top:2px;font-family:var(--mono);color:var(--accent);font-weight:500}
+form.q{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5);display:grid;gap:var(--s3);margin-top:var(--s4)}
+form.q h3{margin:0} form.q .why{font-size:var(--t-1);color:var(--muted);margin:0}
+form.q label{display:grid;grid-template-columns:1.2rem minmax(0,1fr);gap:var(--s2);align-items:start;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;min-height:24px}
+form.q label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+form.q input[type=radio],form.q input[type=checkbox]{margin:3px 0 0;accent-color:var(--accent);width:16px;height:16px}
+form.q textarea{width:100%;font:inherit;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);color:var(--ink-2);min-height:3.2rem;resize:vertical}
+form.q .row{display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap}
+.btn{font:500 var(--t-1) var(--sans);background:var(--accent);color:var(--accent-ink);border:0;border-radius:var(--r-sm);padding:.55em 1em;cursor:pointer;min-height:24px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.08)} .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.queued{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);min-height:1.2em}
+.rec{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);margin-left:.4em}
+.tag{font-family:var(--mono);font-size:var(--t-2);padding:.15em .45em;border-radius:var(--r-sm);border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.tag.ok{border-color:var(--accent);color:var(--accent)} .tag.warn{border-color:var(--amber);color:var(--amber)} .tag.no{border-color:var(--line-3);color:var(--muted)}
+ul.tight{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.tight li{margin-bottom:var(--s1)}
+ul.qa{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.qa li{margin-bottom:var(--s2)}
+.code{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);margin-top:var(--s3);overflow-x:auto}
+.code .label{margin-bottom:var(--s2)}
+.code.band{background:var(--band)}
+.kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4);margin-top:var(--s5)}
+@media (max-width:900px){.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi .n{font-family:var(--serif);font-size:var(--t3);color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:var(--t-1);color:var(--muted);margin-top:var(--s1)}
+
+/* the hackable-address ladder */
+.ladder{display:grid;gap:var(--s2);margin-top:var(--s3)}
+.ladder .rung{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--s3);align-items:baseline;padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel);font-family:var(--mono);font-size:var(--t-2)}
+.ladder .rung .u{color:var(--ink)} .ladder .rung .u b{color:var(--accent);font-weight:500}
+.ladder .rung .w{font-family:var(--sans);color:var(--muted);font-size:var(--t-2);text-align:right;white-space:nowrap}
+@media (max-width:640px){.ladder .rung{grid-template-columns:minmax(0,1fr)} .ladder .rung .w{text-align:left;white-space:normal}}
+
+/* the mock of the explorer page, in the explorer's own styles */
+.addr{font-family:var(--mono);font-size:var(--t-2);color:var(--ink);background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:var(--s2) var(--s3);margin-top:var(--s4);display:flex;gap:var(--s2);align-items:center}
+.addr .lock{color:var(--faint)} .addr b{color:var(--accent);font-weight:500}
+.mock{background:var(--bg);border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin-top:var(--s2)}
+.mock-top{display:flex;gap:var(--s4);align-items:center;padding:var(--s2) var(--s4);border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 88%,transparent);font-size:var(--t-2);flex-wrap:wrap}
+.mock-top .brand{font-family:var(--mono);color:var(--ink);font-weight:500}
+.mock-top nav{display:flex;gap:var(--s3);flex-wrap:wrap} .mock-top nav span{color:var(--ink-2)} .mock-top nav span.on{color:var(--accent);border-bottom:2px solid var(--accent)}
+.mock-body{padding:var(--s4)}
+.mock h1{font-size:var(--t2)} .mock .label{font-size:.7rem}
+.mock .ed{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent);padding:var(--s4);margin:var(--s3) 0 var(--s4);display:grid;gap:var(--s2)}
+.mock .ed .hdr{display:flex;gap:var(--s3);align-items:baseline;flex-wrap:wrap;font-size:var(--t-1)}
+.mock .ed .hdr b{font-family:var(--mono);font-weight:500;color:var(--ink)} .mock .ed .hdr .nav{margin-left:auto;display:flex;gap:var(--s3);font-size:var(--t-2)}
+.mock .ed .hdr .nav a{text-decoration:underline}
+.mock .ed .qtext{font-size:var(--t-1);color:var(--ink-2);margin:0}
+.mock .ed .ta{font-family:var(--mono);font-size:var(--t-2);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);padding:var(--s2) var(--s3);min-height:4.4rem;color:var(--ink-2);white-space:pre-wrap}
+.mock .ed .row{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}
+.mock .ed .btn{font-size:var(--t-2);padding:.4em .8em} .mock .ed .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.mock table{min-width:0;font-size:var(--t-2)} .mock th,.mock td{padding:var(--s2) var(--s3)}
+.mock tr.cur td{background:var(--accent-soft)} .mock tr.cur td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.mock .tw{box-shadow:none;border:1px solid var(--line)}
+.cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.cmp{grid-template-columns:minmax(0,1fr)}}
+.cmp .side{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s4)}
+.cmp .side h4{margin-bottom:var(--s2)} .cmp .side .label{margin-bottom:var(--s2)}
+.cmp .side pre{background:var(--band);border-radius:var(--r-sm);padding:var(--s3)}
+.cmp .side.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.src{font-size:var(--t-1);color:var(--muted)} .src li{margin-bottom:var(--s1)}
+
+.bar{display:flex;height:34px;border-radius:var(--r-sm);overflow:hidden;margin-top:var(--s3);box-shadow:var(--shadow)}
+.bar span{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:var(--t-2);color:var(--ink);min-width:0;white-space:nowrap;overflow:hidden}
+.bar .a{background:var(--accent-soft)} .bar .b{background:color-mix(in srgb,var(--accent-soft) 45%,var(--panel))} .bar .c{background:var(--amber-soft)}
+.legend{display:flex;gap:var(--s4);flex-wrap:wrap;font-size:var(--t-1);color:var(--muted);margin-top:var(--s2)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+pre.sql{background:var(--band);border-radius:var(--r-sm);padding:var(--s4);font-size:var(--t-2);white-space:pre;overflow-x:auto}
+.copyrow{display:flex;gap:var(--s3);align-items:center;margin-top:var(--s2);flex-wrap:wrap}
+
+/* impact chart: the .dia contract, green / amber / red composition (DESIGN.md §2 Colour) */
+.dia{width:100%;height:auto;display:block;background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow)}
+.dia .ax{stroke:var(--line-2);stroke-width:1}
+.dia .tx{font:500 13px var(--sans);fill:var(--ink)} .dia .tx.all{font-weight:600}
+.dia .tx.k{font:500 13px var(--mono);fill:var(--faint)} .dia .tx.k.strong{fill:var(--ink)}
+.dia .tx.in{font:600 12.8px var(--mono);fill:var(--accent-ink)}
+.dia .trk{fill:var(--line-2)} .dia .agt{fill:var(--ink-2)}
+.dia .seg.ok{fill:var(--accent)} .dia .seg.mid{fill:var(--amber)} .dia .seg.bad{fill:var(--red)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+.sw.b{background:var(--ink-2)} .sw.ok{background:var(--accent)} .sw.mid{background:var(--amber)} .sw.bad{background:var(--red)}
+.lg{white-space:nowrap;margin-right:var(--s3)}
+
+/* the challenger flow figure (.dia contract; nodes follow the page tokens) */
+.dia.flow .nd{fill:var(--panel);stroke:var(--line-3);stroke-width:1}
+.dia.flow .nd.in{fill:var(--band)}
+.dia.flow .nd.hi{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.dia.flow .nd.gold{fill:var(--amber-soft);stroke:var(--amber)}
+.dia.flow .ed{stroke:var(--ink-2);stroke-width:1.25;fill:none;marker-end:url(#arr)}
+.dia.flow .ed.both{marker-start:url(#arr)}
+.dia.flow .ed.dash{stroke-dasharray:5 4}
+.dia.flow .tx.s{font:400 12.8px var(--sans);fill:var(--muted)}
+td.nw{white-space:nowrap}
+.dia.flow .cap{font:500 12.8px var(--mono);fill:var(--faint);letter-spacing:.08em;text-transform:uppercase}
+</style>
+<style>
+.shot{margin:var(--s5) 0 0}
+.shot img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+.shot figcaption{font-size:var(--t-1);color:var(--muted);margin-top:var(--s2);max-width:var(--measure)}
+.shot .src{font-family:var(--mono);font-size:var(--t-2);color:var(--faint)}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4)}
+@media (max-width:760px){.pair{grid-template-columns:minmax(0,1fr)}}
+td.up{color:var(--accent);font-weight:600}
+td.down{color:var(--amber);font-weight:600}
+.top b{min-width:0;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in">
+  <b>s12 · round 4, every error</b>
+  <nav aria-label="Sections"><a href="#verdict">Verdict</a><a href="#round">The round</a><a href="#refused">What G1 refused</a><a href="#champion">The champion's text</a><a href="#moved">What moved</a><a href="#tab">Optimise tab</a><a href="#receipt">Receipt</a><a href="#build">Build</a><a href="#next">Next</a></nav>
+</div></div>
+<div class="wrap">
+<header class="hero">
+  <p class="label">DataAgentBench · build receipt · 2026-09-25 · plan s11 (D38 B, D39 one trial, D40 B) · branch challenger_v3 · Opus 5.5 throughout · one trial per question · figures are screenshots of the explorer on :8091</p>
+  <h1>v7_sql read every error of the 54 with the rubric's checks on, tied v6 on answers (46 of 54) and lost three statements: <em>most of what the extra errors taught was a rule that decides one answer, and the reviewer refused it</em></h1>
+  <p class="lead">Round 4 changed two things from round 3: the Opus optimiser read every error of v6's run (16 failed statements, 12 of them formerly held out, and 4 wrong answers without a golden), and guards G1–G4 checked what it wrote. The reviewer (G1) judged 15 of 20 writes decisive under the leaderboard rubric's §2.2, 8 of 11 dataset sessions were dropped, and v7 kept v6's notes for those datasets. Run through the same reviewer, 10 units of text the champion already carries are judged decisive too.</p>
+  <div class="kpi">
+    <div><div class="n">33 → 30 of 49</div><div class="d">SQL passed, v6_sql → v7_sql: 0 won, 3 lost, p = 0.25</div></div>
+    <div><div class="n">46 → 46 of 54</div><div class="d">answers passed: 1 won (agnews/4), 1 lost (bookreview/1)</div></div>
+    <div><div class="n">0.891 → 0.884</div><div class="d">leaderboard Pass@1 (mean over datasets of each one's pass rate), one trial each</div></div>
+    <div><div class="n">15 of 20</div><div class="d">writes the Opus reviewer (G1) judged decisive; 7 of the 15 about formerly held-out questions</div></div>
+  </div>
+</header>
+
+<section class="blk" id="verdict">
+  <div class="hd"><p class="label">01 · verdict · dab promote --candidates v6_sql,v7_sql (D36)</p>
+  <h2>v6_sql keeps the title: SQL 33 to 30, answers tied at 46</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>version</th><th>what changed</th><th>answer</th><th>SQL</th><th>decision</th><th>Pass@1</th><th>run</th></tr></thead>
+    <tbody>
+      <tr class="pro"><td class="sub">v6_sql <span class="tag ok">champion</span></td><td>round 3: 9 training errors read, literal guard</td><td class="num">46/54</td><td class="num">33/49</td><td class="num">49/49</td><td class="num">0.891</td><td class="num">$5.12 · 7 min</td></tr>
+      <tr><td class="sub">v7_sql</td><td>round 4: every error read (20), guards G1–G4</td><td class="num">46/54</td><td class="num">30/49</td><td class="num">49/49</td><td class="num">0.884</td><td class="num">$5.15 · 6 min</td></tr>
+    </tbody></table></div>
+  <p class="small" style="margin-top:var(--s3)">Paired, exact McNemar: SQL 0 won, 3 lost (p = 0.25); answers 1 won, 1 lost (p = 1.0). With every question read there is no held-out score (D38 B): both numbers are in-sample, as the leaderboard's are.</p>
+</section>
+
+<section class="blk" id="round">
+  <div class="hd"><p class="label">02 · the round · agents/v7_sql/optimise.json</p>
+  <h2>20 errors read, 31 writes, 5 accepted: the playbook passed the reviewer, most dataset notes did not</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>session</th><th>read</th><th>outcome</th><th>refusals</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">playbook · sources</td><td class="num">5 errors</td><td class="up nw">accepted, 599/600</td><td>3 (length)</td></tr>
+      <tr><td class="sub">playbook · parse</td><td class="num">5</td><td class="up nw">accepted, 599/600</td><td>0</td></tr>
+      <tr><td class="sub">playbook · shape</td><td class="num">4</td><td class="up nw">accepted, 555/600</td><td>1: G1 (a decade-format rule for bookreview/1)</td></tr>
+      <tr class="dim"><td class="sub">playbook · filter, rank</td><td class="num">1 each</td><td>no session: G3 wants two or more errors behind a section</td><td>—</td></tr>
+      <tr><td class="sub">agnews <span class="tag ok">first time</span></td><td class="num">3 wrong answers, no golden</td><td class="up nw">accepted, 1,790/2,000</td><td>2 (length, literal)</td></tr>
+      <tr><td class="sub">deps_dev_v1</td><td class="num">1</td><td class="up nw">accepted, 1,459/2,000</td><td>1: G1</td></tr>
+      <tr><td class="sub">8 dataset sessions<span class="path" style="white-space:normal">bookreview, crmarenapro, github_repos, googlelocal, music_brainz_20k, pancancer_atlas, stockmarket, yelp</span></td><td class="num">1–6 each</td><td class="down">dropped (two leak refusals): v6's notes kept</td><td>G1 on each; crmarenapro 5 in all</td></tr>
+    </tbody></table></div>
+  <p class="small" style="margin-top:var(--s3)">Refusal problems over the 31 writes: G1 decisive 15, length 10, literal guard 5 (question text, gold value or golden SQL), G4 0. G2 found no gold value in the finished text (0 units reverted). Optimiser $3.23 + reviewer $1.16.</p>
+</section>
+
+<section class="blk" id="refused">
+  <div class="hd"><p class="label">03 · what G1 refused · the reviewer's verdicts, in its own words (gold values redacted)</p>
+  <h2>Given the goldens of all 54, the optimiser wrote the answer's reading or format for one question at a time</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>question</th><th>split before s11</th><th>what the text would have decided</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">bookreview/1</td><td>held out</td><td>a decade returned as an integer start year, though the question's own example reads "1980s" (twice: the shape section and the notes)</td></tr>
+      <tr><td class="mono">crmarenapro/13</td><td>train</td><td>the whole solution of the one sales question: which agent gets credit, how orders count toward the window</td></tr>
+      <tr><td class="mono">deps_dev_v1/2</td><td>train</td><td>an added Version column and the exact tie-break that produces the gold's versions</td></tr>
+      <tr><td class="mono">github_repos/1, /4</td><td>held out, train</td><td>whether repos with no language row count as "not Python"; a rule for the exact wording "main language (not) X"</td></tr>
+      <tr><td class="mono">googlelocal/2, /3</td><td>train, held out</td><td>the synonym list that pulls in the massage rows; the answer format of the opening hours</td></tr>
+      <tr><td class="mono">music_brainz_20k/3</td><td>held out</td><td>"which song" answered as every raw title variant rather than one name (twice)</td></tr>
+      <tr><td class="mono">pancancer_atlas/1, /2</td><td>train, held out</td><td>"histology types" meaning the ICD-O-3 codes; keeping only PASS-filtered rows though the question does not ask</td></tr>
+      <tr><td class="mono">stockmarket/2, /3</td><td>train</td><td>the list-plus-total layout; stripping periods from company names</td></tr>
+      <tr><td class="mono">yelp/6</td><td>train</td><td>"its category" answered as the full category list in one column</td></tr>
+    </tbody></table></div>
+  <p class="small" style="margin-top:var(--s3)">15 decisive verdicts on 13 questions. The reviewer passed text that states a property of the data (agnews' dates and regions, deps_dev_v1's phrasings and join path) and every rule in the three playbook sections but one. The five accepted writes are what v7 changed.</p>
+</section>
+
+<section class="band-sec" id="champion"><div class="wrap">
+  <div class="hd"><p class="label">04 · the champion's own text · G1 in audit mode over v7's 19 prompt units, refusing nothing ($1.02)</p>
+  <h2>10 units v6_sql already carries are judged decisive too: rounds 1–3 wrote them under the literal guard, which cannot see this</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>unit (identical in v6_sql)</th><th>question</th><th>what it decides, per the reviewer</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">playbook · metric</td><td class="mono">stockindex/3</td><td>"overall return" as last over first, not dollar-cost averaging</td></tr>
+      <tr><td class="mono">notes · stockindex</td><td class="mono">stockindex/3</td><td>the same reading, plus the answer's two columns</td></tr>
+      <tr><td class="mono">notes · stockmarket</td><td class="mono">stockmarket/2</td><td>"one name column … sorted by Symbol, then a final row with text 'Total: &lt;n&gt;'"</td></tr>
+      <tr><td class="mono">notes · yelp</td><td class="mono">yelp/6</td><td>a business's category as its full list joined together</td></tr>
+      <tr><td class="mono">notes · pancancer_atlas</td><td class="mono">pancancer_atlas/1</td><td>"histology types" → the ICD-O-3 code column, with the count of distinct codes</td></tr>
+      <tr><td class="mono">notes · github_repos</td><td class="mono">github_repos/4</td><td>an inner join that drops repos without a language row, naming one repo</td></tr>
+      <tr><td class="mono">notes · googlelocal</td><td class="mono">googlelocal/2</td><td>the massage synonym list, matched in name and description</td></tr>
+      <tr><td class="mono">notes · crmarenapro</td><td class="mono">crmarenapro/8</td><td>who counts in the fewest-transfers ranking</td></tr>
+      <tr><td class="mono">notes · bookreview</td><td class="mono">bookreview/2</td><td>bilingual editions counted as English</td></tr>
+      <tr><td class="mono">notes · patents</td><td class="mono">patents/1 (held out)</td><td>a fixed smoothing formula that overrides the one the question describes</td></tr>
+    </tbody></table></div>
+  <blockquote class="warn" style="margin-top:var(--s4)">Nine of the ten came from questions the optimiser read in rounds 1–3; the tenth decides a held-out question it never saw. The reviewer is one Opus reading of §2.2, and the maintainers have accepted per-dataset "schema quirks" (LabRat) and even per-query rules (Permute EQ) when disclosed; but under the rubric's own words, part of v6_sql's 0.891 rests on text a reviewer could flag.</blockquote>
+</div></section>
+
+<section class="blk" id="moved">
+  <div class="hd"><p class="label">05 · what moved · v6_sql → v7_sql, first break from the Opus reader's ledger</p>
+  <h2>The guards removed rules that had been earning statements; the first agnews notes earned an answer</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>question</th><th>SQL</th><th>answer</th><th>v6 → v7</th><th>why, as far as the record shows</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">agnews/4</td><td>no golden</td><td class="up">fail → pass</td><td>—</td><td>the first agnews notes: the optimiser had never read agnews before (no golden)</td></tr>
+      <tr><td class="mono">bookreview/1</td><td>fail</td><td class="down">pass → fail</td><td>shape → metric</td><td>the decade-format rule G1 refused</td></tr>
+      <tr><td class="mono">deps_dev_v1/2</td><td class="down">pass → fail</td><td>pass</td><td>solved → shape</td><td>the rewritten shape section dropped "add the attribute that picks latest"; G1 refused the same rule in the notes</td></tr>
+      <tr><td class="mono">crmarenapro/4</td><td class="down">pass → fail</td><td>pass</td><td>solved → shape</td><td>shape section rewritten</td></tr>
+      <tr><td class="mono">stockindex/1</td><td class="down">pass → fail</td><td>pass</td><td>solved → rank</td><td>no section changed for it: likely one-trial variation</td></tr>
+    </tbody></table></div>
+</section>
+
+<section class="blk" id="tab">
+  <div class="hd"><p class="label">06 · the Optimise tab · /optimise/v7_sql</p>
+  <h2>A round that read everything says so, and Pass@1 sits beside SQL</h2></div>
+  <figure class="shot"><p class="fig-title">Optimise · round v6_sql → v7_sql</p><img src="s12_1_tab.png" alt="Optimise tab: headline 'SQL 33 → 30 of 49, every question read; answers 46 → 46 of 54; Pass@1 0.891 → 0.884', the loop with 'all 54 read · none held out', and the chart of every version" loading="lazy"><figcaption>The headline and the split stage no longer claim a held-out score for a round that read every question; Pass@1 is the leaderboard's number. <span class="src">/optimise/v7_sql</span></figcaption></figure>
+  <figure class="shot"><p class="fig-title">Round v6_sql → v7_sql · what it read</p><img src="s12_2_round.png" alt="Round card: every error of the 54 read, the component matrix of the 16 failed statements all marked read, and the rounds table with an all-read held-out cell and a Pass@1 column" loading="lazy"><figcaption>Every row reads "read"; the rounds table marks the round "all read" and carries Pass@1 per round (0.425 → 0.559 → 0.573 → 0.842 → 0.891 → 0.884). <span class="src">/optimise/v7_sql</span></figcaption></figure>
+</section>
+
+<section class="blk" id="receipt">
+  <div class="hd"><p class="label">07 · receipt · Opus 5.5 on the subscription</p>
+  <h2>$11.80 for the round, the run, its ledger and the audit</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>step</th><th>cost</th><th>what</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">optimiser → v7_sql</td><td class="num">$4.39</td><td>13 sessions, 31 writes; of it the G1 reviewer $1.16 (20 reviews)</td></tr>
+      <tr><td class="sub">v7_sql eval</td><td class="num">$5.15</td><td>54 × 1, 6 min, prompt version 10</td></tr>
+      <tr><td class="sub">Opus reader on v7's run</td><td class="num">$1.24</td><td>goldens from the Opus cache, 19 comparisons</td></tr>
+      <tr><td class="sub">G1 audit of v7's prompt</td><td class="num">$1.02</td><td>19 units, refusing nothing (section 04)</td></tr>
+    </tbody></table></div>
+</section>
+
+<section class="blk" id="build">
+  <div class="hd"><p class="label">08 · the build list, item by item · uncommitted on challenger_v3</p>
+  <h2>Every queued item is accounted for; the cross-fit is built but not run</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>id</th><th>item</th><th>status</th><th>evidence</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">B1</td><td><code>dab optimise --train all</code></td><td class="up">done</td><td><code>agent/optimise.py</code> (<code>train_all</code>, no-golden answers briefed without validator text); <code>tests/test_s11.py</code></td></tr>
+      <tr><td class="sub">B1b</td><td>guards G1–G4 (from D40 B)</td><td class="up">done</td><td><code>--strict</code>; <code>eval/review.py</code> + <code>agents/reviewer/</code> (G1), <code>guards.audit</code> (G2), <code>optimise.breadth</code> + citation check (G3), <code>guards.question_refs</code> (G4); each has a test that it fires; every version's prompt is held to G2 in CI</td></tr>
+      <tr><td class="sub">B2</td><td>Opus optimiser on v6's run → v7_sql</td><td class="up">done</td><td>section 02, $4.39</td></tr>
+      <tr><td class="sub">B3</td><td>v7_sql on the 54 once + Opus reader</td><td class="up">done</td><td><code>runs/20260925T040220Z_v7_sql_all_opus_hints</code></td></tr>
+      <tr><td class="sub">B4</td><td>promote v7 against v6 (D36)</td><td class="up">done</td><td>v6_sql keeps the title; <code>agents/promotions.jsonl</code></td></tr>
+      <tr><td class="sub">B5</td><td>the s12 receipt</td><td class="up">done</td><td>this page</td></tr>
+      <tr><td class="sub">M1</td><td><code>dab crossfit --folds 3</code></td><td><span class="tag warn">built, not run</span></td><td><code>eval/crossfit.py</code>, tested (seeded stratified folds, stitch, folds outside every list). Not run: D38 chose no cross-fit, and with no in-sample gain there is nothing to test out of sample. ≈ $18 with G1 on.</td></tr>
+      <tr><td class="sub">M2</td><td>leaderboard Pass@1 as a headline</td><td class="up">done</td><td><code>dab promote</code> column, rounds table, Optimise headline; <code>dab export-submission</code> wrote v6_sql's 54 answers to <code>runs/…v6_sql…/submission.json</code> (local only)</td></tr>
+    </tbody></table></div>
+  <p class="small" style="margin-top:var(--s3)">Checks: ruff, mypy (45 files), pytest (all pass, 18 new in <code>tests/test_s11.py</code>), <code>tsc</code>, vitest 51, design lint clean. Docs: CLAUDE.md (six model callers; the all-54 rule), AGENTS.md §7 round 4.</p>
+</section>
+
+<section class="blk" id="next">
+  <div class="hd"><p class="label">09 · what this suggests next · nothing run without a go</p>
+  <h2>Measure what the flagged rules are worth before building on them</h2></div>
+  <ol class="steps">
+    <li><b>A clean champion.</b> v6_sql with the 10 flagged units removed (a hand-built version, one run of the 54, ≈ $6). If Pass@1 holds near 0.89, the rules were not needed; if it falls, that fall is how much of the score rests on text §2.2 could flag.</li>
+    <li><b>Audit inherited text every round.</b> <code>--strict</code> reviews new writes only; running G1 over the units a version inherits (as section 04 did) would stop a round from carrying forward what it could not write today.</li>
+    <li><b>Gains from tools, not more prompt text.</b> With the reviewer on, the errors left mostly teach one question's reading. I2 (a code-built profile of each text column) and I1 (a <code>check_sql</code> verify step) teach the agent to find those readings in the data, which the rubric allows.</li>
+    <li><b>Calibrate G1.</b> One judge, one prompt: spot-check its 15 in-round and 10 audit verdicts before treating it as the rubric.</li>
+  </ol>
+</section>
+</div>
+</body>
+</html>

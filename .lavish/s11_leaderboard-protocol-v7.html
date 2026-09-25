@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leaderboard protocol and v7</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Design source (2): the project's own system — DESIGN.md ("Field Guide"), tokens verbatim,
+   the same block s00–s03 and frontend/src/tokens.css carry. */
+:root{
+  --bg:#F7F6F2; --panel:#FFFFFF; --band:#EFEEE8;
+  --ink:#1A1D1B; --ink-2:#3B403D; --muted:#4A514D; --faint:#5C635E;
+  --line:#DCDAD2; --line-2:#C7C5BC; --line-3:#8A8880;
+  --accent:#0A6552; --accent-ink:#FFFFFF; --accent-soft:#DFEFE8;
+  --amber:#8A5006; --amber-soft:#F6E6CF;
+  --red:#A2342B; --red-soft:#F6DEDB;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --t-2:0.8rem; --t-1:0.875rem; --t0:1rem; --t1:1.125rem; --t2:1.406rem; --t3:1.758rem; --t4:2.197rem;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --r:10px; --r-sm:6px;
+  --shadow:0 1px 2px rgb(20 25 22 / .05), 0 12px 28px -18px rgb(20 25 22 / .22);
+  --dur:300ms; --ease:cubic-bezier(.2,.7,.2,1); --focus:var(--accent);
+  --w:1140px; --measure:68ch; --track-label:.08em;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121614; --panel:#191E1B; --band:#161A18;
+    --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+    --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+    --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+    --amber:#D99A4E; --amber-soft:#3A2A14;
+    --red:#E8776B; --red-soft:#3D1D1A;
+    --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121614; --panel:#191E1B; --band:#161A18;
+  --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+  --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+  --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+  --amber:#D99A4E; --amber-soft:#3A2A14;
+  --red:#E8776B; --red-soft:#3D1D1A;
+  --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+}
+@media (prefers-reduced-motion: reduce){ :root{ --dur:0.01ms; } }
+*,*::before,*::after{box-sizing:border-box}
+:where(.grid,.flex,.kpi,.cards,.mock-body,.mock-cols,.mock-top,.ladder)>*{min-width:0}
+:where(p,h1,h2,h3,h4,li,dd,figcaption,td,th,.chip,.label){overflow-wrap:anywhere}
+:where(img,svg,video,iframe){max-width:100%;height:auto}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink-2);font-family:var(--sans);font-size:var(--t0);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{color:var(--ink);margin:0;line-height:1.15;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+h1{font-size:var(--t4);font-family:var(--serif);font-weight:400} h1 em{font-style:italic;font-weight:400;color:var(--accent)}
+h2{font-size:var(--t3)} h3{font-size:var(--t1)} h4{font-size:var(--t0)}
+p{margin:0 0 var(--s4);text-wrap:pretty}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:.2em} a:hover{text-decoration-thickness:2px}
+strong,b{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:max(var(--t-2),.86em);background:var(--band);padding:.08em .32em;border-radius:var(--r-sm);color:var(--ink-2)}
+pre{margin:0;font-family:var(--mono);font-size:var(--t-2);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.wrap{max-width:var(--w);margin-inline:auto;padding-inline:var(--s5)}
+.label{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0}
+.lead{font-family:var(--serif);font-size:var(--t1);line-height:1.5;color:var(--ink-2);max-width:72ch}
+.small{font-size:var(--t-1);color:var(--muted)}
+.top{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:var(--w);margin-inline:auto;padding:var(--s3) var(--s5);display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.top b{font-family:var(--mono);font-size:var(--t-1);color:var(--ink);white-space:nowrap}
+.top nav{display:flex;gap:var(--s4);margin-left:auto;flex-wrap:wrap;font-size:var(--t-1);font-weight:500}
+.top nav a{color:var(--ink-2);text-decoration:none;padding:var(--s1) 0} .top nav a:hover{color:var(--accent)}
+header.hero{padding:var(--s7) 0 var(--s5)}
+.chips{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s4) 0 0}
+.chip{font-family:var(--mono);font-size:var(--t-2);padding:.3em .6em;border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--ink-2);background:var(--panel)}
+.chip.ok{border-color:var(--accent);color:var(--accent)} .chip.warn{border-color:var(--amber);color:var(--amber)}
+section.blk{padding-top:var(--s8)} section.blk:last-of-type{padding-bottom:var(--s9)}
+section.band-sec{background:var(--band);margin-top:var(--s8);padding:var(--s7) 0}
+section.band-sec + section.blk{padding-top:var(--s7)}
+.hd{margin-bottom:var(--s5);max-width:80ch} .hd .label{margin-bottom:var(--s2)} .hd h2{margin-bottom:var(--s3)}
+.panel{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5)}
+.grid{display:grid;gap:var(--s4)} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.g3,.g2{grid-template-columns:minmax(0,1fr)}}
+.card h3{margin-bottom:var(--s2)} .card p{margin-bottom:var(--s2);font-size:var(--t-1)} .card p:last-child{margin:0}
+.card.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r);box-shadow:var(--shadow);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:var(--t-1)}
+caption{text-align:left;padding:var(--s4) var(--s5) var(--s2);color:var(--muted);font-size:var(--t-1);caption-side:top}
+th,td{text-align:left;padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}
+thead th{font-family:var(--mono);font-size:var(--t-2);font-weight:500;color:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase;border-bottom:1px solid var(--line-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.sub{font-weight:600;color:var(--ink);white-space:nowrap}
+td.num{font-family:var(--mono);font-size:var(--t-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+td .path{display:block;font-family:var(--mono);font-size:var(--t-2);color:var(--faint);font-weight:400;margin-top:2px}
+td.mono,td code.u{font-family:var(--mono);font-size:var(--t-2)}
+code.u{background:none;padding:0;color:var(--ink)} code.u s{color:var(--faint);text-decoration:line-through}
+tr.pro td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+tr.dim td{color:var(--muted)}
+.v-ok{color:var(--accent);font-weight:600} .v-no{color:var(--muted)} .v-warn{color:var(--amber);font-weight:600}
+blockquote{margin:0;padding:var(--s3) var(--s4);border-left:2px solid var(--accent);background:var(--band);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:var(--t-1)}
+blockquote.warn{border-left-color:var(--amber)}
+.fig{margin:var(--s5) 0 0}
+.fig-title{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0 0 var(--s3);text-wrap:balance}
+.fig figcaption{font-family:var(--sans);font-size:var(--t-1);color:var(--muted);line-height:1.5;margin-top:var(--s3)}
+.fig figcaption b{color:var(--ink);font-weight:600}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:var(--s3)}
+.steps li{position:relative;padding-left:2.75rem;font-size:var(--t-1)}
+.steps li::before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:0;top:2px;font-family:var(--mono);color:var(--accent);font-weight:500}
+form.q{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5);display:grid;gap:var(--s3);margin-top:var(--s4)}
+form.q h3{margin:0} form.q .why{font-size:var(--t-1);color:var(--muted);margin:0}
+form.q label{display:grid;grid-template-columns:1.2rem minmax(0,1fr);gap:var(--s2);align-items:start;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;min-height:24px}
+form.q label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+form.q input[type=radio],form.q input[type=checkbox]{margin:3px 0 0;accent-color:var(--accent);width:16px;height:16px}
+form.q textarea{width:100%;font:inherit;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);color:var(--ink-2);min-height:3.2rem;resize:vertical}
+form.q .row{display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap}
+.btn{font:500 var(--t-1) var(--sans);background:var(--accent);color:var(--accent-ink);border:0;border-radius:var(--r-sm);padding:.55em 1em;cursor:pointer;min-height:24px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.08)} .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.queued{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);min-height:1.2em}
+.rec{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);margin-left:.4em}
+.tag{font-family:var(--mono);font-size:var(--t-2);padding:.15em .45em;border-radius:var(--r-sm);border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.tag.ok{border-color:var(--accent);color:var(--accent)} .tag.warn{border-color:var(--amber);color:var(--amber)} .tag.no{border-color:var(--line-3);color:var(--muted)}
+ul.tight{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.tight li{margin-bottom:var(--s1)}
+ul.qa{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.qa li{margin-bottom:var(--s2)}
+.code{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);margin-top:var(--s3);overflow-x:auto}
+.code .label{margin-bottom:var(--s2)}
+.code.band{background:var(--band)}
+.kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4);margin-top:var(--s5)}
+@media (max-width:900px){.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi .n{font-family:var(--serif);font-size:var(--t3);color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:var(--t-1);color:var(--muted);margin-top:var(--s1)}
+
+/* the hackable-address ladder */
+.ladder{display:grid;gap:var(--s2);margin-top:var(--s3)}
+.ladder .rung{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--s3);align-items:baseline;padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel);font-family:var(--mono);font-size:var(--t-2)}
+.ladder .rung .u{color:var(--ink)} .ladder .rung .u b{color:var(--accent);font-weight:500}
+.ladder .rung .w{font-family:var(--sans);color:var(--muted);font-size:var(--t-2);text-align:right;white-space:nowrap}
+@media (max-width:640px){.ladder .rung{grid-template-columns:minmax(0,1fr)} .ladder .rung .w{text-align:left;white-space:normal}}
+
+/* the mock of the explorer page, in the explorer's own styles */
+.addr{font-family:var(--mono);font-size:var(--t-2);color:var(--ink);background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:var(--s2) var(--s3);margin-top:var(--s4);display:flex;gap:var(--s2);align-items:center}
+.addr .lock{color:var(--faint)} .addr b{color:var(--accent);font-weight:500}
+.mock{background:var(--bg);border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin-top:var(--s2)}
+.mock-top{display:flex;gap:var(--s4);align-items:center;padding:var(--s2) var(--s4);border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 88%,transparent);font-size:var(--t-2);flex-wrap:wrap}
+.mock-top .brand{font-family:var(--mono);color:var(--ink);font-weight:500}
+.mock-top nav{display:flex;gap:var(--s3);flex-wrap:wrap} .mock-top nav span{color:var(--ink-2)} .mock-top nav span.on{color:var(--accent);border-bottom:2px solid var(--accent)}
+.mock-body{padding:var(--s4)}
+.mock h1{font-size:var(--t2)} .mock .label{font-size:.7rem}
+.mock .ed{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent);padding:var(--s4);margin:var(--s3) 0 var(--s4);display:grid;gap:var(--s2)}
+.mock .ed .hdr{display:flex;gap:var(--s3);align-items:baseline;flex-wrap:wrap;font-size:var(--t-1)}
+.mock .ed .hdr b{font-family:var(--mono);font-weight:500;color:var(--ink)} .mock .ed .hdr .nav{margin-left:auto;display:flex;gap:var(--s3);font-size:var(--t-2)}
+.mock .ed .hdr .nav a{text-decoration:underline}
+.mock .ed .qtext{font-size:var(--t-1);color:var(--ink-2);margin:0}
+.mock .ed .ta{font-family:var(--mono);font-size:var(--t-2);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);padding:var(--s2) var(--s3);min-height:4.4rem;color:var(--ink-2);white-space:pre-wrap}
+.mock .ed .row{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}
+.mock .ed .btn{font-size:var(--t-2);padding:.4em .8em} .mock .ed .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.mock table{min-width:0;font-size:var(--t-2)} .mock th,.mock td{padding:var(--s2) var(--s3)}
+.mock tr.cur td{background:var(--accent-soft)} .mock tr.cur td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.mock .tw{box-shadow:none;border:1px solid var(--line)}
+.cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.cmp{grid-template-columns:minmax(0,1fr)}}
+.cmp .side{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s4)}
+.cmp .side h4{margin-bottom:var(--s2)} .cmp .side .label{margin-bottom:var(--s2)}
+.cmp .side pre{background:var(--band);border-radius:var(--r-sm);padding:var(--s3)}
+.cmp .side.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.src{font-size:var(--t-1);color:var(--muted)} .src li{margin-bottom:var(--s1)}
+
+.bar{display:flex;height:34px;border-radius:var(--r-sm);overflow:hidden;margin-top:var(--s3);box-shadow:var(--shadow)}
+.bar span{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:var(--t-2);color:var(--ink);min-width:0;white-space:nowrap;overflow:hidden}
+.bar .a{background:var(--accent-soft)} .bar .b{background:color-mix(in srgb,var(--accent-soft) 45%,var(--panel))} .bar .c{background:var(--amber-soft)}
+.legend{display:flex;gap:var(--s4);flex-wrap:wrap;font-size:var(--t-1);color:var(--muted);margin-top:var(--s2)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+pre.sql{background:var(--band);border-radius:var(--r-sm);padding:var(--s4);font-size:var(--t-2);white-space:pre;overflow-x:auto}
+.copyrow{display:flex;gap:var(--s3);align-items:center;margin-top:var(--s2);flex-wrap:wrap}
+
+/* impact chart: the .dia contract, green / amber / red composition (DESIGN.md §2 Colour) */
+.dia{width:100%;height:auto;display:block;background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow)}
+.dia .ax{stroke:var(--line-2);stroke-width:1}
+.dia .tx{font:500 13px var(--sans);fill:var(--ink)} .dia .tx.all{font-weight:600}
+.dia .tx.k{font:500 13px var(--mono);fill:var(--faint)} .dia .tx.k.strong{fill:var(--ink)}
+.dia .tx.in{font:600 12.8px var(--mono);fill:var(--accent-ink)}
+.dia .trk{fill:var(--line-2)} .dia .agt{fill:var(--ink-2)}
+.dia .seg.ok{fill:var(--accent)} .dia .seg.mid{fill:var(--amber)} .dia .seg.bad{fill:var(--red)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+.sw.b{background:var(--ink-2)} .sw.ok{background:var(--accent)} .sw.mid{background:var(--amber)} .sw.bad{background:var(--red)}
+.lg{white-space:nowrap;margin-right:var(--s3)}
+
+/* the challenger flow figure (.dia contract; nodes follow the page tokens) */
+.dia.flow .nd{fill:var(--panel);stroke:var(--line-3);stroke-width:1}
+.dia.flow .nd.in{fill:var(--band)}
+.dia.flow .nd.hi{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.dia.flow .nd.gold{fill:var(--amber-soft);stroke:var(--amber)}
+.dia.flow .ed{stroke:var(--ink-2);stroke-width:1.25;fill:none;marker-end:url(#arr)}
+.dia.flow .ed.both{marker-start:url(#arr)}
+.dia.flow .ed.dash{stroke-dasharray:5 4}
+.dia.flow .tx.s{font:400 12.8px var(--sans);fill:var(--muted)}
+td.nw{white-space:nowrap}
+.dia.flow .cap{font:500 12.8px var(--mono);fill:var(--faint);letter-spacing:.08em;text-transform:uppercase}
+</style>
+<style>
+.shot{margin:var(--s5) 0 0}
+.shot img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+.shot figcaption{font-size:var(--t-1);color:var(--muted);margin-top:var(--s2);max-width:var(--measure)}
+.shot .src{font-family:var(--mono);font-size:var(--t-2);color:var(--faint)}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4)}
+@media (max-width:760px){.pair{grid-template-columns:minmax(0,1fr)}}
+td.up{color:var(--accent);font-weight:600}
+td.down{color:var(--amber);font-weight:600}
+.top b{min-width:0;overflow-wrap:anywhere}
+.verdict{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:760px){.verdict{grid-template-columns:minmax(0,1fr)}}
+.verdict .panel h3{display:flex;gap:var(--s2);align-items:baseline;flex-wrap:wrap}
+.big{font-family:var(--serif);font-size:var(--t3);line-height:1}
+.big.go{color:var(--accent)} .big.no{color:var(--amber)}
+.opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.opts{grid-template-columns:minmax(0,1fr)}}
+.opts .panel p{font-size:var(--t-1);margin-bottom:var(--s2)} .opts .panel dl{margin:0;font-size:var(--t-1)}
+.opts dt{font-family:var(--mono);font-size:var(--t-2);color:var(--faint);text-transform:uppercase;letter-spacing:var(--track-label);margin-top:var(--s2)}
+.opts dd{margin:0}
+.ideas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.ideas{grid-template-columns:minmax(0,1fr)}}
+.ideas .panel p{font-size:var(--t-1);margin-bottom:var(--s2)}
+.ideas .who{font-family:var(--mono);font-size:var(--t-2);color:var(--faint)}
+.ideas .hits{display:flex;gap:var(--s2);flex-wrap:wrap;margin-top:var(--s2)}
+td .tag{margin-right:4px}
+.gapbar{display:inline-block;height:10px;background:var(--amber);border-radius:2px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in">
+  <b>s11 · learn on all 54?</b>
+  <nav aria-label="Sections"><a href="#leaders">Leaders</a><a href="#protocol">Protocol</a><a href="#gonogo">Go / no-go</a><a href="#crossfit">Cross-fit</a><a href="#guards">Guards</a><a href="#gap">The gap</a><a href="#ideas">Ideas</a><a href="#v7">v7 plan</a><a href="#decide">Decide</a></nav>
+</div></div>
+<div class="wrap">
+<header class="hero">
+  <p class="label">DataAgentBench · plan s11 · 2026-09-25 · sources: upstream README and SUBMISSION_RUBRIC.md at 0290945, leaderboard PRs #63–#104, our runs v1_sql–v6_sql · every leaderboard number is the site's unless marked</p>
+  <h1>Go: v7 learns from all 54 errors on Opus 5.5, as the tuned leaders do, <em>with the rubric's leak checks added and its score on the 54 read as in-sample</em></h1>
+  <p class="lead">Decided on this page: v7 is round 3's recipe with two changes. The optimiser reads every error of the 54 instead of only the 33 training questions' (v6's optimiser never saw the 16 held out), and four new guards (G1–G4) check what it writes. The reader, the optimiser and the agent stay Opus 5.5, at one trial per question. That is how the leaderboard works: no holdout, the 54 scored directly, and "Tuned prompt ✓" on every top-12 entry. With no cross-fit (D38 B), v7's score on the 54 is in-sample, as every leaderboard number is.</p>
+  <div class="kpi">
+    <div><div class="n">12 of 12</div><div class="d">top-12 entries marked Tuned prompt ✓; none of the 11 write-ups we read describes a holdout</div></div>
+    <div><div class="n">5 × 54 = 270</div><div class="d">trials per leaderboard submission; we run 54 × 1 (decided, D39). Pass@1 = mean over the 12 datasets of each dataset's mean per-question pass rate</div></div>
+    <div><div class="n">0.891</div><div class="d">v6_sql on that metric, one trial: between #2 Scout 0.906 and #3 Camber 0.879 (five trials each)</div></div>
+    <div><div class="n">+10/33 · +1/16</div><div class="d">SQL gained over three rounds on training questions vs held-out questions</div></div>
+  </div>
+</header>
+
+<section class="blk" id="leaders">
+  <div class="hd"><p class="label">01 · how the leaders run it · README table + each PR's own description</p>
+  <h2>The leaders run Opus 5 or GLM-5.2, five trials, a tuned prompt, and a check before the answer leaves</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>#</th><th>entry · model</th><th>Pass@1</th><th>structure</th><th>how it is tuned / what stands out</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td class="sub">Permute EQ<span class="path">Claude Opus 5 · #95</span></td><td class="num">0.9467</td><td>single agent; two prompt variants by dataset group</td><td><span class="tag warn">per-query</span> extra rules for crmarenapro Q3, Q7, Q9 ("conditional execution rules") and a block "use only for GITHUB_REPOS Q2", reused for DEPS_DEV_V1 Q1. Disclosed; accepted.</td></tr>
+      <tr><td class="num">2</td><td class="sub">Scout (OceanBase Lab)<span class="path">GLM-5.2, thinking off · #96</span></td><td class="num">0.9062</td><td>main agent + planner subagents; deterministic workflow compiler and data kernel</td><td>model-backed tools for text extraction and classification; SQL and Python paths; bounded plan repair.</td></tr>
+      <tr><td class="num">3</td><td class="sub">Camber<span class="path">Opus 5, high effort · #92</span></td><td class="num">0.8790</td><td>one notebook agent per dataset, Jupyter kernel</td><td>a clean context per trial; mechanical leakage sweep over every trace.</td></tr>
+      <tr><td class="num">4</td><td class="sub">Sentinel (Actioneer)<span class="path">Fable-5 (+ Opus 4.7) · #73</span></td><td class="num">0.8617</td><td>ReAct over a sandboxed Python REPL</td><td><span class="tag ok">verify</span> deterministic <code>verify_step</code> assertions (row count, uniqueness, non-null, dtype, range) before finalising; hints folded into guidelines.</td></tr>
+      <tr><td class="num">5</td><td class="sub">Permute Core<span class="path">Opus 5, max effort · #85</span></td><td class="num">0.8413</td><td>every store normalised to Parquet behind one DuckDB interface</td><td><span class="tag ok">evidence</span> a pre-built evidence layer (tables, columns, relationships, predicates, operations) retrieved per query; <code>semantic_probe</code> profiling for ambiguities.</td></tr>
+      <tr><td class="num">6</td><td class="sub">Alkera<span class="path">Fable-5 + Opus 4.8 · #70</span></td><td class="num">0.8411</td><td>SQL tools, lineage, review subagents</td><td>a benchmark-agnostic addendum: answer-delivery contract, literal reading, analytical conventions (grain, code vs name, EMA / dollar-cost averaging).</td></tr>
+      <tr><td class="num">7</td><td class="sub">Sarvam Code v0.36<span class="path">GLM-5.2, max · #75</span></td><td class="num">0.8208</td><td>shell + SQL agent</td><td><span class="tag ok">second solver</span> a deterministic answer gate and one blind second solver as a cross-check.</td></tr>
+      <tr><td class="num">9</td><td class="sub">SCRIBE (Actioneer)<span class="path">Opus 4.7 · #67</span></td><td class="num">0.8185</td><td>Spec agent → executor → planner</td><td>plan first, then execute, with mid-course correction; schemas discovered live.</td></tr>
+      <tr><td class="num">12</td><td class="sub">LabRat + Cartographer<span class="path">Opus 5, high · #84</span></td><td class="num">0.8018</td><td>MCP tool suite: catalog, profiling, SQL with repair hints, join verification, embedding classification</td><td><span class="tag ok">closest to ours</span> four prompt packs "derived from our own failure analyses", with a two-way contamination gate (pack tokens vs ground truth; every ground-truth value vs the emitted prompt); an answer-shape gate.</td></tr>
+      <tr><td class="num">13</td><td class="sub">Spacedock (Recce)<span class="path">GPT-5.5 · #63</span></td><td class="num">0.7850</td><td>model → analyse → verify stages</td><td>not tuned; the verify stage re-derives every answer from the source data.</td></tr>
+      <tr class="pro"><td class="num">—</td><td class="sub">v6_sql (ours)<span class="path">Opus 5.5, medium</span></td><td class="num">0.891<span class="path">1 trial</span></td><td>one SQL statement per question, plan first; query_db, describe_table, submit_answer</td><td>tuned already (the optimiser read the 33 training goldens). The only entry that checks its SQL against goldens step by step: the ledger.</td></tr>
+    </tbody></table></div>
+  <p class="small" style="margin-top:var(--s3)">Ranks and Pass@1 are the README's at the ingested commit. Recurring ceilings across entries: agnews 0.40–0.55, DEPS_DEV_V1 and GITHUB_REPOS 0.50, PANCANCER_ATLAS 0.67.</p>
+</section>
+
+<section class="blk" id="protocol">
+  <div class="hd"><p class="label">02 · the protocol · SUBMISSION_RUBRIC.md, mapped to our setup</p>
+  <h2>We meet the rubric's source and runtime rules; the open gap is §2.2's "decisive interpretation"; we keep one trial by choice</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>rule</th><th>what the rubric asks</th><th>our setup</th><th>status</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">coverage §3</td><td>5 runs of every query (270), a trace per run, answers matching the traces</td><td>one trial per question so far; a trace per trial in <code>runs/&lt;id&gt;/traces</code></td><td><span class="tag no">1 trial, by choice (D39)</span></td></tr>
+      <tr><td class="sub">metric</td><td>Pass@1 = mean over datasets of each dataset's mean per-question pass rate</td><td>scorecard and promote lead with counts of 54 and of 49; <code>dab eval</code> prints the macro</td><td><span class="tag warn">headline</span></td></tr>
+      <tr><td class="sub">sources §1</td><td>only the dataset's sanctioned stores and description files</td><td>a Postgres copy of the sanctioned stores, read as <code>dab_agent</code>; Permute Core's Parquet/DuckDB normalisation is the precedent</td><td><span class="tag ok">met · disclose</span></td></tr>
+      <tr><td class="sub">runtime leakage §2.1</td><td>no web fetch, no ground truth or validator, no other runs' artefacts</td><td>isolated sessions: no built-in tools, strict MCP, empty cwd, no network tool; <code>dab_agent</code> cannot read the meta schema</td><td><span class="tag ok">met</span></td></tr>
+      <tr><td class="sub">prompt leakage §2.2</td><td>no prompt text that states a decisive value, label, threshold, key, cardinality or interpretation that a gold answer depends on</td><td>the guard refuses literal gold values, 8-word question runs and 6-token golden SQL; it does not judge whether an interpretation is decisive</td><td><span class="tag warn">G1, G2</span></td></tr>
+      <tr><td class="sub">disclosure</td><td>"Tuned prompt ✓" when the prompt is built from studying DAB</td><td>v2_sql onwards were written by an optimiser that read goldens</td><td><span class="tag ok">✓ already</span></td></tr>
+    </tbody></table></div>
+</section>
+
+<section class="blk" id="gonogo">
+  <div class="hd"><p class="label">03 · go / no-go · our three rounds, each a prompt change on one model</p>
+  <h2>SQL gains stay where the optimiser looked; answer gains reach questions it never saw</h2></div>
+  <div class="tw"><table>
+    <caption>Paired on the same questions, one trial each. Train = the 33 training questions with a golden; held out = the 16 never shown.</caption>
+    <thead><tr><th>round</th><th>agent model</th><th>train SQL</th><th>held-out SQL</th><th>train answers</th><th>held-out answers</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">1 · v1 → v2</td><td>haiku</td><td class="num">12 → 16 /33</td><td class="num">1 → 2 /16</td><td class="num">17 → 21 /33</td><td class="num">6 → 8 /16</td></tr>
+      <tr><td class="sub">2 · v2 → v3</td><td>haiku</td><td class="num">16 → 17</td><td class="num">2 → 2</td><td class="num">21 → 23</td><td class="num">8 → 9</td></tr>
+      <tr><td class="sub">3 · v5 → v6</td><td>opus 5.5</td><td class="num">24 → 29</td><td class="num">4 → 4</td><td class="num">31 → 31</td><td class="num">12 → 14</td></tr>
+      <tr class="pro"><td class="sub">three rounds</td><td></td><td class="num up">+10 of 33 · +30 pts</td><td class="num">+1 of 16 · +6 pts</td><td class="num up">+6 of 33 · +18 pts</td><td class="num up">+5 of 16 · +31 pts</td></tr>
+    </tbody></table></div>
+  <div class="verdict">
+    <div class="panel card pro"><h3><span class="big go">Go</span> train v7 on all 54</h3><p>It is the leaderboard's norm and inside its rules (disclosed as Tuned ✓). The optimiser gets 16 SQL failures and 8 answer failures to learn from instead of 4 and 2, including the no-golden agnews and crmarenapro/7 answers it has never read. Held-out answers rising +5 of 16 says the playbook teaches more than the questions it read.</p></div>
+    <div class="panel card"><h3><span class="big no">No-go</span> dropping the out-of-sample score</h3><p>After training on the 54, a score on the 54 is in-sample. Our SQL rose five times faster in-sample than out (+30 vs +6 points), so an in-sample number alone cannot tell a round that learned from one that memorised, and the guard only catches literal copies. Cross-fitting keeps that measurement at about $12 a round. Decided otherwise (D38 B): v7's 54 score is read as in-sample.</p></div>
+  </div>
+  <div class="opts">
+    <div class="panel card pro"><h3>A · all 54 + 3-fold cross-fit</h3><p><span class="rec">recommended</span></p><dl><dt>learns from</dt><dd>every failure of the 54</dd><dt>tells you</dt><dd>the leaderboard number (in-sample) and an out-of-sample one; the gap is the fitting</dd><dt>costs</dt><dd>≈ $12 more than B (3 fold optimisers + 54 fold trials)</dd></dl></div>
+    <div class="panel card"><h3>B · all 54, no out-of-sample <span class="tag ok">chosen · D38</span></h3><p>what the leaderboard entries publish</p><dl><dt>learns from</dt><dd>every failure</dd><dt>tells you</dt><dd>the in-sample number only</dd><dt>risk</dt><dd>later rounds fit one-trial noise and nothing flags it</dd></dl></div>
+    <div class="panel card"><h3>C · keep the 33 / 16 split</h3><p>today's protocol</p><dl><dt>learns from</dt><dd>4 SQL failures of v6 (12 are held out)</dd><dt>tells you</dt><dd>a clean held-out score on 16 questions</dd><dt>cost</dt><dd>leaves most of v6's failures unread and the leaderboard number lower</dd></dl></div>
+  </div>
+</section>
+
+<section class="blk" id="crossfit">
+  <div class="hd"><p class="label">04 · cross-fitting · the holdout's job without wasting questions</p>
+  <h2>Not run for v7 (D38 B): kept here as the way to measure generalisation if a later round needs it</h2></div>
+  <svg class="dia flow" viewBox="0 0 1000 470" role="img" aria-label="Cross-fitting: v6's run is split into three folds stratified by dataset; for each fold the optimiser reads the other two folds' failures and writes a fold prompt, which answers only its own fold; the three folds give an out-of-sample score; separately the optimiser reads every failure and writes v7, which answers all 54 once for the in-sample score; the gap between them is the fitting">
+    <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--ink-2)"/></marker></defs>
+    <text class="cap" x="20" y="24">out-of-sample · three folds, stratified by dataset, seeded</text>
+    <rect class="nd in" x="20" y="150" width="190" height="84" rx="8"/>
+    <text class="tx" x="115" y="180" text-anchor="middle">v6_sql · 54 × 1 trial</text>
+    <text class="tx s" x="115" y="200" text-anchor="middle">Opus reader's ledger</text>
+    <text class="tx s" x="115" y="218" text-anchor="middle">every failure, every step</text>
+    <g>
+      <rect class="nd" x="270" y="44" width="300" height="56" rx="8"/><text class="tx" x="420" y="68" text-anchor="middle">optimiser reads folds 2 + 3's failures</text><text class="tx s" x="420" y="88" text-anchor="middle">writes fold prompt P1 (never promoted)</text>
+      <rect class="nd hi" x="620" y="44" width="170" height="56" rx="8"/><text class="tx" x="705" y="68" text-anchor="middle">P1 answers fold 1</text><text class="tx s" x="705" y="88" text-anchor="middle">≈ 18 questions × 1</text>
+      <path class="ed" d="M570,72 L616,72"/>
+    </g>
+    <g>
+      <rect class="nd" x="270" y="136" width="300" height="56" rx="8"/><text class="tx" x="420" y="160" text-anchor="middle">optimiser reads folds 1 + 3's failures</text><text class="tx s" x="420" y="180" text-anchor="middle">writes P2</text>
+      <rect class="nd hi" x="620" y="136" width="170" height="56" rx="8"/><text class="tx" x="705" y="160" text-anchor="middle">P2 answers fold 2</text><text class="tx s" x="705" y="180" text-anchor="middle">≈ 18 questions × 1</text>
+      <path class="ed" d="M570,164 L616,164"/>
+    </g>
+    <g>
+      <rect class="nd" x="270" y="228" width="300" height="56" rx="8"/><text class="tx" x="420" y="252" text-anchor="middle">optimiser reads folds 1 + 2's failures</text><text class="tx s" x="420" y="272" text-anchor="middle">writes P3</text>
+      <rect class="nd hi" x="620" y="228" width="170" height="56" rx="8"/><text class="tx" x="705" y="252" text-anchor="middle">P3 answers fold 3</text><text class="tx s" x="705" y="272" text-anchor="middle">≈ 18 questions × 1</text>
+      <path class="ed" d="M570,256 L616,256"/>
+    </g>
+    <path class="ed" d="M210,176 C240,176 240,72 266,72"/>
+    <path class="ed" d="M210,192 L266,164"/>
+    <path class="ed" d="M210,208 C240,208 240,256 266,256"/>
+    <rect class="nd gold" x="830" y="110" width="150" height="110" rx="8"/>
+    <text class="tx" x="905" y="140" text-anchor="middle">out-of-sample</text>
+    <text class="tx s" x="905" y="160" text-anchor="middle">each question</text>
+    <text class="tx s" x="905" y="178" text-anchor="middle">scored once</text>
+    <text class="tx s" x="905" y="196" text-anchor="middle">SQL /49 · Pass@1</text>
+    <path class="ed" d="M790,72 C812,72 812,140 826,140"/>
+    <path class="ed" d="M790,164 L826,164"/>
+    <path class="ed" d="M790,256 C812,256 812,190 826,190"/>
+    <text class="cap" x="20" y="340">in-sample · what the leaderboard sees</text>
+    <path class="ed" d="M115,234 L115,376 L266,376"/>
+    <rect class="nd" x="270" y="350" width="300" height="56" rx="8"/><text class="tx" x="420" y="374" text-anchor="middle">optimiser reads every failure of the 54</text><text class="tx s" x="420" y="394" text-anchor="middle">writes v7_sql (+ G1–G4)</text>
+    <rect class="nd hi" x="620" y="350" width="170" height="56" rx="8"/><text class="tx" x="705" y="374" text-anchor="middle">v7 answers the 54</text><text class="tx s" x="705" y="394" text-anchor="middle">× 1 trial</text>
+    <path class="ed" d="M570,378 L616,378"/>
+    <rect class="nd gold" x="830" y="350" width="150" height="56" rx="8"/><text class="tx" x="905" y="374" text-anchor="middle">in-sample</text><text class="tx s" x="905" y="394" text-anchor="middle">leaderboard Pass@1</text>
+    <path class="ed" d="M790,378 L826,378"/>
+    <path class="ed dash both" d="M962,224 L962,346"/>
+    <text class="tx k strong" x="952" y="292" text-anchor="end">gap = the fitting</text>
+  </svg>
+  <p class="small" style="margin-top:var(--s3)">Folds split the 49 questions with a golden by dataset, so each fold holds some of every dataset with three or more questions; the 5 without a golden (agnews 1–4, crmarenapro/7) are spread the same way and scored on answers only. Cross-fitting measures the procedure (learn from failures), not v7's exact text: the standard caveat, and the reason the fold prompts are never promoted.</p>
+</section>
+
+<section class="blk" id="guards">
+  <div class="hd"><p class="label">05 · guardrails for training on the 54 · rubric §2.2 and LabRat's gate</p>
+  <h2>v7 adds all four to the literal guard (D40 B)</h2><p class="small">The literal guard already checks every write against all 54 questions, gold values and goldens; G1–G4 add the rubric's broader test and three structural rules.</p></div>
+  <div class="tw"><table>
+    <thead><tr><th>id</th><th>check</th><th>what it refuses</th><th>why</th></tr></thead>
+    <tbody>
+      <tr class="dim"><td class="sub">now</td><td>literal guard (<code>eval/guards.py</code>)</td><td>a run of 8 question words, a gold value written literally, a run of 6 golden-SQL tokens; caps 600 / 2,000 / 8,000</td><td>kept unchanged</td></tr>
+      <tr><td class="sub">G1</td><td>decisive-interpretation reviewer</td><td>a separate Opus session reads each write beside the questions and gold answers (a checker, never a writer) and refuses text that hands over a value, row set, threshold, key, cardinality or reading that decides one question's answer and that the agent could not derive from the data and description</td><td>rubric §2.2 names exactly this; our guard only sees literal copies</td></tr>
+      <tr><td class="sub">G2</td><td>whole-prompt reverse audit</td><td>after v7 is written, every gold value of the 54 is searched in the emitted prompt (<code>system.md</code>, every dataset note, the hints), with a planted-token self-test proving the check fires</td><td>LabRat's second gate; ours checks each write, not the assembled prompt</td></tr>
+      <tr><td class="sub">G3</td><td>evidence breadth</td><td>a playbook bullet backed by one question; the session must cite at least two failed questions it generalises from (checked against what it read), and single-question lessons go to dataset notes, which G1 reviews</td><td>round 3's sections rest on one or two questions each</td></tr>
+      <tr><td class="sub">G4</td><td>no routing</td><td>text that conditions on a question ("when asked about … in this form, do …"); one prompt per dataset, the same for every question</td><td>the line we keep that Permute EQ crossed</td></tr>
+    </tbody></table></div>
+  <p class="small" style="margin-top:var(--s3)">The cross-fit gap is the guard on generalisation itself: a round whose out-of-sample score does not move while its in-sample score rises has fitted, and is not promoted on that basis.</p>
+</section>
+
+<section class="blk" id="gap">
+  <div class="hd"><p class="label">06 · where v6_sql loses points · dataset Pass@1, one trial, against the top two</p>
+  <h2>Three datasets account for the whole 0.06 between v6 and the leader: crmarenapro, agnews and github_repos</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>dataset</th><th>questions</th><th>v6_sql</th><th>Permute EQ</th><th>Scout</th><th>points of Pass@1 behind the best</th><th>what fails in v6</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">crmarenapro</td><td class="num">13</td><td class="num">0.69</td><td class="num">1.00</td><td class="num">0.91</td><td class="num"><span class="gapbar" style="width:52px"></span> 2.6</td><td>answers 2, 3, 7, 13 (7 has no golden)</td></tr>
+      <tr><td class="sub">agnews</td><td class="num">4</td><td class="num">0.25</td><td class="num">0.50</td><td class="num">0.45</td><td class="num"><span class="gapbar" style="width:42px"></span> 2.1</td><td>answers 2, 3, 4: classifying article text; no golden, never read by the optimiser; every leader ≤ 0.55</td></tr>
+      <tr><td class="sub">github_repos</td><td class="num">4</td><td class="num">0.75</td><td class="num">1.00</td><td class="num">0.80</td><td class="num"><span class="gapbar" style="width:42px"></span> 2.1</td><td>answer 1 (breaks at sources)</td></tr>
+      <tr class="dim"><td class="sub">the other 9</td><td class="num">33</td><td class="num">1.00</td><td class="num">0.70–1.00</td><td class="num">0.86–1.00</td><td class="num">0</td><td>11 statements differ from the golden but still answer right: a consistency risk</td></tr>
+      <tr class="pro"><td class="sub">Pass@1</td><td class="num">54</td><td class="num">0.891</td><td class="num">0.930*</td><td class="num">0.906</td><td class="num">6.8 in total</td><td>closing all three ≈ 0.96, with agnews at the leaders' 0.50</td></tr>
+    </tbody></table></div>
+  <p class="small" style="margin-top:var(--s3)">* Our rescore of the file in PR #95; the site's 0.9467 adds the maintainers' extraction corrections (bookreview, DEPS_DEV_V1 run 4). One trial of v6 against five of theirs, and we stay at one (D39): a 1.00 on one trial is not a 1.00 over five. Our data is one Postgres copy of the sanctioned stores, so multi-database joins are easier for us than for entries that open four DBMSes.</p>
+</section>
+
+<section class="blk" id="ideas">
+  <div class="hd"><p class="label">07 · ideas from how the leaders build · mapped to the ledger's steps</p>
+  <h2>They all check before they answer; the SQL-first design can do that more cheaply than anyone, because a statement can be re-run</h2></div>
+  <div class="ideas">
+    <div class="panel card"><h3>I1 · Verify before submit</h3><p class="who">Sentinel verify_step · LabRat join verification · Spacedock verify stage</p><p>A <code>check_sql</code> tool: runs the draft statement and reports row count, duplicate keys, join fan-out, null share, and whether the row count matches "top N". The agent fixes before <code>submit_answer</code>.</p><div class="hits"><span class="tag">keys</span><span class="tag">shape · 4 of v6's 16</span></div></div>
+    <div class="panel card pro"><h3>I2 · Profile the text columns</h3><p class="who">Permute Core evidence layer + semantic_probe · LabRat Cartographer</p><p>A deterministic profile per text column (its phrasing templates, value vocabulary, formats) built by <code>dab context build</code>, retrieved by a <code>profile_column</code> tool. It is code, never sees a question, so it is legitimate by construction.</p><div class="hits"><span class="tag">parse · 5</span><span class="tag">sources · 5</span></div></div>
+    <div class="panel card"><h3>I3 · Blind second solver</h3><p class="who">Sarvam Code · Spacedock re-derivation</p><p>Write a second statement without seeing the first; if the two results differ, reconcile before submitting. It targets the leaderboard's five-trial metric's hidden cost: questions that pass in some trials and fail in others.</p><div class="hits"><span class="tag">consistency</span><span class="tag">≈ 2× tokens</span></div></div>
+    <div class="panel card"><h3>I4 · Answer-shape gate</h3><p class="who">LabRat answer-shape gate · Alkera answer-delivery contract</p><p>A deterministic check of the final answer against the question's asked shape (one value vs a list, the columns it names, units) with one presentation-only retry.</p><div class="hits"><span class="tag">shape</span><span class="tag">decision</span></div></div>
+    <div class="panel card"><h3>I5 · A classification path for agnews</h3><p class="who">Scout's classification tools · LabRat embedding classification</p><p>SQL cannot classify article text, and no agnews question has a golden. A <code>classify</code> step in derived mode would break "one SQL statement", for at most 2–4 points. Decide separately.</p><div class="hits"><span class="tag warn">changes the design</span></div></div>
+    <div class="panel card"><h3>I6 · More effort</h3><p class="who">Camber high · Permute Core max · LabRat high</p><p>We run Opus at medium. Effort is a one-line change (<code>dab version-model</code>-style) and a clean experiment after v7, not with it.</p><div class="hits"><span class="tag">all steps</span><span class="tag">cost</span></div></div>
+  </div>
+  <p class="small" style="margin-top:var(--s3)">Recommendation: keep v7 a prompt-only round, so its effect is measurable, and bring I2 and I1 as the next two challengers, one at a time. None of the leaders publish a step-level diagnosis like the ledger; it is what lets the optimiser target a step.</p>
+</section>
+
+<section class="blk" id="v7">
+  <div class="hd"><p class="label">08 · the v7 plan · round 3's recipe, two changes</p>
+  <h2>v7 changes what the optimiser reads (every error of the 54) and what may pass the guard (G1–G4)</h2></div>
+  <div class="tw"><table>
+    <caption>How v6 was made (round 3) and how v7 will be. The model, the reader, the optimiser and the agent are kept; the last two rows change.</caption>
+    <thead><tr><th>part of the recipe</th><th>v6_sql (round 3)</th><th>v7_sql (round 4)</th></tr></thead>
+    <tbody>
+      <tr class="dim"><td class="sub">agent</td><td>Opus 5.5, medium, plan first, 3 tools</td><td>same</td></tr>
+      <tr class="dim"><td class="sub">reader (diagnosis)</td><td>Opus 5.5, seven-step ledger</td><td>same; v6's run is already read: 16 failed statements compared</td></tr>
+      <tr class="dim"><td class="sub">optimiser</td><td>Opus 5.5; component sessions write the playbook, dataset sessions the notes</td><td>same</td></tr>
+      <tr class="pro"><td class="sub">guard</td><td>literal guard against all 54 questions, gold values and goldens; caps 600 / 2,000 / 8,000</td><td><b>the literal guard + G1–G4</b> (D40 B): the Opus decisive-interpretation reviewer, the whole-prompt audit, two or more questions behind every playbook section, no question-specific text</td></tr>
+      <tr class="pro"><td class="sub">what the optimiser reads</td><td>9 failed <i>training</i> statements of v5's run; the 16 held-out never shown</td><td><b>every error of v6's run</b>: 16 failed statements (4 training + 12 held-out) and 8 wrong answers, 4 of them without a golden (agnews 2–4, crmarenapro/7)</td></tr>
+    </tbody></table></div>
+
+  <form class="q" data-lavish-question="build-s11" onsubmit="event.preventDefault(); const selected=[...event.currentTarget.querySelectorAll('input[name=items]:checked')].map(i=>({id:i.value,label:i.dataset.label,disposition:'build'})); if(!selected.length){return;} window.lavish.queuePrompt('Build exactly the ticked items from s11 (v7 = round 3 recipe, optimiser reads every error of the 54), in B order, and return an item-by-item receipt. Account for every submitted ID before reporting completion. Items: '+selected.map(s=>s.id+' '+s.label).join('; '), {tag:'tracked-batch', text:'Build '+selected.length+' items from s11', element:event.currentTarget, data:{items:selected}}); event.currentTarget.querySelector('.queued').textContent='queued: '+selected.map(s=>s.id).join(', ');">
+    <h3>v7 · the two changes and its run</h3>
+    <label><input type="checkbox" name="items" value="B1" data-label="dab optimise --train all: every error of the 54, incl. no-golden answers" checked><span><b>B1 · <code>dab optimise --train all</code>.</b> The optimiser reads every error of the source run; wrong answers without a golden reach their dataset session with the question and the validator's verdict (never the gold value); <code>optimise.json</code> records what it read.</span></label>
+    <label><input type="checkbox" name="items" value="B1b" data-label="guards G1–G4 in the optimiser, each with a test that it fires" checked><span><b>B1b · guards G1–G4.</b> G1: an isolated Opus reviewer per write, shown the questions and gold answers, refuses text that hands over a deciding value, row set, threshold, key, cardinality or reading; its refusals count like any other. G2: after v7 is written, every gold value is searched in the text the optimiser wrote (<code>system.md</code> sections, dataset notes), with a planted-token test. G3: a component gets a playbook session only when two or more errors break there, and its rationale must cite two of them; single-question lessons go to dataset notes. G4: text naming a question (ids, "Q3", "query 3") or conditioning on one is refused.</span></label>
+    <label><input type="checkbox" name="items" value="B2" data-label="Opus optimiser on v6's run, all errors, into v7_sql" checked><span><b>B2 · the Opus optimiser on v6's run → v7_sql.</b> ≈ $5 with G1's reviews (more sessions than round 3's twelve, agnews among them).</span></label>
+    <label><input type="checkbox" name="items" value="B3" data-label="run v7_sql on the 54 once + Opus reader" checked><span><b>B3 · v7_sql on the 54, one trial</b>, and the Opus reader. ≈ $6.</span></label>
+    <label><input type="checkbox" name="items" value="B4" data-label="promote v7 vs v6 (D36, unchanged)" checked><span><b>B4 · promote v7 against v6</b> by D36 as it stands: most SQL passed of 49, then answers of 54.</span></label>
+    <label><input type="checkbox" name="items" value="B5" data-label="s12 receipt" checked><span><b>B5 · the s12 receipt.</b></span></label>
+    <h3 style="margin-top:var(--s3)">Reporting · does not touch v7's prompt</h3>
+    <label><input type="checkbox" name="items" value="M1" data-label="leaderboard Pass@1 as a headline" checked><span><b>M1 · the leaderboard metric</b> (dataset-macro Pass@1) in the scorecard, <code>dab promote</code> and the tabs, beside SQL of 49; and a local answers file in the leaderboard's format.</span></label>
+    <div class="row"><button type="submit" class="btn">Queue the build list</button><span class="queued"></span></div>
+  </form>
+  <p class="small" style="margin-top:var(--s3)">Total ≈ $11: the optimiser with G1's reviews ≈ $5, v7 on the 54 once with its reader ≈ $6. Costs are the subscription's notional dollars for Opus 5.5 at medium, from today's runs ($5.04–5.12 per 54 × 1).</p>
+</section>
+
+<section class="blk" id="decide">
+  <div class="hd"><p class="label">09 · decisions · D38–D41 · all settled</p>
+  <h2>All four are settled; the build list above is what runs</h2></div>
+
+  <div class="panel card" style="margin-top:var(--s4)"><h3>D38 · Out-of-sample score <span class="tag ok">decided · B</span></h3><p>No cross-fit. v7's score on the 54 is in-sample, as on the leaderboard.</p></div>
+
+  <div class="panel card" style="margin-top:var(--s4)"><h3>D39 · Trials <span class="tag ok">decided</span></h3><p>One trial per question for v6 and v7, as rounds 1–3 (your note on the page). v7 learns from v6's run as it stands, already read by Opus.</p></div>
+
+  <div class="panel card" style="margin-top:var(--s4)"><h3>D40 · New guards <span class="tag ok">decided · B</span></h3><p>G1–G4 join the literal guard in v7's round.</p></div>
+
+  <div class="panel card" style="margin-top:var(--s4)"><h3>D41 · Promotion <span class="tag ok">settled by D39</span></h3><p>With one trial, D36 applies unchanged: most SQL passed of the 49, then answers of the 54, then the incumbent. Leaderboard Pass@1 is reported beside it.</p></div>
+</section>
+
+<section class="blk" id="sources">
+  <div class="hd"><p class="label">10 · sources and caveats</p>
+  <h2>What this rests on, and what would change it</h2></div>
+  <ul class="qa">
+    <li><b>Leaderboard facts</b>: <code>data/upstream/README.md</code> and <code>SUBMISSION_RUBRIC.md</code> at the ingested commit 0290945; the descriptions of PRs #95, #96, #92, #73, #85, #70, #75, #104, #67, #84, #63 as their authors wrote them. We have not read their traces.</li>
+    <li><b>Our numbers</b>: one trial per version; Pass@1 recomputed from <code>runs/&lt;id&gt;/results.jsonl</code> with the leaderboard's formula; Permute EQ and Scout per-dataset from our rescore of their PR files.</li>
+    <li><b>Comparability</b>: our agent reads a Postgres copy of the sanctioned stores (as Permute Core reads a DuckDB copy), with the hints file; its answers are judged by the same validators, and our rescore reproduces the site (<code>tests/test_trials.py</code>).</li>
+    <li><b>What would change the recommendation</b>: if the cross-fit shows out-of-sample Pass@1 far below in-sample (a gap of more than ≈ 0.05), the round is fitting; then G3 tightens, or the next gains come from tools (I1, I2) rather than prompt text.</li>
+  </ul>
+</section>
+</div>
+</body>
+</html>

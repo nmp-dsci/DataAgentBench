@@ -43,6 +43,7 @@ class TrialResult:
     mode: str | None = None  # pass_through | derived
     step: str | None = None  # derived: the one-line step after the SQL
     result_rows: int | None = None
+    plan: dict[str, str] | None = None  # s08, D34: the statement's seven steps, as submitted
 
     def as_dict(self) -> dict[str, Any]:
         return asdict(self)

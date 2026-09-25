@@ -141,7 +141,7 @@ export type GoldDiffLine = { op: 'eq' | 'del' | 'add'; gold: number | null; resu
 export type GoldMatch = 'exact' | 'exact_values' | 'reordered' | 'differs';
 export type GoldenBrief = { passed: boolean | null; gold_match: GoldMatch | ''; created_at: string; versions: number; author: string; note: string; kind: GoldenKind; source: string; origin: string /* where the SQL first came from, through re-saves */ };
 export type GoldenList = { queries: (QuerySummary & { golden: GoldenBrief | null; proposal: ProposalBrief | null })[]; n: number; written: number; evidence: number; proposed: number; passing: number; exact: number };
-export type GoldenOne = { query: QuerySummary; hints: string; current: GoldenRow | null; history: GoldenRow[]; proposal: Proposal | null };
+export type GoldenOne = { query: QuerySummary; hints: string; current: GoldenRow | null; history: GoldenRow[]; proposal: Proposal | null; ledger?: Lines | null };
 export type GoldenAttempt = {
   execution: { columns: string[]; rows: unknown[][]; row_count: number; truncated: boolean; duration_ms: number; error: string | null };
   answer_text: string;
@@ -268,9 +268,19 @@ export type ScoreRow = {
   structure: Record<string, { golden: unknown; agent: unknown } | string>;
   result_diff?: GoldDiffLine[];
   split?: string | null;
+  /** s08: the step the statement first breaks at, by the reader's ledger */
+  breaks_at?: Component | null;
+  ledger?: RowLedger;
 };
+/** The seven steps of a statement (eval/ledger.py COMPONENTS), in the order it is built. */
+export type Component = 'sources' | 'keys' | 'parse' | 'filter' | 'metric' | 'rank' | 'shape';
+export const COMPONENTS: Component[] = ['sources', 'keys', 'parse', 'filter', 'metric', 'rank', 'shape'];
+export type Verdict = 'same' | 'differs' | 'none';
+export type Lines = Record<Component, string>;
+/** A scorecard row's ledger: the golden's lines, and where the agent's statement failed, its own. */
+export type RowLedger = { golden: Lines; agent?: Lines; verdicts?: Record<Component, Verdict>; breaks_at?: Component | null; why?: string };
 export type GoldenBriefSql = { id: number; kind: GoldenKind; sql: string; passed: boolean | null; gold_match: string; created_at: string };
-export type AgentSubmission = { sql: string; mode: string; step: string; model_answer: string; columns: string[]; row_count: number; truncated: boolean; result: string };
+export type AgentSubmission = { sql: string; mode: string; step: string; model_answer: string; columns: string[]; row_count: number; truncated: boolean; result: string; plan?: Lines | null };
 /** GET /api/runs/compare: two runs on the same queries, grouped by dataset, validator style or query. */
 export type CompareGroup = 'dataset' | 'style' | 'query';
 export type CompareRate = { passed: number; n: number; rate: number; queries: number };
@@ -316,7 +326,7 @@ export type CompareResp = {
 };
 export type RunRole = 'champion' | 'challenger' | 'superseded' | 'smoke' | 'dry';
 export type PromotionCandidate = { version: string; run_id: string | null; passed: number | null; scored: number | null; n: number | null; heldout: ScoreTotals | null; scorecard: ScoreTotals | null; why_not: string };
-/** `dab promote`'s latest verdict (agents/promotions.jsonl): D30, the most answers passed of the 54 wins. */
+/** `dab promote`'s latest verdict (agents/promotions.jsonl): D36, the most SQL passed wins, answers break a tie (D30 before 2026-09-25). */
 export type Promotion = { at: string; rule: string; incumbent: string; winner: string; changed: boolean; reason: string; candidates: PromotionCandidate[]; champion_run_id: string | null; prompt_version?: number };
 /** The champion over time (`eval/rounds.champion_history`): the reigns and every full-split run. */
 export type Reign = { version: string; run_id: string; from: string; until: string | null; passed: number; scored: number; reason: string; lift: number | null };
@@ -325,8 +335,11 @@ export type ChampionHistory = { reigns: Reign[]; points: HistoryPoint[]; promoti
 export type Board = { champion: string; champion_run_id: string | null; runs: RunSummary[]; submissions: Submission[]; promotion: Promotion | null; history: ChampionHistory };
 
 // ── optimisation rounds (/api/optimise): diagnostic → proposal → outcome ─────────
-export type Tally = { n: number; before: number; after: number; improved: number; regressed: number; held: number; 'still failing': number; 'not scored': number };
-export type CardTotals = { totals: ScoreTotals; by_split: Record<string, ScoreTotals> | null };
+export type TallyCore = { n: number; before: number; after: number; improved: number; regressed: number; held: number; 'still failing': number; 'not scored': number };
+/** A round's before → after over some questions: answers of all, and `sql` over those with a golden. */
+export type Tally = TallyCore & { sql?: TallyCore };
+/** `pass_at_1`: the leaderboard's number, the mean over datasets of each one's pass rate (s11). */
+export type CardTotals = { totals: ScoreTotals; by_split: Record<string, ScoreTotals> | null; pass_at_1?: number | null };
 export type RoundSummary = {
   version: string;
   parent: string | null;
@@ -337,23 +350,88 @@ export type RoundSummary = {
   cost_usd: number | null;
   sessions: number;
   notes_written: number;
+  sections_written?: number;
+  method?: string;
+  plan_first?: boolean;
+  stages?: Stages;
   refusals: number;
   system_md_changed: boolean;
   split: { train: number; heldout: number } | null;
+  /** s11 (D38): `all` when the round read every error of the 54, so nothing was held out. */
+  trained_on?: 'train' | 'all' | 'crossfit';
+  guards?: { literal: boolean; g1_review: boolean; g2_audit: boolean; g3_breadth: boolean; g4_routing: boolean } | null;
   before: CardTotals | null;
   after: CardTotals | null;
   changes: Tally;
   promoted_at: string | null;
 };
-export type VersionNode = { version: string; parent: string | null; measured_against: string | null; run_id: string | null; passed: number | null; scored: number | null; fingerprint: string; started_at: string | null };
+export type VersionNode = { version: string; parent: string | null; measured_against: string | null; run_id: string | null; passed: number | null; scored: number | null; fingerprint: string; started_at: string | null; model?: string; sql?: Rate | null; heldout?: ScoreTotals | null };
+/** The round as the loop figure draws it (eval/rounds.stages): the counts on each stage. */
+export type Stages = {
+  run: { agent: string | null; run_id: string; trials: number; totals: ScoreTotals | null; cost_usd: number | null };
+  diagnose: { goldened: number; sql_fails: number; ledger: boolean; breaks: Partial<Record<Component, number>>; categories: Record<string, number> };
+  split: { sizes: { train: number; heldout: number } | null; read: number; heldout_sql: Rate | null; read_all?: boolean };
+  sessions: { dataset: number; component: number; system: number; cost_usd: number | null; model: string | null };
+  guard: { writes: number; refused: number; leaks: number; too_long: number; accepted: number; dropped: number; caps: { notes: number; section: number | null; system_md: number } | null };
+  version: { name: string; notes: number; sections: number; system_md_chars: number | null; system_md_changed: boolean | null; plan_first: boolean; fingerprint: string | null; prompt_version: number | null };
+  outcome: { run_id: string | null; totals: ScoreTotals | null; heldout_sql: Rate | null; promoted_at: string | null };
+};
 export type Rounds = { champion: string; rounds: RoundSummary[]; versions: VersionNode[] };
-export type Side = { answer: boolean | null; sql: boolean | null; decision: boolean | null; category: string; mode: string | null };
+export type Side = {
+  answer: boolean | null;
+  sql: boolean | null;
+  decision: boolean | null;
+  category: string;
+  mode: string | null;
+  breaks_at?: Component | null;
+  why?: string;
+  verdicts?: Record<Component, Verdict> | null;
+  golden_lines?: Lines | null;
+  agent_lines?: Lines | null;
+  plan?: Lines | null;
+};
 export type Change = 'improved' | 'regressed' | 'held' | 'still failing' | 'not scored';
-export type QuestionChange = { query_id: string; dataset: string; question: string; split: string | null; read: boolean; before: Side | null; after: Side | null; change: Change };
-export type OptimiseSessionRec = { scope: string; notes: string | null; rationale: string; refusals: { problems: string[]; notes_chars?: number; rationale_chars?: number; redacted?: boolean }[]; questions: string[]; n_turns: number; cost_usd: number | null; error: string | null; duration_ms?: number };
+export type QuestionChange = { query_id: string; dataset: string; question: string; split: string | null; read: boolean; before: Side | null; after: Side | null; change: Change; sql_change?: Change };
+export type Attempt = { ok: boolean; chars: number | null; problems: string[] };
+export type Review = { reviewed: boolean; decisive?: boolean; question?: string; what?: string; reason?: string; cost_usd?: number | null; error?: string | null };
+export type OptimiseSessionRec = {
+  scope: string;
+  kind?: 'dataset' | 'component' | 'system';
+  notes: string | null;
+  rationale: string;
+  refusals: { problems: string[]; notes_chars?: number; rationale_chars?: number; redacted?: boolean }[];
+  attempts?: Attempt[];
+  budget?: number | null;
+  dropped?: boolean;
+  questions: string[];
+  n_turns: number;
+  cost_usd: number | null;
+  error: string | null;
+  duration_ms?: number;
+  /** s11 G1: the reviewer's verdict on each write that passed the literal guard. */
+  reviews?: Review[];
+};
 export type RoundDetail = {
   summary: RoundSummary;
-  record: { version: string; challenger_of: string; source_run: string; started_at: string; optimiser: { model: string; effort: string }; split: { train: number; heldout: number }; cost_usd: number; sessions: OptimiseSessionRec[]; system_md_changed: boolean };
+  components?: { name: Component; what: string }[];
+  record: {
+    version: string;
+    challenger_of: string;
+    source_run: string;
+    started_at: string;
+    optimiser: { model: string; effort: string };
+    split: { train: number; heldout: number };
+    cost_usd: number;
+    sessions: OptimiseSessionRec[];
+    system_md_changed: boolean;
+    method?: string;
+    playbook?: Partial<Record<Component, string[]>>;
+    plan_first?: boolean;
+    caps?: { notes: number; section: number | null; system_md: number };
+    trained_on?: 'train' | 'all' | 'crossfit';
+    audit_g2?: { units_with_gold: Record<string, number> };
+    playbook_skipped_g3?: Partial<Record<Component, string[]>>;
+  };
   diagnostic: { run_id: string; totals: ScoreTotals | null; by_split: Record<string, ScoreTotals> | null; optimise_first: { category: string; n: number; queries: string[] }[]; categories: Record<string, number> };
   questions: QuestionChange[];
   outcome: { all: Tally; by_split: Record<string, Tally>; by_dataset: Record<string, Tally>; category_moves: { from: string; to: string; n: number }[] } | null;

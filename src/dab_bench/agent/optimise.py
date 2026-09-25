@@ -1,4 +1,33 @@
-"""`dab optimise <run> --into <version>`: one round of the optimisation loop (plan s06, B9).
+"""`dab optimise <run> --into <version>`: one round of the optimisation loop (plan s06, B9; s08).
+
+Round 2 onward (plan s08, D32 B) the round has two kinds of session, run in parallel:
+
+- **Component sessions** write the SQL **playbook** in `system.md`: seven headed sections,
+  one per step of a statement (sources, keys, parse, filter, metric, rank, shape; the
+  ledger's components, `eval/ledger.py`). One session per step at which at least one failed
+  training question's statement first breaks, across every dataset: it reads those
+  questions with the ledger's words for both statements, both statements and the result
+  diff, and writes that step's section (tool `write_section`, the same guard, at most 600
+  characters; `system.md` stays under 8,000). The run must have a ledger
+  (`dab diagnose --ledger`). The playbook's skeleton (`agents/optimiser/playbook.md`) is
+  inserted into `system.md` the first time, and it asks for the plan first, so the new
+  version's `agent.yaml` gets `plan: true` (D34).
+- **Dataset sessions**, as in round 1, write the dataset notes, now led by the ledger's
+  lines and capped at 2,000 characters.
+
+The cross-dataset `system.md` pass of round 1 is not run: the component sessions are the
+generalisation.
+
+From s11 (D38, D40 B), a round may read **every error** of the 54 (`train_all`, `dab optimise
+--train all`): the held-out split is not applied, and wrong answers without a golden reach
+their dataset session with the question, the agent's answer and the validator's fail (no
+reference statement exists for them). With `strict`, four guards join the literal one: G1, an
+Opus reviewer per write (`eval/review.py`); G2, every gold value searched in the finished
+text, a hit reverting that unit to the parent's (`guards.audit`); G3, a playbook section only
+for a step where two or more errors break, its rationale citing two of them by id; G4, no
+text naming a question. `dab crossfit` runs the same round per fold with that fold's
+questions excluded (`exclude`) to score each question with a prompt that never read it.
+Round 1's own description follows.
 
 The optimiser is an agent (`agents/optimiser/`, Sonnet 5 at medium effort) that turns a
 scored run's failures into **dataset notes**, the per-dataset block the eval agent's
@@ -31,9 +60,10 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 import shutil
 import time
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -66,15 +96,23 @@ from dab_bench.config import AGENTS_DIR, RUNS_DIR
 from dab_bench.eval.guards import NOTES_MAX_CHARS, Guard, load_guard
 
 OPTIMISER_DIR = AGENTS_DIR / "optimiser"
-SYSTEM_MAX_CHARS = 3_000
+SYSTEM_MAX_CHARS = 3_000  # round 1's cross-dataset pass
+# s08: system.md with the playbook: room for all seven sections at SECTION_MAX on top of the
+# instructions (round 2 first ran at 5,000, which left 282 characters a section)
+PLAYBOOK_SYSTEM_MAX = 8_000
+SECTION_MAX = 600  # s08: one playbook section, at most
+NOTES_CAP = 2_000  # s08: dataset notes (round 1: 1,500; the cap did most of the refusing)
 SYSTEM_PASS_TURNS = 6
 DIFF_LINES = 40
 TOOLS = ["mcp__dab__query_db", "mcp__dab__write_notes"]
+PLAYBOOK_HEAD = "## From the question to the statement"
+_SECTION = re.compile(r"^### (\d) · (\w+) — .*$", re.M)
 
 
 @dataclass
 class Session:
-    scope: str  # a dataset, or "system.md" for the cross-dataset pass
+    scope: str  # a dataset, "system.md" (round 1's pass) or "playbook:<component>" (s08)
+    kind: str = "dataset"  # dataset | component | system
     notes: str | None = None  # accepted text; None when nothing was accepted
     rationale: str = ""
     refusals: list[dict[str, Any]] = field(default_factory=list)
@@ -86,6 +124,10 @@ class Session:
     output_tokens: int = 0
     error: str | None = None
     dropped: bool = False  # a second leak refusal: nothing more is accepted
+    reviews: list[dict[str, Any]] = field(default_factory=list)  # G1 verdicts, per write (s11)
+    budget: int | None = None  # the character cap this session wrote under
+    # every write, in order: {"ok", "chars", "problems"} (no text: a refused one may leak)
+    attempts: list[dict[str, Any]] = field(default_factory=list)
     trace: list[dict[str, Any]] = field(default_factory=list)
 
 
@@ -117,23 +159,50 @@ def briefing(
     traces: dict[str, dict[str, Any]],
     goldens: dict[str, dict[str, Any]],
     train: set[str],
+    no_golden: bool = False,
 ) -> tuple[str, list[str]]:
-    """The user message of one dataset's session, and the failed questions it covers."""
+    """The user message of one dataset's session, and the failed questions it covers.
+    `no_golden` (s11, every error read): wrong answers without a golden are included."""
     ctx = load_context(dataset)
     rows = [q for q in card["questions"] if q["query_id"].split("/")[0] == dataset]
-    rows = [q for q in rows if q["query_id"] in train and q["golden_id"] is not None]
+    rows = [
+        q
+        for q in rows
+        if q.get("trial", 1) == 1
+        and q["query_id"] in train
+        and (q["golden_id"] is not None or no_golden)
+    ]
     failed = [q for q in rows if False in (q["answer"], q["sql"], q["decision"])]
     passed = [q for q in rows if q not in failed]
+    which = "" if no_golden else "training "
     parts = [
         f"# Dataset {dataset}",
         "## The prompt the agent saw for this dataset\n\n````\n"
         + version.prompt_for(ctx)
         + "\n````",
-        f"## Failed training questions ({len(failed)})",
+        f"## Failed {which}questions ({len(failed)})",
     ]
     for q in failed:
         qid = q["query_id"]
         r, t, g = results[qid], traces.get(qid, {}), goldens.get(qid, {})
+        if q["golden_id"] is None:
+            parts.append(
+                "\n".join(
+                    [
+                        f"### {qid} · wrong answer, no reference statement",
+                        f"Question: {r['question']}",
+                        "Scorecard: answer fail. No reference statement exists for this "
+                        "question; the validator says only that the answer is wrong.",
+                        f"Agent mode: {r.get('mode') or '—'}; step: {r.get('step') or '—'}",
+                        f"Trace: {_trace_summary(t)}",
+                        "Agent SQL:\n```sql\n"
+                        + (r.get("agent_sql") or "(none submitted)")
+                        + "\n```",
+                        "Agent answer (wrong):\n```\n" + str(r.get("answer") or "")[:600] + "\n```",
+                    ]
+                )
+            )
+            continue
         diff = "\n".join(
             ("  " if d["op"] == "eq" else "- " if d["op"] == "del" else "+ ") + d["text"]
             for d in (q.get("result_diff") or [])[:DIFF_LINES]
@@ -143,6 +212,7 @@ def briefing(
             for k, v in (q.get("structure") or {}).items()
             if isinstance(v, dict)
         )
+        led = ledger_lines(q)
         parts.append(
             "\n".join(
                 [
@@ -154,7 +224,8 @@ def briefing(
                     f"{'derived' if g.get('kind') == 'evidence' else 'pass_through'}). "
                     f"Agent mode: {r.get('mode') or '—'}; step: {r.get('step') or '—'}",
                     f"Validator: {r.get('reason', '')[:300]}",
-                    *([f"Structure differences: {structure}"] if structure else []),
+                    *([led] if led else []),
+                    *([f"Structure differences: {structure}"] if structure and not led else []),
                     f"Trace: {_trace_summary(t)}",
                     "Agent SQL:\n```sql\n" + (r.get("agent_sql") or "(none submitted)") + "\n```",
                     "Golden SQL:\n```sql\n" + (g.get("sql") or "") + "\n```",
@@ -169,13 +240,136 @@ def briefing(
                 ]
             )
         )
-    parts.append(f"## Training questions the agent got right ({len(passed)})")
+    got_right = "Training questions" if which else "Questions"
+    parts.append(f"## {got_right} the agent got right ({len(passed)})")
     for q in passed:
         r = results[q["query_id"]]
         parts.append(
             f"### {q['query_id']}\nQuestion: {r['question']}\n```sql\n{r.get('agent_sql') or ''}\n```"
         )
     return "\n\n".join(parts) + "\n", [q["query_id"] for q in failed]
+
+
+def ledger_lines(q: dict[str, Any], only: str | None = None) -> str:
+    """A scorecard row's ledger as the optimiser reads it: where the statement breaks and, per
+    step, what the reference and the agent do (every step, or `only` one, plus the others that
+    differ)."""
+    from dab_bench.eval.ledger import COMPONENTS
+
+    led = q.get("ledger") or {}
+    g, a, v = led.get("golden") or {}, led.get("agent"), led.get("verdicts") or {}
+    if not g or not a:
+        return ""
+    steps = [c for c in COMPONENTS if c == only or v.get(c) == "differs"] if only else COMPONENTS
+    lines = [
+        f"Where the statement breaks (the ledger): {led.get('breaks_at') or 'no single step'}"
+        + (f" — {led['why']}" if led.get("why") else "")
+    ]
+    for c in steps:
+        mark = "differs" if v.get(c) == "differs" else v.get(c, "same")
+        lines.append(f"- {c} ({mark}): reference: {g.get(c, 'none')} | agent: {a.get(c, 'none')}")
+    return "\n".join(lines)
+
+
+def component_briefing(
+    component: str,
+    rows: list[dict[str, Any]],
+    results: dict[str, dict[str, Any]],
+    goldens: dict[str, dict[str, Any]],
+    system_md: str,
+    current: str,
+    budget: int,
+    cite: bool = False,
+) -> str:
+    """The user message of one component session: every failed train question, across
+    datasets, whose statement first breaks at `component`. `cite` (s11 G3): the rationale must
+    name two or more of them by id."""
+    from dab_bench.eval.ledger import WHAT
+
+    parts = [
+        f"# Step: {component} — {WHAT[component]}",
+        f"Your budget: at most {budget:,} characters for the section.",
+        *(
+            [
+                "Generalise: the section must hold for two or more of the questions below. In "
+                "your rationale, cite by id (such as yelp/2) at least two of them that each rule "
+                "comes from. Never name a question in the section itself."
+            ]
+            if cite
+            else []
+        ),
+        "## The current section\n\n" + (current.strip() or "(empty)"),
+        "## The shared instructions the agent reads (system.md), for context\n\n````\n"
+        + system_md
+        + "\n````",
+        f"## Failed training questions whose statement first breaks at {component} ({len(rows)})",
+    ]
+    for q in rows:
+        qid = q["query_id"]
+        r, g = results[qid], goldens.get(qid, {})
+        diff = "\n".join(
+            ("  " if d["op"] == "eq" else "- " if d["op"] == "del" else "+ ") + d["text"]
+            for d in (q.get("result_diff") or [])[:20]
+        )
+        parts.append(
+            "\n".join(
+                [
+                    f"### {qid} (dataset {qid.split('/')[0]})",
+                    f"Question: {r['question']}",
+                    f"Result: {q.get('sql_detail') or q.get('detail') or ''}. Answer "
+                    f"{_mark(q['answer'])}.",
+                    ledger_lines(q, only=component),
+                    "Agent SQL:\n```sql\n" + (r.get("agent_sql") or "") + "\n```",
+                    "Reference SQL:\n```sql\n" + (g.get("sql") or "") + "\n```",
+                    *(
+                        [f"Result diff (- reference rows, + agent rows):\n```\n{diff}\n```"]
+                        if diff
+                        else []
+                    ),
+                ]
+            )
+        )
+    return "\n\n".join(parts) + "\n"
+
+
+# ── the playbook in system.md (s08) ─────────────────────────────────────────
+
+
+def with_playbook(system_md: str) -> str:
+    """`system_md` with the playbook skeleton appended, unless it has one already."""
+    if PLAYBOOK_HEAD in system_md:
+        return system_md
+    return system_md.rstrip() + "\n\n" + (OPTIMISER_DIR / "playbook.md").read_text().strip() + "\n"
+
+
+def sections(system_md: str) -> dict[str, str]:
+    """The playbook's section bodies by component (empty when a section has none)."""
+    heads = list(_SECTION.finditer(system_md))
+    out = {}
+    for i, m in enumerate(heads):
+        end = heads[i + 1].start() if i + 1 < len(heads) else len(system_md)
+        out[m.group(2)] = system_md[m.end() : end].strip()
+    return out
+
+
+def fill_sections(system_md: str, bodies: dict[str, str]) -> str:
+    """Replace the named sections' bodies; every other section keeps its own."""
+    heads = list(_SECTION.finditer(system_md))
+    if not heads:
+        return system_md
+    out = [system_md[: heads[0].start()]]
+    for i, m in enumerate(heads):
+        end = heads[i + 1].start() if i + 1 < len(heads) else len(system_md)
+        body = bodies.get(m.group(2), system_md[m.end() : end].strip())
+        out.append(m.group(0) + "\n\n" + (body.strip() + "\n\n" if body.strip() else ""))
+    return "".join(out).rstrip() + "\n"
+
+
+def section_budget(system_md: str, components: list[str]) -> int:
+    """Characters each of `components`' sections may use so system.md stays under the cap."""
+    empty = fill_sections(system_md, dict.fromkeys(components, ""))
+    free = PLAYBOOK_SYSTEM_MAX - len(empty) - 4 * len(components)
+    return max(0, min(SECTION_MAX, free // max(1, len(components))))
 
 
 def system_briefing(version: AgentVersion, card: dict[str, Any], notes: dict[str, str]) -> str:
@@ -203,7 +397,19 @@ def system_briefing(version: AgentVersion, card: dict[str, Any], notes: dict[str
 # ── one session ────────────────────────────────────────────────────────────
 
 
-def _server(state: ToolState, sess: Session, guard: Guard, dataset: str | None) -> Any:
+def _server(
+    state: ToolState,
+    sess: Session,
+    guard: Guard,
+    dataset: str | None,
+    tool_name: str = "write_notes",
+    query: bool | None = None,
+    reviewer: Any = None,
+    cite_from: list[str] | None = None,
+) -> Any:
+    """`reviewer` (s11 G1): an async callable text -> (problems, record); `cite_from` (s11
+    G3): the ids the rationale must cite two of."""
+
     @tool(
         "query_db",
         "Run read-only Postgres SQL (schema dataagentbench; tables <dataset>_<table>) as the agent's "
@@ -219,8 +425,8 @@ def _server(state: ToolState, sess: Session, guard: Guard, dataset: str | None) 
         return {"content": [{"type": "text", "text": out}], **({"is_error": True} if err else {})}
 
     @tool(
-        "write_notes",
-        "Finish: the complete notes (they replace the current ones) and a short rationale.",
+        tool_name,
+        "Finish: the complete text (it replaces the current one) and a short rationale.",
         {
             "type": "object",
             "properties": {"notes": {"type": "string"}, "rationale": {"type": "string"}},
@@ -235,8 +441,26 @@ def _server(state: ToolState, sess: Session, guard: Guard, dataset: str | None) 
                 "content": [{"type": "text", "text": "The notes were dropped. Stop."}],
                 "is_error": True,
             }
-        rationale_problems = guard.check(rationale) if rationale else []
+        # the rationale is leak-checked but not length-capped: the cap is for the text that
+        # enters a prompt (a 282-character section cap refused rationales in round 2, s08)
+        rationale_problems = (
+            guard.leaks(guard.check(rationale, prompt_text=False)) if rationale else []
+        )
         problems = (guard.check(notes) if notes else []) + rationale_problems
+        if not problems and notes and cite_from is not None:  # G3 (s11)
+            cited = {
+                q for q in cite_from if re.search(rf"(?<![\w/]){re.escape(q)}(?!\d)", rationale)
+            }
+            if len(cited) < min(2, len(cite_from)):
+                problems.append(
+                    "G3 cite, in the rationale, at least two of the questions you read (by id, "
+                    "such as yelp/2) that the section generalises from"
+                )
+        if not problems and notes and reviewer is not None:  # G1 (s11): after the cheap checks
+            g1, rec = await reviewer(notes)
+            sess.reviews.append(rec)
+            problems += g1
+        sess.attempts.append({"ok": not problems, "chars": len(notes), "problems": problems})
         if problems:
             sess.refusals.append(
                 {
@@ -259,7 +483,8 @@ def _server(state: ToolState, sess: Session, guard: Guard, dataset: str | None) 
         sess.notes, sess.rationale = notes, rationale
         return {"content": [{"type": "text", "text": "Accepted. Stop now."}]}
 
-    tools = [write_notes] if dataset is None else [query_db, write_notes]
+    query = dataset is not None if query is None else query
+    tools = [query_db, write_notes] if query else [write_notes]
     return create_sdk_mcp_server(name="dab", version="1.0.0", tools=tools)
 
 
@@ -270,10 +495,16 @@ async def run_session(
     guard: Guard,
     optimiser: AgentVersion,
     dataset: str | None,
+    kind: str = "dataset",
+    tool_name: str = "write_notes",
+    query: bool | None = None,
+    reviewer: Any = None,
+    cite_from: list[str] | None = None,
 ) -> Session:
     require_live()
     cfg = optimiser.config
-    sess = Session(scope=scope)
+    query = dataset is not None if query is None else query
+    sess = Session(scope=scope, kind=kind, budget=guard.max_chars)
     # the cross-dataset pass has no query_db, so its state's dataset is never read
     state = ToolState(
         dataset=dataset or "",
@@ -281,17 +512,19 @@ async def run_session(
         trial_key=f"optimise_{scope}",
         sandbox=None,
     )
-    allowed = TOOLS if dataset else ["mcp__dab__write_notes"]
+    allowed = (["mcp__dab__query_db"] if query else []) + [f"mcp__dab__{tool_name}"]
     cwd = isolated_cwd()
     options = ClaudeAgentOptions(
         system_prompt=system_prompt,
         model=resolve_model(cfg.model),
         tools=[],
         allowed_tools=allowed,
-        mcp_servers={"dab": _server(state, sess, guard, dataset)},
+        mcp_servers={
+            "dab": _server(state, sess, guard, dataset, tool_name, query, reviewer, cite_from)
+        },
         strict_mcp_config=True,
         permission_mode="bypassPermissions",
-        max_turns=cfg.max_turns if dataset else SYSTEM_PASS_TURNS,
+        max_turns=cfg.max_turns if query else SYSTEM_PASS_TURNS,
         cwd=str(cwd),
         env=subscription_env(),
         setting_sources=[],
@@ -374,7 +607,60 @@ def _read_run(run_id: str) -> tuple[dict[str, Any], dict[str, dict[str, Any]], d
     return meta, results, traces
 
 
-async def optimise(run_id: str, into: str, workers: int = 4) -> dict[str, Any]:
+def failed_train(
+    card: dict[str, Any], train: set[str], no_golden: bool = False
+) -> list[dict[str, Any]]:
+    """Trial-1 rows of training questions with a golden that failed any of the three checks;
+    with `no_golden` (s11, every error read) also wrong answers without a golden."""
+    return [
+        q
+        for q in card["questions"]
+        if q["trial"] == 1
+        and q["query_id"] in train
+        and (q["golden_id"] is not None or no_golden)
+        and False in (q["answer"], q["sql"], q["decision"])
+    ]
+
+
+def by_component(rows: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    """Failed rows grouped by the step their statement first breaks at (the ledger's)."""
+    from dab_bench.eval.ledger import COMPONENTS
+
+    out: dict[str, list[dict[str, Any]]] = {}
+    for q in rows:
+        b = q.get("breaks_at")
+        if b in COMPONENTS and (q.get("ledger") or {}).get("agent"):
+            out.setdefault(b, []).append(q)
+    return {c: out[c] for c in COMPONENTS if c in out}
+
+
+def breadth(
+    groups: dict[str, list[dict[str, Any]]], least: int = 2
+) -> tuple[dict[str, list[dict[str, Any]]], dict[str, list[str]]]:
+    """G3 (s11): (the steps that get a playbook session, the ids of those that do not). A step
+    where fewer than `least` errors break writes no section; its questions still reach their
+    dataset sessions."""
+    kept = {c: rows for c, rows in groups.items() if len(rows) >= least}
+    skipped = {c: [q["query_id"] for q in rows] for c, rows in groups.items() if len(rows) < least}
+    return kept, skipped
+
+
+async def optimise(
+    run_id: str,
+    into: str,
+    workers: int = 4,
+    components: bool = True,
+    model: str | None = None,
+    train_all: bool = False,
+    exclude: set[str] | None = None,
+    strict: bool = False,
+    crossfit: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """One round. `components` (s08, D32 B): component sessions write the playbook and
+    dataset sessions the notes; without it, round 1's per-dataset sessions and system pass.
+    `model` overrides the optimiser's agent.yaml for this round (recorded in optimise.json).
+    s11: `train_all` reads every error of the 54; `exclude` holds questions out (a cross-fit
+    fold); `strict` adds guards G1–G4; `crossfit` marks the version a fold (never listed)."""
     from dab_bench.eval import golden
     from dab_bench.eval.scorecard import load_optimise_split, load_scorecard, score_run
 
@@ -382,53 +668,136 @@ async def optimise(run_id: str, into: str, workers: int = 4) -> dict[str, Any]:
     if target.exists():
         raise FileExistsError(f"{target} exists; a version is never overwritten")
     split = load_optimise_split()
-    if split is None:
+    if split is None and not train_all:
         raise FileNotFoundError("no train/held-out split: run `dab split-optimise` first")
     meta, results, traces = _read_run(run_id)
     source = load_version(meta["agent"])
     if not source.submits_sql:
         raise ValueError(f"{source.name} has no submit_answer: nothing for the optimiser to read")
     card = load_scorecard(run_id) or score_run(run_id)
+    everyone = {q["query_id"] for q in card["questions"] if q["trial"] == 1}
+    held = set(exclude or ())
+    train = (everyone if train_all else set((split or {}).get("train", []))) - held
+    failed = failed_train(card, train, no_golden=train_all)
+    groups = by_component(failed) if components else {}
+    skipped: dict[str, list[str]] = {}
+    if strict:
+        groups, skipped = breadth(groups)
+    if components and not groups:
+        raise ValueError(
+            f"no failed training question of {run_id} has a ledger: run "
+            f"`dab diagnose {run_id} --ledger` first"
+        )
     goldens = golden.current()
-    train = set(split["train"])
     optimiser = load_version(OPTIMISER_DIR.name)
-    guard = load_guard(NOTES_MAX_CHARS)
-    datasets = sorted(
-        {
-            q["query_id"].split("/")[0]
-            for q in card["questions"]
-            if q["query_id"] in train
-            and q["golden_id"] is not None
-            and False in (q["answer"], q["sql"], q["decision"])
-        }
-    )
+    if model:
+        optimiser = replace(optimiser, config=replace(optimiser.config, model=model))
+    notes_cap = NOTES_CAP if components else NOTES_MAX_CHARS
+    guard = load_guard(notes_cap, routing=strict)
+    reviews_model = resolve_model(model) if model else None
+
+    def reviewer_for(kind: str, dataset: str | None) -> Any:
+        if not strict:
+            return None
+        from dab_bench.eval.review import review
+
+        async def _r(text: str) -> tuple[list[str], dict[str, Any]]:
+            return await review(text, kind, dataset, model=reviews_model)
+
+        return _r
+
+    datasets = sorted({q["query_id"].split("/")[0] for q in failed})
     sem = asyncio.Semaphore(max(1, workers))
     started = datetime.now(UTC).isoformat()
+    system_md = with_playbook(source.system_prompt) if components else source.system_prompt
+    current = sections(system_md)
+    budget = section_budget(system_md, list(groups))
+    component_prompt = (OPTIMISER_DIR / "component.md").read_text()
 
     async def one(ds: str) -> Session:
-        message, failed = briefing(ds, source, card, results, traces, goldens, train)
+        message, qs = briefing(ds, source, card, results, traces, goldens, train, train_all)
         async with sem:
-            s = await run_session(ds, optimiser.system_prompt, message, guard, optimiser, ds)
-        s.questions = failed
+            s = await run_session(
+                ds,
+                optimiser.system_prompt,
+                message,
+                guard,
+                optimiser,
+                ds,
+                reviewer=reviewer_for("dataset", ds),
+            )
+        s.questions = qs
         return s
 
-    sessions = await asyncio.gather(*(one(ds) for ds in datasets))
-    notes = dict(source.notes)
-    for s in sessions:
-        if s.notes is not None:
-            notes[s.scope] = s.notes
-    system_md = source.system_prompt
-    sys_guard = Guard(guard.questions, guard.golds, guard.golden_sqls, SYSTEM_MAX_CHARS)
-    system_pass = await run_session(
-        "system.md",
-        (OPTIMISER_DIR / "system_pass.md").read_text(),
-        system_briefing(source, card, {s.scope: s.notes or "" for s in sessions}),
-        sys_guard,
-        optimiser,
-        None,
+    async def section(comp: str, rows: list[dict[str, Any]]) -> Session:
+        message = component_briefing(
+            comp, rows, results, goldens, system_md, current.get(comp, ""), budget, cite=strict
+        )
+        g = replace(guard, max_chars=budget)
+        async with sem:
+            s = await run_session(
+                f"playbook:{comp}",
+                component_prompt,
+                message,
+                g,
+                optimiser,
+                None,
+                kind="component",
+                tool_name="write_section",
+                query=True,
+                reviewer=reviewer_for("component", None),
+                cite_from=[q["query_id"] for q in rows] if strict else None,
+            )
+        s.questions = [q["query_id"] for q in rows]
+        return s
+
+    sessions = list(
+        await asyncio.gather(
+            *(section(c, rows) for c, rows in groups.items()), *(one(ds) for ds in datasets)
+        )
     )
-    if system_pass.notes:
-        system_md = system_pass.notes.rstrip() + "\n"
+    notes = dict(source.notes)
+    bodies: dict[str, str] = {}
+    for s in sessions:
+        if s.notes is None:
+            continue
+        if s.kind == "component":
+            bodies[s.scope.removeprefix("playbook:")] = s.notes
+        else:
+            notes[s.scope] = s.notes
+    if components:
+        system_md = fill_sections(system_md, bodies)
+    audit_hits: dict[str, int] = {}
+    if strict:  # G2: every gold value in everything the optimiser wrote, inherited text included
+        from dab_bench.eval.guards import audit
+
+        units = {f"playbook:{c}": b for c, b in sections(system_md).items()}
+        units |= {f"notes:{ds}": t for ds, t in notes.items()}
+        audit_hits = audit(units, guard.golds)
+        parent = sections(with_playbook(source.system_prompt)) if components else {}
+        for unit in audit_hits:
+            kind_, name = unit.split(":", 1)
+            if kind_ == "playbook":
+                keep = parent.get(name, "")
+                keep = "" if audit({unit: keep}, guard.golds) else keep
+                system_md = fill_sections(system_md, {name: keep})
+            else:
+                keep = source.notes.get(name, "")
+                notes[name] = "" if audit({unit: keep}, guard.golds) else keep
+    if not components:
+        sys_guard = Guard(guard.questions, guard.golds, guard.golden_sqls, SYSTEM_MAX_CHARS)
+        system_pass = await run_session(
+            "system.md",
+            (OPTIMISER_DIR / "system_pass.md").read_text(),
+            system_briefing(source, card, {s.scope: s.notes or "" for s in sessions}),
+            sys_guard,
+            optimiser,
+            None,
+            kind="system",
+        )
+        if system_pass.notes:
+            system_md = system_pass.notes.rstrip() + "\n"
+        sessions.append(system_pass)
 
     # the new version: a copy, the notes, the lineage
     shutil.copytree(source.path, target, ignore=shutil.ignore_patterns("optimise.json"))
@@ -436,9 +805,25 @@ async def optimise(run_id: str, into: str, workers: int = 4) -> dict[str, Any]:
     header = (source.path / "agent.yaml").read_text().split("\n")
     comments = [ln for ln in header if ln.startswith("#")]
     cfg["challenger_of"] = source.name
+    cfg.pop("measured_against", None)  # a round's parent is challenger_of
+    if crossfit:  # a fold: kept for its record, never listed or promoted (s11)
+        cfg["crossfit_of"] = crossfit["of"]
+        cfg["crossfit_fold"] = crossfit["fold"]
+    plan_first = PLAYBOOK_HEAD in system_md
+    if plan_first:
+        cfg["plan"] = True  # the playbook asks for the plan first (D34)
+    method = (
+        "component sessions write the playbook, dataset sessions the notes (s08, D32 B)"
+        if components
+        else "dataset sessions + a cross-dataset system.md pass (s06, D31 A)"
+    )
+    if train_all:
+        method += "; every error of the 54 read (s11, D38)"
+    if strict:
+        method += "; guards G1–G4 (s11, D40 B)"
     (target / "agent.yaml").write_text(
         "\n".join(
-            [f"# {into}: {source.name} after one optimisation round of run {run_id} (s06, B9)"]
+            [f"# {into}: {source.name} after one optimisation round of run {run_id} ({method})"]
             + comments
         )
         + "\n"
@@ -450,7 +835,6 @@ async def optimise(run_id: str, into: str, workers: int = 4) -> dict[str, Any]:
         if text:
             (target / "datasets" / f"{ds}.md").write_text(text.rstrip() + "\n")
     new = load_version(into)
-    all_sessions = [*sessions, system_pass]
     record = {
         "version": into,
         "challenger_of": source.name,
@@ -459,21 +843,46 @@ async def optimise(run_id: str, into: str, workers: int = 4) -> dict[str, Any]:
         "fingerprint": new.fingerprint,
         "started_at": started,
         "finished_at": datetime.now(UTC).isoformat(),
+        "method": method,
         "optimiser": {
             "model": resolve_model(optimiser.config.model),
             "effort": optimiser.config.effort,
         },
-        "split": {k: len(v) for k, v in split.items()},
+        "split": (
+            {"train": len(train), "heldout": len(held)}
+            if train_all
+            else {k: len(v) for k, v in (split or {}).items()}
+        ),
+        "trained_on": "all" if train_all and not held else "crossfit" if held else "train",
         "source_scorecard": card["totals"],
-        "cost_usd": sum(s.cost_usd or 0.0 for s in all_sessions),
-        "sessions": [{k: v for k, v in asdict(s).items() if k != "trace"} for s in all_sessions],
+        "caps": {
+            "notes": notes_cap,
+            "section": budget if components else None,
+            "system_md": PLAYBOOK_SYSTEM_MAX if components else SYSTEM_MAX_CHARS,
+        },
+        "playbook": {c: [q["query_id"] for q in rows] for c, rows in groups.items()},
+        "plan_first": plan_first,
+        "guards": {
+            "literal": True,
+            "g1_review": strict,
+            "g2_audit": strict,
+            "g3_breadth": strict,
+            "g4_routing": strict,
+        },
+        **({"playbook_skipped_g3": skipped} if skipped else {}),
+        **({"audit_g2": {"units_with_gold": audit_hits}} if strict else {}),
+        **({"crossfit": crossfit} if crossfit else {}),
+        "reviews_cost_usd": sum(r.get("cost_usd") or 0.0 for x in sessions for r in x.reviews),
+        "cost_usd": sum(s.cost_usd or 0.0 for s in sessions)
+        + sum(r.get("cost_usd") or 0.0 for x in sessions for r in x.reviews),
+        "sessions": [{k: v for k, v in asdict(s).items() if k != "trace"} for s in sessions],
         "system_md_changed": system_md != source.system_prompt,
     }
     (target / "optimise.json").write_text(json.dumps(record, ensure_ascii=False, indent=1) + "\n")
     tdir = RUNS_DIR / run_id / "optimise" / into
     tdir.mkdir(parents=True, exist_ok=True)
-    for s in all_sessions:
-        name = s.scope.replace(".", "_")
+    for s in sessions:
+        name = s.scope.replace(".", "_").replace(":", "_")
         (tdir / f"{name}.json").write_text(
             json.dumps(asdict(s), ensure_ascii=False, indent=1, default=str)
         )
@@ -516,6 +925,7 @@ async def rerun_system_pass(into: str) -> dict[str, Any]:
         sys_guard,
         optimiser,
         None,
+        kind="system",
     )
     if s.notes:
         (target / "system.md").write_text(s.notes.rstrip() + "\n")

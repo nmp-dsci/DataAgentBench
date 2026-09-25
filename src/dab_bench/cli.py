@@ -390,13 +390,40 @@ def runs_log(run_id: str) -> None:
 
 
 @app.command()
-def diagnose(run_id: str, refresh: bool = False, show: int = 60) -> None:
+def diagnose(
+    run_id: str,
+    refresh: bool = False,
+    show: int = 60,
+    ledger: bool = typer.Option(
+        False, help="also run the reader (Sonnet 5): the SQL ledger, where each statement breaks"
+    ),
+    model: str | None = typer.Option(
+        None, help="the reader's model for this ledger (haiku | sonnet | opus); default agent.yaml"
+    ),
+) -> None:
     """The scorecard of a run: answer / SQL / decision per question, a category per failure,
     and what to optimise first. Computed after the run (goldens re-run as dab_agent) and kept
-    in runs/<id>/scorecard.json; --refresh recomputes it."""
+    in runs/<id>/scorecard.json; --refresh recomputes it. --ledger (plan s08) has the reader
+    write seven lines per golden (cached) and per failed statement into runs/<id>/ledger.json,
+    and a failed trial's category becomes the step it breaks at; with --refresh the ledger's
+    comparisons are re-read too."""
     from dab_bench.eval.scorecard import load_scorecard, score_run
 
-    card = None if refresh else load_scorecard(run_id)
+    card = None if refresh or ledger else load_scorecard(run_id)
+    if ledger:
+        import asyncio
+
+        from dab_bench.eval.ledger import build
+
+        score_run(run_id)  # the comparisons read the fresh SQL verdicts
+        led = asyncio.run(build(run_id, refresh=refresh, model=model))
+        console.print(
+            f"ledger: {len(led['goldens'])} goldens, {len(led['questions'])} comparisons, "
+            f"${led['cost_usd']:.2f}"
+            + (f", [red]{len(led['errors'])} error(s)[/]" if led["errors"] else "")
+        )
+        for e in led["errors"]:
+            console.print(f"  [red]{e}[/]")
     if card is None:
         card = score_run(run_id)
         from dab_bench.config import RUNS_DIR
@@ -450,10 +477,28 @@ def optimise(
     system_pass_only: bool = typer.Option(
         False, help="re-run only the cross-dataset system.md pass for an existing INTO"
     ),
+    components: bool = typer.Option(
+        True,
+        help="s08 (D32 B): component sessions write the SQL playbook in system.md; "
+        "--no-components runs round 1's per-dataset sessions and system pass",
+    ),
+    model: str | None = typer.Option(
+        None,
+        help="the optimiser's model for this round (haiku | sonnet | opus); default agent.yaml",
+    ),
+    train: str = typer.Option(
+        "split",
+        help="split: read the training questions' errors only; all: every error of the 54, "
+        "wrong answers without a golden included (s11, D38)",
+    ),
+    strict: bool = typer.Option(
+        False, help="s11 (D40 B): guards G1 review, G2 audit, G3 breadth, G4 no routing"
+    ),
 ) -> None:
     """One optimisation round: the optimiser (Sonnet 5, medium) reads RUN's failed train
-    questions per dataset and writes agents/INTO/ = the run's version + dataset notes (+ a
-    guarded system.md pass). Every edit is checked for question text, gold values and golden
+    questions and writes agents/INTO/ = the run's version + a playbook section per step at
+    which statements break (across datasets, from the ledger: run `dab diagnose RUN --ledger`
+    first) + dataset notes. Every edit is checked for question text, gold values and golden
     SQL; the held-out questions are never shown."""
     import asyncio
 
@@ -470,7 +515,20 @@ def optimise(
 
         rec = asyncio.run(rerun_system_pass(into))
     else:
-        rec = asyncio.run(_optimise(run_id, into, workers=workers))
+        if train not in ("split", "all"):
+            console.print("[red]--train is split or all[/]")
+            raise typer.Exit(1)
+        rec = asyncio.run(
+            _optimise(
+                run_id,
+                into,
+                workers=workers,
+                components=components,
+                model=model,
+                train_all=train == "all",
+                strict=strict,
+            )
+        )
     for s in rec["sessions"]:
         state = (
             "[red]error[/] " + s["error"]
@@ -480,25 +538,38 @@ def optimise(
             else "[yellow]dropped[/]"
         )
         console.print(
-            f"  {s['scope']:<18} {state}  {len(s['notes'] or ''):>5} chars  "
+            f"  {s['scope']:<18} {state}  {len(s['notes'] or ''):>5} chars"
+            + (f"/{s['budget']}" if s.get("budget") else "")
+            + "  "
             f"{len(s['refusals'])} refusal(s)  {s['n_turns']} turns  ${s['cost_usd'] or 0:.3f}"
         )
     console.print(
         f"agents/{into} · fingerprint {rec['fingerprint']} · system.md "
         f"{'changed' if rec['system_md_changed'] else 'unchanged'} · ${rec['cost_usd']:.2f}"
     )
+    if (rec.get("guards") or {}).get("g1_review"):
+        reviews = [r for s in rec["sessions"] for r in s.get("reviews") or []]
+        console.print(
+            f"G1 {len(reviews)} review(s), {sum(1 for r in reviews if r.get('decisive'))} "
+            f"decisive, {sum(1 for r in reviews if not r.get('reviewed'))} unreviewed · "
+            f"${rec.get('reviews_cost_usd') or 0:.2f} · G2 units reverted: "
+            f"{len((rec.get('audit_g2') or {}).get('units_with_gold') or {})} · G3 skipped: "
+            f"{', '.join(rec.get('playbook_skipped_g3') or {}) or 'none'}"
+        )
 
 
 @app.command()
 def promote(candidates: str | None = None, dry_run: bool = False) -> None:
-    """Crown the version with the most answers passed on the 54 (D30; a tie keeps the
-    incumbent). Each candidate is its newest complete full-split run. Moves agents/champion,
-    sets the MLflow prompt alias `champion` and appends the verdict to agents/promotions.jsonl."""
+    """Crown the version whose statements are right most often (D36): the most SQL passed
+    of the questions with a golden; answers passed of the 54 break a tie; then the incumbent;
+    then the older run. Each candidate is its newest complete full-split run. Moves
+    agents/champion, sets the MLflow prompt alias `champion` and appends the verdict to
+    agents/promotions.jsonl."""
     from dab_bench.eval.promote import promote as _promote
 
     rec = _promote(_datasets_arg(candidates), dry_run=dry_run)
     t = Table(box=None)
-    for c in ("version", "run", "answer", "SQL", "decision", "held-out answer", "note"):
+    for c in ("version", "run", "answer", "SQL", "decision", "Pass@1", "held-out answer", "note"):
         t.add_column(c)
     for c in rec["candidates"]:
         sc = c.get("scorecard") or {}
@@ -511,11 +582,67 @@ def promote(candidates: str | None = None, dry_run: bool = False) -> None:
             f"{sc['decision']['passed']}/{sc['decision']['n']}"
             if sc.get("decision", {}).get("n")
             else "—",
+            f"{c['pass_at_1']:.3f}" if c.get("pass_at_1") is not None else "—",
             f"{ho['passed']}/{ho['n']}" if ho else "—",
             c["why_not"],
         )
     console.print(t)
     console.print(("[dim]dry run[/] " if dry_run else "") + rec["reason"])
+
+
+@app.command("crossfit")
+def crossfit_cmd(
+    run_id: str,
+    prefix: str = typer.Option(..., help="the version the folds measure, e.g. v7_sql"),
+    folds: int = 3,
+    model: str | None = typer.Option(None, help="the optimiser's model; default agent.yaml"),
+    strict: bool = typer.Option(True, help="guards G1–G4, as the version's own round"),
+    workers: int = 4,
+) -> None:
+    """An out-of-sample score for a round that reads every error (s11): RUN's 54 in FOLDS
+    folds by dataset; each fold's round excludes that fold's questions and its prompt
+    (<prefix>_f<i>, never listed or promoted) answers only them. Writes
+    runs/<RUN>/crossfit/<prefix>.json."""
+    import asyncio
+
+    from dab_bench.eval.crossfit import crossfit
+
+    out = asyncio.run(crossfit(run_id, prefix, folds, model=model, strict=strict, workers=workers))
+    o = out["out_of_sample"]
+    p1 = o["pass_at_1"]
+    console.print(
+        f"out of sample: answers {o['answer']['passed']}/{o['answer']['n']} · SQL "
+        f"{o['sql']['passed']}/{o['sql']['n']} · Pass@1 "
+        + (f"{p1:.3f}" if p1 is not None else "—")
+        + f" · ${out['cost_usd']:.2f} · runs/{run_id}/crossfit/{prefix}.json"
+    )
+
+
+@app.command("export-submission")
+def export_submission_cmd(run_id: str) -> None:
+    """RUN's answers in the leaderboard's submission format, to runs/<RUN>/submission.json
+    (local only; submitting is a pull request upstream, a separate decision)."""
+    from dab_bench.eval.crossfit import export_submission
+
+    path, n = export_submission(run_id)
+    console.print(f"{n} answers → {path}")
+
+
+@app.command("version-model")
+def version_model(
+    src: str,
+    into: str = typer.Option(..., help="the new version's name, e.g. v4_sql"),
+    model: str = typer.Option(..., help="haiku | sonnet | opus, or a full model id"),
+) -> None:
+    """A hand-built version that is SRC with another model (plan s08, D35 A): the same prompt
+    files, `measured_against: SRC`, so the model's lift is measured apart from the prompt's."""
+    from dab_bench.agent.versions import copy_with_model, load_version
+
+    copy_with_model(src, into, model)
+    v = load_version(into)
+    console.print(
+        f"agents/{into} · {v.config.model} · measured against {src} · fingerprint {v.fingerprint}"
+    )
 
 
 @app.command("split-optimise")

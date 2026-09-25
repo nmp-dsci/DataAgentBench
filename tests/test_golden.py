@@ -197,6 +197,18 @@ def test_the_agent_role_cannot_read_the_proposals() -> None:
         con.execute(f"select * from {PG_META_SCHEMA}.golden_proposal")
 
 
+@live
+def test_the_agent_role_cannot_read_the_goldens_ledger() -> None:
+    from dab_bench.eval import ledger
+
+    ledger.ensure_table()
+    with (
+        psycopg.connect(settings().agent_database_url, autocommit=True) as con,
+        pytest.raises(psycopg.errors.InsufficientPrivilege),
+    ):
+        con.execute(f"select * from {PG_META_SCHEMA}.golden_ledger")
+
+
 def test_a_golden_saved_from_a_golden_is_traced_to_where_its_sql_began() -> None:
     sources = {1: "proposal #7", 2: "golden #1", 3: "golden #2", 4: "", 5: "golden #9"}
     assert golden.origin("golden #3", sources) == "proposal #7"

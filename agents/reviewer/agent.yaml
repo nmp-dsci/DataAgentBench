@@ -1,0 +1,10 @@
+# The reviewer (plan s11, D40 B: guard G1) reads one piece of text the optimiser wants to put in
+# the SQL agent's prompt, beside the questions it could affect and their gold answers, and says
+# whether it hands over a decisive value or interpretation (the leaderboard rubric's §2.2). It
+# is a checker, never a writer: what it sees never reaches a prompt.
+model: opus
+effort: medium
+max_turns: 3
+timeout_s: 300
+tools:
+  - mcp__dab__write_verdict

@@ -1,0 +1,938 @@
+{
+ "version": "v3_sql",
+ "challenger_of": "v2_sql",
+ "source_run": "20260924T053026Z_v2_sql_all_haiku_hints",
+ "source_fingerprint": "2e057112fb2f",
+ "fingerprint": "01e2d0ad9fde",
+ "started_at": "2026-09-24T23:55:28.123094+00:00",
+ "finished_at": "2026-09-24T23:58:16.123417+00:00",
+ "method": "component sessions write the playbook, dataset sessions the notes (s08, D32 B)",
+ "optimiser": {
+  "model": "claude-sonnet-5",
+  "effort": "medium"
+ },
+ "split": {
+  "train": 33,
+  "heldout": 16
+ },
+ "source_scorecard": {
+  "answer": {
+   "passed": 30,
+   "n": 54
+  },
+  "sql": {
+   "passed": 18,
+   "n": 49
+  },
+  "decision": {
+   "passed": 44,
+   "n": 48
+  }
+ },
+ "caps": {
+  "notes": 2000,
+  "section": 600,
+  "system_md": 8000
+ },
+ "playbook": {
+  "sources": [
+   "pancancer_atlas/3",
+   "music_brainz_20k/1",
+   "stockindex/3",
+   "stockmarket/2",
+   "stockmarket/3"
+  ],
+  "keys": [
+   "yelp/2"
+  ],
+  "parse": [
+   "patents/2",
+   "patents/3",
+   "music_brainz_20k/2"
+  ],
+  "filter": [
+   "crmarenapro/8",
+   "crmarenapro/9",
+   "crmarenapro/12",
+   "yelp/6"
+  ],
+  "shape": [
+   "deps_dev_v1/2",
+   "github_repos/4",
+   "bookreview/2"
+  ]
+ },
+ "plan_first": true,
+ "cost_usd": 1.2454432,
+ "sessions": [
+  {
+   "scope": "playbook:sources",
+   "kind": "component",
+   "notes": "- List every column/table whose name resembles a question term and check hints/description for the one that actually means it; near-synonym columns often measure something different — pick by meaning, not name similarity.\n- If a table looks like a precomputed \"all\"/union table, verify it covers every key needed (compare its distinct keys against the full per-entity tables/columns); convenience tables can silently omit entities.\n- Don't hand-write a mapping from outside knowledge; if a reference table encodes the same fact, join to it and confirm coverage instead of trusting a manual list.",
+   "rationale": "Addresses: pancancer_atlas/3 (wrong near-synonym column vs. the one hints point to); stockmarket/2&3 (convenience union table excludes some per-ticker tables, silently dropping entities); stockindex/3 (hardcoded lookup instead of validating against an available reference table). General verification habits, no dataset names/columns, no question text or SQL copied.",
+   "refusals": [
+    {
+     "problems": [
+      "710 characters; the limit is 600"
+     ],
+     "notes_chars": 710,
+     "rationale_chars": 573,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "613 characters; the limit is 600"
+     ],
+     "notes_chars": 613,
+     "rationale_chars": 366,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "602 characters; the limit is 600"
+     ],
+     "notes_chars": 602,
+     "rationale_chars": 366,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "pancancer_atlas/3",
+    "music_brainz_20k/1",
+    "stockindex/3",
+    "stockmarket/2",
+    "stockmarket/3"
+   ],
+   "n_turns": 5,
+   "duration_ms": 32175,
+   "cost_usd": 0.1407134,
+   "input_tokens": 108070,
+   "output_tokens": 2378,
+   "error": null,
+   "dropped": false,
+   "budget": 600,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 710,
+     "problems": [
+      "710 characters; the limit is 600"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 613,
+     "problems": [
+      "613 characters; the limit is 600"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 602,
+     "problems": [
+      "602 characters; the limit is 600"
+     ]
+    },
+    {
+     "ok": true,
+     "chars": 595,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "playbook:keys",
+   "kind": "component",
+   "notes": "- When two tables' keys share a common part but differ by a fixed prefix/suffix, derive the exact transform (replace prefix A with prefix B, strip a known affix) and join on full-string equality — don't extract only the trailing/leading digits and compare those; two differently-prefixed key families can share a numeric suffix, causing spurious matches or duplicated rows that silently change counts/averages downstream.\n- Sanity-check the join: compare distinct key counts on each side and the joined row count against the base table's count to catch mismatches before computing metrics.",
+   "rationale": "Root cause was matching keys by regex-extracted numeric suffix instead of the exact prefix-replacement transform implied by the schema, which mismatched/duplicated rows and shifted the pooled average. Generalized to any prefixed/suffixed key pair, plus a verification habit, without naming the dataset.",
+   "refusals": [
+    {
+     "problems": [
+      "813 characters; the limit is 600"
+     ],
+     "notes_chars": 813,
+     "rationale_chars": 466,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "yelp/2"
+   ],
+   "n_turns": 3,
+   "duration_ms": 11910,
+   "cost_usd": 0.035141599999999995,
+   "input_tokens": 17349,
+   "output_tokens": 976,
+   "error": null,
+   "dropped": false,
+   "budget": 600,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 813,
+     "problems": [
+      "813 characters; the limit is 600"
+     ]
+    },
+    {
+     "ok": true,
+     "chars": 589,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "playbook:parse",
+   "kind": "component",
+   "notes": "- To pull a value from a templated sentence, anchor a regex to the fixed words around it (capture after a label, to next punctuation); a loose `LIKE '%word%'`/`split_part` on one phrase matches some templates and misses or misjoins the rest.\n- Before matching free-text names/titles to a phrase, normalize both sides alike (lowercase, strip non-letters/spaces), not raw substring compare — sources vary spacing/casing/punctuation across duplicate rows.\n- For \"X itself\" filters, extract the full field and test equality, not containment — containment also matches longer names that include X.",
+   "rationale": "Covers patents/2 & patents/3 (anchored regex vs loose LIKE/split_part misreading fields) and music_brainz/2 (normalize before substring match). Trimmed under 600 chars.",
+   "refusals": [
+    {
+     "problems": [
+      "819 characters; the limit is 600"
+     ],
+     "notes_chars": 819,
+     "rationale_chars": 394,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "690 characters; the limit is 600"
+     ],
+     "notes_chars": 690,
+     "rationale_chars": 316,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "617 characters; the limit is 600"
+     ],
+     "notes_chars": 617,
+     "rationale_chars": 262,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "patents/2",
+    "patents/3",
+    "music_brainz_20k/2"
+   ],
+   "n_turns": 5,
+   "duration_ms": 19263,
+   "cost_usd": 0.093282,
+   "input_tokens": 71378,
+   "output_tokens": 1767,
+   "error": null,
+   "dropped": false,
+   "budget": 600,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 819,
+     "problems": [
+      "819 characters; the limit is 600"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 690,
+     "problems": [
+      "690 characters; the limit is 600"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 617,
+     "problems": [
+      "617 characters; the limit is 600"
+     ]
+    },
+    {
+     "ok": true,
+     "chars": 592,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "playbook:filter",
+   "kind": "component",
+   "notes": "- Identify which date/entity the window phrase refers to (e.g. \"closed/signed in X\" windows the end event's date, \"opened/created in X\" windows the start) — don't default to the easiest column.\n- Build windows half-open: `>= start AND < next_start`; never `<= last_day`, which is midnight and drops same-day timestamps after 00:00.\n- \"Among/who did X (at least N times)\" defines the population: require X to exist (inner join/having), don't LEFT JOIN+COALESCE missing rows in at a default.\n- Row-level filters (nulls, keys) go in WHERE before grouping; thresholds on counts/sums go in HAVING after.",
+   "rationale": "Addresses crmarenapro/8 (LEFT JOIN+COALESCE wrongly admitting non-qualifying entities vs required inner join), crmarenapro/9 & /12 (window applied to wrong date column), and yelp/6 (inclusive <= midnight bound dropping same-day late timestamps vs half-open <).",
+   "refusals": [
+    {
+     "problems": [
+      "932 characters; the limit is 600"
+     ],
+     "notes_chars": 932,
+     "rationale_chars": 532,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "633 characters; the limit is 600"
+     ],
+     "notes_chars": 633,
+     "rationale_chars": 327,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "crmarenapro/8",
+    "crmarenapro/9",
+    "crmarenapro/12",
+    "yelp/6"
+   ],
+   "n_turns": 4,
+   "duration_ms": 25394,
+   "cost_usd": 0.0817258,
+   "input_tokens": 50083,
+   "output_tokens": 1826,
+   "error": null,
+   "dropped": false,
+   "budget": 600,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 932,
+     "problems": [
+      "932 characters; the limit is 600"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 633,
+     "problems": [
+      "633 characters; the limit is 600"
+     ]
+    },
+    {
+     "ok": true,
+     "chars": 598,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "playbook:shape",
+   "kind": "component",
+   "notes": "- Include columns needed to disambiguate rows and to show the ranking/filter metric, not only the named entity: if an entity can repeat (versions, records), add the attribute used to pick \"latest\"/\"top one\" and the value used to order or filter.\n- Match the reference's row grain: one row per entity after grouping, not per raw join row; use a window + LIMIT 1 per key to pick one row, not DISTINCT.\n- If a text value can contain a comma or quote, apply CSV-style escaping: wrap it in double quotes, doubling embedded quotes.\n- Drop plumbing columns (join keys, flags) from the final SELECT.",
+   "rationale": "Fixes: deps_dev_v1/2 and github_repos/4 dropped a disambiguating/metric column the reference kept — bullets 1-2. bookreview/2 needed CSV quoting for a comma-containing title — bullet 3. Bullet 4 trims extras.",
+   "refusals": [
+    {
+     "problems": [
+      "1,218 characters; the limit is 600"
+     ],
+     "notes_chars": 1218,
+     "rationale_chars": 627,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "801 characters; the limit is 600"
+     ],
+     "notes_chars": 801,
+     "rationale_chars": 340,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "630 characters; the limit is 600"
+     ],
+     "notes_chars": 630,
+     "rationale_chars": 244,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "deps_dev_v1/2",
+    "github_repos/4",
+    "bookreview/2"
+   ],
+   "n_turns": 5,
+   "duration_ms": 32892,
+   "cost_usd": 0.0749524,
+   "input_tokens": 51562,
+   "output_tokens": 2077,
+   "error": null,
+   "dropped": false,
+   "budget": 600,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 1218,
+     "problems": [
+      "1,218 characters; the limit is 600"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 801,
+     "problems": [
+      "801 characters; the limit is 600"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 630,
+     "problems": [
+      "630 characters; the limit is 600"
+     ]
+    },
+    {
+     "ok": true,
+     "chars": 591,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "bookreview",
+   "kind": "dataset",
+   "notes": "- Output formatting (applies to ANY question whose answer is book titles, however phrased — \"list the titles\", \"which books...\", \"return all matching books\", etc., not only questions literally saying \"list titles\"): gold answers always CSV-encode the title column — if a title contains a comma, wrap the whole title in double quotes and double any internal double quotes (standard CSV field quoting). ~34/200 titles in bookreview_books_info contain a comma. Always apply this transform to any returned title column before submitting, even in pass_through mode; do not return the raw title text when the question's answer is a list of book titles.\n- Join key: `books_info.book_id` is `bookid_N`, `review.purchase_id` is `purchaseid_N`. Join by extracting the trailing integer from each side (`substring(... from '[0-9]+$')::int`) and comparing as integers, not by concatenating a prefix or using LIKE/wildcard on ids.\n- `categories` is a string-encoded list, e.g. `[\"Books\", \"Literature & Fiction\", \"Poetry\"]`. Match a category by its exact quoted element (regex on `\"CategoryName\"`), not a loose `LIKE '%CategoryName%'`, since category names can be substrings of each other and of surrounding text.\n- Book language lives only in the templated `details` text, with many phrasings (\"written in English\", \"available in English\", \"is in English\", \"this English-language ...\", bilingual \"available in both English and X\"). Use a word-bounded regex (`\\mEnglish\\M`) on the language name so all phrasings match while avoiding partial-word false matches; bilingual English editions still count as English.\n- `review_time` is text in one consistent date-time format across all rows (1997-2023); cast directly with `::timestamp`.\n- Compute average rating per book by grouping individual `bookreview_review` rows (joined via the extracted id) and taking `avg(rating)`; never use any pre-aggregated rating field on `books_info`.",
+   "rationale": "The single failure (bookreview/2) was a \"shape\" mismatch: the agent returned raw titles instead of CSV-quoting the one title containing a comma. The prior note only mentioned CSV-encoding for questions literally phrased \"list the titles\", so the agent missed applying it to a differently-phrased question (\"Which ... books ... Return all matching books\"). I broadened that note to state the CSV-quoting rule applies to any question whose answer is a set of book titles, regardless of phrasing, and to apply it even under pass_through mode. Kept the other already-verified notes (join key extraction, categories quoted-element matching, language word-boundary regex, review_time format, average-rating computation from raw review rows) unchanged since they aren't implicated in this failure and are used correctly elsewhere (e.g. the passing bookreview/3 query already follows them).",
+   "refusals": [],
+   "questions": [
+    "bookreview/2"
+   ],
+   "n_turns": 3,
+   "duration_ms": 18326,
+   "cost_usd": 0.0281572,
+   "input_tokens": 23637,
+   "output_tokens": 1328,
+   "error": null,
+   "dropped": false,
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": true,
+     "chars": 1915,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "crmarenapro",
+   "kind": "dataset",
+   "notes": "- Transfer-count rankings (casehistory__c, field__c='Owner Assignment'): only 12 of 165 rows have oldvalue__c not null (a real transfer); the rest are first assignments (oldvalue__c null). When ranking agents by transfer count, the pool is agents who appear at least once as oldvalue__c in the window — never add zero-transfer agents at 0 via LEFT JOIN/COALESCE; \"never transferred\" is undefined for this metric, not a real 0, and floods the ranking with ties.\n- \"Handled/managed a case\" = agent appears as newvalue__c (received it) in an Owner Assignment row; count distinct case ids per agent, not rows.\n- Sales-cycle: Opportunity.CreatedDate -> Contract.CompanySignedDate via Opportunity.ContractID__c = Contract.Id (exact 1:1 key, every non-null ContractID__c matches one contract.Id once '#'/whitespace stripped). When a period is given for when deals \"closed/were made\", filter on CompanySignedDate falling in it, not CreatedDate.\n- Case-closure-time windows (\"past N quarters/months\" for closure speed): filter on the case's createddate (when opened), not closeddate; closeddate (non-null) is only used to compute duration.\n- OwnerId, ContractID__c etc. on opportunity/order/contract carry a leading '#' on ~1 in 5 rows — normalize with ltrim(trim(x),'#') before grouping/aggregating by the id too, not just before joins.\n- Compute closure/handle duration as an exact interval in seconds (extract(epoch from closeddate::timestamptz - createddate::timestamptz)), not truncated whole days — most cases close within hours, so day-truncation ties nearly everything at 0.\n- knowledge__kav \"policy\" articles (summary equals title, or starts \"Policy\") have faq_answer__c split into numbered paragraphs by blank lines; a rule naming a product2.Name applies only when that product is on the quote/order reviewed; rules naming no product apply to every one.",
+   "rationale": "Targets: Q8 (transfer ranking wrongly pooled zero-transfer agents; verified only 12/165 casehistory rows are real transfers), Q9 (windowed on closeddate not createddate, and day-truncated duration caused ties), Q12 (windowed on CreatedDate not CompanySignedDate, didn't trim OwnerId before grouping; verified 1:1 contract key and ~22% '#'-prefixed OwnerIds), and Q2 (policy-article/rule structure to guide compliance reading).",
+   "refusals": [
+    {
+     "problems": [
+      "2,720 characters; the limit is 2,000"
+     ],
+     "notes_chars": 2720,
+     "rationale_chars": 869,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "2,087 characters; the limit is 2,000"
+     ],
+     "notes_chars": 2087,
+     "rationale_chars": 576,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "crmarenapro/2",
+    "crmarenapro/8",
+    "crmarenapro/9",
+    "crmarenapro/12"
+   ],
+   "n_turns": 8,
+   "duration_ms": 63529,
+   "cost_usd": 0.11612879999999999,
+   "input_tokens": 128946,
+   "output_tokens": 5468,
+   "error": null,
+   "dropped": false,
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 2720,
+     "problems": [
+      "2,720 characters; the limit is 2,000"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 2087,
+     "problems": [
+      "2,087 characters; the limit is 2,000"
+     ]
+    },
+    {
+     "ok": true,
+     "chars": 1854,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "deps_dev_v1",
+   "kind": "dataset",
+   "notes": "- Star/fork/other repo metrics live ONLY as free text in `deps_dev_v1_project_info.\"Project_Information\"`, never as separate numeric columns. Extract the `owner/repo` slug from that text with a regex like `[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]*[A-Za-z0-9_-]`, lowercase it, and join to lowercased `deps_dev_v1_project_packageversion.\"ProjectName\"`. Don't match Project_Information to ProjectName via LIKE/substring on the whole text blob.\n- Fork counts appear in three mutually exclusive phrasings that together cover every row (checked: 154 + 68 + 548 = 770 rows): a \"forks count of N\" style, a \"forked N times\" style, and a plain \"N forks\" style. Try all three (case-insensitive) before trusting one, strip thousands commas, cast to a number. Star counts and other metrics likely have similarly varied phrasings worth surveying first.\n- `Licenses` and `VersionInfo` columns are JSON stored as text, sometimes pretty-printed across lines. Parse as JSON (`::jsonb`, `?`, `@>`) rather than substring/LIKE, which can miss whitespace variants.\n- One GitHub project maps to many package versions in `project_packageversion`/`packageinfo`. When a question asks for \"the\" package/release/version for a project (not just its metric), don't collapse the many matching rows with `DISTINCT` and drop the Version column — pick one row per project (rank by most recent `UpstreamPublishedAt`, then `VersionInfo`'s `Ordinal`, then `Version` string) and include that row's `System`, `Name`, and `Version` columns in the final output alongside the metric, since the identifying version is itself part of what's being asked for.\n- Join path: `packageinfo(System,Name,Version)` = `project_packageversion(System,Name,Version)`; `project_packageversion.ProjectName` equals the slug extracted from `project_info.Project_Information`, not a free-text search match.",
+   "rationale": "The failed question asked for \"which projects\" with highest fork count; the agent used DISTINCT and dropped the Version column, producing a 2-column result instead of the reference's 3-column (ProjectName, Version, ForksCount) result even though the ranking/values matched. Added a note instructing the agent to include identifying version columns when picking \"the\" release for a project, plus kept/verified the existing notes on fork phrasing counts (154/68/548=770) and JSON parsing which remain correct and useful for other questions.",
+   "refusals": [],
+   "questions": [
+    "deps_dev_v1/2"
+   ],
+   "n_turns": 3,
+   "duration_ms": 15800,
+   "cost_usd": 0.028911799999999998,
+   "input_tokens": 27158,
+   "output_tokens": 1260,
+   "error": null,
+   "dropped": false,
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": true,
+     "chars": 1835,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "github_repos",
+   "kind": "dataset",
+   "notes": "- `github_repos_languages.language_description` is templated free text; a repo can list several languages in one row. Templates: \"mainly written in X (N bytes)\", \"built entirely in X (N bytes)\", \"majority of the code is in X (N bytes)\", \"most of the project is built in X (N bytes)\", \"Nearly all of the code is in X, totaling N bytes.\", \"The codebase includes: X (N bytes), Y (N bytes), ...\". Extract the language as the text after \"in\"/\":\" up to the byte marker (`(N bytes` or `, totaling`); don't use `ILIKE '%X%'` on the whole sentence, since prose can contain the word incidentally.\n- Not every `repo_name` in other tables has a row in `github_repos_languages` (e.g. `torvalds/linux` has none). If a question needs a repo's \"main language\", join `github_repos_languages` (or the derived main-language CTE) to the other table with an INNER join — repos with no language row have no main language and should be dropped from \"main language is/-is not X\" results, not kept as NULL via a LEFT JOIN.\n- When a question ranks/orders entities by some quantity (e.g. \"ordered by number of commits\", \"most frequently copied\") and asks to \"list\" the entities, still return that ranking quantity as a column alongside the identifying column(s) — the expected result includes the metric used for ordering, not just the entity name.\n- `github_repos_contents.repo_data_description` is templated, one row per `id`; states size, binary/non-binary, and a copy count phrased as a number then \"times\" (seen/appears/copied/duplicated/repeated N times) — pull digits before \"times\". Match \"non-binary\" with word boundaries since \"binary\" is a substring of it.\n- `github_repos_files.id` repeats (same blob, multiple paths/refs); dedupe by id before treating a file as unique.\n- Join `repo_name`/`id` exactly across tables; never wildcard-match a join key.\n- File `mode` 33188 = regular file.",
+   "rationale": "Targets the observed failure (github_repos/4): the agent's query correctly ranked and filtered repos but returned only repo_name, omitting the commit-count column the golden answer includes even though the question only said \"list repo names\" — added a note that ranking metrics should be returned alongside identifiers. Also flagged the related join-shape issue (LEFT vs INNER join against languages table, since some repos like torvalds/linux have no language row) which the ledger showed as a real divergence, to prevent it causing failures on other questions about \"main language\" filters. Kept the existing verified notes about language_description templates, contents description parsing, file id dedupe, and join-key/mode facts since they're already correct and used by the passing queries.",
+   "refusals": [],
+   "questions": [
+    "github_repos/4"
+   ],
+   "n_turns": 3,
+   "duration_ms": 18159,
+   "cost_usd": 0.0336706,
+   "input_tokens": 27395,
+   "output_tokens": 1617,
+   "error": null,
+   "dropped": false,
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": true,
+     "chars": 1871,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "googlelocal",
+   "kind": "dataset",
+   "notes": "- `googlelocal_business_description.name`/`description` rarely say \"massage\" literally: descriptions are paraphrased, e.g. \"skilled therapists offer soothing treatments\", \"expert bodywork services\", \"therapeutic bodywork services\", \"rejuvenating therapies and soothing body treatments\". To find a trade (massage, spa, etc.) match BOTH `name` and `description` with a broad regex covering synonyms (bodywork, body treatment(s), therapy/therapist/therapeutic, massage), not just `name LIKE '%word%'`. Before trusting a keyword pattern, survey how many of the 79 rows it catches and eyeball matches and near-misses.\n- When averaging ratings, keep the underlying aggregate at full numeric precision for any filtering (HAVING/WHERE) and ordering (ORDER BY); only round for display in the outer/final select. Rounding first can change which rows pass a threshold and can tie-break rows in the wrong order.\n- Averages of `googlelocal_review.rating` are often exact whole numbers (e.g. one 5-star review averages to exactly 5). A plain `numeric`/`round(...)` value for a whole number can render without any decimal point (e.g. \"5\" instead of \"5.00\"), breaking a grader expecting a decimal score. Cast the final displayed rating average explicitly to `text` (e.g. `round(avg_rating, 2)::text`) so a decimal point is always present, but sort/filter on the underlying numeric column, not the text one.\n- `googlelocal_review.time` mixes several text formats in one column, e.g. \"September 03, 2020 at 04:15 PM\", \"2021-04-12 17:07:52\", \"08 Mar 2020, 00:04\". A `LIKE '%2019%'` on the 4-digit year works across all of them, but extracting month/day or casting to timestamp requires handling each layout separately.\n- Join `googlelocal_review` to `googlelocal_business_description` only on `gmap_id`; business names can repeat or differ in casing/spacing, so never join or filter on `name` as the key.",
+   "rationale": "The failure (googlelocal/2) had the right business set and rounding, but the grader couldn't find a score after one business's name; the golden SQL's comment shows the validator wants a guaranteed decimal point and casts round(...) to text for that reason (a whole-number numeric can render without decimals). Added a note to cast final displayed rating averages to text. Kept existing regex, rating-precision, date-format, and join-key notes that still support the passing questions.",
+   "refusals": [
+    {
+     "problems": [
+      "2,001 characters; the limit is 2,000",
+      "gold values written literally: j b oriental inc"
+     ],
+     "notes_chars": 2001,
+     "rationale_chars": 869,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "2,001 characters; the limit is 2,000"
+     ],
+     "notes_chars": 2001,
+     "rationale_chars": 726,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "googlelocal/2"
+   ],
+   "n_turns": 9,
+   "duration_ms": 86797,
+   "cost_usd": 0.12694400000000003,
+   "input_tokens": 83616,
+   "output_tokens": 7489,
+   "error": null,
+   "dropped": false,
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 2001,
+     "problems": [
+      "2,001 characters; the limit is 2,000",
+      "gold values written literally: j b oriental inc"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 2001,
+     "problems": [
+      "2,001 characters; the limit is 2,000"
+     ]
+    },
+    {
+     "ok": true,
+     "chars": 1885,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "music_brainz_20k",
+   "kind": "dataset",
+   "notes": "## Matching songs/artists in `music_brainz_20k_tracks` (entity resolution)\n- A raw case-insensitive substring match on `title`/`artist` is NOT enough: rows can have extra internal spaces or stray characters inside the words themselves (e.g. \"StreetH ype (Groove City)\" for \"Street Hype\"), not just the known per-source wrapping (album suffix, \"Artist - Title\", leading digit code). A plain LIKE on the lower-cased raw column will miss such rows and silently return a partial/wrong set of duplicate track_ids.\n- Correct approach: for both the question's title/artist text and the table's title/artist columns, build a \"letters-only\" comparison key by removing every character that is not a letter (regex character class matching non-alphabetic characters, replaced globally with an empty string), then lower-case the result, then compare the keys with substring matching. Comparing on the letters-only key catches spacing/punctuation noise that survives simple lower-casing alone.\n- Do this letters-only normalization in addition to, not instead of, the per-source unwrapping (source_id 1 \"Title (Album)\", 2 \"Artist - Title\" with artist NULL, 3 \"Title - Album\" with album NULL, 4 leading digit-code prefix, 5 plain but with minor typos/spacing). Skipping either step undercounts the duplicate track_id set.\n- A song/artist named in a question is one real-world entity spread across up to 5 track_id rows (one per source_id, occasionally fewer if a source variant has no matching text). Always resolve to the FULL set of matching track_ids before joining to `music_brainz_20k_sales`; summing/grouping revenue over only some of the matched track_ids undercounts totals and can change which store/country ranks highest.\n- When the question asks \"which X earned the most\", return only the requested identifying column, not extra aggregate columns, unless the question also asks to show the amount.",
+   "rationale": "Both failures share the same root cause: the agent's title/artist matching used only lower-casing + substring search on raw columns, missing rows where the real title/artist text itself contains extra internal whitespace or stray characters, and failed to aggregate over the full resolved duplicate-track set. Notes generalize the fix (letters-only normalization plus full duplicate-set resolution before joining to sales) without pasting golden SQL tokens. Also added a shape note about returning only the requested column, addressing the extra revenue column in failure 2's output.",
+   "refusals": [
+    {
+     "problems": [
+      "golden SQL copied (6+ tokens): '[^a-za-z]' , '' , 'g' ); , '[^a-za-z]' , '' , 'g'; describe the pattern in words instead"
+     ],
+     "notes_chars": 1866,
+     "rationale_chars": 689,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "music_brainz_20k/1",
+    "music_brainz_20k/2"
+   ],
+   "n_turns": 4,
+   "duration_ms": 21158,
+   "cost_usd": 0.0447628,
+   "input_tokens": 42744,
+   "output_tokens": 2047,
+   "error": null,
+   "dropped": false,
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 1866,
+     "problems": [
+      "golden SQL copied (6+ tokens): '[^a-za-z]' , '' , 'g' ); , '[^a-za-z]' , '' , 'g'; describe the pattern in words instead"
+     ]
+    },
+    {
+     "ok": true,
+     "chars": 1892,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "pancancer_atlas",
+   "kind": "dataset",
+   "notes": "- When a question says \"histological type\"/\"histology type\" as a plain English phrase, use the free-text `histological_type` column (e.g. \"Infiltrating Ductal Carcinoma\"), NOT the coded `icd_o_3_histology` field (e.g. \"8500/3\") — the two are many-to-many (one text label maps to several codes and vice versa, verified on Breast invasive carcinoma rows), so grouping by the wrong one changes every downstream count/statistic. Only use `icd_o_3_histology` if the question explicitly asks for the ICD-O-3 code.\n- Both `histological_type` and `icd_o_3_histology` (and other coded clinical columns) can hold bracketed sentinel values like `[Not Available]`; \"known\"/\"valid\"/non-bracketed histology means excluding rows where the column IS NULL OR matches `^\\[.*\\]$` — check whichever of the two columns the question actually names.\n- Extract patient sex from `Patient_description` with a word-boundary regex (`\\m(MALE|FEMALE)\\M` or similar), never `ILIKE '%FEMALE%'`/`'%MALE%'` substring matching — \"FEMALE\" contains \"MALE\" as a substring, so plain substring checks on MALE will also match FEMALE rows and inflate/corrupt sex-based filters.\n- For chi-square questions, build the full row x column grid (cross join of all kept categories) so empty cells contribute o=0, drop rows/columns whose marginal (summed) total is <= (or below, per the question's wording) the given cutoff using each cell's own row/column marginal — not a pre-filtered subset — then compute Σ(O-E)²/E over the surviving cells with E = row_total*col_total/grand_total computed from the same kept grid.",
+   "rationale": "Targets the failed chi-square question: the agent grouped by icd_o_3_histology instead of histological_type (they are many-to-many, verified via query), and used ILIKE '%FEMALE%' instead of word-boundary matching (which also incidentally matches MALE rows). Also generalized the bracketed-sentinel exclusion rule to apply to whichever histology column is relevant, and reinforced the chi-square grid/marginal-cutoff mechanics that the golden SQL implements correctly, to help future chi-square/contingency-table questions on this dataset.",
+   "refusals": [],
+   "questions": [
+    "pancancer_atlas/3"
+   ],
+   "n_turns": 3,
+   "duration_ms": 17452,
+   "cost_usd": 0.030351800000000005,
+   "input_tokens": 33836,
+   "output_tokens": 1055,
+   "error": null,
+   "dropped": false,
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": true,
+     "chars": 1568,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "patents",
+   "kind": "dataset",
+   "notes": "- `patents_publicationinfo.\"Patents_info\"` is one sentence per row from many templates. Extract fields with anchored regex, never `LIKE`/`split_part` on literal words:\n  - **Country code**: 2-letter prefix of the publication number inside the sentence, e.g. `(?:publication|pub\\.) (?:number|no\\.) ([A-Z]{2})-...`. Don't match `LIKE '%DE%'`/`'%from DE%'` — those letters appear inside unrelated IDs/words too.\n  - **Assignee**: two shapes — `\"<NAME> holds the <CC> (patent )?(application|filing) (\"` (assignee = text before it), or `... (owned by|assigned to|held by|belonging to) <NAME> (and has|, with) (publication|pub\\.) (number|no\\.) ...` (assignee = captured group). Assignee can be literal `[]` (none) — filter out. Compare assignees with exact equality only: \"UNIV CALIFORNIA\" is a prefix of \"UNIV CALIFORNIA AT SAN DIEGO\" and unrelated to \"CALIFORNIA INST OF TECHN\" — never substring-match.\n  - **Publication number**: trailing ID before the final period, format `<CC>-<digits>-<kind>`; capture anchored at sentence end, not split on '.'.\n- `cpc`/`citation` are JSON arrays as text; cast to jsonb, use `jsonb_array_elements`. `cpc` elements have `code`,`first`(bool=primary). `citation` elements have `publication_number` — join exactly to the target's extracted publication number, never `LIKE`.\n- CPC subclass = first 4 chars of `code` (matches `patents_cpc_definition.symbol`, `level=5`); class = first 3 chars (`level=4`).\n- date fields mix full/abbreviated month names, ordinal days, one 4-digit year, or `'None Date'`. Get year via `substring(col from '\\d{4}')`; match months with a regex covering both forms.\n- EMA of yearly counts per group: zero-fill the group's min-max year range via `generate_series`, seed at first year's count, recurse `ema(t)=0.1*n(t)+0.9*ema(t-1)`; don't use raw counts as EMA. Pick best year per group independently (max EMA, earliest year on ties), not the globally-highest value.\n- CSV-quote a returned text field if it may contain a comma/quote.",
+   "rationale": "Targets EMA-by-CPC-group (wrong country match via LIKE, raw counts used as EMA, global-max instead of per-group best year) and citing-assignee (loose split_part let in a non-equal assignee, missing CSV quoting). Checked via query_db samples of Patents_info.",
+   "refusals": [
+    {
+     "problems": [
+      "2,947 characters; the limit is 2,000"
+     ],
+     "notes_chars": 2947,
+     "rationale_chars": 805,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "2,350 characters; the limit is 2,000"
+     ],
+     "notes_chars": 2350,
+     "rationale_chars": 659,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "2,124 characters; the limit is 2,000"
+     ],
+     "notes_chars": 2124,
+     "rationale_chars": 419,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "2,059 characters; the limit is 2,000"
+     ],
+     "notes_chars": 2059,
+     "rationale_chars": 419,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "2,045 characters; the limit is 2,000"
+     ],
+     "notes_chars": 2045,
+     "rationale_chars": 415,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "2,026 characters; the limit is 2,000"
+     ],
+     "notes_chars": 2026,
+     "rationale_chars": 415,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "2,019 characters; the limit is 2,000"
+     ],
+     "notes_chars": 2019,
+     "rationale_chars": 415,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "patents/2",
+    "patents/3"
+   ],
+   "n_turns": 12,
+   "duration_ms": 73008,
+   "cost_usd": 0.1975442,
+   "input_tokens": 235580,
+   "output_tokens": 9647,
+   "error": null,
+   "dropped": false,
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 2947,
+     "problems": [
+      "2,947 characters; the limit is 2,000"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 2350,
+     "problems": [
+      "2,350 characters; the limit is 2,000"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 2124,
+     "problems": [
+      "2,124 characters; the limit is 2,000"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 2059,
+     "problems": [
+      "2,059 characters; the limit is 2,000"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 2045,
+     "problems": [
+      "2,045 characters; the limit is 2,000"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 2026,
+     "problems": [
+      "2,026 characters; the limit is 2,000"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 2019,
+     "problems": [
+      "2,019 characters; the limit is 2,000"
+     ]
+    },
+    {
+     "ok": true,
+     "chars": 1990,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "stockindex",
+   "kind": "dataset",
+   "notes": null,
+   "rationale": "Targets stockindex/3: the agent's failure was building an incomplete 5-symbol Index→country lookup (matching only that query's top ranked rows) with no validation against stockindex_index_info, instead of a complete, index_info-checked mapping covering all 13 symbols. Notes state the full symbol list and the index_info validation step (14 rows, one exchange with no matching series) as data facts, generalizing to any question needing country/exchange/region for indices, without listing the literal gold symbol/country pairs from the failed question's answer.",
+   "refusals": [
+    {
+     "problems": [
+      "2,112 characters; the limit is 2,000",
+      "gold values written literally: 000001.ss, 399001.sz, africa, china, india"
+     ],
+     "notes_chars": 2112,
+     "rationale_chars": 656,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "gold values written literally: 000001.ss, 399001.sz, ixic, nsei"
+     ],
+     "notes_chars": 1983,
+     "rationale_chars": 562,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "stockindex/3"
+   ],
+   "n_turns": 6,
+   "duration_ms": 45504,
+   "cost_usd": 0.0798002,
+   "input_tokens": 53677,
+   "output_tokens": 4431,
+   "error": null,
+   "dropped": true,
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 2112,
+     "problems": [
+      "2,112 characters; the limit is 2,000",
+      "gold values written literally: 000001.ss, 399001.sz, africa, china, india"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 1983,
+     "problems": [
+      "gold values written literally: 000001.ss, 399001.sz, ixic, nsei"
+     ]
+    }
+   ]
+  },
+  {
+   "scope": "stockmarket",
+   "kind": "dataset",
+   "notes": "- Per-ticker price/volume history is split across many tables. `stockmarket_stocktrade_all` is a stored union of only the 2,715 tickers whose native Volume is bigint. There are 38 additional individual `stockmarket_<ticker>` tables (lowercase ticker, e.g. `stockmarket_sdow`, `stockmarket_ftft`, `stockmarket_ftr`, `stockmarket_adp`, `stockmarket_cmi`, `stockmarket_cma`) whose native Volume is double precision and are NOT included in `stocktrade_all`. Any question touching \"all\"/\"every\" ticker's prices or volume (max/min/avg price, existence checks over dates, etc.) must union `stocktrade_all` with these 38 per-ticker tables (cast Volume to a common type) or matching rows are silently dropped. Compare `lower(stockinfo.\"Symbol\")` against the union's ticker column to find which symbols need their own table.\n- \"Company Description\" in `stockmarket_stockinfo` is one free-text sentence: the company name leads, followed by a verb phrase (offers/is/provides/specializes/operates/focuses/invests/based/manages/empowers/revolutionizes/utilizes/develops/generates/excels/partners/owns/manufactures/delivers/crafts/connects/managed/presents/engages/harnesses/etc.) or a \", <lowercase clause>\". Cut the string right before that first verb word or before the comma+lowercase clause, then trim a trailing \", \". Also strip periods from corporate abbreviations (e.g. \"Inc.\", \"Co.\", \"Ltd.\" -> \"Inc\", \"Co\", \"Ltd\") to get the canonical name.\n- Never restrict stockinfo to whichever tickers happen to already be in `stocktrade_all` before joining/filtering; that silently excludes the 38 double-precision-volume tickers. Build the full unioned price source first, then apply filters.\n- Financial Status codes: D=deficient, E=delinquent, H=deficient+delinquent (both) — these three count as \"financially troubled\". G/J/K also involve bankruptcy and should be excluded unless bankruptcy is explicitly asked about.",
+   "rationale": "Both failures share the same root cause (sources step): the agent only queried stockmarket_stocktrade_all and missed the 38 per-ticker tables with double-precision Volume, dropping qualifying rows (ETFs like sdow, and companies like ftft/ftr). Notes call out this table split explicitly with example ticker names so any question needing full price/volume coverage will union correctly. Also added the company-name extraction detail (strip trailing periods from abbreviations like \"Inc.\") which caused near-miss name mismatches in q3, and the correct Financial Status code set (D/E/H, excluding G/J/K) which q3's agent got wrong by including J/K.",
+   "refusals": [
+    {
+     "problems": [
+      "2,081 characters; the limit is 2,000"
+     ],
+     "notes_chars": 2081,
+     "rationale_chars": 645,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "stockmarket/2",
+    "stockmarket/3"
+   ],
+   "n_turns": 5,
+   "duration_ms": 26934,
+   "cost_usd": 0.0578378,
+   "input_tokens": 64231,
+   "output_tokens": 2372,
+   "error": null,
+   "dropped": false,
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 2081,
+     "problems": [
+      "2,081 characters; the limit is 2,000"
+     ]
+    },
+    {
+     "ok": true,
+     "chars": 1903,
+     "problems": []
+    }
+   ]
+  },
+  {
+   "scope": "yelp",
+   "kind": "dataset",
+   "notes": "- Join key: yelp_business.business_id is \"businessid_N\"; yelp_review.business_ref / yelp_tip.business_ref is \"businessref_N\". Join by turning one prefix into the other and comparing full strings, not by extracting only trailing digits from each side with a regex — that numeric-only approach can match rows differently and shifts which reviews get pooled per group.\n- State extraction from yelp_business.description: the state is the two-uppercase-letter token right after \"<City>, \" — but the character right after the state code is NOT always a comma (one description reads \"...Philadelphia, PA location offers...\" with no comma after PA). Use a word-boundary regex on the two letters, not a pattern requiring a trailing comma, or you drop/misclassify rows.\n- Categories in description: text after the \"<City>, <ST>,\" clause holds capitalized category phrase(s) joined by space, \"&\", \"/\", \"of\", or parenthetical qualifiers like \"(New)\"; extract the whole run of such phrases in order, listing every category found, not just the first substring after the location clause.\n- Date range filters on yelp_review.date/yelp_tip.date (after parsing to timestamp): an inclusive end date means keeping timestamps up to but not including the start of the next day; an upper bound of exactly midnight on the end date excludes real rows timestamped later that same day (confirmed such rows exist).\n- \"Highest number of X\" / top-1 rankings need a deterministic tie-break (secondary count/id ascending) before limiting to one row.\n- Return only the columns the question asks for; don't leave extra helper columns (e.g. a raw count) in the final result.\n- For \"U.S. state\" questions, filter the extracted 2-letter code against the 50 states + DC; non-US codes (e.g. Canadian province abbreviations) appear in the description text and must be excluded.",
+   "rationale": "Targets yelp/2 (join technique causing shifted pooled averages, non-comma-terminated state token, extra output columns) and yelp/6 (inclusive end-of-day date boundary excluding valid rows, incomplete category extraction). Reinforces tie-break and US-state filtering, backed by query_db checks (Philadelphia description with no trailing comma after state code; a review timestamped after midnight on the range's end date).",
+   "refusals": [
+    {
+     "problems": [
+      "2,254 characters; the limit is 2,000",
+      "golden SQL copied (6+ tokens): ( business_id , 'businessid_' , 'businessref_'; business_id , 'businessid_' , 'businessref_' ); replace ( business_id , 'businessid_' ,; describe the pattern in words instead"
+     ],
+     "notes_chars": 2254,
+     "rationale_chars": 481,
+     "redacted": true
+    },
+    {
+     "problems": [
+      "2,031 characters; the limit is 2,000"
+     ],
+     "notes_chars": 2031,
+     "rationale_chars": 444,
+     "redacted": true
+    }
+   ],
+   "questions": [
+    "yelp/2",
+    "yelp/6"
+   ],
+   "n_turns": 7,
+   "duration_ms": 52103,
+   "cost_usd": 0.07551880000000001,
+   "input_tokens": 81932,
+   "output_tokens": 3538,
+   "error": null,
+   "dropped": false,
+   "budget": 2000,
+   "attempts": [
+    {
+     "ok": false,
+     "chars": 2254,
+     "problems": [
+      "2,254 characters; the limit is 2,000",
+      "golden SQL copied (6+ tokens): ( business_id , 'businessid_' , 'businessref_'; business_id , 'businessid_' , 'businessref_' ); replace ( business_id , 'businessid_' ,; describe the pattern in words instead"
+     ]
+    },
+    {
+     "ok": false,
+     "chars": 2031,
+     "problems": [
+      "2,031 characters; the limit is 2,000"
+     ]
+    },
+    {
+     "ok": true,
+     "chars": 1837,
+     "problems": []
+    }
+   ]
+  }
+ ],
+ "system_md_changed": true,
+ "mlflow_run_id": "4e5fea7ba9c841229b0c2c8709a67953",
+ "prompt_version": 6
+}
