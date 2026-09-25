@@ -178,6 +178,34 @@ its diagnosis named a `sqlglot` category rather than the part of the statement t
   counts, the rounds over versions with SQL first, and a round opened as a component
   matrix, one card per session and held-out SQL first.
 
+Outcome (receipts `.lavish/s09_…`, `s10_…`): the same prompts on Haiku, Sonnet 5 and Opus 5.5
+scored SQL 19, 27 and 28 of 49; round 3 on Opus (reader and optimiser on Opus too, `--model
+opus`) wrote `v6_sql`: SQL 33 of 49, answers 46 of 54, held-out SQL flat at 4 of 16. v6_sql
+was promoted over v4_sql.
+
+### Round 4: every error, as the leaderboard does (s11, 2026-09-25)
+
+Plan `.lavish/s11_leaderboard-protocol-v7.html`, decisions D38–D41. The leaderboard has no
+holdout: it scores the 54, and every top-12 entry is marked "Tuned prompt ✓" (built from
+studying them). Three rounds had lifted training SQL +10 of 33 and held-out SQL +1 of 16.
+
+- **Every error read** (D38 B): `dab optimise --train all` reads every error of the source
+  run, held-out questions and wrong answers without a golden included (those reach their
+  dataset session with the agent's answer and the validator's fail, never its text). No
+  cross-fit for v7: its score on the 54 is in-sample. `dab crossfit` (built on request)
+  scores the same round out of sample: k folds by dataset, each fold's round excludes that
+  fold and its prompt (`<version>_f<i>`, `crossfit_of` in `agent.yaml`, never listed or
+  promoted) answers only it; `runs/<run>/crossfit/<version>.json`.
+- **One trial** (D39): 54 × 1 for v6 and v7, as rounds 1–3; D41 falls away and D36 stands.
+- **Guards G1–G4 with v7** (D40 B), `dab optimise --strict`: G1 an Opus reviewer
+  (`agents/reviewer/`, `eval/review.py`) refuses text that hands over a decisive value or
+  interpretation (the rubric's §2.2); G2 every gold value searched in the finished text,
+  a hit reverting that unit (`guards.audit`); G3 a playbook section only where two or more
+  errors break, its rationale citing two by id; G4 no text naming a question.
+- **The leaderboard's number** beside the rule: Pass@1 (the mean over datasets of each
+  one's pass rate) in `dab promote`, the rounds table and the Optimise headline;
+  `dab export-submission <run>` writes the answers in the leaderboard's format.
+
 ## 8 · The agent build — decisions, layout, contract
 
 Decided in the s01 review (all queued by the reviewer):

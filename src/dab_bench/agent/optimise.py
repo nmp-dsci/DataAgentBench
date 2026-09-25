@@ -16,7 +16,18 @@ Round 2 onward (plan s08, D32 B) the round has two kinds of session, run in para
   lines and capped at 2,000 characters.
 
 The cross-dataset `system.md` pass of round 1 is not run: the component sessions are the
-generalisation. Round 1's own description follows.
+generalisation.
+
+From s11 (D38, D40 B), a round may read **every error** of the 54 (`train_all`, `dab optimise
+--train all`): the held-out split is not applied, and wrong answers without a golden reach
+their dataset session with the question, the agent's answer and the validator's fail (no
+reference statement exists for them). With `strict`, four guards join the literal one: G1, an
+Opus reviewer per write (`eval/review.py`); G2, every gold value searched in the finished
+text, a hit reverting that unit to the parent's (`guards.audit`); G3, a playbook section only
+for a step where two or more errors break, its rationale citing two of them by id; G4, no
+text naming a question. `dab crossfit` runs the same round per fold with that fold's
+questions excluded (`exclude`) to score each question with a prompt that never read it.
+Round 1's own description follows.
 
 The optimiser is an agent (`agents/optimiser/`, Sonnet 5 at medium effort) that turns a
 scored run's failures into **dataset notes**, the per-dataset block the eval agent's
@@ -113,6 +124,7 @@ class Session:
     output_tokens: int = 0
     error: str | None = None
     dropped: bool = False  # a second leak refusal: nothing more is accepted
+    reviews: list[dict[str, Any]] = field(default_factory=list)  # G1 verdicts, per write (s11)
     budget: int | None = None  # the character cap this session wrote under
     # every write, in order: {"ok", "chars", "problems"} (no text: a refused one may leak)
     attempts: list[dict[str, Any]] = field(default_factory=list)
@@ -147,23 +159,50 @@ def briefing(
     traces: dict[str, dict[str, Any]],
     goldens: dict[str, dict[str, Any]],
     train: set[str],
+    no_golden: bool = False,
 ) -> tuple[str, list[str]]:
-    """The user message of one dataset's session, and the failed questions it covers."""
+    """The user message of one dataset's session, and the failed questions it covers.
+    `no_golden` (s11, every error read): wrong answers without a golden are included."""
     ctx = load_context(dataset)
     rows = [q for q in card["questions"] if q["query_id"].split("/")[0] == dataset]
-    rows = [q for q in rows if q["query_id"] in train and q["golden_id"] is not None]
+    rows = [
+        q
+        for q in rows
+        if q.get("trial", 1) == 1
+        and q["query_id"] in train
+        and (q["golden_id"] is not None or no_golden)
+    ]
     failed = [q for q in rows if False in (q["answer"], q["sql"], q["decision"])]
     passed = [q for q in rows if q not in failed]
+    which = "" if no_golden else "training "
     parts = [
         f"# Dataset {dataset}",
         "## The prompt the agent saw for this dataset\n\n````\n"
         + version.prompt_for(ctx)
         + "\n````",
-        f"## Failed training questions ({len(failed)})",
+        f"## Failed {which}questions ({len(failed)})",
     ]
     for q in failed:
         qid = q["query_id"]
         r, t, g = results[qid], traces.get(qid, {}), goldens.get(qid, {})
+        if q["golden_id"] is None:
+            parts.append(
+                "\n".join(
+                    [
+                        f"### {qid} · wrong answer, no reference statement",
+                        f"Question: {r['question']}",
+                        "Scorecard: answer fail. No reference statement exists for this "
+                        "question; the validator says only that the answer is wrong.",
+                        f"Agent mode: {r.get('mode') or '—'}; step: {r.get('step') or '—'}",
+                        f"Trace: {_trace_summary(t)}",
+                        "Agent SQL:\n```sql\n"
+                        + (r.get("agent_sql") or "(none submitted)")
+                        + "\n```",
+                        "Agent answer (wrong):\n```\n" + str(r.get("answer") or "")[:600] + "\n```",
+                    ]
+                )
+            )
+            continue
         diff = "\n".join(
             ("  " if d["op"] == "eq" else "- " if d["op"] == "del" else "+ ") + d["text"]
             for d in (q.get("result_diff") or [])[:DIFF_LINES]
@@ -201,7 +240,8 @@ def briefing(
                 ]
             )
         )
-    parts.append(f"## Training questions the agent got right ({len(passed)})")
+    got_right = "Training questions" if which else "Questions"
+    parts.append(f"## {got_right} the agent got right ({len(passed)})")
     for q in passed:
         r = results[q["query_id"]]
         parts.append(
@@ -239,14 +279,25 @@ def component_briefing(
     system_md: str,
     current: str,
     budget: int,
+    cite: bool = False,
 ) -> str:
     """The user message of one component session: every failed train question, across
-    datasets, whose statement first breaks at `component`."""
+    datasets, whose statement first breaks at `component`. `cite` (s11 G3): the rationale must
+    name two or more of them by id."""
     from dab_bench.eval.ledger import WHAT
 
     parts = [
         f"# Step: {component} — {WHAT[component]}",
         f"Your budget: at most {budget:,} characters for the section.",
+        *(
+            [
+                "Generalise: the section must hold for two or more of the questions below. In "
+                "your rationale, cite by id (such as yelp/2) at least two of them that each rule "
+                "comes from. Never name a question in the section itself."
+            ]
+            if cite
+            else []
+        ),
         "## The current section\n\n" + (current.strip() or "(empty)"),
         "## The shared instructions the agent reads (system.md), for context\n\n````\n"
         + system_md
@@ -353,7 +404,12 @@ def _server(
     dataset: str | None,
     tool_name: str = "write_notes",
     query: bool | None = None,
+    reviewer: Any = None,
+    cite_from: list[str] | None = None,
 ) -> Any:
+    """`reviewer` (s11 G1): an async callable text -> (problems, record); `cite_from` (s11
+    G3): the ids the rationale must cite two of."""
+
     @tool(
         "query_db",
         "Run read-only Postgres SQL (schema dataagentbench; tables <dataset>_<table>) as the agent's "
@@ -387,8 +443,23 @@ def _server(
             }
         # the rationale is leak-checked but not length-capped: the cap is for the text that
         # enters a prompt (a 282-character section cap refused rationales in round 2, s08)
-        rationale_problems = guard.leaks(guard.check(rationale)) if rationale else []
+        rationale_problems = (
+            guard.leaks(guard.check(rationale, prompt_text=False)) if rationale else []
+        )
         problems = (guard.check(notes) if notes else []) + rationale_problems
+        if not problems and notes and cite_from is not None:  # G3 (s11)
+            cited = {
+                q for q in cite_from if re.search(rf"(?<![\w/]){re.escape(q)}(?!\d)", rationale)
+            }
+            if len(cited) < min(2, len(cite_from)):
+                problems.append(
+                    "G3 cite, in the rationale, at least two of the questions you read (by id, "
+                    "such as yelp/2) that the section generalises from"
+                )
+        if not problems and notes and reviewer is not None:  # G1 (s11): after the cheap checks
+            g1, rec = await reviewer(notes)
+            sess.reviews.append(rec)
+            problems += g1
         sess.attempts.append({"ok": not problems, "chars": len(notes), "problems": problems})
         if problems:
             sess.refusals.append(
@@ -427,6 +498,8 @@ async def run_session(
     kind: str = "dataset",
     tool_name: str = "write_notes",
     query: bool | None = None,
+    reviewer: Any = None,
+    cite_from: list[str] | None = None,
 ) -> Session:
     require_live()
     cfg = optimiser.config
@@ -446,7 +519,9 @@ async def run_session(
         model=resolve_model(cfg.model),
         tools=[],
         allowed_tools=allowed,
-        mcp_servers={"dab": _server(state, sess, guard, dataset, tool_name, query)},
+        mcp_servers={
+            "dab": _server(state, sess, guard, dataset, tool_name, query, reviewer, cite_from)
+        },
         strict_mcp_config=True,
         permission_mode="bypassPermissions",
         max_turns=cfg.max_turns if query else SYSTEM_PASS_TURNS,
@@ -532,14 +607,17 @@ def _read_run(run_id: str) -> tuple[dict[str, Any], dict[str, dict[str, Any]], d
     return meta, results, traces
 
 
-def failed_train(card: dict[str, Any], train: set[str]) -> list[dict[str, Any]]:
-    """Trial-1 rows of training questions with a golden that failed any of the three checks."""
+def failed_train(
+    card: dict[str, Any], train: set[str], no_golden: bool = False
+) -> list[dict[str, Any]]:
+    """Trial-1 rows of training questions with a golden that failed any of the three checks;
+    with `no_golden` (s11, every error read) also wrong answers without a golden."""
     return [
         q
         for q in card["questions"]
         if q["trial"] == 1
         and q["query_id"] in train
-        and q["golden_id"] is not None
+        and (q["golden_id"] is not None or no_golden)
         and False in (q["answer"], q["sql"], q["decision"])
     ]
 
@@ -556,12 +634,33 @@ def by_component(rows: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
     return {c: out[c] for c in COMPONENTS if c in out}
 
 
+def breadth(
+    groups: dict[str, list[dict[str, Any]]], least: int = 2
+) -> tuple[dict[str, list[dict[str, Any]]], dict[str, list[str]]]:
+    """G3 (s11): (the steps that get a playbook session, the ids of those that do not). A step
+    where fewer than `least` errors break writes no section; its questions still reach their
+    dataset sessions."""
+    kept = {c: rows for c, rows in groups.items() if len(rows) >= least}
+    skipped = {c: [q["query_id"] for q in rows] for c, rows in groups.items() if len(rows) < least}
+    return kept, skipped
+
+
 async def optimise(
-    run_id: str, into: str, workers: int = 4, components: bool = True, model: str | None = None
+    run_id: str,
+    into: str,
+    workers: int = 4,
+    components: bool = True,
+    model: str | None = None,
+    train_all: bool = False,
+    exclude: set[str] | None = None,
+    strict: bool = False,
+    crossfit: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """One round. `components` (s08, D32 B): component sessions write the playbook and
     dataset sessions the notes; without it, round 1's per-dataset sessions and system pass.
-    `model` overrides the optimiser's agent.yaml for this round (recorded in optimise.json)."""
+    `model` overrides the optimiser's agent.yaml for this round (recorded in optimise.json).
+    s11: `train_all` reads every error of the 54; `exclude` holds questions out (a cross-fit
+    fold); `strict` adds guards G1–G4; `crossfit` marks the version a fold (never listed)."""
     from dab_bench.eval import golden
     from dab_bench.eval.scorecard import load_optimise_split, load_scorecard, score_run
 
@@ -569,16 +668,21 @@ async def optimise(
     if target.exists():
         raise FileExistsError(f"{target} exists; a version is never overwritten")
     split = load_optimise_split()
-    if split is None:
+    if split is None and not train_all:
         raise FileNotFoundError("no train/held-out split: run `dab split-optimise` first")
     meta, results, traces = _read_run(run_id)
     source = load_version(meta["agent"])
     if not source.submits_sql:
         raise ValueError(f"{source.name} has no submit_answer: nothing for the optimiser to read")
     card = load_scorecard(run_id) or score_run(run_id)
-    train = set(split["train"])
-    failed = failed_train(card, train)
+    everyone = {q["query_id"] for q in card["questions"] if q["trial"] == 1}
+    held = set(exclude or ())
+    train = (everyone if train_all else set((split or {}).get("train", []))) - held
+    failed = failed_train(card, train, no_golden=train_all)
     groups = by_component(failed) if components else {}
+    skipped: dict[str, list[str]] = {}
+    if strict:
+        groups, skipped = breadth(groups)
     if components and not groups:
         raise ValueError(
             f"no failed training question of {run_id} has a ledger: run "
@@ -589,7 +693,19 @@ async def optimise(
     if model:
         optimiser = replace(optimiser, config=replace(optimiser.config, model=model))
     notes_cap = NOTES_CAP if components else NOTES_MAX_CHARS
-    guard = load_guard(notes_cap)
+    guard = load_guard(notes_cap, routing=strict)
+    reviews_model = resolve_model(model) if model else None
+
+    def reviewer_for(kind: str, dataset: str | None) -> Any:
+        if not strict:
+            return None
+        from dab_bench.eval.review import review
+
+        async def _r(text: str) -> tuple[list[str], dict[str, Any]]:
+            return await review(text, kind, dataset, model=reviews_model)
+
+        return _r
+
     datasets = sorted({q["query_id"].split("/")[0] for q in failed})
     sem = asyncio.Semaphore(max(1, workers))
     started = datetime.now(UTC).isoformat()
@@ -599,17 +715,25 @@ async def optimise(
     component_prompt = (OPTIMISER_DIR / "component.md").read_text()
 
     async def one(ds: str) -> Session:
-        message, qs = briefing(ds, source, card, results, traces, goldens, train)
+        message, qs = briefing(ds, source, card, results, traces, goldens, train, train_all)
         async with sem:
-            s = await run_session(ds, optimiser.system_prompt, message, guard, optimiser, ds)
+            s = await run_session(
+                ds,
+                optimiser.system_prompt,
+                message,
+                guard,
+                optimiser,
+                ds,
+                reviewer=reviewer_for("dataset", ds),
+            )
         s.questions = qs
         return s
 
     async def section(comp: str, rows: list[dict[str, Any]]) -> Session:
         message = component_briefing(
-            comp, rows, results, goldens, system_md, current.get(comp, ""), budget
+            comp, rows, results, goldens, system_md, current.get(comp, ""), budget, cite=strict
         )
-        g = Guard(guard.questions, guard.golds, guard.golden_sqls, budget)
+        g = replace(guard, max_chars=budget)
         async with sem:
             s = await run_session(
                 f"playbook:{comp}",
@@ -621,6 +745,8 @@ async def optimise(
                 kind="component",
                 tool_name="write_section",
                 query=True,
+                reviewer=reviewer_for("component", None),
+                cite_from=[q["query_id"] for q in rows] if strict else None,
             )
         s.questions = [q["query_id"] for q in rows]
         return s
@@ -641,7 +767,24 @@ async def optimise(
             notes[s.scope] = s.notes
     if components:
         system_md = fill_sections(system_md, bodies)
-    else:
+    audit_hits: dict[str, int] = {}
+    if strict:  # G2: every gold value in everything the optimiser wrote, inherited text included
+        from dab_bench.eval.guards import audit
+
+        units = {f"playbook:{c}": b for c, b in sections(system_md).items()}
+        units |= {f"notes:{ds}": t for ds, t in notes.items()}
+        audit_hits = audit(units, guard.golds)
+        parent = sections(with_playbook(source.system_prompt)) if components else {}
+        for unit in audit_hits:
+            kind_, name = unit.split(":", 1)
+            if kind_ == "playbook":
+                keep = parent.get(name, "")
+                keep = "" if audit({unit: keep}, guard.golds) else keep
+                system_md = fill_sections(system_md, {name: keep})
+            else:
+                keep = source.notes.get(name, "")
+                notes[name] = "" if audit({unit: keep}, guard.golds) else keep
+    if not components:
         sys_guard = Guard(guard.questions, guard.golds, guard.golden_sqls, SYSTEM_MAX_CHARS)
         system_pass = await run_session(
             "system.md",
@@ -663,6 +806,9 @@ async def optimise(
     comments = [ln for ln in header if ln.startswith("#")]
     cfg["challenger_of"] = source.name
     cfg.pop("measured_against", None)  # a round's parent is challenger_of
+    if crossfit:  # a fold: kept for its record, never listed or promoted (s11)
+        cfg["crossfit_of"] = crossfit["of"]
+        cfg["crossfit_fold"] = crossfit["fold"]
     plan_first = PLAYBOOK_HEAD in system_md
     if plan_first:
         cfg["plan"] = True  # the playbook asks for the plan first (D34)
@@ -671,6 +817,10 @@ async def optimise(
         if components
         else "dataset sessions + a cross-dataset system.md pass (s06, D31 A)"
     )
+    if train_all:
+        method += "; every error of the 54 read (s11, D38)"
+    if strict:
+        method += "; guards G1–G4 (s11, D40 B)"
     (target / "agent.yaml").write_text(
         "\n".join(
             [f"# {into}: {source.name} after one optimisation round of run {run_id} ({method})"]
@@ -698,7 +848,12 @@ async def optimise(
             "model": resolve_model(optimiser.config.model),
             "effort": optimiser.config.effort,
         },
-        "split": {k: len(v) for k, v in split.items()},
+        "split": (
+            {"train": len(train), "heldout": len(held)}
+            if train_all
+            else {k: len(v) for k, v in (split or {}).items()}
+        ),
+        "trained_on": "all" if train_all and not held else "crossfit" if held else "train",
         "source_scorecard": card["totals"],
         "caps": {
             "notes": notes_cap,
@@ -707,7 +862,19 @@ async def optimise(
         },
         "playbook": {c: [q["query_id"] for q in rows] for c, rows in groups.items()},
         "plan_first": plan_first,
-        "cost_usd": sum(s.cost_usd or 0.0 for s in sessions),
+        "guards": {
+            "literal": True,
+            "g1_review": strict,
+            "g2_audit": strict,
+            "g3_breadth": strict,
+            "g4_routing": strict,
+        },
+        **({"playbook_skipped_g3": skipped} if skipped else {}),
+        **({"audit_g2": {"units_with_gold": audit_hits}} if strict else {}),
+        **({"crossfit": crossfit} if crossfit else {}),
+        "reviews_cost_usd": sum(r.get("cost_usd") or 0.0 for x in sessions for r in x.reviews),
+        "cost_usd": sum(s.cost_usd or 0.0 for s in sessions)
+        + sum(r.get("cost_usd") or 0.0 for x in sessions for r in x.reviews),
         "sessions": [{k: v for k, v in asdict(s).items() if k != "trace"} for s in sessions],
         "system_md_changed": system_md != source.system_prompt,
     }

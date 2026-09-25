@@ -29,10 +29,13 @@ def _load(path: Any) -> Any:
 
 
 def round_records() -> list[dict[str, Any]]:
-    """Every version an optimisation round wrote, oldest round first."""
+    """Every version an optimisation round wrote, oldest round first (a `dab crossfit` fold is
+    a measurement, not a round: left out)."""
     recs = []
     for p in sorted(AGENTS_DIR.glob("*/optimise.json")):
         rec = json.loads(p.read_text())
+        if rec.get("crossfit"):
+            continue
         rec.setdefault("version", p.parent.name)
         recs.append(rec)
     return sorted(recs, key=lambda r: str(r.get("started_at") or ""))
@@ -169,7 +172,22 @@ def _totals(run_id: str | None) -> dict[str, Any] | None:
     if not run_id:
         return None
     card = _load(RUNS_DIR / run_id / "scorecard.json")
-    return None if card is None else {"totals": card["totals"], "by_split": card.get("by_split")}
+    meta = _load(RUNS_DIR / run_id / "run.json") or {}
+    return (
+        None
+        if card is None
+        else {
+            "totals": card["totals"],
+            "by_split": card.get("by_split"),
+            # the leaderboard's number (s11): mean over datasets of each one's pass rate
+            "pass_at_1": (meta.get("summary") or {}).get("pass_rate_macro"),
+        }
+    )
+
+
+def read_all(rec: dict[str, Any]) -> bool:
+    """The round read every error of the 54 (s11, D38): no question was held out."""
+    return rec.get("trained_on") == "all"
 
 
 def session_kind(s: dict[str, Any]) -> str:
@@ -194,7 +212,9 @@ def attempts(s: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _is_leak(problem: str) -> bool:
-    return "characters; the limit is" not in problem
+    from dab_bench.eval.guards import is_leak
+
+    return is_leak(problem)
 
 
 def stages(
@@ -229,7 +249,10 @@ def stages(
         "split": {
             "sizes": rec.get("split"),
             "read": len(read),
-            "heldout_sql": ((before.get("by_split") or {}).get("heldout") or {}).get("sql"),
+            "heldout_sql": None
+            if read_all(rec)
+            else ((before.get("by_split") or {}).get("heldout") or {}).get("sql"),
+            "read_all": read_all(rec),
         },
         "sessions": {
             "dataset": kinds.get("dataset", 0),
@@ -264,9 +287,9 @@ def stages(
         "outcome": {
             "run_id": after,
             "totals": (out_card or {}).get("totals"),
-            "heldout_sql": (((out_card or {}).get("by_split") or {}).get("heldout") or {}).get(
-                "sql"
-            ),
+            "heldout_sql": None
+            if read_all(rec)
+            else (((out_card or {}).get("by_split") or {}).get("heldout") or {}).get("sql"),
             "promoted_at": promoted["at"] if promoted else None,
         },
     }
@@ -304,6 +327,8 @@ def round_summary(rec: dict[str, Any]) -> dict[str, Any]:
         "refusals": sum(len(s.get("refusals") or []) for s in rec.get("sessions", [])),
         "system_md_changed": rec.get("system_md_changed"),
         "split": rec.get("split"),
+        "trained_on": rec.get("trained_on") or "train",
+        "guards": rec.get("guards"),
         "before": _totals(rec["source_run"]),
         "after": _totals(after),
         "changes": tally,
@@ -319,7 +344,8 @@ def round_detail(version: str) -> dict[str, Any] | None:
     if rec is None:
         return None
     rec.setdefault("version", version)
-    split = load_optimise_split()
+    # a round that read every error has no held-out questions to label (s11)
+    split = None if read_all(rec) else load_optimise_split()
     read = {q for s in rec.get("sessions", []) for q in s.get("questions") or []}
     after = outcome_run(version)
     rows = compare_questions(rec["source_run"], after, split, read)

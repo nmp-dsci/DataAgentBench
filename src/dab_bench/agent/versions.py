@@ -21,7 +21,7 @@ from dab_bench.config import AGENTS_DIR
 SURFACES = ("system.md", "helper.py")
 FROZEN = ("agent.yaml",)
 CHAMPION_FILE = AGENTS_DIR / "champion"
-NOT_EVAL_AGENTS = ("curator", "optimiser", "reader")  # agents that never answer a question
+NOT_EVAL_AGENTS = ("curator", "optimiser", "reader", "reviewer")  # never answer a question
 
 
 @dataclass(frozen=True)
@@ -53,6 +53,10 @@ class AgentConfig:
     measured_against: str | None = None
     # plan first (s08, D34): submit_answer requires `plan`, the statement's seven steps in words
     plan: bool = False
+    # a cross-fit fold (s11, `dab crossfit`): a measurement prompt that never read `crossfit_fold`'s
+    # questions; never listed, never promoted
+    crossfit_of: str | None = None
+    crossfit_fold: int | None = None
 
 
 @dataclass(frozen=True)
@@ -150,8 +154,17 @@ def list_versions() -> list[str]:
     return sorted(
         p.name
         for p in AGENTS_DIR.iterdir()
-        if p.is_dir() and (p / "system.md").exists() and p.name not in NOT_EVAL_AGENTS
+        if p.is_dir()
+        and (p / "system.md").exists()
+        and p.name not in NOT_EVAL_AGENTS
+        and not is_crossfit_fold(p)
     )
+
+
+def is_crossfit_fold(path: Path) -> bool:
+    """A `dab crossfit` fold version (s11): kept for its record, outside every list."""
+    cfg = path / "agent.yaml"
+    return cfg.exists() and bool((yaml.safe_load(cfg.read_text()) or {}).get("crossfit_of"))
 
 
 def copy_with_model(src: str, into: str, model: str, agents_dir: Path = AGENTS_DIR) -> Path:

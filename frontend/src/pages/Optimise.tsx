@@ -27,6 +27,8 @@ const CHANGE_TONE: Record<Change, string> = { improved: 'ok', regressed: 'warn',
 const day = (iso: string | null | undefined) => (iso ? iso.slice(0, 10) : '—');
 const signed = (n: number) => (n > 0 ? `+${n}` : n < 0 ? `−${-n}` : '±0');
 const r = (x: RateT | null | undefined) => (x ? `${x.passed}/${x.n}` : '—');
+/** The leaderboard's Pass@1 (dataset-macro), three decimals as the site prints it; null when not scored. */
+const pass1 = (x: number | null | undefined) => (x == null ? null : x.toFixed(3));
 const onKey = (go: () => void) => (e: KeyboardEvent) => {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
@@ -56,7 +58,9 @@ export function Optimise() {
         {last && sqlB ? (
           sqlA && last.outcome_run ? (
             <>
-              The newest round wrote {last.version}: SQL {sqlB.passed} → <em>{sqlA.passed} of {sqlA.n}</em>, held out {r(hoB)} → {r(hoA)}; answers {last.changes.before} → {last.changes.after} of {last.changes.n}
+              The newest round wrote {last.version}: SQL {sqlB.passed} → <em>{sqlA.passed} of {sqlA.n}</em>
+              {last.trained_on === 'all' ? ', every question read' : `, held out ${r(hoB)} → ${r(hoA)}`}; answers {last.changes.before} → {last.changes.after} of {last.changes.n}
+              {pass1(last.before?.pass_at_1) && pass1(last.after?.pass_at_1) ? `; Pass@1 ${pass1(last.before?.pass_at_1)} → ${pass1(last.after?.pass_at_1)}` : ''}
             </>
           ) : (
             <>
@@ -125,12 +129,16 @@ const STAGES: StageDef[] = [
   {
     key: 'split',
     title: '3 · split',
-    sub: (s) => `${s.split.sizes?.train ?? '—'} train · ${s.split.sizes?.heldout ?? '—'} held out`,
+    sub: (s) => (s.split.read_all ? `all ${s.split.sizes?.train ?? '—'} read · none held out` : `${s.split.sizes?.train ?? '—'} train · ${s.split.sizes?.heldout ?? '—'} held out`),
     edge: (s) => `${s.split.read} read`,
     tone: 'in',
     body: (s) => ({
-      lead: 'Only failed training questions go on to the optimiser. The held-out questions are never shown, so they test whether what it writes generalises; the questions without a golden stay outside the loop. The split is seeded and fixed, so every round is measured on the same questions.',
-      facts: [`${s.split.sizes?.train ?? '—'} train`, `${s.split.sizes?.heldout ?? '—'} held out`, `${s.split.read} failed train questions read`, `held-out SQL before: ${r(s.split.heldout_sql)}`],
+      lead: s.split.read_all
+        ? 'This round read every error of the 54, as the leaderboard\'s tuned entries do (s11, D38): no question was held out, wrong answers without a golden included. Its score on the 54 is in-sample; a cross-fit (dab crossfit) scores each question with a prompt that never read it.'
+        : 'Only failed training questions go on to the optimiser. The held-out questions are never shown, so they test whether what it writes generalises; the questions without a golden stay outside the loop. The split is seeded and fixed, so every round is measured on the same questions.',
+      facts: s.split.read_all
+        ? [`${s.split.sizes?.train ?? '—'} questions`, 'none held out', `${s.split.read} failed questions read`]
+        : [`${s.split.sizes?.train ?? '—'} train`, `${s.split.sizes?.heldout ?? '—'} held out`, `${s.split.read} failed train questions read`, `held-out SQL before: ${r(s.split.heldout_sql)}`],
       files: 'data/splits/train.json · heldout.json',
     }),
   },
@@ -398,6 +406,7 @@ function RoundsTable({ rounds, open }: { rounds: RoundSummary[]; open: string | 
             <th className="num">SQL before → after</th>
             <th className="num">Held-out SQL</th>
             <th className="num">Answers</th>
+            <th className="num">Pass@1</th>
             <th>Wrote</th>
             <th className="num">Cost</th>
             <th>Promoted</th>
@@ -429,10 +438,13 @@ function RoundsTable({ rounds, open }: { rounds: RoundSummary[]; open: string | 
                   {r(sb)} → {x.outcome_run ? r(sa) : 'not run yet'}
                 </td>
                 <td className="num">
-                  {r(hb)} → {x.outcome_run ? r(ha) : '—'}
+                  {x.trained_on === 'all' ? <span className="small">all read</span> : `${r(hb)} → ${x.outcome_run ? r(ha) : '—'}`}
                 </td>
                 <td className="num">
                   {x.changes.before}/{x.changes.n} → {x.outcome_run ? `${x.changes.after}/${x.changes.n}` : '—'}
+                </td>
+                <td className="num">
+                  {pass1(x.before?.pass_at_1) ?? '—'} → {x.outcome_run ? pass1(x.after?.pass_at_1) ?? '—' : '—'}
                 </td>
                 <td className="small nw">
                   {x.sections_written ? `${x.sections_written} sections + ` : ''}
@@ -472,7 +484,7 @@ export function OptimiseRound() {
       key: 'diagnostic',
       n: '1',
       title: 'Diagnostic',
-      body: `${rec.challenger_of}'s run: SQL ${rate(data.diagnostic.totals?.sql)} · answers ${rate(data.diagnostic.totals?.answer)}; ${st?.split.read ?? 0} failed train questions read` + (breaks.length ? `; first breaks: ${breaks.join(', ')}` : ''),
+      body: `${rec.challenger_of}'s run: SQL ${rate(data.diagnostic.totals?.sql)} · answers ${rate(data.diagnostic.totals?.answer)}; ${st?.split.read ?? 0} failed ${rec.trained_on === 'all' ? '' : 'train '}questions read` + (breaks.length ? `; first breaks: ${breaks.join(', ')}` : ''),
     },
     {
       key: 'proposal',
@@ -484,13 +496,13 @@ export function OptimiseRound() {
       key: 'outcome',
       n: '3',
       title: 'Outcome',
-      body: o && oSql ? `SQL ${oSql.before} → ${oSql.after} of ${oSql.n}, held out ${hoSql ? `${hoSql.before} → ${hoSql.after} of ${hoSql.n}` : '—'}; answers ${o.all.before} → ${o.all.after} of ${o.all.n}` : `${version} has no complete run yet`,
+      body: o && oSql ? `SQL ${oSql.before} → ${oSql.after} of ${oSql.n}, ${rec.trained_on === 'all' ? 'every question read' : `held out ${hoSql ? `${hoSql.before} → ${hoSql.after} of ${hoSql.n}` : '—'}`}; answers ${o.all.before} → ${o.all.after} of ${o.all.n}` : `${version} has no complete run yet`,
     },
   ];
   return (
     <section className="card round-open" aria-label={`optimisation round ${version}`}>
       <p className="label">
-        round · {rec.challenger_of} → {version} · {day(rec.started_at)} · {rec.optimiser.model} @ {rec.optimiser.effort} · split {rec.split.train} train / {rec.split.heldout} held out ·{' '}
+        round · {rec.challenger_of} → {version} · {day(rec.started_at)} · {rec.optimiser.model} @ {rec.optimiser.effort} · {rec.trained_on === 'all' ? `every error of the ${rec.split.train} read` : `split ${rec.split.train} train / ${rec.split.heldout} held out`} ·{' '}
         <Link to={agentPath(version)}>the agent</Link> · <Link to={optimisePath()}>close</Link>
       </p>
       <h2>
@@ -527,7 +539,14 @@ function Diagnostic({ d }: { d: RoundDetail }) {
   return (
     <>
       <p>
-        What the optimiser was given: the scorecard of <Link to={runPath(src)} className="mono">{src}</Link> (SQL {rate(d.diagnostic.totals?.sql)} · answers {rate(d.diagnostic.totals?.answer)} · decision {rate(d.diagnostic.totals?.decision)}). Only failed <i>training</i> questions were read; held-out and no-golden questions were never shown.
+        What the optimiser was given: the scorecard of <Link to={runPath(src)} className="mono">{src}</Link> (SQL {rate(d.diagnostic.totals?.sql)} · answers {rate(d.diagnostic.totals?.answer)} · decision {rate(d.diagnostic.totals?.decision)}).{' '}
+        {d.record.trained_on === 'all' ? (
+          <>Every error of the 54 was read, wrong answers without a golden included; nothing was held out (s11, D38).</>
+        ) : (
+          <>
+            Only failed <i>training</i> questions were read; held-out and no-golden questions were never shown.
+          </>
+        )}
       </p>
       {hasLedger ? <ComponentMatrix d={d} /> : <CategoryBars d={d} />}
     </>
@@ -604,7 +623,7 @@ function ComponentMatrix({ d }: { d: RoundDetail }) {
         </svg>
       </div>
       <figcaption>
-        <span className="lgd"><i className="sw diff" /> the agent's step differs</span> <span className="lgd"><i className="sw same" /> same in effect</span> <span className="lgd"><i className="sw blind" /> not read</span> · outlined: the first step that changes the result. <code>read</code>: a failed train question the optimiser saw; <code>held out</code>: never shown. Source: the reader's ledger, <code>runs/{d.diagnostic.run_id}/ledger.json</code>.
+        <span className="lgd"><i className="sw diff" /> the agent's step differs</span> <span className="lgd"><i className="sw same" /> same in effect</span> <span className="lgd"><i className="sw blind" /> not read</span> · outlined: the first step that changes the result. <code>read</code>: a failed question the optimiser saw{d.record.trained_on === 'all' ? '' : '; '}{d.record.trained_on === 'all' ? null : <><code>held out</code>: never shown</>}. Source: the reader's ledger, <code>runs/{d.diagnostic.run_id}/ledger.json</code>.
       </figcaption>
       {sel && openC && <CellPanel q={sel} c={openC} run={d.diagnostic.run_id} after={d.summary.outcome_run} what={d.components?.find((x) => x.name === openC)?.what ?? ''} />}
     </figure>

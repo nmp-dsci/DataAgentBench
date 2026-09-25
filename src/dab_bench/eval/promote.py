@@ -37,6 +37,7 @@ class Candidate:
     scorecard: dict[str, Any] | None = None
     why_not: str = ""  # why the version has no usable run
     started_at: str | None = None  # the winning run's start, for the challenger tie-break
+    pass_at_1: float | None = None  # the leaderboard's number (s11), reported beside the rule
 
     @property
     def sql_passed(self) -> int:
@@ -78,6 +79,7 @@ def candidate(version: str) -> Candidate:
         heldout=((card or {}).get("by_split") or {}).get("heldout"),
         scorecard=(card or {}).get("totals"),
         started_at=m.started_at,
+        pass_at_1=s.get("pass_rate_macro"),
     )
 
 

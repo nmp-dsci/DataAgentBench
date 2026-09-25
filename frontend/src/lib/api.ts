@@ -338,7 +338,8 @@ export type Board = { champion: string; champion_run_id: string | null; runs: Ru
 export type TallyCore = { n: number; before: number; after: number; improved: number; regressed: number; held: number; 'still failing': number; 'not scored': number };
 /** A round's before → after over some questions: answers of all, and `sql` over those with a golden. */
 export type Tally = TallyCore & { sql?: TallyCore };
-export type CardTotals = { totals: ScoreTotals; by_split: Record<string, ScoreTotals> | null };
+/** `pass_at_1`: the leaderboard's number, the mean over datasets of each one's pass rate (s11). */
+export type CardTotals = { totals: ScoreTotals; by_split: Record<string, ScoreTotals> | null; pass_at_1?: number | null };
 export type RoundSummary = {
   version: string;
   parent: string | null;
@@ -356,6 +357,9 @@ export type RoundSummary = {
   refusals: number;
   system_md_changed: boolean;
   split: { train: number; heldout: number } | null;
+  /** s11 (D38): `all` when the round read every error of the 54, so nothing was held out. */
+  trained_on?: 'train' | 'all' | 'crossfit';
+  guards?: { literal: boolean; g1_review: boolean; g2_audit: boolean; g3_breadth: boolean; g4_routing: boolean } | null;
   before: CardTotals | null;
   after: CardTotals | null;
   changes: Tally;
@@ -366,7 +370,7 @@ export type VersionNode = { version: string; parent: string | null; measured_aga
 export type Stages = {
   run: { agent: string | null; run_id: string; trials: number; totals: ScoreTotals | null; cost_usd: number | null };
   diagnose: { goldened: number; sql_fails: number; ledger: boolean; breaks: Partial<Record<Component, number>>; categories: Record<string, number> };
-  split: { sizes: { train: number; heldout: number } | null; read: number; heldout_sql: Rate | null };
+  split: { sizes: { train: number; heldout: number } | null; read: number; heldout_sql: Rate | null; read_all?: boolean };
   sessions: { dataset: number; component: number; system: number; cost_usd: number | null; model: string | null };
   guard: { writes: number; refused: number; leaks: number; too_long: number; accepted: number; dropped: number; caps: { notes: number; section: number | null; system_md: number } | null };
   version: { name: string; notes: number; sections: number; system_md_chars: number | null; system_md_changed: boolean | null; plan_first: boolean; fingerprint: string | null; prompt_version: number | null };
@@ -389,6 +393,7 @@ export type Side = {
 export type Change = 'improved' | 'regressed' | 'held' | 'still failing' | 'not scored';
 export type QuestionChange = { query_id: string; dataset: string; question: string; split: string | null; read: boolean; before: Side | null; after: Side | null; change: Change; sql_change?: Change };
 export type Attempt = { ok: boolean; chars: number | null; problems: string[] };
+export type Review = { reviewed: boolean; decisive?: boolean; question?: string; what?: string; reason?: string; cost_usd?: number | null; error?: string | null };
 export type OptimiseSessionRec = {
   scope: string;
   kind?: 'dataset' | 'component' | 'system';
@@ -403,6 +408,8 @@ export type OptimiseSessionRec = {
   cost_usd: number | null;
   error: string | null;
   duration_ms?: number;
+  /** s11 G1: the reviewer's verdict on each write that passed the literal guard. */
+  reviews?: Review[];
 };
 export type RoundDetail = {
   summary: RoundSummary;
@@ -421,6 +428,9 @@ export type RoundDetail = {
     playbook?: Partial<Record<Component, string[]>>;
     plan_first?: boolean;
     caps?: { notes: number; section: number | null; system_md: number };
+    trained_on?: 'train' | 'all' | 'crossfit';
+    audit_g2?: { units_with_gold: Record<string, number> };
+    playbook_skipped_g3?: Partial<Record<Component, string[]>>;
   };
   diagnostic: { run_id: string; totals: ScoreTotals | null; by_split: Record<string, ScoreTotals> | null; optimise_first: { category: string; n: number; queries: string[] }[]; categories: Record<string, number> };
   questions: QuestionChange[];

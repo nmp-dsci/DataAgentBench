@@ -1,0 +1,9 @@
+- Repo metrics (stars, forks, open issues) exist ONLY as free text in `deps_dev_v1_project_info."Project_Information"`. Take the `owner/repo` slug as the first slash-joined token (regex like `[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]*[A-Za-z0-9_-]`), lowercase it, and join it to lowercased `deps_dev_v1_project_packageversion."ProjectName"`. Don't LIKE-match the whole text.
+- Numbers can have thousands commas. Strip them, then cast to bigint.
+- Forks come in 3 phrasings: "forks count of N", "forked N times", "N forks". Use coalesce over all three, case-insensitive.
+- Stars: "stars count of N", "N stars", "starred by N users". Use all three.
+- Open issues: "open issues count of N" or "N open issues".
+- `Licenses` (project and package) and `VersionInfo` are JSON stored as text. Parse as jsonb (key-exists test for 'MIT'; read IsRelease and Ordinal as text, then cast). "Project license" means `project_info."Licenses"`.
+- Join path: packageinfo(System,Name,Version) = project_packageversion(System,Name,Version), then ProjectName = slug.
+- `VersionInfo` Ordinal is the registry's version order within a package. `UpstreamPublishedAt` (ms epoch) has nulls, and ordering by it picks a different top version than Ordinal for ~500 NPM release packages.
+- One repo maps to many package names and versions (several repos have 75-900 NPM package names), so star/fork rankings over packages have large ties at equal values, and one project has many package-version rows.

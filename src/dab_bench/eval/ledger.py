@@ -183,10 +183,16 @@ class Call:
 
 
 async def ask(
-    system_prompt: str, message: str, schema: dict[str, Any], model: str | None = None
+    system_prompt: str,
+    message: str,
+    schema: dict[str, Any],
+    model: str | None = None,
+    agent: str = "reader",
+    tool_name: str = "write_ledger",
 ) -> Call:
-    """One isolated reader session: the prompt, the message, one tool that records its input.
-    `model` overrides the reader's agent.yaml for this call."""
+    """One isolated session: the prompt, the message, one tool that records its input.
+    `model` overrides the agent's agent.yaml for this call; `agent` and `tool_name` let the
+    reviewer (s11 G1, `eval/review.py`) use the same isolation."""
     from claude_agent_sdk import (
         AssistantMessage,
         ClaudeAgentOptions,
@@ -208,15 +214,15 @@ async def ask(
     from dab_bench.agent.versions import load_version
 
     require_live()
-    cfg = load_version(READER_DIR.name).config
+    cfg = load_version(agent).config
     call = Call()
 
-    @tool("write_ledger", "Record the ledger. Call once, then stop.", schema)
+    @tool(tool_name, "Record the result. Call once, then stop.", schema)
     async def write_ledger(args: dict[str, Any]) -> dict[str, Any]:
         call.out = dict(args)
         return {"content": [{"type": "text", "text": "Recorded. Stop now."}]}
 
-    allowed = ["mcp__dab__write_ledger"]
+    allowed = [f"mcp__dab__{tool_name}"]
     cwd = isolated_cwd()
     options = ClaudeAgentOptions(
         system_prompt=system_prompt,
@@ -267,7 +273,7 @@ async def ask(
     except Exception as e:  # noqa: BLE001 - recorded; the other statements carry on
         call.error = f"{type(e).__name__}: {e}"[:300]
     if call.out is None and not call.error:
-        call.error = "the reader did not call write_ledger"
+        call.error = f"the {agent} did not call {tool_name}"
     return call
 
 

@@ -486,6 +486,14 @@ def optimise(
         None,
         help="the optimiser's model for this round (haiku | sonnet | opus); default agent.yaml",
     ),
+    train: str = typer.Option(
+        "split",
+        help="split: read the training questions' errors only; all: every error of the 54, "
+        "wrong answers without a golden included (s11, D38)",
+    ),
+    strict: bool = typer.Option(
+        False, help="s11 (D40 B): guards G1 review, G2 audit, G3 breadth, G4 no routing"
+    ),
 ) -> None:
     """One optimisation round: the optimiser (Sonnet 5, medium) reads RUN's failed train
     questions and writes agents/INTO/ = the run's version + a playbook section per step at
@@ -507,8 +515,19 @@ def optimise(
 
         rec = asyncio.run(rerun_system_pass(into))
     else:
+        if train not in ("split", "all"):
+            console.print("[red]--train is split or all[/]")
+            raise typer.Exit(1)
         rec = asyncio.run(
-            _optimise(run_id, into, workers=workers, components=components, model=model)
+            _optimise(
+                run_id,
+                into,
+                workers=workers,
+                components=components,
+                model=model,
+                train_all=train == "all",
+                strict=strict,
+            )
         )
     for s in rec["sessions"]:
         state = (
@@ -528,6 +547,15 @@ def optimise(
         f"agents/{into} · fingerprint {rec['fingerprint']} · system.md "
         f"{'changed' if rec['system_md_changed'] else 'unchanged'} · ${rec['cost_usd']:.2f}"
     )
+    if (rec.get("guards") or {}).get("g1_review"):
+        reviews = [r for s in rec["sessions"] for r in s.get("reviews") or []]
+        console.print(
+            f"G1 {len(reviews)} review(s), {sum(1 for r in reviews if r.get('decisive'))} "
+            f"decisive, {sum(1 for r in reviews if not r.get('reviewed'))} unreviewed · "
+            f"${rec.get('reviews_cost_usd') or 0:.2f} · G2 units reverted: "
+            f"{len((rec.get('audit_g2') or {}).get('units_with_gold') or {})} · G3 skipped: "
+            f"{', '.join(rec.get('playbook_skipped_g3') or {}) or 'none'}"
+        )
 
 
 @app.command()
@@ -541,7 +569,7 @@ def promote(candidates: str | None = None, dry_run: bool = False) -> None:
 
     rec = _promote(_datasets_arg(candidates), dry_run=dry_run)
     t = Table(box=None)
-    for c in ("version", "run", "answer", "SQL", "decision", "held-out answer", "note"):
+    for c in ("version", "run", "answer", "SQL", "decision", "Pass@1", "held-out answer", "note"):
         t.add_column(c)
     for c in rec["candidates"]:
         sc = c.get("scorecard") or {}
@@ -554,11 +582,50 @@ def promote(candidates: str | None = None, dry_run: bool = False) -> None:
             f"{sc['decision']['passed']}/{sc['decision']['n']}"
             if sc.get("decision", {}).get("n")
             else "—",
+            f"{c['pass_at_1']:.3f}" if c.get("pass_at_1") is not None else "—",
             f"{ho['passed']}/{ho['n']}" if ho else "—",
             c["why_not"],
         )
     console.print(t)
     console.print(("[dim]dry run[/] " if dry_run else "") + rec["reason"])
+
+
+@app.command("crossfit")
+def crossfit_cmd(
+    run_id: str,
+    prefix: str = typer.Option(..., help="the version the folds measure, e.g. v7_sql"),
+    folds: int = 3,
+    model: str | None = typer.Option(None, help="the optimiser's model; default agent.yaml"),
+    strict: bool = typer.Option(True, help="guards G1–G4, as the version's own round"),
+    workers: int = 4,
+) -> None:
+    """An out-of-sample score for a round that reads every error (s11): RUN's 54 in FOLDS
+    folds by dataset; each fold's round excludes that fold's questions and its prompt
+    (<prefix>_f<i>, never listed or promoted) answers only them. Writes
+    runs/<RUN>/crossfit/<prefix>.json."""
+    import asyncio
+
+    from dab_bench.eval.crossfit import crossfit
+
+    out = asyncio.run(crossfit(run_id, prefix, folds, model=model, strict=strict, workers=workers))
+    o = out["out_of_sample"]
+    p1 = o["pass_at_1"]
+    console.print(
+        f"out of sample: answers {o['answer']['passed']}/{o['answer']['n']} · SQL "
+        f"{o['sql']['passed']}/{o['sql']['n']} · Pass@1 "
+        + (f"{p1:.3f}" if p1 is not None else "—")
+        + f" · ${out['cost_usd']:.2f} · runs/{run_id}/crossfit/{prefix}.json"
+    )
+
+
+@app.command("export-submission")
+def export_submission_cmd(run_id: str) -> None:
+    """RUN's answers in the leaderboard's submission format, to runs/<RUN>/submission.json
+    (local only; submitting is a pull request upstream, a separate decision)."""
+    from dab_bench.eval.crossfit import export_submission
+
+    path, n = export_submission(run_id)
+    console.print(f"{n} answers → {path}")
 
 
 @app.command("version-model")

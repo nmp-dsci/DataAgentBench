@@ -1,0 +1,9 @@
+- `patents_publicationinfo."Patents_info"` is one templated sentence per row. Extract fields with anchored regex, never `LIKE`/`split_part`:
+  - **Country**: 2-letter prefix of the publication number, `(?:publication|pub\.) (?:number|no\.) ([A-Z]{2})-` (matches every row). Never `LIKE '%DE%'`.
+  - **Assignee**: either `^<NAME> holds the <CC> (patent )?(application|filing) (` or `(owned by|assigned to|held by|belonging to) <NAME> (and has|, with) (publication|pub\.) (number|no\.)`. `[]` means no assignee. Compare assignees by exact equality: "UNIV CALIFORNIA AT SAN DIEGO" is a different assignee from "UNIV CALIFORNIA".
+  - **Publication number**: the last ID in the sentence, `<CC>-<alnum>-<kind>` before the final period.
+- `cpc`/`citation` are JSON arrays stored as text: cast to jsonb and use `jsonb_array_elements`. `cpc` elements have `code` and `first` (bool, true = primary). `citation` elements have `publication_number`: join it exactly to the extracted publication number.
+- CPC subclass = first 4 chars of `code` = `patents_cpc_definition.symbol` at `level=5`. Class/"group at level 4" = first 3 chars at `level=4`.
+- Date text mixes full and abbreviated month names, ordinal days, one 4-digit year, or `'None Date'`. Get the year with `substring(col from '\d{4}')`. Match months with a word-bounded regex that covers both forms.
+- EMA of yearly counts per group: zero-fill each group's min-max year with `generate_series`. Seed with the first year's count, then ema = 0.1*n + 0.9*previous. Pick the best year per group (max EMA, earliest on ties).
+- Output shape: return `titleFull` exactly as stored. Wrap it in double quotes ONLY when it contains a comma (about 10% of level-4 titles and 43% of level-5 titles have one; none contain a quote). Never quote every row. Don't add helper columns (EMA values, counts) unless the question asks for them. Just return the named columns.
