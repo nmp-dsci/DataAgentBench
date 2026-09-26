@@ -32,7 +32,7 @@ from typing import Any
 
 import psycopg
 
-from dab_bench.config import PG_META_SCHEMA, SOURCE_PATH, settings
+from dab_bench.config import DATA_DIR, PG_META_SCHEMA, SOURCE_PATH, settings
 from dab_bench.data import pg
 
 GOLDEN_TABLE = "golden_sql"
@@ -619,3 +619,60 @@ def proposals() -> dict[str, dict[str, Any]]:
                 order by query_id, id desc"""  # type: ignore[arg-type,unused-ignore]
         ).fetchall()
     return {r[1]: _prow(r) for r in rows}
+
+
+# ----------------------------------------------------------------- the coverage export
+
+COVERAGE_PATH = DATA_DIR / "golden" / "coverage.json"
+STATUSES = ("exact", "differs", "evidence", "fails", "none")
+
+
+def status_of(g: dict[str, Any] | None) -> str:
+    """The Golden tab's tone for one question's current golden: `exact` recreates the gold
+    answer; `differs` passes the validator but not byte for byte; `evidence` is a judgment
+    question's golden, never validated; `fails`; `none`."""
+    if g is None:
+        return "none"
+    if g.get("kind") == "evidence":
+        return "evidence"
+    if g.get("passed"):
+        return "exact" if g.get("gold_match") in ("exact", "exact_values") else "differs"
+    return "fails"
+
+
+def how_started(origin_src: str) -> str:
+    """`proposal` · `run` · `hand`, from where a golden's SQL first came (`origin`)."""
+    if not origin_src:
+        return "hand"
+    return "proposal" if origin_src.startswith("proposal") else "run"
+
+
+def coverage(queries: list[dict[str, Any]]) -> dict[str, Any]:
+    """Golden coverage per question with no SQL text: what `data/golden/coverage.json` holds,
+    so the number the case study quotes has a path in git while the goldens stay in Postgres."""
+    cur = current()
+    starts = origins()
+    rows = []
+    for q in queries:
+        g = cur.get(q["id"])
+        rows.append(
+            {
+                "id": q["id"],
+                "dataset_key": q["dataset_key"],
+                "status": status_of(g),
+                "kind": g["kind"] if g else None,
+                "passed": g["passed"] if g else None,
+                "gold_match": g["gold_match"] if g else None,
+                "versions": g["versions"] if g else 0,
+                "started_from": how_started(starts.get(q["id"], "")) if g else None,
+                "saved_at": g["created_at"] if g else None,
+            }
+        )
+    counts = {s: sum(1 for r in rows if r["status"] == s) for s in STATUSES}
+    return {
+        "n": len(rows),
+        "written": sum(1 for r in rows if r["status"] != "none"),
+        "counts": counts,
+        "exported_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "queries": rows,
+    }

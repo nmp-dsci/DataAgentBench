@@ -1,0 +1,1258 @@
+{
+ "run_id": "20260924T235835Z_v3_sql_all_haiku_hints",
+ "model": "claude-sonnet-5",
+ "created_at": "2026-09-25T00:22:47.110271+00:00",
+ "cost_usd": 0.9144,
+ "components": [
+  "sources",
+  "keys",
+  "parse",
+  "filter",
+  "metric",
+  "rank",
+  "shape"
+ ],
+ "goldens": {
+  "bookreview/1": {
+   "golden_id": 18,
+   "lines": {
+    "keys": "bid extracted as trailing digits of book_id ('bookid_N'->N) joined to bid extracted from purchase_id ('purchaseid_N'->N); exact integer match.",
+    "rank": "Order decades by avg_rating descending, no explicit tie-break specified, limit to 1 row.",
+    "parse": "Regex extracts the year following the first month name (optionally with day and comma) in details; if absent, same pattern applied to subtitle as fallback; result cast to int as pub_year.",
+    "shape": "Single column 'decade', one row, the decade value as an integer (e.g. representing a decade like 1980).",
+    "filter": "Rows require a non-null pub_year (books with no month-anchored date, i.e. no match in details or subtitle, are dropped); after grouping, only decades with n_books >= 10 are kept.",
+    "metric": "Grouped by decade computed as (pub_year/10)*10; metric is avg(rating) across all joined review rows per decade, plus count(distinct bid) as n_books for the filter.",
+    "sources": "bookreview_books_info.details (templated prose with publication date) and .subtitle (fallback date text) for pub year; bookreview_review.rating for ratings; book_id/purchase_id hold row identifiers."
+   }
+  },
+  "bookreview/2": {
+   "golden_id": 19,
+   "lines": {
+    "keys": "book_id 'bookid_N' and purchase_id 'purchaseid_N' are matched by extracting the trailing integer N from each with a regex and casting to int.",
+    "rank": "no explicit tie-break needed since filtering to avg=5; results are ordered alphabetically by title with no row limit.",
+    "parse": "categories is matched by looking for the literal quoted substring \"Literature & Fiction\" in the string; language is detected by a word-boundary regex match for 'English' anywhere in the details text.",
+    "shape": "single column named title, one row per matching book, with titles containing a comma wrapped in double quotes (CSV-style escaping) and internal quotes doubled.",
+    "filter": "keep rows where categories contains the quoted 'Literature & Fiction' element, details matches the English word-boundary pattern, and the book's average rating across its reviews equals exactly 5.",
+    "metric": "average rating per book computed by grouping bookreview_review rows by the extracted book id and taking avg(rating) over individual review rows.",
+    "sources": "bookreview_books_info holds book_id, title, categories (JSON-like string list) and details (templated prose text); bookreview_review holds purchase_id and rating."
+   }
+  },
+  "bookreview/3": {
+   "golden_id": 20,
+   "lines": {
+    "keys": "trailing digits after 'bookid_' in book_id match trailing digits after 'purchaseid_' in purchase_id, both cast to int.",
+    "rank": "order by average rating descending, then title ascending; no row limit.",
+    "parse": "review_time text cast to timestamp for comparison; categories matched via regex for the quoted literal \"Children's Books\" within the string list.",
+    "shape": "single column of title, CSV-quoted (wrapped in double quotes, internal quotes doubled) if it contains a comma, one row per qualifying book.",
+    "filter": "reviews with review_time::timestamp >= 2020-01-01; books whose categories string contains the quoted \"Children's Books\" element; only average ratings >= … kept.",
+    "metric": "average rating per book_id (via matched purchase_id trailing number) computed over qualifying reviews, one row per book.",
+    "sources": "bookreview_books_info gives book_id, title, categories (string-encoded list); bookreview_review gives purchase_id, rating, review_time (text timestamp)."
+   }
+  },
+  "crmarenapro/1": {
+   "golden_id": 54,
+   "lines": {
+    "keys": "voicecalltranscript__c.LeadId__c joined to lead.Id after stripping leading '#' and trimming on both sides; pricebookentry.Product2Id stripped of '#' matched to product2.Id similarly stripped",
+    "rank": "calls ordered newest first by CreatedDate via row_number; products ordered alphabetically; policy rules ordered by their paragraph number; final union ordered by source group then that order",
+    "parse": "product names matched by substring position in call body text; knowledge faq_answer__c split into numbered paragraphs on blank lines, keeping only paragraphs starting with 'digit.'",
+    "shape": "single result set with columns kind, ref_id, label, detail, listing one lead row, then call rows, then price rows, then policy rule rows, no aggregation or dedupe of BANT verdict",
+    "filter": "lead restricted to the given lead_id; products kept only if their trimmed name appears somewhere in a call body; knowledge articles kept where summary equals title and title matches Budget/Authority/Need/Timeline as whole words",
+    "metric": "no aggregation; each row is an individual evidence item (lead record, one call, one product price, one policy rule) at its own grain",
+    "sources": "crmarenapro_lead for lead fields; crmarenapro_voicecalltranscript__c.Body__c for call text; crmarenapro_product2/pricebookentry for UnitPrice; crmarenapro_knowledge__kav.faq_answer__c for policy rule text"
+   }
+  },
+  "crmarenapro/10": {
+   "golden_id": 29,
+   "lines": {
+    "keys": "cases join assignments on case id after stripping leading '#'/whitespace from case.id and casehistory caseid__c and newvalue__c/ownerid; handled agents = union of assignment agent_id and case owner_id per case.",
+    "rank": "order by average handle time ascending, tie-broken by agent_id ascending, limit to 1 row.",
+    "parse": "trim(field__c) matched exactly to literal 'Owner Assignment' to identify assignment rows; newvalue__c stripped of leading '#' and whitespace gives agent id; dates cast directly from ISO timestamptz strings.",
+    "shape": "single column agent_id, one row, the agent with lowest average handle time.",
+    "filter": "case createddate within [today-4 months, today+1 day); handle_times only for cases with closed_at not null and exactly one Owner Assignment row (untransferred); eligible agents need >1 distinct handled case (owner or any assignment).",
+    "metric": "handle time in seconds = closed_at - opened_at extracted as epoch, computed per untransferred closed case, credited to case owner; averaged per agent_id.",
+    "sources": "crmarenapro_case gives case id, ownerid, createddate, closeddate; crmarenapro_casehistory__c gives caseid__c, field__c and newvalue__c holding owner-assignment agent ids."
+   }
+  },
+  "crmarenapro/11": {
+   "golden_id": 30,
+   "lines": {
+    "keys": "Contact.AccountId links to Order.AccountId; Order.Id links to OrderItem.OrderId; OrderItem.Product2Id links to Product2.Id; all Id/AccountId values trimmed and stripped of leading '#' before matching.",
+    "rank": "No ordering, tie-break, or limit applied; DISTINCT is used to dedupe identical product ids.",
+    "parse": "EffectiveDate is read as text then trimmed and cast to date (format 'YYYY-MM-DD'); no JSON parsing involved.",
+    "shape": "Single column output: product_id (the normalised Product2 Id), potentially multiple rows though expected to be one.",
+    "filter": "Contact.Id equals the given contact id (after normalising); order EffectiveDate falls within the previous calendar month relative to today (2021-07-15, i.e. June 2021); product Name matches 'AI' as a whole word via regex.",
+    "metric": "No aggregation; simply selects distinct matching product rows at the grain of one row per qualifying product id.",
+    "sources": "Tables: crmarenapro_contact (Id, AccountId), crmarenapro_order (Id, AccountId, EffectiveDate text), crmarenapro_orderitem (OrderId, Product2Id), crmarenapro_product2 (Id, Name)."
+   }
+  },
+  "crmarenapro/12": {
+   "golden_id": 65,
+   "lines": {
+    "keys": "Join Opportunity.ContractID__c to Contract.Id as an exact key, after trimming whitespace and stripping leading '#' from both sides.",
+    "rank": "Order agents by ascending average cycle days, tie-broken alphabetically by agent id, take the top row.",
+    "parse": "CreatedDate's first 10 characters cast to date for opportunity creation; CompanySignedDate cast directly to date (plain YYYY-MM-DD).",
+    "shape": "Single row, single column named Id, containing the winning agent's identifier.",
+    "filter": "Keep only rows where Contract.CompanySignedDate falls within April 2023 (>= 2023-04-01 and < 2023-05-01).",
+    "metric": "For each agent (trimmed, '#'-stripped OwnerId), compute average of (CompanySignedDate - CreatedDate) in days across their matched opportunities.",
+    "sources": "Opportunity table gives OwnerId (agent) and CreatedDate; Contract table gives Id and CompanySignedDate; link via Opportunity.ContractID__c."
+   }
+  },
+  "crmarenapro/13": {
+   "golden_id": 31,
+   "lines": {
+    "keys": "Orders join contracts on AccountId equality and order.EffectiveDate = contract.StartDate (both trimmed/stripped of '#' and whitespace); orderitem joins orders on OrderId = order.Id after same normalisation.",
+    "rank": "Order agents by sales_amount descending, tie-break by agent_id ascending, and take only the top row.",
+    "parse": "Ids are cleaned by trimming whitespace and stripping leading '#' via ltrim/trim; date strings like CompanySignedDate, StartDate, EffectiveDate are cast to date using 'YYYY-MM-DD' format; Quantity and UnitPrice text fields are cast to numeric.",
+    "shape": "Return a single column, single row containing just the agent_id (the top agent's Id).",
+    "filter": "Keep contracts whose CompanySignedDate falls between today (2022-11-25) minus 5 months and today inclusive; keep orders that match at least one such contract via the account/start-date join; distinct order rows to avoid duplicate matches from multiple contracts.",
+    "metric": "For each agent (order OwnerId), sum Quantity*UnitPrice across all their matched orders' order items to get total sales_amount, grouped by agent_id.",
+    "sources": "crmarenapro_contract holds AccountId, StartDate, CompanySignedDate; crmarenapro_order holds Id, OwnerId (agent), AccountId, EffectiveDate; crmarenapro_orderitem holds OrderId, Quantity, UnitPrice (all as text fields)."
+   }
+  },
+  "crmarenapro/2": {
+   "golden_id": 22,
+   "lines": {
+    "keys": "QuoteId, Product2Id, PricebookEntryId are matched to Id columns after trimming whitespace and stripping a leading '#' with trim(ltrim(x,'#')) on both sides of each join.",
+    "rank": "Quote lines ordered by product name; policy rules ordered by article title then paragraph number, via row_number() within each kind partition (s=1 lines, s=2 rules).",
+    "parse": "Quantity, UnitPrice, Discount, TotalPrice text fields cast to numeric; faq_answer__c split on blank lines into paragraphs numbered by ordinality, keeping only paragraphs starting with a digit and period (numbered rules).",
+    "shape": "Single result set unioning quote-line rows (kind, product, quantity, list_price, unit_price, discount, total_price) and policy-rule rows (kind, article_id, title, rule text), ordered s,o.",
+    "filter": "Restrict quote lines to QuoteId = 0Q0Wt000001WSDVKA4; restrict knowledge articles to those whose summary equals the title or starts with 'Policy'; keep only rule paragraphs that mention no specific product or mention a product present on this quote.",
+    "metric": "No aggregation - produces a flat listing at the grain of one row per quote line item and one row per kept policy rule paragraph, tagged by kind.",
+    "sources": "Quote lines from crmarenapro_quotelineitem joined to crmarenapro_product2 (Name) and crmarenapro_pricebookentry (UnitPrice as list price); policy text from crmarenapro_knowledge__kav's faq_answer__c body field, plus summary and title columns."
+   }
+  },
+  "crmarenapro/3": {
+   "golden_id": 24,
+   "lines": {
+    "keys": "Task.WhatId matched to Opportunity.Id after stripping leading '#' and trimming whitespace from both sides via ltrim/trim.",
+    "rank": "Rows ordered first by a synthetic flag (opportunity row before task rows), then by activity_date ascending, then by id; no limit.",
+    "parse": "Trailing/leading spaces trimmed from Id, Name, StageName, Status, Subject, Description; no JSON or regex extraction, just trim/ltrim of '#' prefix.",
+    "shape": "Returns columns kind, id, activity_date, status, subject, description as a chronological list mixing the opportunity's stage and its tasks.",
+    "filter": "Opportunity restricted to the single Id 006Wt000007BGGjIAO (after normalisation); its joined tasks are all included, no status/date filter.",
+    "metric": "No aggregation; builds a union of one opportunity summary row plus one row per linked task, each row a raw fact for manual reading.",
+    "sources": "crmarenapro_opportunity gives Id, Name, StageName, CloseDate; crmarenapro_task gives WhatId, ActivityDate, Status, Subject, Description as task detail fields."
+   }
+  },
+  "crmarenapro/4": {
+   "golden_id": 26,
+   "lines": {
+    "keys": "Match case.orderitemid__c to orderitem.\"Id\" after stripping/trimming leading '#' and whitespace from both sides via ltrim(trim(x),'#'); orderitem filtered by normalized \"Product2Id\" equal to the given product id.",
+    "rank": "Order groups by case count descending, then by month_start ascending as tie-break; no explicit LIMIT applied in the query as written.",
+    "parse": "Cast case.createddate text (format 'YYYY-MM-DDTHH:MI:SS.000+0000') to timestamptz, convert to UTC, truncate to month via date_trunc('month', ...) for grouping and formatted with to_char(...,'FMMonth') for display.",
+    "shape": "Returns rows with two columns: month (formatted month name) and cases (count), one row per month, ordered by highest count first.",
+    "filter": "Keep only cases whose matched orderitem's Product2Id (normalized) equals the given product id, and whose createddate (as UTC date) falls between today minus 10 months and today inclusive.",
+    "metric": "Count of cases (count(*)) grouped by calendar month (month_start from date_trunc) to get case volume per month for the product.",
+    "sources": "crmarenapro_case (createddate, orderitemid__c) links to crmarenapro_orderitem (\"Id\", \"Product2Id\") to identify SecureAnalytics Pro cases via product id."
+   }
+  },
+  "crmarenapro/5": {
+   "golden_id": 27,
+   "lines": {
+    "keys": "orderitem rows filtered to the given Product2Id, then joined to case on orderitemid__c = orderitem Id, both normalised by stripping a leading '#' after trimming whitespace.",
+    "rank": "Order groups by case count descending; take the single top row (limit 1); no explicit tie-break beyond default ordering.",
+    "parse": "issueid__c and orderitemid__c/Product2Id/Id are read as plain text and cleaned via ltrim(trim(x),'#') to drop a leading '#' marker; createddate is cast from timestamptz at UTC to a date.",
+    "shape": "Single row, single column named issue_id containing the most frequent issue's normalised id.",
+    "filter": "Product2Id must equal the given product id (normalised); case createddate's UTC date must fall within today minus 5 months through today inclusive; issueid__c must not be null.",
+    "metric": "Count of case rows (not distinct-deduplicated beyond grouping) per normalised issue id, grouped by issue_id, representing frequency of that issue for the product.",
+    "sources": "Issue text comes from case.issueid__c; product linkage via orderitem table's Id and Product2Id columns; case table gives createddate for the time window."
+   }
+  },
+  "crmarenapro/6": {
+   "golden_id": 28,
+   "lines": {
+    "keys": "Line items join to Product2 and PricebookEntry by matching Id after trimming spaces and stripping a leading '#' from each side; quote filter matches QuoteId the same normalised way.",
+    "rank": "Quote lines are ordered by product name; kept policy rules are ordered by article title then paragraph number; two blocks are concatenated with quote lines first via an outer sequence/row-number ordering, no limit applied.",
+    "parse": "Numeric-as-text fields (Quantity, UnitPrice, Discount, TotalPrice, pricebook UnitPrice) are cast to numeric; knowledge article body is split into paragraphs on blank lines via regexp_split_to_table, keeping only paragraphs starting with a number and a period as rule text, whitespace collapsed.",
+    "shape": "Output columns kind, article_id, title, product, quantity, list_price, unit_price, discount, total_price, rule - one row per quote line item and one row per applicable policy rule, for manual comparison rather than a single computed verdict.",
+    "filter": "Restrict to line items whose normalised QuoteId equals the given quote; restrict candidate knowledge articles to those whose summary equals its title or whose summary starts with 'Policy'; keep only numbered-paragraph rules; drop rules that name a specific catalog product unless that product appears among the quote's line items.",
+    "metric": "No aggregation is computed; grain is one row per quote line item (with product, quantity, list/unit price, discount, total price) union one row per surviving policy rule paragraph (with article id, title, rule text), tagged by a 'kind' label.",
+    "sources": "Quote line items come from crmarenapro_quotelineitem (QuoteId, Product2Id, PricebookEntryId, Quantity, UnitPrice, Discount, TotalPrice); product names from crmarenapro_product2.Name; list prices from crmarenapro_pricebookentry.UnitPrice; policy text from crmarenapro_knowledge__kav.faq_answer__c, plus its id and title/summary."
+   }
+  },
+  "crmarenapro/8": {
+   "golden_id": 63,
+   "lines": {
+    "keys": "case ids and agent ids matched after normalizing: trim whitespace and strip leading '#' from caseid__c, oldvalue__c, newvalue__c; transfers.agent joined to handled.agent on the normalized id.",
+    "rank": "order agents by transfer count ascending, tie-broken by agent id ascending, limit to 1 row (the minimum).",
+    "parse": "createddate text parsed by taking the first 10 characters (left(...,10)) and casting to date to get the UTC calendar day; oldvalue__c/newvalue__c cleaned via trim+ltrim of '#' and blanked-to-null via nullif.",
+    "shape": "single column output aliased as \"Id\", one row: the agent id with fewest transfers among those with more than 0 handled cases.",
+    "filter": "field__c trimmed equals 'Owner Assignment'; createddate day within [lo,hi) window = the four complete quarters before current quarter (2022-04-01 to 2023-03-31); from_agent/to_agent not null where required.",
+    "metric": "for each agent: handled = count of distinct normalized case_id where they appear as newvalue__c (to_agent) in window; transfers = count of rows where they appear as oldvalue__c (from_agent) in window.",
+    "sources": "crmarenapro_casehistory__c table, field__c column identifying 'Owner Assignment' rows, oldvalue__c/newvalue__c for agent ids, caseid__c for case, createddate text column for the event date."
+   }
+  },
+  "crmarenapro/9": {
+   "golden_id": 64,
+   "lines": {
+    "keys": "Join case.accountid to account.Id after trimming whitespace and stripping leading '#' from both sides, exact match.",
+    "rank": "Order states by ascending average closure seconds, tie-break alphabetically by state name, limit to 1 row.",
+    "parse": "createddate read via left(...,10) cast to date to get the date part from the timestamp-like text; closeddate/createddate cast to timestamptz for interval subtraction.",
+    "shape": "Single column 'state' with one row: the two-letter state abbreviation with quickest average closure time.",
+    "filter": "Only cases with non-null closeddate; createddate date falls within the 6 complete quarters before current quarter (2021-04-01 to 2022-09-30, exclusive upper bound).",
+    "metric": "For each state, average closure time in seconds (closeddate - createddate) computed via extract(epoch from ...), grouped by trimmed ShippingState.",
+    "sources": "crmarenapro_case (createddate, closeddate, accountid) and crmarenapro_account (Id, ShippingState) provide dates/state; state is a plain text field on account."
+   }
+  },
+  "deps_dev_v1/1": {
+   "golden_id": 44,
+   "lines": {
+    "keys": "packageinfo joined to project_packageversion on System='NPM', Name, Version; result joined to project_info on lowercased ProjectName equal to lowercased owner/repo extracted from Project_Information",
+    "rank": "order by stars descending, tie-broken by Name descending, limited to top 5 rows",
+    "parse": "Ordinal and IsRelease read from VersionInfo JSONB via ->>; owner/repo repo-slug extracted from Project_Information via regex; star count extracted via first matching regex among 'stars count of N', 'starred by N', 'N stars', commas stripped and cast to bigint",
+    "shape": "two columns Name and Version, one row per package, 5 rows total",
+    "filter": "System='NPM', IsRelease true; per package keep only the row with highest Ordinal (rn=1) as the latest release; only rows where a matching project and star count exist",
+    "metric": "max star count per Name/Version release, grouped by Name and Version, using the single latest version per package",
+    "sources": "deps_dev_v1_packageinfo (Name, Version, VersionInfo JSON for Ordinal/IsRelease), deps_dev_v1_project_packageversion (System, Name, Version, ProjectName), deps_dev_v1_project_info (Project_Information free text with repo and star count)"
+   }
+  },
+  "deps_dev_v1/2": {
+   "golden_id": 46,
+   "lines": {
+    "keys": "project matched by lowercased owner/repo extracted from Project_Information vs lowercased ProjectName; packageinfo joined to project_packageversion on exact System, Name, Version",
+    "rank": "order all qualifying projects by forks descending, tie-break by ProjectName ascending, limit to 5",
+    "parse": "regex extracts owner/repo substring from Project_Information; three alternative regexes extract fork counts ('forks count of N', 'forked N times', 'N forks'), commas stripped and cast to bigint; VersionInfo JSON parsed for Ordinal and IsRelease boolean",
+    "shape": "ProjectName, Version, ForksCount, five rows",
+    "filter": "Licenses JSON array contains 'MIT'; packageinfo System = 'NPM' and VersionInfo IsRelease true; only projects present in the MIT proj set",
+    "metric": "per project pick the latest release version (row_number by UpstreamPublishedAt desc, then Ordinal desc, then Version desc, rn=1), pair with the extracted forks count",
+    "sources": "deps_dev_v1_project_info (Licenses JSON, Project_Information free text for owner/repo and forks); deps_dev_v1_packageinfo (System, Name, Version, VersionInfo JSON, UpstreamPublishedAt); deps_dev_v1_project_packageversion (ProjectName, System, Name, Version)"
+   }
+  },
+  "github_repos/1": {
+   "golden_id": 47,
+   "lines": {
+    "keys": "files.id joined to contents.id (exact blob id match) to get README text; languages.repo_name joined to files.repo_name (exact) restricted to repos with a README.",
+    "rank": "none",
+    "parse": "path matched case-insensitively for README.md at path start or after a slash; language_description parsed via regex for a 'Python' token followed by '(N bytes' or ', totaling N bytes' patterns.",
+    "shape": "single row with three columns: total_readmes, copyright_readmes, proportion (float ratio, not rounded).",
+    "filter": "keep only files whose path is README.md and have a contents row; keep repos whose languages rows exist and none of them match the Python token pattern; join filtered readmes to those non-Python repos.",
+    "metric": "per matched README row, flag has_copyright as content matching 'copyright' or '©' (case-insensitive); count total readmes and count with the flag, then compute ratio.",
+    "sources": "github_repos_files (repo_name, path, id) locates README.md files; github_repos_contents.content holds file text keyed by id; github_repos_languages.language_description holds per-repo language sentences."
+   }
+  },
+  "github_repos/2": {
+   "golden_id": 71,
+   "lines": {
+    "keys": "files.id joins to contents.id (blob id, exact match); files.repo_name joins to languages.repo_name (exact match), restricted to repos already appearing among described Swift files.",
+    "rank": "order by parsed copies descending, tie-break by repo_name ascending, limit to 1 row.",
+    "parse": "path filtered by regex matching '.swift' suffix, case-insensitive; from repo_data_description extract the integer preceding the literal word 'times' as copies; languages.language_description matched by regex requiring 'Swift' followed by '(N bytes' or ', totaling N bytes' as a language token.",
+    "shape": "single row output containing repo_name only (the file's repo_name for the top-copied swift file).",
+    "filter": "files.path must end in .swift (case-insensitive); contents.repo_data_description must contain the whole word 'non-binary'; languages rows must contain a valid Swift token; repo restricted to those with at least one described swift file.",
+    "metric": "distinct-on id dedups files to one row per file id (first repo_name/path alphabetically); copies is the parsed integer per file, one value per file id, no aggregation beyond dedup.",
+    "sources": "github_repos_files gives id, repo_name, path per file; github_repos_contents.repo_data_description (text) gives copy-count phrasing and binary flag; github_repos_languages.language_description lists languages with byte counts per repo_name."
+   }
+  },
+  "github_repos/3": {
+   "golden_id": 16,
+   "lines": {
+    "keys": "shell_apache_repos derived by joining languages and licenses tables on exact repo_name match; commits joined to that set via repo_name equality.",
+    "rank": "none",
+    "parse": "language_description matched via LIKE '%Shell%' substring search within the text field; no JSON parsing; message length via LENGTH(), prefix checked via LOWER() LIKE patterns.",
+    "shape": "single row with one column total_count, an integer count.",
+    "filter": "repos require language_description containing 'Shell' and license exactly 'apache-2.0'; commits require message IS NOT NULL, LENGTH(message) < 1000, and lowercased message not starting with 'merge', 'update', or 'test'.",
+    "metric": "simple count of qualifying commit rows (COUNT(*)), no grouping, each commit counted once.",
+    "sources": "github_repos_languages.language_description (text list of languages) and github_repos_licenses.license identify repo attributes; github_repos_commits.message holds commit text; all keyed by repo_name."
+   }
+  },
+  "github_repos/4": {
+   "golden_id": 15,
+   "lines": {
+    "keys": "commits and langs matched on exact repo_name; main and commits joined on exact repo_name via USING clause.",
+    "rank": "rows ordered by num_commits descending, limited to the top 5, no explicit tie-break beyond that.",
+    "parse": "main_language extracted from language_description via regex substring capturing the text after 'in' or ':' up to before ' (<digits with commas> bytes' or ', totaling'.",
+    "shape": "two columns returned: repo_name and num_commits, five rows, though question asks only for repo names.",
+    "filter": "langs restricted to repo_name present in commits (pre-filtering before regex); final result restricted to rows where extracted main_language is not exactly 'Python'; inner join drops repos with no language row.",
+    "metric": "num_commits computed per repo_name as count(*) over github_repos_commits rows, one row per repo.",
+    "sources": "github_repos_commits table (repo_name, one row per commit) for commit counts; github_repos_languages table's language_description text column for the per-repo language breakdown text."
+   }
+  },
+  "googlelocal/1": {
+   "golden_id": 32,
+   "lines": {
+    "keys": "googlelocal_business_description.gmap_id joined to googlelocal_review.gmap_id, an exact key match, no transformation needed.",
+    "rank": "order by average rating descending, limit to top 5 rows, no explicit tie-break beyond that.",
+    "parse": "regex extracts the literal phrase 'Los Angeles, CA' or 'Los Angeles, California' as whole words from the description text.",
+    "shape": "two columns: business name and avg_rating, five rows, values left unrounded as computed by avg().",
+    "filter": "rows whose description matches the Los Angeles CA/California pattern via word-boundary regex; no date window or other exclusions.",
+    "metric": "average of review.rating per business (grouped by gmap_id and name), unrounded mean across all matching reviews.",
+    "sources": "googlelocal_business_description.description holds templated prose naming city/state/zip; googlelocal_review.rating holds per-review star ratings; business name in .name."
+   }
+  },
+  "googlelocal/2": {
+   "golden_id": 66,
+   "lines": {
+    "keys": "massage CTE's gmap_id joins to googlelocal_review.gmap_id directly; both sides need only the raw gmap_id, no stripping or casing needed.",
+    "rank": "order the final results by the numeric avg_rating descending; no limit, no tie-break specified beyond that.",
+    "parse": "name matched case-insensitively against '\\mmassage' word boundary; description matched against a regex alternation of bodywork, body treatment(s), therap(y/ies/ist/ists/eutic), massag phrasings.",
+    "shape": "two columns: name and avg_rating rounded to 15 decimal places cast to text (to preserve trailing zeros/decimal point), one row per qualifying business.",
+    "filter": "rows where name or description regex matches count as massage businesses; then after grouping, only keep groups whose average rating is >= 4.0.",
+    "metric": "per business (grouped by gmap_id, name) compute the average of r.rating across all joined reviews, giving one avg_rating per business.",
+    "sources": "googlelocal_business_description table holds gmap_id, name, and description text for massage detection; googlelocal_review table holds rating and gmap_id for scoring."
+   }
+  },
+  "googlelocal/3": {
+   "golden_id": 67,
+   "lines": {
+    "keys": "Businesses matched to reviews by exact gmap_id equality; hours JSON exploded per business via gmap_id before joining to review ratings by the same gmap_id.",
+    "rank": "Ordered by avg_rating descending, then by n_reviews ascending, then by name ascending as tie-breakers, limited to top 5 rows.",
+    "parse": "hours cast to jsonb and expanded into (day, hrs) pairs with ordinality; hrs matched by regex extracting open hour/minute/AM-PM and close hour/minute/AM-PM around an en dash, converting each to minutes since midnight (12-hour to 24-hour, minutes optional, open AM/PM inferred from close if omitted).",
+    "shape": "Five rows with columns name, operating_hours (JSON-like string of day/hours pairs), and avg_rating.",
+    "filter": "Only rows with non-null hours are parsed; only Monday-Friday entries considered; a business qualifies if any weekday entry is 'Open 24 hours', has close_min > 18:00, or close_min <= open_min (wraps past midnight); exact 6PM close excluded.",
+    "metric": "Per gmap_id: average of review.rating (avg_rating) and count of reviews (n_reviews), computed only for businesses passing the evening-open filter; hours text rebuilt as a concatenated JSON-like string of [day, hrs] pairs in original order.",
+    "sources": "googlelocal_business_description.hours (JSON array of [day, hours] pairs) for schedules; googlelocal_review.rating for ratings; googlelocal_business_description.name/gmap_id for identity."
+   }
+  },
+  "googlelocal/4": {
+   "golden_id": 68,
+   "lines": {
+    "keys": "reviews.gmap_id matches business_description.gmap_id exactly, an inner join with no transformation needed on either side.",
+    "rank": "order by review count descending, ties broken alphabetically by business name, limited to top 3.",
+    "parse": "time text is matched by regex to detect which of three formats it is, then parsed with to_timestamp using the matching format string (ISO, 'DD Mon YYYY, HH24:MI', or 'FMMonth DD, YYYY at HH12:MI AM').",
+    "shape": "two columns: business name and high_rating_count, three rows, one per top business.",
+    "filter": "rating >= … (only 5-star reviews qualify since rating is integer), and parsed timestamp falls within 2019-01-01 inclusive to 2020-01-01 exclusive.",
+    "metric": "count of qualifying reviews grouped per business (by gmap_id and name), one count per business.",
+    "sources": "googlelocal_review holds gmap_id, rating, and time (text in three different formats); googlelocal_business_description holds gmap_id and name."
+   }
+  },
+  "music_brainz_20k/1": {
+   "golden_id": 62,
+   "lines": {
+    "keys": "tracks and sales matched on track_id after tracks are reduced to matching song_records; each track's song/performer text unwrapped per its source_id format before matching.",
+    "rank": "none - no ordering or limiting, single aggregate result.",
+    "parse": "song and performer extracted from title per source_id: strip ' (Album)' or trailing parenthetical for source 1, split 'Artist - Title' or 'Title - Album' on ' - ' for sources 2/3, strip leading 3-4 digit code for source 4, else title as-is; then lower-cased, accents translated to plain letters, and non-alphanumeric characters stripped for both song and artist.",
+    "shape": "one row, one column revenue_usd, rounded to 2 decimal places.",
+    "filter": "only tracks whose folded song_key and artist_key are within one character deletion (either side) of the folded 'getmebodied'/'beyonce' keys; then sales rows restricted to store = Apple Music and country = Canada.",
+    "metric": "sum of revenue_usd across all matched sales rows for the matched duplicate track records, i.e. total revenue for the song grain not per-record.",
+    "sources": "music_brainz_20k_tracks holds title/album/artist text per track_id and source_id; music_brainz_20k_sales holds revenue_usd, store, country per track_id."
+   }
+  },
+  "music_brainz_20k/2": {
+   "golden_id": 43,
+   "lines": {
+    "keys": "tracks and sales joined on track_id, an exact key; track_id resolved via matching to candidate track rows first.",
+    "rank": "order stores by summed revenue_usd descending, take top 1 row, ties broken by arbitrary order.",
+    "parse": "title and artist stripped of all non-letters and lowercased via regexp_replace, comparing letters-only forms; surname taken as second word of 'Brucqe Maginnis' split on space, also letters-only lowered.",
+    "shape": "single column 'store', one row, the top-earning store, no rounding applied.",
+    "filter": "track rows where cleaned title contains 'streethype' and cleaned artist contains cleaned surname 'maginnis'; no date window or other exclusions.",
+    "metric": "sum of sales.revenue_usd grouped by store, aggregating across all matched track_id rows and all countries.",
+    "sources": "music_brainz_20k_tracks (title, artist columns) for song identity; music_brainz_20k_sales (store, revenue_usd) for revenue."
+   }
+  },
+  "music_brainz_20k/3": {
+   "golden_id": 61,
+   "lines": {
+    "keys": "tracks join sales on track_id; duplicate tracks of the same song are linked via computed song_key/artist_key rather than any stored key.",
+    "rank": "order clusters by summed revenue_usd descending, take the single top cluster (limit 1).",
+    "parse": "per source_id, strip album suffix ' (Album)', split 'Artist - Title', split 'Title - Album', strip leading 'NNN-' digits from title; extract performer similarly for source 2; then lower-case, fold accents, strip non-alphanumerics to get song_key and artist_key.",
+    "shape": "list the title column from all track_id records belonging to the winning cluster, ordered by track_id ascending, no other columns.",
+    "filter": "drop records with empty song_key or artist_key, or artist_key equal to 'unknown'; only link keys of length 6+ via one-character-deletion variants for typo tolerance.",
+    "metric": "for each track, generate one-deletion variants of song_key and artist_key, join on exact artist+variant or title+variant matches to build edges, propagate minimum track_id label across three rounds to cluster duplicate records, then sum revenue_usd per cluster.",
+    "sources": "music_brainz_20k_tracks holds title, album, artist, source_id per track; music_brainz_20k_sales holds revenue_usd per track_id."
+   }
+  },
+  "pancancer_atlas/1": {
+   "golden_id": 49,
+   "lines": {
+    "keys": "patients.barcode (extracted TCGA-XX-XXXX substring) joined to rnaseq r.ParticipantBarcode on exact match, combined with r.Symbol = 'IGF2'.",
+    "rank": "Results ordered alphabetically by Histology_Type; no row limit or top-N.",
+    "parse": "Barcode read via regex TCGA-[A-Z0-9]{2}-[A-Z0-9]{4}; disease name read via coalesce of three regex patterns matching 'case of/subject with/diagnosed with/study of X,' or 'belongs to the X cohort.' or 'In the X dataset,'.",
+    "shape": "Two columns: Histology_Type and Average_Log_Expression, one row per histology code, numeric average with at least four decimal places.",
+    "filter": "disease = 'Brain lower grade glioma'; icd_o_3_histology not null and not matching bracketed pattern ^\\[.*\\]$; r.normalized_count not null and > -1 (valid for log).",
+    "metric": "For each histology code, average of log base-10 of (normalized_count + 1) across matched IGF2 rows per LGG barcode.",
+    "sources": "pancancer_atlas_clinical_info's Patient_description free-text column (barcode and disease name) and icd_o_3_histology column; pancancer_atlas_rnaseq_expression's normalized_count and Symbol columns."
+   }
+  },
+  "pancancer_atlas/2": {
+   "golden_id": 14,
+   "lines": {
+    "keys": "Join extracted barcode from Patient_description to ParticipantBarcode in mutation data; needs exact TCGA barcode extracted, no case folding needed.",
+    "rank": "Order by mutation_percentage descending, tie-broken alphabetically by histological_type, limited to top 3 rows.",
+    "parse": "Regex substring pulls TCGA-XX-XXXX pattern as barcode and whole-word Alive|Dead token as vital status from Patient_description text.",
+    "shape": "Returns four columns: Histological_Type, mutation_count, total, mutation_percentage (unrounded double), three rows.",
+    "filter": "Patient_description contains 'Breast invasive carcinoma'; vital = 'Alive'; histological_type not null; mutation rows restricted to Hugo_Symbol='CDH1' and FILTER='PASS'.",
+    "metric": "Per histological_type: count distinct mutated barcodes (via left join to deduped CDH1 PASS barcodes) over total alive BRCA patients, as mutation_percentage ratio.",
+    "sources": "pancancer_atlas_clinical_info.Patient_description (free text) for barcode/vital/histological_type; pancancer_atlas_mutation_data.ParticipantBarcode/Hugo_Symbol/FILTER for mutations."
+   }
+  },
+  "pancancer_atlas/3": {
+   "golden_id": 17,
+   "lines": {
+    "keys": "Join on barcode extracted from Patient_description (regex TCGA-XX-XXXX) matched against mutation_data.ParticipantBarcode; left join so unmatched patients count as not mutated.",
+    "rank": "none",
+    "parse": "Extract barcode via regex 'TCGA-[A-Z0-9]{2}-[A-Z0-9]{4}' and sex via word-boundary match on MALE|FEMALE from Patient_description text.",
+    "shape": "Single row, single column named Chi2 (double precision), the summed chi-square statistic.",
+    "filter": "Patient_description matches 'Breast invasive carcinoma'; sex = FEMALE; histological_type not null and not starting with '['; CDH1 mutation rows restricted to FILTER='PASS', deduplicated per barcode; after building full histological_type x mutated grid, keep only rows/columns whose marginal total sum(o) > 10.",
+    "metric": "Grain is one row per patient collapsed to histological_type x mutated(boolean) contingency cell counts (o); chi-square computed as sum over kept cells of (o - row_total*col_total/n)^2 / (row_total*col_total/n), with row_total, col_total, n as window sums over kept cells.",
+    "sources": "pancancer_atlas_clinical_info.Patient_description (text with embedded barcode and sex tokens) and histological_type column; pancancer_atlas_mutation_data.ParticipantBarcode, Hugo_Symbol, FILTER for CDH1 mutations."
+   }
+  },
+  "patents/1": {
+   "golden_id": 50,
+   "lines": {
+    "keys": "Level-5 group is the 4-char prefix of each cpc element's code; matched to patents_cpc_definition where symbol equals that 4-char prefix and level=5.",
+    "rank": "For each group pick the year with maximum EMA, breaking ties by choosing the earliest year; then filter to those groups whose best year equals 2022.",
+    "parse": "From each cpc jsonb array element take left(code,4) as group and (first)::boolean flag; extract the single 4-digit year via regex \\d{4} from filing_date text.",
+    "shape": "Single column cpc_group listing the level-5 CPC group codes, one row per qualifying group, ordered alphabetically by code.",
+    "filter": "Keep only cpc elements where first=true; keep only filing_date rows matching a 4-digit year (drops 'None Date' rows); distinct group per patent so duplicates count once.",
+    "metric": "Per group per year count distinct patents (grade filled with 0 for every year between group's min and max filing year), then compute EMA with alpha=0.2, seeded by first year's count, recursively 0.2*n+0.8*prev_ema.",
+    "sources": "patents_publicationinfo.cpc (jsonb array of {code, first, inventive, tree}) for codes; filing_date text for dates; patents_cpc_definition.symbol/level for level-5 subclass codes."
+   }
+  },
+  "patents/2": {
+   "golden_id": 51,
+   "lines": {
+    "keys": "Join filings to patents_cpc_definition on level-4 group code (left 3 chars of cpc element 'code') equal to symbol with level=4; no other table join.",
+    "rank": "For each group pick the year with maximum EMA value, ties broken by earliest year (distinct on group ordered by ema desc, year asc).",
+    "parse": "Country from Patents_info via regex capturing 2 letters after 'publication number'/'no.'; grant year via regex on grant_date for 4-digit year; grant half via regex matching month name/abbrev jul-dec; filing year via regex 4-digit year in filing_date; cpc array parsed as jsonb, each element's 'code' and 'first' boolean extracted.",
+    "shape": "One row per CPC level-4 group: titleFull, cpc_group code, best_year, ordered by group code.",
+    "filter": "Country = DE; grant year = 2019 and grant month among Jul-Dec; filing_date must contain a 4-digit year; only cpc entries where first=true.",
+    "metric": "Per level-4 group (first 3 chars of code), count distinct patents filed per year (deduplicated via distinct per patent-group), fill missing years in group's min-max range with 0, compute EMA over years with alpha=0.1 seeded at first year's count then recursively 0.1*n+0.9*prev.",
+    "sources": "patents_publicationinfo columns Patents_info (text), grant_date, filing_date, cpc (JSON text); patents_cpc_definition columns symbol, titleFull, level."
+   }
+  },
+  "patents/3": {
+   "golden_id": 53,
+   "lines": {
+    "keys": "uc_pubs.pub joined to citation element's publication_number field to find citing rows; citing subclass (left 4 chars of cpc code) joined to patents_cpc_definition.symbol at level=5.",
+    "rank": "Ordered by citing_assignee then by titleFull, no limit, no tie-break beyond stated sort, no top-N.",
+    "parse": "Assignee extracted via two regex patterns on Patents_info: 'holds the ... application/filing (' prefix form, or 'owned by/assigned to/held by/belonging to X and has|, with publication number/no. ' form; publication number captured as trailing ID before final period; citation and cpc columns cast text->jsonb and exploded via jsonb_array_elements; primary CPC subclass is first=true element's code le",
+    "shape": "Two columns: citing_assignee (raw name) and titleFull (CSV-quoted with doubled internal quotes if it contains a comma or quote); multiple rows, one per assignee/subclass-title pair.",
+    "filter": "Patents_info must contain 'UNIV CALIFORNIA' (prefilter) and extracted assignee equals exactly 'UNIV CALIFORNIA' for uc_pubs; citation must not be empty array '[]'; cpc element first must be true; citing_assignee must not equal 'UNIV CALIFORNIA' (exclude self-citations/self-assignee).",
+    "metric": "No aggregation; distinct pairs of (citing publication's Patents_info+cpc) then distinct (assignee, subclass) pairs, one row per citing-assignee/CPC-subclass-title combination.",
+    "sources": "patents_publicationinfo.Patents_info (assignee and publication number via regex), .citation JSON array (publication_number key), .cpc JSON array (code, first); patents_cpc_definition.symbol/titleFull for subclass titles."
+   }
+  },
+  "stockindex/1": {
+   "golden_id": 42,
+   "lines": {
+    "keys": "symbol_map.exchange joins to stockindex_index_info.Exchange (exact match) to validate exchanges exist; symbol_map.symbol filters stockindex_index_trade.Index (exact match) for Asia region symbols.",
+    "rank": "Order groups by the average volatility descending, no tie-break specified, limit to 1 row (the highest).",
+    "parse": "Date text matched by regex into three shapes ('YYYY-MM-DD ...', 'DD Mon YYYY,...', 'Month DD, YYYY at ...') and converted via to_date with the matching format mask into column d.",
+    "shape": "Single column output: Index (the symbol name) of the one row with highest average intraday volatility.",
+    "filter": "Index restricted to the 6 Asia-region symbols per symbol_map; parsed date d must be >= 2020-01-01 (inclusive, since 2020 means from that date on).",
+    "metric": "For each Index, average of daily (High - Low) / Open computed per trading day, grouped by Index to get mean intraday volatility.",
+    "sources": "stockindex_index_trade holds Index, Open, High, Low and text Date; stockindex_index_info holds Exchange; a hand-built symbol_map CTE holds symbol, exchange name, and region."
+   }
+  },
+  "stockindex/2": {
+   "golden_id": 41,
+   "lines": {
+    "keys": "symbol_map.exchange joined to stockindex_index_info.Exchange (exact match) to validate exchanges exist; symbol_map.symbol filtered to region='North America' gives allowed Index values used to filter trades.",
+    "rank": "HAVING clause keeps only groups where up-day count exceeds down-day count; results ordered alphabetically by Index; no limit.",
+    "parse": "Date text matched by regex to detect format ('^\\d{4}-\\d{2}-\\d{2} ', '^\\d{2} [A-Za-z]{3} \\d{4},', '^[A-Za-z]+ \\d{2}, \\d{4} at '), then to_date with matching format mask (YYYY-MM-DD, DD Mon YYYY, FMMonth DD, YYYY) to get a date.",
+    "shape": "Single column 'Index' listing each qualifying North American index symbol, one row per index, no aggregated counts shown.",
+    "filter": "Index restricted to the North America symbols (NYA, …, GSPTSE); parsed date d between 2018-01-01 inclusive and 2019-01-01 exclusive.",
+    "metric": "Per Index, count of days where Close > Open (up days) and count where Close < Open (down days), flat days (Close = Open) excluded from both counts.",
+    "sources": "stockindex_index_trade holds Date (text, 3 formats), Open, Close, Index; stockindex_index_info holds Exchange; a hardcoded symbol_map VALUES list holds symbol-to-exchange-to-region mapping."
+   }
+  },
+  "stockindex/3": {
+   "golden_id": 60,
+   "lines": {
+    "keys": "since_2000 (per Index first/last Close) joins to countries on symbol = Index; countries joins hand-written lookup to index_info on exact Exchange name match.",
+    "rank": "Rows ordered by last_close/first_close descending, ties broken by that same order implicitly, limited to top 5.",
+    "parse": "Date text parsed into a real date across three formats: 'YYYY-MM-DD ...' via left 10 chars, 'DD Mon YYYY, ...' via left 11 chars, and 'Month DD, YYYY at ...' via splitting off ' at ' then parsing FMMonth DD, YYYY.",
+    "shape": "Result has two columns, Index and Country, one row per of the top 5 indices by return.",
+    "filter": "Only rows with parsed date >= 2000-01-01 are kept; only lookup entries whose exchange string exactly matches an index_info Exchange value survive the countries join.",
+    "metric": "Per Index, first Close (earliest date) and last Close (latest date) since 2000 are picked via array_agg ordering; return computed as last_close divided by first_close.",
+    "sources": "stockindex_index_trade table gives Index, Close, and free-text Date; stockindex_index_info table's Exchange column is used with a hand-written symbol-to-exchange-to-country lookup."
+   }
+  },
+  "stockmarket/1": {
+   "golden_id": 40,
+   "lines": {
+    "keys": "company's Symbol (lower-cased) matches stocktrade_all's '_table' column, an exact string match after case folding.",
+    "rank": "none",
+    "parse": "Company matched by 'Company Description' starting with 'The RealReal, Inc.' via LIKE prefix match; Date read as text string 'YYYY-MM-DD'.",
+    "shape": "single row, single column named max_adj_close, no rounding applied.",
+    "filter": "rows where '_table' equals the lower-cased Symbol found for the company, and Date is >= '2020-01-01' and < '2021-01-01' (string comparison).",
+    "metric": "maximum of the 'Adj Close' column across all matching rows, a single aggregate value with no grouping.",
+    "sources": "stockmarket_stockinfo table's 'Company Description' text column holds company names; stockmarket_stocktrade_all holds trades with '_table', 'Date', and 'Adj Close' columns."
+   }
+  },
+  "stockmarket/2": {
+   "golden_id": 59,
+   "lines": {
+    "keys": "prices_2015.ticker (table name/_table, lowercased) matches arca_etf.\"Symbol\" lowercased; no explicit foreign key, matched by ticker string equality after case folding.",
+    "rank": "Results ordered with individual ETF rows (part=0) sorted by Symbol first, followed by the total count row (part=1) last; no limit applied.",
+    "parse": "Date text matched by prefix '2015%' to select the year; Company Description parsed with a regex capturing everything before a comma+lowercase clause or before one of a list of verb words, trimmed of trailing comma/spaces to get the name.",
+    "shape": "Single column 'name' output: one row per qualifying ETF's parsed company name, plus a final row 'Total: <count>' summarizing the count.",
+    "filter": "Rows where stockinfo.ETF = 'Y' and Listing Exchange = 'P' (NYSE Arca); price rows restricted to Date starting '2015'; only tickers with at least one Adj Close > 200 during that window kept via EXISTS.",
+    "metric": "Existence check per ETF symbol: whether any 2015 daily Adj Close exceeds 200, grain is one row per qualifying ETF; count(*) over qualifying ETFs gives the total.",
+    "sources": "Per-ticker price tables (stockmarket_stocktrade_all union plus 38 individually named tables like stockmarket_sdow) hold Date/Adj Close; stockmarket_stockinfo holds Symbol, ETF, Listing Exchange, and Company Description (free text) for name extraction."
+   }
+  },
+  "stockmarket/3": {
+   "golden_id": 58,
+   "lines": {
+    "keys": "Ticker joined by lowercasing stockinfo's Symbol to match the per-table/_table ticker column used as volume_2008.ticker; no join needed for other stockinfo fields.",
+    "rank": "Ordered by ticker Symbol ascending; no limit or top-N.",
+    "parse": "Company name extracted via regex from Company Description: text up to first verb keyword or a comma before a lowercase clause, then periods stripped and trailing ', ' trimmed; Volume in the double-precision tables cast to float8.",
+    "shape": "Two columns: company name and avg_daily_volume_2008 rounded to 2 decimals, one row per troubled NASDAQ ticker with 2008 volume.",
+    "filter": "Market Category in ('Q','G','S') for NASDAQ; Financial Status in ('D','E','H') for deficient/delinquent/both (excludes bankruptcy codes G/J/K); Date like '2008%'; volume not null.",
+    "metric": "Average daily trading volume in 2008 per ticker, computed as AVG(volume) over non-null 2008 volume rows, grouped by Symbol/name.",
+    "sources": "stockmarket_stockinfo (Symbol, Company Description, Market Category, Financial Status) for company info; stockmarket_stocktrade_all plus 38 individual per-ticker stockmarket_<ticker> tables (Date, Volume) for 2008 trading volume."
+   }
+  },
+  "stockmarket/4": {
+   "golden_id": 39,
+   "lines": {
+    "keys": "Lowercased stockinfo Symbol matches stocktrade_all's \"_table\" column, which stores symbols in lowercase; joined via CTE list membership and USING(tkr).",
+    "rank": "Order by (up_days - down_days) descending, tie-broken alphabetically by ticker, limited to top 5 rows.",
+    "parse": "Company name is extracted from Company Description via regex: first word plus following capitalized/connector words (of, and, the, plc, etc.), stopping at next lowercase word, trailing '.' or ',' stripped.",
+    "shape": "Single column output: company_name, one row per top symbol, 5 rows total, no other columns.",
+    "filter": "Listing Exchange = 'N' (NYSE), ETF = 'N' (non-ETF), Date between '2017-01-01' and '2018-01-01' (string range), and up_days > down_days after aggregation.",
+    "metric": "Per symbol (_table), count days where Close>Open (up_days) and Close<Open (down_days) via FILTER, then rank by up_days minus down_days.",
+    "sources": "stockmarket_stockinfo gives Symbol, Listing Exchange, ETF flag, and Company Description text; stockmarket_stocktrade_all gives per-table (per-symbol) daily Open/Close/Date rows."
+   }
+  },
+  "stockmarket/5": {
+   "golden_id": 38,
+   "lines": {
+    "keys": "capital CTE lower-cases stockinfo Symbol as tkr; counts joins stocktrade_all._table to that tkr list; final join matches counts.tkr to capital.tkr.",
+    "rank": "Order by wide_days descending, tie-break by tkr ascending, limit to 5 rows.",
+    "parse": "Company name extracted from Company Description via regex: first word plus following capitalized/non-lower-case words or connector words (of, and, the, plc, etc.), stopping at next lowercase word, then trailing '.' or ',' stripped.",
+    "shape": "Single column output: company_name, one row per top company, derived via regex extraction and cleanup, 5 rows total.",
+    "filter": "stockinfo rows where Market Category = 'S' (NASDAQ Capital Market); trade rows restricted to _table in that capital tkr set, Date between 2019-01-01 and 2020-01-01 exclusive, and High - Low > 0.2 * Low.",
+    "metric": "Count of qualifying wide-range days per ticker (_table), grouped by _table, counted once per matching trade row.",
+    "sources": "stockmarket_stockinfo gives Symbol, Market Category, and Company Description (text with name embedded); stockmarket_stocktrade_all gives per-day _table, Date, High, Low."
+   }
+  },
+  "yelp/1": {
+   "golden_id": 37,
+   "lines": {
+    "keys": "join review.business_ref to business.business_id after stripping the literal prefixes 'businessref_' and 'businessid_' so only the numeric N remains, compared as text.",
+    "rank": "none - single aggregate value, no ordering or limit applied.",
+    "parse": "no JSON/structured parsing; description is matched as free text for the substring 'Indianapolis, IN' regardless of case.",
+    "shape": "single row, single unrounded numeric column: the average rating.",
+    "filter": "keep only business rows whose description contains 'Indianapolis, IN' (case-insensitive), then all reviews joined to those businesses via the numeric key.",
+    "metric": "average of r.rating across all matching review rows (grain: one row per review), giving a single overall average rating.",
+    "sources": "yelp_review.rating holds review scores; yelp_business.description holds location text; yelp_review.business_ref and yelp_business.business_id hold matching identifiers."
+   }
+  },
+  "yelp/2": {
+   "golden_id": 57,
+   "lines": {
+    "keys": "business_id in yelp_business has prefix 'businessid_' replaced with 'businessref_' to match yelp_review.business_ref exactly.",
+    "rank": "order states by review count descending, tie-broken alphabetically by state code, and take only the top row.",
+    "parse": "a regex extracts the two-capital-letter state code following a comma and space (', XX') from the description text, using word boundary.",
+    "shape": "a single row with two columns: the state code and its average rating.",
+    "filter": "only rows whose extracted state code matches one of the 51 hand-listed US state/DC codes are kept, dropping non-US codes like province abbreviations.",
+    "metric": "for each state code, count all matching reviews (grain: one row per review) and compute the average rating across all those pooled reviews.",
+    "sources": "yelp_business.description holds the location text; yelp_business.business_id and yelp_review.business_ref link business to reviews; yelp_review.rating is the score."
+   }
+  },
+  "yelp/3": {
+   "golden_id": 56,
+   "lines": {
+    "keys": "review.business_ref with 'businessref_' prefix replaced by 'businessid_' matched to yelp_business.business_id after distinct dedup.",
+    "rank": "none",
+    "parse": "date parsed via three formats picked by regex shape (ISO timestamp, 'DD Mon YYYY, HH:MI', 'Month DD, YYYY at HH:MI AM'); BusinessParking dict string parsed with regexp_matches extracting key:value pairs (handling u'' prefix) into rows.",
+    "shape": "single row with one column, businesses, the count of qualifying distinct businesses.",
+    "filter": "review ts within 2018-01-01 (inclusive) to 2019-01-01 (exclusive); final filter keeps businesses where business_parking is true or bike_parking is true.",
+    "metric": "per business_id: bike_parking boolean = BikeParking attribute equals 'True'; business_parking boolean = any parsed key/value pair with value 'True' exists; grain is one row per business.",
+    "sources": "yelp_review.business_ref and date (text, three formats) for review timing; yelp_business.business_id and attributes JSON (BikeParking key, BusinessParking Python-repr dict string) for parking info."
+   }
+  },
+  "yelp/4": {
+   "golden_id": 55,
+   "lines": {
+    "keys": "yelp_business.business_id matched to yelp_review.business_ref by stripping 'businessid_' prefix and replacing with 'businessref_'.",
+    "rank": "Order categories by distinct business count descending, tie-break alphabetically by category name, take top 1.",
+    "parse": "Cut description after ', <ST>' (state code); split remainder on commas; extract Title-Case word runs (joined by space, '&', or 'of', with optional apostrophe-s or parenthetical) via regex per segment; also catch one bare lowercase segment and title-case it as a category.",
+    "shape": "Single row with two columns: category name and its average rating (float, unrounded).",
+    "filter": "Only businesses where attributes->>'BusinessAcceptsCreditCards' = 'True'; only rows in yelp_review whose business_ref matches a qualifying business_id.",
+    "metric": "Count distinct business_id per parsed category to find business count per category; then average yelp_review.rating (cast to float) across all reviews of businesses in the top category.",
+    "sources": "yelp_business.description (prose text) and attributes JSON field 'BusinessAcceptsCreditCards'; yelp_review.rating and business_ref for ratings."
+   }
+  },
+  "yelp/5": {
+   "golden_id": 36,
+   "lines": {
+    "keys": "yelp_business.business_id (stripped of 'businessid_' prefix) matches yelp_review.business_ref (stripped of 'businessref_' prefix) as a numeric key.",
+    "rank": "States ordered by business count descending, ties broken alphabetically by state code, limited to 1 (top state).",
+    "parse": "attributes->>'WiFi' Python-repr string stripped of optional leading u and surrounding quotes via regexp_replace; state is the 2-letter uppercase code following the city name in description, extracted via regex ', ([A-Z]{2})\\M'.",
+    "shape": "Single row with two columns: state code and avg_rating (rounded to 2 decimals).",
+    "filter": "Only rows where cleaned WiFi value is 'free' or 'paid' (excludes 'no' and missing); excludes Canadian province codes (AB, BC, MB, NB, NL, NS, NT, NU, ON, PE, QC, SK, YT) from the state ranking.",
+    "metric": "Count of distinct WiFi-offering businesses grouped by state to find the top state; average of yelp_review.rating across all reviews of businesses in that state, rounded to 2 decimal places.",
+    "sources": "yelp_business.attributes JSON field 'WiFi' for wifi status, yelp_business.description text for city/state, yelp_business.business_id, yelp_review.business_ref and rating column."
+   }
+  },
+  "yelp/6": {
+   "golden_id": 34,
+   "lines": {
+    "keys": "strip 'businessref_' from business_ref and 'businessid_' from business_id, join on the resulting numeric id string.",
+    "rank": "order by avg_rating descending, then n descending, then bnum ascending; limit to 1 row.",
+    "parse": "date text parsed by matching one of three regexes then converted via to_timestamp with matching format string to a timestamp; description parsed by regex extracting the substring after 'City, ST,' as tail, then a second regexp_matches pulls each capitalised category phrase (words joined by space, '&', '/', 'of', or parenthetical qualifiers) from tail in order.",
+    "shape": "single row/string: business name concatenated with ', ' and the comma-joined list of extracted category phrases, aliased as answer.",
+    "filter": "keep reviews whose parsed timestamp is >= 2016-01-01 and < 2016-07-01; after grouping by business, keep only businesses with count(*) >= 5 reviews.",
+    "metric": "average rating per business (avg(rating)) and count of qualifying reviews (n), grouped by business id.",
+    "sources": "yelp_review.business_ref (prefixed id) and .date (text, 3 date formats) and .rating; yelp_business.business_id (prefixed id), .name, and .description (text with location + category phrases)."
+   }
+  },
+  "yelp/7": {
+   "golden_id": 33,
+   "lines": {
+    "keys": "yelp_review.user_id matches yelp_user.user_id; yelp_review.business_ref with 'businessref_' prefix stripped matches yelp_business.business_id with 'businessid_' prefix stripped.",
+    "rank": "order by review count descending, ties broken alphabetically by category name, limited to top 5.",
+    "parse": "yelping_since and review date parsed via three timestamp formats (ISO, 'DD Mon YYYY, HH24:MI', 'Month DD, YYYY at HH12:MI AM') matched by regex then converted with to_timestamp; categories extracted from description via regexp_matches after stripping the 'City, ST,' prefix, capturing capitalized phrases joined by space, '&', '/', 'of', or parenthesized qualifiers.",
+    "shape": "single column category, 5 rows, no additional formatting.",
+    "filter": "users whose parsed yelping_since year equals 2016; reviews by those users whose parsed date is on or after 2016-01-01; reviews with NULL user_id excluded via inner join.",
+    "metric": "count of reviews per category, counting each (business,category) pair once via distinct in biz_cat so each review contributes 1 per associated category, grouped by category.",
+    "sources": "yelp_user.yelping_since (text, registration date) and yelp_review.user_id/date/business_ref; yelp_business.description text holding category phrases after location."
+   }
+  }
+ },
+ "questions": {
+  "deps_dev_v1/1": {
+   "golden_id": 44,
+   "agent_sql_sha": "e05562f074a1",
+   "agent": {
+    "sources": "deps_dev_v1_packageinfo (Name, Version, UpstreamPublishedAt, VersionInfo JSON for Ordinal/IsRelease), deps_dev_v1_project_packageversion (System, Name, Version, ProjectName), deps_dev_v1_project_info (Project_Information free text with repo and star count)",
+    "keys": "packageinfo joined to project_packageversion on System='NPM', Name, Version; left joined to project_info on lowercased ProjectName equal to lowercased owner/repo extracted from Project_Information",
+    "parse": "Ordinal and IsRelease read from VersionInfo JSONB via ->>; owner/repo extracted via regex; star count extracted via single regex matching only 'N stars' phrasing with optional commas, no fallback patterns",
+    "filter": "System='NPM', IsRelease true; per package keep row with highest UpstreamPublishedAt (then Ordinal, then Version) as latest release; keep only rows with non-null star match",
+    "metric": "distinct Name/Version/stars combination per package, using the single latest version per package chosen by the above tie-break",
+    "rank": "order by stars descending, tie-broken by Name ascending, limited to top 5 rows via row_number",
+    "shape": "three columns Name, Version, stars, one row per package, 5 rows total"
+   },
+   "verdicts": {
+    "sources": "differs",
+    "keys": "same",
+    "parse": "differs",
+    "filter": "differs",
+    "metric": "differs",
+    "rank": "differs",
+    "shape": "differs"
+   },
+   "breaks_at": "parse",
+   "why": "The agent's star-count regex only matches the plain 'N stars' phrasing and drops the reference's 'stars count of N' and 'starred by N' fallback patterns, so it extracts different (and for many rows different-valued) star counts, which cascades into a different top-5 ranking and different Name/Version rows even before the differing latest-release tie-break logic comes into play.",
+   "cost_usd": 0.0428906
+  },
+  "deps_dev_v1/2": {
+   "golden_id": 46,
+   "agent_sql_sha": "366eac3e09d1",
+   "agent": {
+    "sources": "project_info (Licenses JSON, Project_Information text); packageinfo (System, Name, Version, VersionInfo JSON); project_packageversion (ProjectName, System, Name, Version)",
+    "keys": "project matched by lowercased extracted slug from Project_Information vs lowercased ProjectName; packageinfo joined to project_packageversion on exact System, Name, Version",
+    "parse": "regex extracts owner/repo slug; three regexes extract fork counts ('and N forks', 'forked N times', 'forks count of N') with plain \\d+, no comma stripping; VersionInfo JSON checked for IsRelease true via containment",
+    "filter": "Licenses JSON contains 'MIT' via jsonb containment; packageinfo System='NPM' and IsRelease true; fork_count not null",
+    "metric": "no per-project version selection; DISTINCT ProjectName/fork_count pairs from all matching version rows, no latest-release pick",
+    "rank": "order by fork_count descending, no tie-break, limit 5",
+    "shape": "ProjectName, fork_count only (no Version column), five rows"
+   },
+   "verdicts": {
+    "sources": "same",
+    "keys": "same",
+    "parse": "differs",
+    "filter": "same",
+    "metric": "differs",
+    "rank": "differs",
+    "shape": "differs"
+   },
+   "breaks_at": "parse",
+   "why": "The agent's fork-count regexes use plain \\d+ without comma stripping and use a different third pattern ('and N forks' vs 'N forks'), so entries with comma-formatted counts (e.g. …'s 30,522 forks) are not extracted and yield NULL, dropping the true top-ranked project and shifting which projects appear in the top 5.",
+   "cost_usd": 0.030257199999999998
+  },
+  "github_repos/1": {
+   "golden_id": 47,
+   "agent_sql_sha": "7712ea6a087b",
+   "agent": {
+    "sources": "github_repos_contents provides sample_repo_name and sample_path directly for locating README.md files and their text; github_repos_languages.language_description used for Python detection; github_repos_files not used at all.",
+    "keys": "github_repos_contents joined to non_python_repos via sample_repo_name = repo_name; no join to github_repos_files.id to link a file entry's blob id to the contents row.",
+    "parse": "sample_path matched with ILIKE '%README.md%' (unanchored substring anywhere in path); language_description matched with ILIKE '%Python%' (naive substring, no token boundary or byte-count pattern check).",
+    "filter": "keep contents rows where sample_path contains README.md and content is not null, restricted to repos whose language_description never contains substring 'Python'; no requirement that repo have any languages row at all.",
+    "metric": "per matched contents row, flag copyright by content ILIKE '%Copyright%' or '%©%'; compute ratio of flagged count to total count directly, no separate total/copyright count columns.",
+    "rank": "none",
+    "shape": "single row with one column: proportion (decimal ratio, not rounded), omitting total_readmes and copyright_readmes columns."
+   },
+   "verdicts": {
+    "sources": "differs",
+    "keys": "differs",
+    "parse": "differs",
+    "filter": "differs",
+    "metric": "differs",
+    "rank": "none",
+    "shape": "differs"
+   },
+   "breaks_at": "sources",
+   "why": "The agent reads README paths and text straight from github_repos_contents's own sample_repo_name/sample_path fields instead of joining github_repos_files (by path pattern) to github_repos_contents (by blob id), so it locates a different, much larger set of 'README.md'-matching rows (unanchored substring match) tied to sample repo attribution rather than the exact file-to-blob mapping, producing a ",
+   "cost_usd": 0.0329812
+  },
+  "github_repos/4": {
+   "golden_id": 15,
+   "agent_sql_sha": "f6c8a1c5ab48",
+   "agent": {
+    "sources": "github_repos_commits table (repo_name) for commit counts; github_repos_languages table's language_description text column for language breakdown text.",
+    "keys": "commits and langs matched on exact repo_name via inner join on repo_name equality.",
+    "parse": "main_language extracted via two CASE branches: regex after 'in ' up to '(' , or after 'includes:' up to '(' , else NULL.",
+    "filter": "final result restricted to rows where main_language is not NULL and not exactly 'Python'; inner join drops repos with no language row.",
+    "metric": "commit_count computed per repo_name as count(*) over github_repos_commits rows, one row per repo.",
+    "rank": "rows ordered by commit_count descending, limited to top 5, no explicit tie-break.",
+    "shape": "one column returned: repo_name only, five rows, omitting the commit count column."
+   },
+   "verdicts": {
+    "sources": "same",
+    "keys": "same",
+    "parse": "differs",
+    "filter": "differs",
+    "metric": "same",
+    "rank": "same",
+    "shape": "differs"
+   },
+   "breaks_at": "shape",
+   "why": "The agent's regex and NULL-filtering differ from the reference but happen to yield the same five repos in the same order; the actual mismatch is that the agent omits the num_commits column present in the reference's output.",
+   "cost_usd": 0.0241052
+  },
+  "pancancer_atlas/1": {
+   "golden_id": 49,
+   "agent_sql_sha": "61231dbe4f93",
+   "agent": {
+    "sources": "pancancer_atlas_clinical_info's Patient_description text, histological_type column (not icd_o_3_histology), tissue_source_site and patient_id columns; rnaseq normalized_count and Symbol.",
+    "keys": "barcode built by concatenating 'TCGA-' + tissue_source_site + '-' + patient_id joined to r.ParticipantBarcode on exact match, plus r.Symbol = 'IGF2'.",
+    "parse": "No regex extraction of barcode or disease name; disease matched via LIKE '%Brain lower grade glioma%' on raw Patient_description text.",
+    "filter": "disease matched loosely via LIKE; histological_type not null and not starting with '['; normalized_count not null but missing > -1 check.",
+    "metric": "For each histological_type value, average of log10(normalized_count+1) via log(x)/log(10) across matched IGF2 rows per barcode.",
+    "rank": "Results ordered alphabetically by histological_type; no row limit.",
+    "shape": "Two columns: histological_type and avg_log10_igf2_expression, one row per histological_type, numeric with default precision."
+   },
+   "verdicts": {
+    "sources": "differs",
+    "keys": "differs",
+    "parse": "differs",
+    "filter": "differs",
+    "metric": "same",
+    "rank": "same",
+    "shape": "same"
+   },
+   "breaks_at": "sources",
+   "why": "The agent groups by the free-text histological_type column (3 broad categories like Astrocytoma) instead of the fine-grained icd_o_3_histology codes, so results are aggregated at a different grain and both row count and values differ.",
+   "cost_usd": 0.024389800000000003
+  },
+  "pancancer_atlas/2": {
+   "golden_id": 14,
+   "agent_sql_sha": "a55a8710be85",
+   "agent": {
+    "sources": "Uses Patient_description text for barcode/histological_type and pancancer_atlas_mutation_data ParticipantBarcode/Hugo_Symbol for mutations, same tables/fields as reference (no FILTER column used).",
+    "keys": "Joins extracted TCGA barcode from Patient_description to ParticipantBarcode in mutation data using exact string match, same as reference.",
+    "parse": "Regex extracts TCGA-XX-XXXX barcode via regexp_matches; vital status detected via case-insensitive 'vital status.*alive' pattern instead of whole-word Alive/Dead token.",
+    "filter": "Filters Breast invasive carcinoma text, vital status alive regex, histological_type not null and excludes types containing '[', and mutation rows restricted only to Hugo_Symbol='CDH1' without requiring FILTER='PASS'.",
+    "metric": "Per histological_type: counts distinct total patients and distinct patients with any CDH1 mutation (any FILTER), computes percentage = 100*mutated/total, rounded to 2 decimals.",
+    "rank": "Orders by cdh1_percentage descending, tie-broken by total_patients descending, limited to top 3 rows.",
+    "shape": "Returns two columns: histological_type and cdh1_percentage (rounded to 2 decimals), three rows."
+   },
+   "verdicts": {
+    "sources": "same",
+    "keys": "same",
+    "parse": "same",
+    "filter": "differs",
+    "metric": "differs",
+    "rank": "differs",
+    "shape": "differs"
+   },
+   "breaks_at": "filter",
+   "why": "The agent omits the FILTER='PASS' restriction on CDH1 mutation rows (and adds an unrelated histological_type exclusion), so it counts non-PASS mutation calls as mutated patients, inflating the mutation counts and resulting percentages compared to the reference.",
+   "cost_usd": 0.0374718
+  },
+  "patents/2": {
+   "golden_id": 51,
+   "agent_sql_sha": "b0e1f61972d2",
+   "agent": {
+    "sources": "patents_publicationinfo columns Patents_info, grant_date, filing_date, cpc (JSON text); patents_cpc_definition columns symbol, titleFull, level.",
+    "keys": "Join filings to patents_cpc_definition on level-4 group code (left 3 chars of cpc element 'code') equal to symbol with level=4; no other table join.",
+    "parse": "Country matched via LIKE '%DE-%' on Patents_info instead of regex; grant month matched via ILIKE list of month names/abbrevs; filing year via regex on filing_date; cpc parsed as jsonb, 'code' and 'first' extracted.",
+    "filter": "Grant year contains '2019' text match; grant month among Jul-Dec via ILIKE; only cpc entries where first=true; no explicit filing_date 4-digit check.",
+    "metric": "Per level-4 group, count patents filed per year, fill missing years with 0, compute EMA seeded at first year then recursively 0.1*n+0.9*prev, same as reference.",
+    "rank": "For each group picks year with max EMA (ties earliest year), then additionally filters to keep only the single group whose best EMA is the global maximum across all groups.",
+    "shape": "One row per surviving group: titleFull, cpc_group, best_year, ordered by group code."
+   },
+   "verdicts": {
+    "sources": "same",
+    "keys": "same",
+    "parse": "same",
+    "filter": "same",
+    "metric": "same",
+    "rank": "differs",
+    "shape": "same"
+   },
+   "breaks_at": "rank",
+   "why": "The agent adds an extra global MAX(ema) OVER () filter that keeps only the one group whose best-year EMA is the overall highest across all groups, collapsing the per-group best-year result set from 23 rows down to just 1, whereas the reference keeps one best-year row for every CPC group independently.",
+   "cost_usd": 0.0491962
+  },
+  "patents/3": {
+   "golden_id": 53,
+   "agent_sql_sha": "4375779b70a6",
+   "agent": {
+    "sources": "patents_publicationinfo.Patents_info (assignee via LIKE patterns), .citation JSON array (publication_number), .cpc JSON array (code, first); patents_cpc_definition.symbol/titleFull for subclass titles.",
+    "keys": "uc_pubs.pub_number joined to citation element's publication_number; citing subclass (left 4 chars of cpc code) left-joined to patents_cpc_definition.symbol at level=5.",
+    "parse": "Assignee extracted via CASE/LIKE branches with regex captures on 'holds the', 'assigned to', 'owned by', 'held by', 'belonging to' phrasings; publication number captured via single regex; citation/cpc cast text->jsonb and exploded; primary CPC subclass is first=true element's code.",
+    "filter": "Patents_info must LIKE one of several UNIV CALIFORNIA phrasing patterns and NOT LIKE 'UNIV CALIFORNIA AT%'/'UNIV CALIFORNIA,%' for uc_pubs; citation and cpc must not be '[]'; primary_cpc first must be true; citing assignee NOT LIKE '%UNIV CALIFORNIA%' (excludes any variant containing the string, not just exact).",
+    "metric": "No aggregation; distinct rows through each CTE, final distinct (assignee, titleFull) pairs, one row per citing-assignee/CPC-subclass-title combination.",
+    "rank": "Ordered by assignee then by titleFull, no limit, no tie-break beyond stated sort, no top-N.",
+    "shape": "Two columns: assignee (raw name) and titleFull, not CSV-quoted even when it contains a comma or quote; multiple rows."
+   },
+   "verdicts": {
+    "sources": "same",
+    "keys": "same",
+    "parse": "differs",
+    "filter": "differs",
+    "metric": "same",
+    "rank": "same",
+    "shape": "differs"
+   },
+   "breaks_at": "shape",
+   "why": "The agent never CSV-quotes titleFull values containing commas, so titles like the … one that has an embedded comma appear as raw unquoted text instead of the reference's quoted, doubled-quote CSV form, causing the value mismatch shown in the diff.",
+   "cost_usd": 0.037884
+  },
+  "bookreview/1": {
+   "golden_id": 18,
+   "agent_sql_sha": "75df30dcabad",
+   "agent": {
+    "sources": "bookreview_books_info.details only for pub year, via a bare 4-digit regex; no subtitle fallback used; bookreview_review.rating for ratings; book_id/purchase_id as identifiers.",
+    "keys": "bid extracted as trailing digits of book_id joined to trailing digits of purchase_id; exact integer match, same as reference.",
+    "parse": "Regex extracts any 4-digit number followed by '.', ',' or whitespace in details as pub_year; no month-name anchor, no subtitle fallback pattern.",
+    "filter": "Rows require pub_year (details match) not null; after grouping, HAVING count(distinct book_id) >= 10 kept, same threshold as reference.",
+    "metric": "Grouped by decade as (pub_year/10*10)||'s'; avg(rating) per decade across joined reviews; count(distinct book_id) as distinct_books.",
+    "rank": "Order decades by avg_rating descending, no explicit tie-break, limit to 1 row - same as reference.",
+    "shape": "Single column 'decade', one row, but value formatted as text string with trailing 's' (e.g. '2020s') instead of integer."
+   },
+   "verdicts": {
+    "sources": "differs",
+    "keys": "same",
+    "parse": "differs",
+    "filter": "same",
+    "metric": "same",
+    "rank": "same",
+    "shape": "differs"
+   },
+   "breaks_at": "shape",
+   "why": "Although the agent's looser date regex and missing subtitle fallback differ from the reference, both statements still select the same decade; the visible discrepancy is that the agent outputs the decade as a text string with a trailing 's' (e.g. '2020s') instead of the reference's plain integer (2020).",
+   "cost_usd": 0.0391066
+  },
+  "crmarenapro/2": {
+   "golden_id": 22,
+   "agent_sql_sha": "a27967873713",
+   "agent": {
+    "sources": "none - returns a hardcoded literal string, no tables or fields are read",
+    "keys": "none - no joins performed",
+    "parse": "none - no text or JSON parsing performed",
+    "filter": "none - no WHERE conditions or quote/article filtering applied",
+    "metric": "none - no aggregation or grain, single constant literal returned",
+    "rank": "none - no ordering or limiting logic",
+    "shape": "single column single row hardcoded article id string, no quote-line or rule listing"
+   },
+   "verdicts": {
+    "sources": "differs",
+    "keys": "differs",
+    "parse": "differs",
+    "filter": "differs",
+    "metric": "differs",
+    "rank": "differs",
+    "shape": "differs"
+   },
+   "breaks_at": "sources",
+   "why": "The agent statement never queries the quote line item, product, price book entry, or knowledge article tables at all; it just hardcodes a literal article id as the entire output, so it fails at the sourcing step before any join, parse, filter, metric, rank, or shape logic can even be evaluated.",
+   "cost_usd": 0.032562600000000004
+  },
+  "crmarenapro/4": {
+   "golden_id": 26,
+   "agent_sql_sha": "16af88474e35",
+   "agent": {
+    "sources": "crmarenapro_case (id, createddate, orderitemid__c) joined to crmarenapro_orderitem (\"Id\", \"Product2Id\") to identify SecureAnalytics Pro cases via product id.",
+    "keys": "Joins case.orderitemid__c directly to orderitem.\"Id\" with no stripping of '#'/whitespace on the case side; only orderitem.\"Product2Id\" is normalized before filtering.",
+    "parse": "Casts case.createddate text directly to timestamp (no timezone conversion) and formats month via to_char(...,'Month') trimmed for grouping/display.",
+    "filter": "Keeps cases whose orderitem Product2Id (normalized) equals the given id, createddate not null, and createddate between literal '2020-06-10' and '2021-04-11' (exclusive upper bound).",
+    "metric": "Count of cases (implicit count(*) in ORDER BY) grouped by trimmed month name and month_start for grouping.",
+    "rank": "Order by count(*) descending only, no tie-break, LIMIT 1 to return a single top month.",
+    "shape": "Returns a single column: month name only, one row (the top month), no case count column."
+   },
+   "verdicts": {
+    "sources": "same",
+    "keys": "differs",
+    "parse": "differs",
+    "filter": "differs",
+    "metric": "same",
+    "rank": "differs",
+    "shape": "differs"
+   },
+   "breaks_at": "keys",
+   "why": "The agent joins case.orderitemid__c to orderitem.\\\"Id\\\" without stripping the leading '#'/whitespace that ~25% of ids carry, so cases with a '#'-prefixed orderitemid__c fail to match the orderitem row and are dropped (or wrongly excluded) from the product-case set, changing which cases are counted before any later step is reached.",
+   "cost_usd": 0.0267302
+  },
+  "crmarenapro/6": {
+   "golden_id": 28,
+   "agent_sql_sha": "a4c5191c36eb",
+   "agent": {
+    "sources": "Uses quotelineitem and product2 only for join/filter; hardcodes a single knowledge article id as literal text instead of reading crmarenapro_knowledge__kav rows or its faq_answer__c body.",
+    "keys": "Joins quotelineitem to product2 by trimming and stripping leading '#' from Product2Id and Id, same normalisation as reference.",
+    "parse": "No numeric casting of quantity/price fields and no parsing of knowledge article body into rule paragraphs; article id is a hardcoded constant.",
+    "filter": "Filters quote line items to QuoteId equals the quote literal and product name equals 'AI Cirku-Tech' only, without normalising QuoteId and without any policy-rule qualifying filters.",
+    "metric": "No per-line-item or per-rule rows produced; collapses to a single constant literal selected once, no grain over quote lines or rule paragraphs.",
+    "rank": "Uses LIMIT 1 with no explicit ordering, so no defined tie-break; reference orders lines by product and rules by title/paragraph.",
+    "shape": "Outputs one column (knowledge_article_id) with one row, versus reference's multi-column union of quote-line rows and policy-rule rows."
+   },
+   "verdicts": {
+    "sources": "differs",
+    "keys": "same",
+    "parse": "differs",
+    "filter": "differs",
+    "metric": "differs",
+    "rank": "differs",
+    "shape": "differs"
+   },
+   "breaks_at": "sources",
+   "why": "The agent abandons reading the knowledge article table/body entirely and instead hardcodes a single article id as a literal constant, producing a wholly different result set from the reference's line-item plus rule-paragraph rows.",
+   "cost_usd": 0.0377066
+  },
+  "crmarenapro/8": {
+   "golden_id": 63,
+   "agent_sql_sha": "c926736d570f",
+   "agent": {
+    "sources": "crmarenapro_casehistory__c table, field__c column identifying 'Owner Assignment' rows, oldvalue__c/newvalue__c for agent ids, caseid__c for case, createddate cast directly to timestamp.",
+    "keys": "agent ids normalized via ltrim(trim(...),'#') on oldvalue__c/newvalue__c; caseid__c used raw, not trimmed or stripped of leading '#'.",
+    "parse": "createddate cast directly to timestamp for comparison instead of extracting first 10 chars as a date; oldvalue__c/newvalue__c cleaned via trim+ltrim of '#', blank-to-null not applied via nullif (relies on IS NOT NULL only).",
+    "filter": "field__c equals 'Owner Assignment' (no explicit trim); createddate timestamp within ['2022-04-10','2023-04-10') i.e. exactly one year back from today, not quarter-aligned like the reference's 2022-04-01..2023-03-31 window.",
+    "metric": "handled = distinct case count where agent is newvalue__c in window; transfers = count of rows where agent is oldvalue__c, LEFT JOINed with COALESCE to 0 so agents with zero transfers remain in the pool.",
+    "rank": "order by transfer_count ascending, agent_id ascending, limit 1 — same ordering logic as reference.",
+    "shape": "single column agent_id, one row — same output shape as reference's Id column."
+   },
+   "verdicts": {
+    "sources": "same",
+    "keys": "differs",
+    "parse": "same",
+    "filter": "differs",
+    "metric": "differs",
+    "rank": "same",
+    "shape": "same"
+   },
+   "breaks_at": "filter",
+   "why": "The agent uses a rolling 12-month window anchored to today's exact date (2022-04-10 to 2023-04-10) instead of the reference's quarter-aligned window (2022-04-01 to 2023-03-31), changing which Owner Assignment events are counted; compounding this, the agent's LEFT JOIN with COALESCE(...,0) also lets agents with zero transfers enter the ranking pool, whereas the reference's inner join restricts cand",
+   "cost_usd": 0.0622374
+  },
+  "crmarenapro/12": {
+   "golden_id": 65,
+   "agent_sql_sha": "a748801d6400",
+   "agent": {
+    "sources": "Opportunity table gives OwnerId (agent) and CreatedDate; Contract table gives Id and CompanySignedDate; link via Opportunity.ContractID__c.",
+    "keys": "Join Opportunity.ContractID__c to Contract.Id as an exact key, after trimming whitespace and stripping leading '#' from both sides.",
+    "parse": "CreatedDate cast to timestamp then to date for opportunity creation; CompanySignedDate cast directly to date.",
+    "filter": "Keep only rows where ContractID__c and CompanySignedDate are not null and Opportunity.CreatedDate falls within April 2023.",
+    "metric": "For each agent (trimmed, '#'-stripped OwnerId), compute average of (CompanySignedDate - CreatedDate) in days across matched opportunities.",
+    "rank": "Order agents by ascending average cycle days (no tie-break), take the top row.",
+    "shape": "Single row, single column named AgentId, containing the winning agent's identifier."
+   },
+   "verdicts": {
+    "sources": "same",
+    "keys": "same",
+    "parse": "same",
+    "filter": "differs",
+    "metric": "same",
+    "rank": "differs",
+    "shape": "differs"
+   },
+   "breaks_at": "filter",
+   "why": "The agent filters opportunities by CreatedDate falling in April 2023 instead of filtering by the contract's CompanySignedDate falling in April 2023, selecting a different set of opportunities/agents and changing the answer.",
+   "cost_usd": 0.0199238
+  },
+  "googlelocal/3": {
+   "golden_id": 67,
+   "agent_sql_sha": "027bcd5f918c",
+   "agent": {
+    "sources": "googlelocal_business_description.hours (JSON array of [day, hours] pairs) for schedules; googlelocal_review.rating for ratings; googlelocal_business_description.name/gmap_id for identity.",
+    "keys": "Businesses matched to reviews by exact gmap_id equality; hours JSON exploded per business via gmap_id before joining to review ratings by the same gmap_id.",
+    "parse": "hours cast to jsonb and expanded into day_name/hours_str pairs; closing hour extracted via LIKE pattern matching on substrings like '6PM', '7:30PM', '12AM' mapped to fixed hour values, not full regex time parsing.",
+    "filter": "Only rows with non-null hours are parsed; only Monday-Friday entries considered; a business qualifies if any weekday closing_hour value (from the LIKE-based mapping) exceeds 18, including 'Open 24 hours' mapped to 24.",
+    "metric": "Per gmap_id: average of review.rating (avg_rating_numeric) computed only for businesses passing the evening-open filter; original hours JSON text passed through unchanged (not rebuilt).",
+    "rank": "Ordered by avg_rating_numeric descending, then by name ascending only (no n_reviews tie-break), limited to top 5 rows.",
+    "shape": "Five rows with columns name, hours (raw JSON text with double quotes), and average_rating (rounded to 2 decimals, cast to text)."
+   },
+   "verdicts": {
+    "sources": "same",
+    "keys": "same",
+    "parse": "differs",
+    "filter": "differs",
+    "metric": "same",
+    "rank": "differs",
+    "shape": "differs"
+   },
+   "breaks_at": "shape",
+   "why": "The agent finds the same five qualifying businesses with the same rounded average rating, but formats the output differently: operating_hours is emitted as the raw JSON array with double-quoted strings (e.g. [[\"Thursday\", \"9AM–8PM\"], ...]) instead of the reference's rebuilt single-quoted, outer-quoted string ('[[\\'Thursday\\', \\'9AM–8PM\\'], ...]'), and avg_rating is rendered as a text value '5.00' ",
+   "cost_usd": 0.0416372
+  },
+  "music_brainz_20k/1": {
+   "golden_id": 62,
+   "agent_sql_sha": "ca84d47e244b",
+   "agent": {
+    "sources": "music_brainz_20k_tracks holds title and artist columns; music_brainz_20k_sales holds revenue_usd, store, country per track_id.",
+    "keys": "tracks and sales matched directly on track_id via a plain join, without first reducing tracks to a matched song_records set.",
+    "parse": "no per-source_id unwrapping of title into song/performer; just strips non-letter characters from the raw title and artist columns.",
+    "filter": "requires exact equality of the stripped title to 'getmebodied' and stripped artist to 'beyonce', then restricts sales to Apple Music/Canada.",
+    "metric": "sum of revenue_usd over matched sales rows, using LEFT JOIN with COALESCE to 0 instead of inner join.",
+    "rank": "none - single aggregate result.",
+    "shape": "one row, one column revenue_usd, not rounded to 2 decimals."
+   },
+   "verdicts": {
+    "sources": "same",
+    "keys": "differs",
+    "parse": "differs",
+    "filter": "differs",
+    "metric": "same",
+    "rank": "same",
+    "shape": "differs"
+   },
+   "breaks_at": "parse",
+   "why": "The agent never unwraps the wrapped title formats (e.g. 'Title (Album)', 'Artist - Title', numeric-prefixed titles) into a clean song/performer pair, so it strips only letters from the raw stored title/artist and requires an exact match, causing it to miss the actual matching duplicate track records and return 0 instead of the summed revenue.",
+   "cost_usd": 0.030385999999999996
+  },
+  "music_brainz_20k/3": {
+   "golden_id": 61,
+   "agent_sql_sha": "440417682de5",
+   "agent": {
+    "sources": "music_brainz_20k_tracks holds title, album, artist, source_id; music_brainz_20k_sales holds revenue_usd per track_id.",
+    "keys": "tracks join sales on track_id; duplicate tracks linked via computed clean_title/clean_artist grouping rather than a stored key.",
+    "parse": "per source_id, strip leading digits for source 4, split 'Artist - Title' for source 2 only; no album-suffix stripping, no source-3 'Title - Album' split, no accent-folding or non-alphanumeric stripping.",
+    "filter": "drop only rows where clean_title trims to empty; no exclusion of unknown artist_key, no minimum key-length requirement for fuzzy matching.",
+    "metric": "group tracks by exact lower-cased clean_title and clean_artist pairs (no typo tolerance), pick min track_id as canonical, sum revenue_usd per canonical group.",
+    "rank": "order canonical groups by summed revenue_usd descending, take the single top group (limit 1).",
+    "shape": "return only the clean_title of one representative track (the canonical track) for the winning group, single row, single column."
+   },
+   "verdicts": {
+    "sources": "same",
+    "keys": "differs",
+    "parse": "differs",
+    "filter": "differs",
+    "metric": "differs",
+    "rank": "same",
+    "shape": "differs"
+   },
+   "breaks_at": "parse",
+   "why": "The agent skips album-suffix stripping, the source-3 'Title - Album' split, accent/alnum folding, and any typo-tolerant variant matching, so duplicate records of the same song end up with different song/artist keys and are never clustered together, changing which song accumulates the highest summed revenue and producing a single-title answer instead of all five duplicate title spellings.\"",
+   "cost_usd": 0.0340186
+  },
+  "stockindex/3": {
+   "golden_id": 60,
+   "agent_sql_sha": "590f3d2050fb",
+   "agent": {
+    "sources": "stockindex_index_trade table gives Index, Close, and free-text Date; country is derived from a hard-coded CASE mapping on Index, without using stockindex_index_info's Exchange column at all.",
+    "keys": "No join to index_info or any exchange lookup table; country is attached directly via CASE on Index value, so no key matching step exists.",
+    "parse": "Date text parsed into a timestamp across the same three formats using to_timestamp with format masks and a regexp_replace to strip the AM/PM suffix.",
+    "filter": "Only rows with parsed_date >= 2000-01-01 are kept, matching the reference's date window.",
+    "metric": "Per Index, first and last Close since 2000 picked via FIRST_VALUE/LAST_VALUE window functions ordered by date; return computed as percentage change (last-first)/first*100.",
+    "rank": "Rows ordered by return_percentage descending, limited to top 5, same tie-break behavior as reference.",
+    "shape": "Result has three columns, Index, Country, and Return Percentage; country spelled differently (e.g. 'USA' vs '…') due to hard-coded labels."
+   },
+   "verdicts": {
+    "sources": "differs",
+    "keys": "differs",
+    "parse": "same",
+    "filter": "same",
+    "metric": "same",
+    "rank": "same",
+    "shape": "differs"
+   },
+   "breaks_at": "sources",
+   "why": "The agent hard-codes country names via a CASE on Index instead of joining through stockindex_index_info's Exchange column, producing different country labels like 'USA' instead of '…'.",
+   "cost_usd": 0.034167600000000006
+  },
+  "stockmarket/2": {
+   "golden_id": 59,
+   "agent_sql_sha": "17a3053fb874",
+   "agent": {
+    "sources": "Only stockmarket_stocktrade_all for prices; stockmarket_stockinfo holds Symbol, ETF, Listing Exchange, Company Description, but description not parsed into name.",
+    "keys": "price_data_2015.ticker (lowercased _table) matches etf_arca Symbol lowercased via IN subquery; same string-equality matching as reference.",
+    "parse": "Date parsed via TO_DATE with format 'YYYY-MM-DD' and EXTRACT(YEAR); Company Description used raw, no regex trimming to a short name.",
+    "filter": "Rows where ETF='Y' and Listing Exchange='P'; price rows filtered to year 2015 via EXTRACT and Adj Close > 200, combined in one CTE rather than EXISTS.",
+    "metric": "Existence via DISTINCT ticker list where any 2015 row has Adj Close > 200; grain one row per qualifying ticker, no count aggregate computed.",
+    "rank": "Ordered by Symbol only; no separate summary row, no part-based ordering.",
+    "shape": "Two columns Symbol and Company Description returned, one row per ETF; no 'Total: <count>' row and no parsed short name."
+   },
+   "verdicts": {
+    "sources": "differs",
+    "keys": "same",
+    "parse": "differs",
+    "filter": "same",
+    "metric": "same",
+    "rank": "differs",
+    "shape": "differs"
+   },
+   "breaks_at": "sources",
+   "why": "The agent's price CTE only unions stockmarket_stocktrade_all and omits the 38 individually named double-precision-volume tables (e.g. stockmarket_sdow) that the reference unions in, so ETFs whose ticker table lives only in one of those 38 tables are missed, producing fewer qualifying rows (30 vs 32).",
+   "cost_usd": 0.0392458
+  },
+  "stockmarket/3": {
+   "golden_id": 58,
+   "agent_sql_sha": "d57b19d3a7aa",
+   "agent": {
+    "sources": "stockmarket_stockinfo (Symbol, Company Description, Market Category, Financial Status) for company info; only stockmarket_stocktrade_all for 2008 trading volume, omitting the 38 per-ticker double-precision tables (e.g. ftft, ftr).",
+    "keys": "Ticker joined by lowercasing stockinfo's Symbol to match stocktrade_all's _table ticker column; no join needed for other stockinfo fields.",
+    "parse": "Company name extracted via POSITION-based LEAST() over verb keywords to find cut point, substring up to that point, then trailed with RTRIM and chained literal REPLACE calls for suffixes like Inc./Corp.",
+    "filter": "Market Category in ('Q','G','S') for NASDAQ; Financial Status in ('D','E','H') for deficient/delinquent/both; Date like '2008%'; volume not null.",
+    "metric": "Average daily trading volume in 2008 per company_name, computed as AVG(Volume) over non-null 2008 volume rows, grouped by company_name only (not Symbol).",
+    "rank": "Ordered by company_name ascending; no limit or top-N.",
+    "shape": "Two columns: company_name and avg_daily_volume_2008 rounded to an integer (bigint) rather than 2 decimals."
+   },
+   "verdicts": {
+    "sources": "differs",
+    "keys": "same",
+    "parse": "same",
+    "filter": "same",
+    "metric": "differs",
+    "rank": "same",
+    "shape": "differs"
+   },
+   "breaks_at": "sources",
+   "why": "The agent joins volume only against stockmarket_stocktrade_all and omits the union of the 38 double-precision per-ticker tables (like stockmarket_ftft and stockmarket_ftr), so tickers such as … and … are missing from the results entirely.",
+   "cost_usd": 0.04519140000000001
+  },
+  "stockmarket/4": {
+   "golden_id": 39,
+   "agent_sql_sha": "06cdefeca61e",
+   "agent": {
+    "sources": "stockmarket_stockinfo gives Symbol, Listing Exchange, ETF flag, and Company Description text; stockmarket_stocktrade_all gives per-table (per-symbol) daily Open/Close/Date rows.",
+    "keys": "Lowercased stockinfo Symbol matches stocktrade_all's _table column via join condition; same effect as CTE membership plus USING(tkr).",
+    "parse": "Company name extracted via regex capturing everything non-greedily up to (but including trailing punctuation before) the first lowercase word, no trailing '.'/',' stripping.",
+    "filter": "Listing Exchange = 'N', ETF = 'N', Date LIKE '2017-%' pattern match instead of string range, and up_days > down_days after aggregation.",
+    "metric": "Per symbol, count days where Close>Open (up_days) and Close<Open (down_days) via SUM(CASE...), then compute net_days = up_days - down_days.",
+    "rank": "Order by net_days descending, tie-broken by up_days descending (not ticker alphabetically), limited to top 5 rows.",
+    "shape": "Single column output: company_name, one row per top symbol, 5 rows total, no other columns."
+   },
+   "verdicts": {
+    "sources": "same",
+    "keys": "same",
+    "parse": "differs",
+    "filter": "same",
+    "metric": "same",
+    "rank": "differs",
+    "shape": "same"
+   },
+   "breaks_at": "parse",
+   "why": "The agent's name-extraction regex does not strip a trailing '.' or ',' from the captured company name, so names like 'MFA Financial, Inc.' keep the period that the reference's regex_replace removes, producing differing text values for otherwise-matching rows.",
+   "cost_usd": 0.025199399999999997
+  },
+  "stockmarket/5": {
+   "golden_id": 38,
+   "agent_sql_sha": "c9988270b962",
+   "agent": {
+    "sources": "stockmarket_stockinfo gives Symbol, Market Category, and Company Description (text with name embedded); stockmarket_stocktrade_all gives per-symbol _table, Date, High, Low.",
+    "keys": "Joins stockinfo Symbol to stocktrade_all _table using LOWER() on both sides for case-insensitive match.",
+    "parse": "Company name extracted by taking substring of Company Description up to the earliest occurrence of a set of verb phrases (' is ', ' specializes', etc.), trimmed but trailing '.' or ',' not stripped.",
+    "filter": "stockinfo rows where Market Category = 'S'; trade rows with Date in 2019-01-01 to before 2020-01-01, and High > 1.20 * Low (algebraically same as High-Low>0.2*Low).",
+    "metric": "Count of qualifying wide-range days per Symbol/Company Description, grouped by Symbol, counted once per matching trade row.",
+    "rank": "Order by days_with_high_volatility descending, limit to 5 rows, no explicit tie-break.",
+    "shape": "Single column output: Company Name, one row per top company, derived via substring-to-verb-phrase extraction, 5 rows total."
+   },
+   "verdicts": {
+    "sources": "same",
+    "keys": "same",
+    "parse": "differs",
+    "filter": "same",
+    "metric": "same",
+    "rank": "same",
+    "shape": "same"
+   },
+   "breaks_at": "parse",
+   "why": "The agent's substring extraction stops before a verb phrase but does not strip a trailing '.' or ',' from the resulting name, so names like '…, Inc.' keep the trailing period unlike the reference's cleaned '…, Inc'.",
+   "cost_usd": 0.02751
+  },
+  "yelp/3": {
+   "golden_id": 56,
+   "agent_sql_sha": "4a80410ff5e2",
+   "agent": {
+    "sources": "yelp_review.date text and business_ref; yelp_business.business_id and attributes JSON (BikeParking key, BusinessParking string) for parking info.",
+    "keys": "business_id suffix extracted via regex, prefixed with 'businessref_', matched to review.business_ref; no distinct dedup before join.",
+    "parse": "no date-format parsing; date matched with LIKE '2018%' against raw text, which only matches ISO-formatted dates starting with the year.",
+    "filter": "review.date starts with '2018' via LIKE; final filter keeps rows where BikeParking = 'True' or BusinessParking text contains 'True'.",
+    "metric": "per business_id: bike_parking = BikeParking attribute equals 'True'; business_parking = BusinessParking string LIKE '%True%', no key/value parsing; grain one row per business via DISTINCT.",
+    "rank": "none",
+    "shape": "single row with one column, count, the count of distinct qualifying business_id."
+   },
+   "verdicts": {
+    "sources": "same",
+    "keys": "same",
+    "parse": "differs",
+    "filter": "differs",
+    "metric": "differs",
+    "rank": "none",
+    "shape": "same"
+   },
+   "breaks_at": "parse",
+   "why": "The agent never parses the three review-date formats and instead applies LIKE '2018%' to the raw text, which only matches the ISO-timestamp format and silently excludes 2018 reviews written in the 'DD Mon YYYY' and 'Month DD, YYYY' formats, shrinking the set of businesses considered reviewed in 2018.",
+   "cost_usd": 0.032848600000000006
+  },
+  "yelp/4": {
+   "golden_id": 55,
+   "agent_sql_sha": "d52ac090d2c5",
+   "agent": {
+    "sources": "yelp_business.description (prose text) and attributes JSON field 'BusinessAcceptsCreditCards'; yelp_review.rating and business_ref for ratings.",
+    "keys": "yelp_business.business_id matched to yelp_review.business_ref by stripping 'businessid_' prefix and replacing with 'businessref_'.",
+    "parse": "Cut description after ', <ST>, '; replace ' and ' with commas; split on commas; keep segments starting with capital letter, length>2, not in a stopword list, and not containing blocklisted marketing words (no Title-Case-run regex extraction, no bare-lowercase segment handling, no parenthetical handling).",
+    "filter": "Only businesses where attributes->>'BusinessAcceptsCreditCards' = 'True'; only rows in yelp_review whose business_ref matches a qualifying business_id.",
+    "metric": "Count distinct business_id per parsed category to find business count per category; then average yelp_review.rating across all reviews of businesses in the top category.",
+    "rank": "Order categories by distinct business count descending, no explicit alphabetical tie-break, take top 1.",
+    "shape": "Single row with two columns: category name and its average rating, rounded to 2 decimal places (numeric)."
+   },
+   "verdicts": {
+    "sources": "same",
+    "keys": "same",
+    "parse": "differs",
+    "filter": "same",
+    "metric": "same",
+    "rank": "differs",
+    "shape": "differs"
+   },
+   "breaks_at": "parse",
+   "why": "The agent's parse step uses a crude comma-split with a stopword/substring blocklist instead of the reference's regex extraction of Title-Case word runs (with special handling for '&', 'of', parentheticals, and bare-lowercase segments), producing a materially different set of categories per business and thus a different top category (… instead of …).",
+   "cost_usd": 0.0306842
+  },
+  "yelp/6": {
+   "golden_id": 34,
+   "agent_sql_sha": "09ecd7efbb7b",
+   "agent": {
+    "sources": "yelp_review.business_ref and .date (text, 3 formats) and .rating; yelp_business.business_id, .name, and .description (text with location + category phrases).",
+    "keys": "join on business_id = 'businessid_' || substring(business_ref, 13), extracting the numeric suffix directly rather than stripping a literal prefix.",
+    "parse": "date text parsed via to_timestamp after regexp_replace to isolate the date portion (drops time-of-day for two formats); description tail parsed by matching 'featuring (.+?),? (?:perfect|ideal|great|offers)' instead of extracting capitalised category phrases.",
+    "filter": "keep reviews with parsed_date >= 2016-01-01 and < 2016-07-01; group by business and keep only groups with count(*) >= 5.",
+    "metric": "average rating per business (avg(rating)) and count of qualifying reviews, grouped by business_ref.",
+    "rank": "order by avg_rating desc, business_ref asc; limit 1 row (drops the review-count tiebreak used by reference).",
+    "shape": "two columns: business name and category (single regex capture group), instead of one concatenated 'name, cat1, cat2, ...' answer string."
+   },
+   "verdicts": {
+    "sources": "same",
+    "keys": "same",
+    "parse": "differs",
+    "filter": "same",
+    "metric": "same",
+    "rank": "differs",
+    "shape": "differs"
+   },
+   "breaks_at": "parse",
+   "why": "The agent extracts the category text with a regex that captures only the phrase between 'featuring' and a trailing 'perfect/ideal/great/offers' cue, instead of extracting the full ordered list of capitalised category phrases after the location clause, so the category string produced differs from the reference's comma-joined category list.",
+   "cost_usd": 0.041812
+  },
+  "yelp/7": {
+   "golden_id": 33,
+   "agent_sql_sha": "b5b4c08af7ee",
+   "agent": {
+    "sources": "yelp_user.yelping_since (text) and yelp_review.user_id/date/business_ref; yelp_business.description text holding category phrases after location.",
+    "keys": "yelp_review.user_id matches yelp_user.user_id; yelp_review.business_ref with 'businessref_' replaced by 'businessid_' matches yelp_business.business_id directly.",
+    "parse": "yelping_since/date matched by substring '2016' or year-list LIKE patterns, not parsed to timestamp; categories extracted via substring after phrases like 'in', 'including', 'for', 'specializes in', then split on ', ' and ' and '.",
+    "filter": "users whose yelping_since text contains '2016'; reviews whose date text contains any year 2016-2025; NULL categories_text excluded; empty category strings excluded.",
+    "metric": "count of review rows per split category (via split table, one row per review per category), grouped by category; no distinct dedup of (business,category).",
+    "rank": "order by review count descending, ties broken alphabetically by category name, limited to top 5.",
+    "shape": "single column category, 5 rows, no additional formatting."
+   },
+   "verdicts": {
+    "sources": "same",
+    "keys": "same",
+    "parse": "differs",
+    "filter": "differs",
+    "metric": "differs",
+    "rank": "same",
+    "shape": "same"
+   },
+   "breaks_at": "parse",
+   "why": "The agent extracts categories using ad-hoc phrase markers ('in', 'including', 'for', 'specializes in') and splits on commas/'and' instead of the reference's regex that captures capitalized phrases after the location prefix, so the two approaches yield different category sets entirely.",
+   "cost_usd": 0.0342848
+  }
+ },
+ "errors": []
+}
