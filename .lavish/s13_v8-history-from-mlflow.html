@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>v8 learns from history</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Design source (2): the project's own system — DESIGN.md ("Field Guide"), tokens verbatim,
+   the same block s00–s03 and frontend/src/tokens.css carry. */
+:root{
+  --bg:#F7F6F2; --panel:#FFFFFF; --band:#EFEEE8;
+  --ink:#1A1D1B; --ink-2:#3B403D; --muted:#4A514D; --faint:#5C635E;
+  --line:#DCDAD2; --line-2:#C7C5BC; --line-3:#8A8880;
+  --accent:#0A6552; --accent-ink:#FFFFFF; --accent-soft:#DFEFE8;
+  --amber:#8A5006; --amber-soft:#F6E6CF;
+  --red:#A2342B; --red-soft:#F6DEDB;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --t-2:0.8rem; --t-1:0.875rem; --t0:1rem; --t1:1.125rem; --t2:1.406rem; --t3:1.758rem; --t4:2.197rem;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --r:10px; --r-sm:6px;
+  --shadow:0 1px 2px rgb(20 25 22 / .05), 0 12px 28px -18px rgb(20 25 22 / .22);
+  --dur:300ms; --ease:cubic-bezier(.2,.7,.2,1); --focus:var(--accent);
+  --w:1140px; --measure:68ch; --track-label:.08em;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121614; --panel:#191E1B; --band:#161A18;
+    --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+    --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+    --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+    --amber:#D99A4E; --amber-soft:#3A2A14;
+    --red:#E8776B; --red-soft:#3D1D1A;
+    --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121614; --panel:#191E1B; --band:#161A18;
+  --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+  --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+  --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+  --amber:#D99A4E; --amber-soft:#3A2A14;
+  --red:#E8776B; --red-soft:#3D1D1A;
+  --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+}
+@media (prefers-reduced-motion: reduce){ :root{ --dur:0.01ms; } }
+*,*::before,*::after{box-sizing:border-box}
+:where(.grid,.flex,.kpi,.cards,.mock-body,.mock-cols,.mock-top,.ladder)>*{min-width:0}
+:where(p,h1,h2,h3,h4,li,dd,figcaption,td,th,.chip,.label){overflow-wrap:anywhere}
+:where(img,svg,video,iframe){max-width:100%;height:auto}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink-2);font-family:var(--sans);font-size:var(--t0);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{color:var(--ink);margin:0;line-height:1.15;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+h1{font-size:var(--t4);font-family:var(--serif);font-weight:400} h1 em{font-style:italic;font-weight:400;color:var(--accent)}
+h2{font-size:var(--t3)} h3{font-size:var(--t1)} h4{font-size:var(--t0)}
+p{margin:0 0 var(--s4);text-wrap:pretty}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:.2em} a:hover{text-decoration-thickness:2px}
+strong,b{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:max(var(--t-2),.86em);background:var(--band);padding:.08em .32em;border-radius:var(--r-sm);color:var(--ink-2)}
+pre{margin:0;font-family:var(--mono);font-size:var(--t-2);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.wrap{max-width:var(--w);margin-inline:auto;padding-inline:var(--s5)}
+.label{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0}
+.lead{font-family:var(--serif);font-size:var(--t1);line-height:1.5;color:var(--ink-2);max-width:72ch}
+.small{font-size:var(--t-1);color:var(--muted)}
+.top{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:var(--w);margin-inline:auto;padding:var(--s3) var(--s5);display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.top b{font-family:var(--mono);font-size:var(--t-1);color:var(--ink);white-space:nowrap}
+.top nav{display:flex;gap:var(--s4);margin-left:auto;flex-wrap:wrap;font-size:var(--t-1);font-weight:500}
+.top nav a{color:var(--ink-2);text-decoration:none;padding:var(--s1) 0} .top nav a:hover{color:var(--accent)}
+header.hero{padding:var(--s7) 0 var(--s5)}
+.chips{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s4) 0 0}
+.chip{font-family:var(--mono);font-size:var(--t-2);padding:.3em .6em;border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--ink-2);background:var(--panel)}
+.chip.ok{border-color:var(--accent);color:var(--accent)} .chip.warn{border-color:var(--amber);color:var(--amber)}
+section.blk{padding-top:var(--s8)} section.blk:last-of-type{padding-bottom:var(--s9)}
+section.band-sec{background:var(--band);margin-top:var(--s8);padding:var(--s7) 0}
+section.band-sec + section.blk{padding-top:var(--s7)}
+.hd{margin-bottom:var(--s5);max-width:80ch} .hd .label{margin-bottom:var(--s2)} .hd h2{margin-bottom:var(--s3)}
+.panel{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5)}
+.grid{display:grid;gap:var(--s4)} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.g3,.g2{grid-template-columns:minmax(0,1fr)}}
+.card h3{margin-bottom:var(--s2)} .card p{margin-bottom:var(--s2);font-size:var(--t-1)} .card p:last-child{margin:0}
+.card.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r);box-shadow:var(--shadow);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:var(--t-1)}
+caption{text-align:left;padding:var(--s4) var(--s5) var(--s2);color:var(--muted);font-size:var(--t-1);caption-side:top}
+th,td{text-align:left;padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}
+thead th{font-family:var(--mono);font-size:var(--t-2);font-weight:500;color:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase;border-bottom:1px solid var(--line-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.sub{font-weight:600;color:var(--ink);white-space:nowrap}
+td.num{font-family:var(--mono);font-size:var(--t-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+td .path{display:block;font-family:var(--mono);font-size:var(--t-2);color:var(--faint);font-weight:400;margin-top:2px}
+td.mono,td code.u{font-family:var(--mono);font-size:var(--t-2)}
+code.u{background:none;padding:0;color:var(--ink)} code.u s{color:var(--faint);text-decoration:line-through}
+tr.pro td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+tr.dim td{color:var(--muted)}
+.v-ok{color:var(--accent);font-weight:600} .v-no{color:var(--muted)} .v-warn{color:var(--amber);font-weight:600}
+blockquote{margin:0;padding:var(--s3) var(--s4);border-left:2px solid var(--accent);background:var(--band);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:var(--t-1)}
+blockquote.warn{border-left-color:var(--amber)}
+.fig{margin:var(--s5) 0 0}
+.fig-title{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0 0 var(--s3);text-wrap:balance}
+.fig figcaption{font-family:var(--sans);font-size:var(--t-1);color:var(--muted);line-height:1.5;margin-top:var(--s3)}
+.fig figcaption b{color:var(--ink);font-weight:600}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:var(--s3)}
+.steps li{position:relative;padding-left:2.75rem;font-size:var(--t-1)}
+.steps li::before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:0;top:2px;font-family:var(--mono);color:var(--accent);font-weight:500}
+form.q{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5);display:grid;gap:var(--s3);margin-top:var(--s4)}
+form.q h3{margin:0} form.q .why{font-size:var(--t-1);color:var(--muted);margin:0}
+form.q label{display:grid;grid-template-columns:1.2rem minmax(0,1fr);gap:var(--s2);align-items:start;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;min-height:24px}
+form.q label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+form.q input[type=radio],form.q input[type=checkbox]{margin:3px 0 0;accent-color:var(--accent);width:16px;height:16px}
+form.q textarea{width:100%;font:inherit;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);color:var(--ink-2);min-height:3.2rem;resize:vertical}
+form.q .row{display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap}
+.btn{font:500 var(--t-1) var(--sans);background:var(--accent);color:var(--accent-ink);border:0;border-radius:var(--r-sm);padding:.55em 1em;cursor:pointer;min-height:24px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.08)} .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.queued{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);min-height:1.2em}
+.rec{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);margin-left:.4em}
+.tag{font-family:var(--mono);font-size:var(--t-2);padding:.15em .45em;border-radius:var(--r-sm);border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.tag.ok{border-color:var(--accent);color:var(--accent)} .tag.warn{border-color:var(--amber);color:var(--amber)} .tag.no{border-color:var(--line-3);color:var(--muted)}
+ul.tight{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.tight li{margin-bottom:var(--s1)}
+ul.qa{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.qa li{margin-bottom:var(--s2)}
+.code{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);margin-top:var(--s3);overflow-x:auto}
+.code .label{margin-bottom:var(--s2)}
+.code.band{background:var(--band)}
+.kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4);margin-top:var(--s5)}
+@media (max-width:900px){.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi .n{font-family:var(--serif);font-size:var(--t3);color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:var(--t-1);color:var(--muted);margin-top:var(--s1)}
+
+/* the hackable-address ladder */
+.ladder{display:grid;gap:var(--s2);margin-top:var(--s3)}
+.ladder .rung{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--s3);align-items:baseline;padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel);font-family:var(--mono);font-size:var(--t-2)}
+.ladder .rung .u{color:var(--ink)} .ladder .rung .u b{color:var(--accent);font-weight:500}
+.ladder .rung .w{font-family:var(--sans);color:var(--muted);font-size:var(--t-2);text-align:right;white-space:nowrap}
+@media (max-width:640px){.ladder .rung{grid-template-columns:minmax(0,1fr)} .ladder .rung .w{text-align:left;white-space:normal}}
+
+/* the mock of the explorer page, in the explorer's own styles */
+.addr{font-family:var(--mono);font-size:var(--t-2);color:var(--ink);background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:var(--s2) var(--s3);margin-top:var(--s4);display:flex;gap:var(--s2);align-items:center}
+.addr .lock{color:var(--faint)} .addr b{color:var(--accent);font-weight:500}
+.mock{background:var(--bg);border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin-top:var(--s2)}
+.mock-top{display:flex;gap:var(--s4);align-items:center;padding:var(--s2) var(--s4);border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 88%,transparent);font-size:var(--t-2);flex-wrap:wrap}
+.mock-top .brand{font-family:var(--mono);color:var(--ink);font-weight:500}
+.mock-top nav{display:flex;gap:var(--s3);flex-wrap:wrap} .mock-top nav span{color:var(--ink-2)} .mock-top nav span.on{color:var(--accent);border-bottom:2px solid var(--accent)}
+.mock-body{padding:var(--s4)}
+.mock h1{font-size:var(--t2)} .mock .label{font-size:.7rem}
+.mock .ed{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent);padding:var(--s4);margin:var(--s3) 0 var(--s4);display:grid;gap:var(--s2)}
+.mock .ed .hdr{display:flex;gap:var(--s3);align-items:baseline;flex-wrap:wrap;font-size:var(--t-1)}
+.mock .ed .hdr b{font-family:var(--mono);font-weight:500;color:var(--ink)} .mock .ed .hdr .nav{margin-left:auto;display:flex;gap:var(--s3);font-size:var(--t-2)}
+.mock .ed .hdr .nav a{text-decoration:underline}
+.mock .ed .qtext{font-size:var(--t-1);color:var(--ink-2);margin:0}
+.mock .ed .ta{font-family:var(--mono);font-size:var(--t-2);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);padding:var(--s2) var(--s3);min-height:4.4rem;color:var(--ink-2);white-space:pre-wrap}
+.mock .ed .row{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}
+.mock .ed .btn{font-size:var(--t-2);padding:.4em .8em} .mock .ed .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.mock table{min-width:0;font-size:var(--t-2)} .mock th,.mock td{padding:var(--s2) var(--s3)}
+.mock tr.cur td{background:var(--accent-soft)} .mock tr.cur td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.mock .tw{box-shadow:none;border:1px solid var(--line)}
+.cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.cmp{grid-template-columns:minmax(0,1fr)}}
+.cmp .side{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s4)}
+.cmp .side h4{margin-bottom:var(--s2)} .cmp .side .label{margin-bottom:var(--s2)}
+.cmp .side pre{background:var(--band);border-radius:var(--r-sm);padding:var(--s3)}
+.cmp .side.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.src{font-size:var(--t-1);color:var(--muted)} .src li{margin-bottom:var(--s1)}
+
+.bar{display:flex;height:34px;border-radius:var(--r-sm);overflow:hidden;margin-top:var(--s3);box-shadow:var(--shadow)}
+.bar span{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:var(--t-2);color:var(--ink);min-width:0;white-space:nowrap;overflow:hidden}
+.bar .a{background:var(--accent-soft)} .bar .b{background:color-mix(in srgb,var(--accent-soft) 45%,var(--panel))} .bar .c{background:var(--amber-soft)}
+.legend{display:flex;gap:var(--s4);flex-wrap:wrap;font-size:var(--t-1);color:var(--muted);margin-top:var(--s2)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+pre.sql{background:var(--band);border-radius:var(--r-sm);padding:var(--s4);font-size:var(--t-2);white-space:pre;overflow-x:auto}
+.copyrow{display:flex;gap:var(--s3);align-items:center;margin-top:var(--s2);flex-wrap:wrap}
+
+/* impact chart: the .dia contract, green / amber / red composition (DESIGN.md §2 Colour) */
+.dia{width:100%;height:auto;display:block;background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow)}
+.dia .ax{stroke:var(--line-2);stroke-width:1}
+.dia .tx{font:500 13px var(--sans);fill:var(--ink)} .dia .tx.all{font-weight:600}
+.dia .tx.k{font:500 13px var(--mono);fill:var(--faint)} .dia .tx.k.strong{fill:var(--ink)}
+.dia .tx.in{font:600 12.8px var(--mono);fill:var(--accent-ink)}
+.dia .trk{fill:var(--line-2)} .dia .agt{fill:var(--ink-2)}
+.dia .seg.ok{fill:var(--accent)} .dia .seg.mid{fill:var(--amber)} .dia .seg.bad{fill:var(--red)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+.sw.b{background:var(--ink-2)} .sw.ok{background:var(--accent)} .sw.mid{background:var(--amber)} .sw.bad{background:var(--red)}
+.lg{white-space:nowrap;margin-right:var(--s3)}
+
+/* the challenger flow figure (.dia contract; nodes follow the page tokens) */
+.dia.flow .nd{fill:var(--panel);stroke:var(--line-3);stroke-width:1}
+.dia.flow .nd.in{fill:var(--band)}
+.dia.flow .nd.hi{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.dia.flow .nd.gold{fill:var(--amber-soft);stroke:var(--amber)}
+.dia.flow .ed{stroke:var(--ink-2);stroke-width:1.25;fill:none;marker-end:url(#arr)}
+.dia.flow .ed.both{marker-start:url(#arr)}
+.dia.flow .ed.dash{stroke-dasharray:5 4}
+.dia.flow .tx.s{font:400 12.8px var(--sans);fill:var(--muted)}
+td.nw{white-space:nowrap}
+.dia.flow .cap{font:500 12.8px var(--mono);fill:var(--faint);letter-spacing:.08em;text-transform:uppercase}
+</style>
+<style>
+.shot{margin:var(--s5) 0 0}
+.shot img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+.shot figcaption{font-size:var(--t-1);color:var(--muted);margin-top:var(--s2);max-width:var(--measure)}
+.shot .src{font-family:var(--mono);font-size:var(--t-2);color:var(--faint)}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4)}
+@media (max-width:760px){.pair{grid-template-columns:minmax(0,1fr)}}
+td.up{color:var(--accent);font-weight:600}
+td.down{color:var(--amber);font-weight:600}
+.top b{min-width:0;overflow-wrap:anywhere}
+.verdict{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:760px){.verdict{grid-template-columns:minmax(0,1fr)}}
+.verdict .panel h3{display:flex;gap:var(--s2);align-items:baseline;flex-wrap:wrap}
+.big{font-family:var(--serif);font-size:var(--t3);line-height:1}
+.big.go{color:var(--accent)} .big.no{color:var(--amber)}
+.opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.opts{grid-template-columns:minmax(0,1fr)}}
+.opts .panel p{font-size:var(--t-1);margin-bottom:var(--s2)} .opts .panel dl{margin:0;font-size:var(--t-1)}
+.opts dt{font-family:var(--mono);font-size:var(--t-2);color:var(--faint);text-transform:uppercase;letter-spacing:var(--track-label);margin-top:var(--s2)}
+.opts dd{margin:0}
+.ideas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.ideas{grid-template-columns:minmax(0,1fr)}}
+.ideas .panel p{font-size:var(--t-1);margin-bottom:var(--s2)}
+.ideas .who{font-family:var(--mono);font-size:var(--t-2);color:var(--faint)}
+.ideas .hits{display:flex;gap:var(--s2);flex-wrap:wrap;margin-top:var(--s2)}
+td .tag{margin-right:4px}
+.gapbar{display:inline-block;height:10px;background:var(--amber);border-radius:2px;vertical-align:middle}
+</style>
+<style>
+/* s13: the question-history matrix */
+table.hist{min-width:860px}
+table.hist th.v{text-align:center;padding-inline:var(--s2)}
+table.hist th.v span{display:block;font-size:.68rem;color:var(--faint);letter-spacing:.04em;text-transform:none;margin-top:2px}
+table.hist th.v.champ,table.hist td.champ{background:color-mix(in srgb,var(--accent-soft) 60%,transparent)}
+table.hist td.hc{text-align:center;white-space:nowrap;padding-inline:var(--s2);font-family:var(--mono);font-size:var(--t-1)}
+table.hist .m{display:inline-block;width:1.1em;text-align:center;line-height:1}
+table.hist .m.p{color:var(--accent)} table.hist .m.f{color:var(--red)} table.hist .m.n{color:var(--line-3)}
+table.hist .m:not(.t){opacity:.45}
+table.hist i.rd{font-style:normal;font-family:var(--mono);font-size:.68rem;color:var(--amber);border:1px solid var(--amber);border-radius:3px;padding:0 3px;margin-left:3px;vertical-align:1px}
+table.hist tr.grp td{background:var(--band);font-family:var(--mono);font-size:var(--t-2);letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);padding-block:var(--s2)}
+.key{display:flex;gap:var(--s4);flex-wrap:wrap;font-size:var(--t-1);color:var(--muted);margin-top:var(--s3)}
+.key b{font-family:var(--mono);font-weight:500}
+.key .p{color:var(--accent)} .key .f{color:var(--red)} .key .rdk{color:var(--amber);font-family:var(--mono)}
+pre.brief{background:var(--band);border-radius:var(--r-sm);padding:var(--s4);font-size:var(--t-2);white-space:pre-wrap;overflow-wrap:anywhere}
+pre.brief b{color:var(--ink)}
+.cmp .side ul{margin:0;padding-left:1.1em;font-size:var(--t-1)} .cmp .side li{margin-bottom:var(--s1)}
+.cmp .side li.new{color:var(--ink)} .cmp .side li.new::marker{color:var(--accent)}
+.dia.flow .nd.lost{fill:var(--amber-soft);stroke:var(--amber);stroke-width:1.5}
+.dia.flow .nd.new{fill:var(--panel);stroke:var(--accent);stroke-width:1.5;stroke-dasharray:5 4}
+.dia.flow .ed.acc{stroke:var(--accent)}
+.dia.flow .tx.lbl{font:500 12px var(--mono);fill:var(--faint)}
+td.sub.wrap8,td.sub.wrap8 .path{white-space:normal}
+td.sub.wrap8{min-width:12rem;max-width:16rem}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in">
+  <b>s13 · v8 reads the history</b>
+  <nav aria-label="Sections"><a href="#history">History</a><a href="#v7">v7</a><a href="#reads">What it reads</a><a href="#mlflow">MLflow</a><a href="#champion">Champion</a><a href="#guards">Guards</a><a href="#v8">v8</a><a href="#build">Build</a><a href="#decide">Decide</a></nav>
+</div></div>
+<div class="wrap">
+<header class="hero">
+  <p class="label">DataAgentBench · plan s13 · 2026-09-25 · branch challenger_v8 · sources: the scorecards of v1_sql–v7_sql's runs on the 54, <code>agents/*/optimise.json</code>, the prompt files, MLflow <code>dataagentbench/evals</code></p>
+  <h1>v8's optimiser reads what every earlier round did to each question it fails, <em>so it stops breaking what an earlier prompt already fixed</em></h1>
+  <p class="lead">Proposed: v8 uses v7's recipe with one change: what the optimiser knows about earlier rounds. Opus 5.5 still runs the agent, the reader and the optimiser; the optimiser still reads every error of the champion's run on the 54; guards G1–G4 still apply; and each question is still run once. Each session now also reads two things. The first is the history of every question it is given: its result under v1 to v7, and what each round changed in the prompt in between. The second is v7's round, which lost to v6: what it wrote, what the reviewer refused, and which questions it gained and lost. The history is built from MLflow. <code>dab optimise</code> starts only from the champion's run.</p>
+  <div class="kpi">
+    <div><div class="n">7 of 20</div><div class="d">of v6's failing questions (an answer or a statement wrong) passed in an earlier version</div></div>
+    <div><div class="n">4 of 7</div><div class="d">passed under v5 and failed first under v6. Round 3, which made v6, read none of them because they were passing</div></div>
+    <div><div class="n">+1 −1 · +0 −3</div><div class="d">v7 against v6: answers of 54, then SQL of 49. Every gain was cancelled by a loss</div></div>
+    <div><div class="n">8 of 10</div><div class="d">of v7's dataset sessions ended with no notes accepted, so v6's notes stayed. G1 made the last refusal in each</div></div>
+  </div>
+</header>
+
+<section class="blk" id="history">
+  <div class="hd"><p class="label">01 · the history the optimiser has never seen · v6's 20 failing questions, v1–v7, one trial each</p>
+  <h2>Seven of v6's failures passed under an earlier prompt, and no round was told</h2>
+  <p class="small">Every round reads only its parent's run. crmarenapro/7, crmarenapro/13, stockmarket/3 and stockmarket/5 passed under v5 and failed under v6. Round 3 read none of them, because they were passing when it ran. Round 4 (v6 → v7) read all four as new failures, with no sign that v5 had passed them.</p></div>
+  <div class="tw"><table class="hist">
+    <caption>Filled dot = pass, open = fail, dash = no golden (answers only). In each cell the first mark is the answer and the second the SQL; the mark the row tracks (the one that fails in v6) is solid. <i style="font-style:normal;color:var(--amber);font-family:var(--mono)">r</i> = a session of the round that made this version read the question.</caption>
+    <thead><tr><th>question</th><th class="v">v1<span>haiku</span></th><th class="v">v2<span>round 1</span></th><th class="v">v3<span>round 2</span></th><th class="v">v4<span>→ sonnet</span></th><th class="v">v5<span>→ opus</span></th><th class="v champ">v6 ★<span>round 3</span></th><th class="v">v7 ✗<span>round 4</span></th><th>v6 breaks at</th><th>history</th></tr></thead>
+<tbody><tr class="grp"><td colspan="10">passed in an earlier version, fail in v6 · 7</td></tr>
+<tr><td class="sub">agnews/4<span class="path">fails answer</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m p t">●</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc champ"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m p t">●</span><span class="m n" title="no golden: not scored">–</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">—</td><td>passed v4; broke at v5 (model switch)</td></tr>
+<tr><td class="sub">crmarenapro/3<span class="path">fails answer</span></td><td class="hc"><span class="m p t">●</span><span class="m f">○</span></td><td class="hc"><span class="m f t">○</span><span class="m f">○</span></td><td class="hc"><span class="m p t">●</span><span class="m f">○</span></td><td class="hc"><span class="m f t">○</span><span class="m f">○</span></td><td class="hc"><span class="m f t">○</span><span class="m f">○</span></td><td class="hc champ"><span class="m f t">○</span><span class="m f">○</span></td><td class="hc"><span class="m f t">○</span><span class="m f">○</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">sources</td><td>passed v3; broke at v4 (model switch)</td></tr>
+<tr><td class="sub">crmarenapro/7<span class="path">fails answer</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m p t">●</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc champ"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">—</td><td>passed v5; broke at v6 (round 3)</td></tr>
+<tr><td class="sub">crmarenapro/13<span class="path">fails answer</span></td><td class="hc"><span class="m p t">●</span><span class="m p">●</span></td><td class="hc"><span class="m p t">●</span><span class="m p">●</span></td><td class="hc"><span class="m p t">●</span><span class="m p">●</span></td><td class="hc"><span class="m p t">●</span><span class="m p">●</span></td><td class="hc"><span class="m p t">●</span><span class="m p">●</span></td><td class="hc champ"><span class="m f t">○</span><span class="m f">○</span></td><td class="hc"><span class="m f t">○</span><span class="m f">○</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">sources</td><td>passed v5; broke at v6 (round 3)</td></tr>
+<tr><td class="sub">stockmarket/3<span class="path">fails sql</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span><i class=rd title="a session of this round read it">r</i></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span><i class=rd title="a session of this round read it">r</i></td><td class="hc"><span class="m p">●</span><span class="m p t">●</span></td><td class="hc"><span class="m p">●</span><span class="m p t">●</span></td><td class="hc champ"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">sources</td><td>passed v5; broke at v6 (round 3)</td></tr>
+<tr><td class="sub">stockmarket/4<span class="path">fails sql</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m p t">●</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc champ"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">parse</td><td>passed v4; broke at v5 (model switch)</td></tr>
+<tr><td class="sub">stockmarket/5<span class="path">fails sql</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m p t">●</span></td><td class="hc"><span class="m p">●</span><span class="m p t">●</span></td><td class="hc champ"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">parse</td><td>passed v5; broke at v6 (round 3)</td></tr>
+<tr class="grp"><td colspan="10">never passed · 13</td></tr>
+<tr><td class="sub">agnews/2<span class="path">fails answer</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc champ"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">—</td><td>never passed</td></tr>
+<tr><td class="sub">agnews/3<span class="path">fails answer</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc champ"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span></td><td class="hc"><span class="m f t">○</span><span class="m n" title="no golden: not scored">–</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">—</td><td>never passed</td></tr>
+<tr><td class="sub">bookreview/1<span class="path">fails sql</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc champ"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">shape</td><td>never passed</td></tr>
+<tr><td class="sub">crmarenapro/1<span class="path">fails sql</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc champ"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">sources</td><td>never passed</td></tr>
+<tr><td class="sub">crmarenapro/2<span class="path">fails answer</span></td><td class="hc"><span class="m f t">○</span><span class="m f">○</span></td><td class="hc"><span class="m f t">○</span><span class="m f">○</span><i class=rd title="a session of this round read it">r</i></td><td class="hc"><span class="m f t">○</span><span class="m f">○</span><i class=rd title="a session of this round read it">r</i></td><td class="hc"><span class="m f t">○</span><span class="m f">○</span></td><td class="hc"><span class="m f t">○</span><span class="m f">○</span></td><td class="hc champ"><span class="m f t">○</span><span class="m f">○</span><i class=rd title="a session of this round read it">r</i></td><td class="hc"><span class="m f t">○</span><span class="m f">○</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">parse</td><td>never passed</td></tr>
+<tr><td class="sub">crmarenapro/6<span class="path">fails sql</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc champ"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">parse</td><td>never passed</td></tr>
+<tr><td class="sub">deps_dev_v1/1<span class="path">fails sql</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc champ"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">rank</td><td>never passed</td></tr>
+<tr><td class="sub">github_repos/1<span class="path">fails answer</span></td><td class="hc"><span class="m f t">○</span><span class="m f">○</span></td><td class="hc"><span class="m f t">○</span><span class="m f">○</span></td><td class="hc"><span class="m f t">○</span><span class="m f">○</span></td><td class="hc"><span class="m f t">○</span><span class="m f">○</span></td><td class="hc"><span class="m f t">○</span><span class="m f">○</span></td><td class="hc champ"><span class="m f t">○</span><span class="m f">○</span></td><td class="hc"><span class="m f t">○</span><span class="m f">○</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">sources</td><td>never passed</td></tr>
+<tr><td class="sub">googlelocal/3<span class="path">fails sql</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc champ"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">shape</td><td>never passed</td></tr>
+<tr><td class="sub">music_brainz_20k/3<span class="path">fails sql</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc champ"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">shape</td><td>never passed</td></tr>
+<tr><td class="sub">pancancer_atlas/2<span class="path">fails sql</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc champ"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">filter</td><td>never passed</td></tr>
+<tr><td class="sub">yelp/4<span class="path">fails sql</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m f">○</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc champ"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">parse</td><td>never passed</td></tr>
+<tr><td class="sub">yelp/6<span class="path">fails sql</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span><i class=rd title="a session of this round read it">r</i></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span><i class=rd title="a session of this round read it">r</i></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span></td><td class="hc champ"><span class="m p">●</span><span class="m f t">○</span><i class=rd title="a session of this round read it">r</i></td><td class="hc"><span class="m p">●</span><span class="m f t">○</span><i class=rd title="a session of this round read it">r</i></td><td class="mono">shape</td><td>never passed</td></tr>
+</tbody>
+  </table></div>
+  <div class="key"><span><b class="p">●</b> pass</span><span><b class="f">○</b> fail</span><span><b>–</b> no golden, not scored</span><span><span class="rdk">r</span> read by the round</span><span>★ champion · ✗ lost to the champion</span></div>
+  <p class="small" style="margin-top:var(--s3)">v4 and v5 are model switches: the prompt was not changed. So three of the seven (agnews/4, crmarenapro/3, stockmarket/4) broke with no change to the prompt, and with one trial a flip like that can be run noise. The history labels those flips so the optimiser does not chase them (H3). Rounds 1–3 read only the 33 training questions (the dots without <span class="rdk" style="color:var(--amber);font-family:var(--mono)">r</span>); round 4 read every error.</p>
+</section>
+
+<section class="blk" id="v7">
+  <div class="hd"><p class="label">02 · the round that lost · v6 → v7, from <code>agents/v7_sql/optimise.json</code> and the two runs' scorecards</p>
+  <h2>v7 changed three shared sections and two datasets' notes, and gained no more than it lost</h2></div>
+  <div class="tw"><table>
+    <caption>Every session of round 4. "Kept v6's" = no write was accepted, so v6's text went into v7 unchanged. Outcomes compare v7's run with v6's on the same questions.</caption>
+    <thead><tr><th>session</th><th>read</th><th>what was written</th><th>G1 decisive</th><th>outcome in v7's run</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">playbook · sources</td><td class="num">5</td><td>accepted after 3 length refusals</td><td class="num">0 / 1</td><td>none of the 5 fixed; crmarenapro/13 and github_repos/1 still break at sources</td></tr>
+      <tr><td class="sub">playbook · parse</td><td class="num">5</td><td>accepted</td><td class="num">0 / 1</td><td>none of the 5 fixed</td></tr>
+      <tr class="pro"><td class="sub">playbook · shape</td><td class="num">4</td><td>accepted after one G1 refusal (a decade written as its start year, for bookreview/1)</td><td class="num">1 / 2</td><td><b>deps_dev_v1/2 and crmarenapro/4 passed SQL under v6; under v7 both break at shape</b></td></tr>
+      <tr><td class="sub">agnews</td><td class="num">3</td><td>accepted after a length refusal</td><td class="num">0 / 1</td><td>agnews/4 answer gained (it had also passed in v4, with no prompt change)</td></tr>
+      <tr><td class="sub">deps_dev_v1</td><td class="num">1</td><td>accepted after one G1 refusal (an output-shape rule for rankings)</td><td class="num">1 / 2</td><td>deps_dev_v1/1 still fails; deps_dev_v1/2 lost SQL</td></tr>
+      <tr><td class="sub wrap8">8 dataset sessions<span class="path">bookreview · crmarenapro · github_repos · googlelocal · music_brainz_20k · pancancer_atlas · stockmarket · yelp</span></td><td class="num">16</td><td><span class="tag warn">kept v6's</span> in all eight, G1 made the last refusal</td><td class="num">13 / 13</td><td>none fixed; bookreview/1 lost its answer (now breaks at metric)</td></tr>
+      <tr class="dim"><td class="sub">no session</td><td class="num">—</td><td>stockindex had no failure to read</td><td class="num">—</td><td>stockindex/1 lost SQL, breaking at rank, a section v7 did not change: run noise or a side effect</td></tr>
+    </tbody></table></div>
+  <div class="grid g3" style="margin-top:var(--s4)">
+    <div class="panel card"><h3>P1 · the reviewer refused one-question rules</h3><p>15 of 20 G1 reviews called the write decisive. 8 of those 15 were output-shape or format rules for one question: bookreview/1's decade, googlelocal/3's hours, stockmarket/2's list plus total, yelp/6's name and categories.</p></div>
+    <div class="panel card"><h3>P2 · rewriting a shared section broke passing statements</h3><p>Every playbook section is read by all 54 questions. The shape rewrite came from 4 failing questions, and the 2 that broke at shape afterwards were both passing, so no session had read them.</p></div>
+    <div class="panel card"><h3>P3 · the net was zero</h3><p>Answers 46/54 → 46/54, SQL 33/49 → 30/49, Pass@1 0.891 → 0.884. v6 kept the title under D36.</p></div>
+  </div>
+  <p class="small" style="margin-top:var(--s3)">P1–P3 are what this page reads from the record. The v8 optimiser is given the record and draws its own conclusions. Its instructions gain a paragraph on how to read the history, and no rule written by us.</p>
+</section>
+
+<section class="blk" id="reads">
+  <div class="hd"><p class="label">03 · what each optimiser session reads · today (v7) and v8</p>
+  <h2>v8 keeps everything v7's sessions read and adds three blocks</h2></div>
+  <div class="cmp">
+    <div class="side"><p class="label">today · round 4</p><h4>The parent's run only</h4>
+      <ul>
+        <li>the prompt the agent saw for the dataset, or the current section and <code>system.md</code></li>
+        <li>each failed question: scorecard, validator, the reader's seven-step ledger, agent SQL beside golden SQL, result diff, trace summary</li>
+        <li>wrong answers without a golden: the question, the agent's SQL and answer</li>
+        <li>the SQL of the questions the agent got right (dataset sessions)</li>
+        <li>tools <code>query_db</code> and <code>write_notes</code> / <code>write_section</code>; every write checked by the literal guard and G1–G4</li>
+      </ul></div>
+    <div class="side pro"><p class="label">v8 · round 5</p><h4>The parent's run, plus what came before it</h4>
+      <ul>
+        <li>everything on the left, unchanged</li>
+        <li class="new"><b>History, per failed question:</b> answer and SQL under v1–v7, where each statement broke, and what changed between versions: the dataset's notes, the section of the step it breaks at, the model. Also which session read it and what that session wrote.</li>
+        <li class="new"><b>Last passed, for a regressed question:</b> the version, the diff of its dataset's notes and its break-step section from that version to now (≤ 600 characters each), and that version's statement. The answer is never shown (H1).</li>
+        <li class="new"><b>The last attempt from this champion (v7):</b> the text v7 wrote for this dataset or section, its rationale, G1's verdicts, and the questions it gained and lost. For a section, this includes the passing statements that broke at that step under v7.</li>
+      </ul></div>
+  </div>
+  <div class="code band" style="margin-top:var(--s4)">
+    <p class="label">the history block of one question, as a session will read it · crmarenapro/13 · every fact from the records above</p>
+<pre class="brief"><b>### crmarenapro/13 · history (one trial per version)</b>
+version   model   answer  SQL   into this version
+v1_sql    haiku   pass    pass  —
+v2_sql    haiku   pass    pass  round 1 · crmarenapro notes changed · not read
+v3_sql    haiku   pass    pass  round 2 · crmarenapro notes and 5 sections changed · not read
+v4_sql    sonnet  pass    pass  model switch · prompt unchanged
+v5_sql    opus    pass    pass  model switch · prompt unchanged
+v6_sql ★  opus    fail    fail  round 3 · crmarenapro notes and sections sources, parse, metric, rank, shape changed · not read · breaks at sources
+v7_sql ✗  opus    fail    fail  round 4 · read by playbook:sources and crmarenapro · its crmarenapro notes refused by G1 ("lays out the whole solution for the one sales question"), v6's kept · sources rewritten · breaks at sources
+<b>Last passed: v5_sql.</b> From v5 to v6, for this question:
+- crmarenapro notes: 7 bullets → 6 (the diff, ≤ 600 characters)
+- sources section, the step it now breaks at (the diff, ≤ 600 characters)
+The statement that last passed (v5_sql, the agent's own; its answer is not shown):
+```sql … ```</pre>
+  </div>
+</section>
+
+<section class="blk" id="mlflow">
+  <div class="hd"><p class="label">04 · built from MLflow · experiment <code>dataagentbench/evals</code> on the central server</p>
+  <h2>MLflow already holds four of the six sources; the round's outcome and its session traces are added</h2>
+  <p class="small">Checked today: 8 full eval runs (v0 to v7), 5 optimise runs (v3 appears twice), a trial trace per question tagged <code>agent · query · passed · reason</code>, and a prompt version per agent version with the <code>champion</code> alias. No optimise run records whether its version won. The sessions are stored as files, not as traces.</p></div>
+  <svg class="dia flow" viewBox="0 0 1000 380" role="img" aria-label="Six sources in MLflow feed dab history: eval runs, trial traces, optimise runs, the prompt registry, and two new ones, session traces and round outcomes. dab history writes history.json into the champion's run folder and logs it to the round's MLflow run; the optimiser's dataset and component sessions read it.">
+    <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--ink-2)"/></marker></defs>
+    <text class="cap" x="20" y="24">MLflow · dataagentbench/evals</text>
+    <g id="src-eval"><title>eval runs: each version's scorecard.json, per-question pass metrics</title><rect class="nd in" x="20" y="40" width="400" height="46" rx="8"/><text class="tx" x="36" y="60">eval runs · kind=eval</text><text class="tx s" x="36" y="78">scorecard.json per version: answer · SQL · breaks at</text></g>
+    <g id="src-trace"><title>trial traces</title><rect class="nd in" x="20" y="94" width="400" height="46" rx="8"/><text class="tx" x="36" y="114">trial traces · kind=trial</text><text class="tx s" x="36" y="132">tags query · passed · reason; the SQL and plan</text></g>
+    <g id="src-opt"><title>optimise runs</title><rect class="nd in" x="20" y="148" width="400" height="46" rx="8"/><text class="tx" x="36" y="168">optimise runs · kind=optimise</text><text class="tx s" x="36" y="186">optimise.json: what each session read and wrote</text></g>
+    <g id="src-prompt"><title>prompt registry</title><rect class="nd in" x="20" y="202" width="400" height="46" rx="8"/><text class="tx" x="36" y="222">prompt registry · dataagentbench.system</text><text class="tx s" x="36" y="240">a version per agent version; alias champion</text></g>
+    <g id="src-sess"><title>new: optimiser session traces</title><rect class="nd hi" x="20" y="256" width="400" height="46" rx="8"/><text class="tx" x="36" y="276">new · session traces · kind=optimise_session</text><text class="tx s" x="36" y="294">each session's turns, queries, writes, refusals</text></g>
+    <g id="src-out"><title>new: round outcome</title><rect class="nd hi" x="20" y="310" width="400" height="46" rx="8"/><text class="tx" x="36" y="330">new · outcome on each optimise run</text><text class="tx s" x="36" y="348">won or lost; questions gained and lost</text></g>
+    <path class="ed" d="M420,63 C470,63 470,170 506,176"/>
+    <path class="ed" d="M420,117 C460,117 460,180 506,184"/>
+    <path class="ed" d="M420,171 L506,190"/>
+    <path class="ed" d="M420,225 L506,198"/>
+    <path class="ed acc" d="M420,279 C460,279 460,206 506,206"/>
+    <path class="ed acc" d="M420,333 C470,333 470,214 506,214"/>
+    <g id="hist"><title>dab history</title><rect class="nd hi" x="510" y="160" width="170" height="70" rx="8"/><text class="tx" x="595" y="190" text-anchor="middle">dab history</text><text class="tx s" x="595" y="210" text-anchor="middle">no model call</text></g>
+    <g id="json"><title>history.json</title><rect class="nd" x="740" y="110" width="240" height="56" rx="8"/><text class="tx" x="860" y="134" text-anchor="middle">runs/&lt;champion run&gt;/history.json</text><text class="tx s" x="860" y="154" text-anchor="middle">the record; logged to the round</text></g>
+    <g id="brief"><title>optimiser briefings</title><rect class="nd" x="740" y="224" width="240" height="56" rx="8"/><text class="tx" x="860" y="248" text-anchor="middle">optimiser sessions</text><text class="tx s" x="860" y="268" text-anchor="middle">dataset · component (v8)</text></g>
+    <path class="ed" d="M680,184 C712,184 712,138 736,138"/>
+    <path class="ed" d="M680,206 C712,206 712,252 736,252"/>
+  </svg>
+  <ul class="qa" style="margin-top:var(--s4)">
+    <li><b>Rule change, as you asked.</b> CLAUDE.md says MLflow "is linked, never read back". This plan makes one exception, <code>dab history</code>. The run folders stay the record: every MLflow copy is still written from them, and a parity test holds the two equal.</li>
+    <li><b>MLflow down</b> → the round refuses to start, as <code>dab optimise</code> already does (platform rule zero: no local fallback).</li>
+    <li><b>Backfill, no model call:</b> the outcomes of rounds 1–4 come from <code>promotions.jsonl</code> and the scorecards, and their session traces from the session files already in <code>runs/&lt;run&gt;/optimise/</code>. From then on, <code>dab optimise</code> logs session traces and <code>dab promote</code> writes each challenger's outcome.</li>
+  </ul>
+</section>
+
+<section class="blk" id="champion">
+  <div class="hd"><p class="label">05 · always from the champion · <code>agents/champion</code> = v6_sql</p>
+  <h2>A round starts from the champion's run, and reads every round from that champion that lost</h2></div>
+  <svg class="dia flow" viewBox="0 0 1000 230" role="img" aria-label="Lineage: v1 to v2 by round 1, v2 to v3 by round 2, v3 to v4 and v4 to v5 by model switches, v5 to v6 by round 3; v6 is the champion. v6 to v7 by round 4, which lost. v8 is made from v6's run by round 5 and reads v7's round and outcome.">
+    <defs><marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--ink-2)"/></marker></defs>
+    <g><title>v1_sql</title><rect class="nd" x="20" y="50" width="104" height="48" rx="8"/><text class="tx" x="72" y="72" text-anchor="middle">v1_sql</text><text class="tx s" x="72" y="89" text-anchor="middle">haiku</text></g>
+    <g><title>v2_sql</title><rect class="nd" x="160" y="50" width="104" height="48" rx="8"/><text class="tx" x="212" y="72" text-anchor="middle">v2_sql</text><text class="tx s" x="212" y="89" text-anchor="middle">haiku</text></g>
+    <g><title>v3_sql</title><rect class="nd" x="300" y="50" width="104" height="48" rx="8"/><text class="tx" x="352" y="72" text-anchor="middle">v3_sql</text><text class="tx s" x="352" y="89" text-anchor="middle">haiku</text></g>
+    <g><title>v4_sql</title><rect class="nd" x="440" y="50" width="104" height="48" rx="8"/><text class="tx" x="492" y="72" text-anchor="middle">v4_sql</text><text class="tx s" x="492" y="89" text-anchor="middle">sonnet</text></g>
+    <g><title>v5_sql</title><rect class="nd" x="580" y="50" width="104" height="48" rx="8"/><text class="tx" x="632" y="72" text-anchor="middle">v5_sql</text><text class="tx s" x="632" y="89" text-anchor="middle">opus</text></g>
+    <g><title>v6_sql, champion</title><rect class="nd hi" x="720" y="50" width="104" height="48" rx="8"/><text class="tx" x="772" y="72" text-anchor="middle">v6_sql ★</text><text class="tx s" x="772" y="89" text-anchor="middle">SQL 33/49</text></g>
+    <g><title>v7_sql, lost to v6</title><rect class="nd lost" x="872" y="50" width="108" height="48" rx="8"/><text class="tx" x="926" y="72" text-anchor="middle">v7_sql ✗</text><text class="tx s" x="926" y="89" text-anchor="middle">SQL 30/49</text></g>
+    <path class="ed" style="marker-end:url(#arr2)" d="M124,74 L156,74"/><text class="tx lbl" x="140" y="42" text-anchor="middle">r1</text>
+    <path class="ed" style="marker-end:url(#arr2)" d="M264,74 L296,74"/><text class="tx lbl" x="280" y="42" text-anchor="middle">r2</text>
+    <path class="ed dash" style="marker-end:url(#arr2)" d="M404,74 L436,74"/><text class="tx lbl" x="420" y="42" text-anchor="middle">model</text>
+    <path class="ed dash" style="marker-end:url(#arr2)" d="M544,74 L576,74"/><text class="tx lbl" x="560" y="42" text-anchor="middle">model</text>
+    <path class="ed" style="marker-end:url(#arr2)" d="M684,74 L716,74"/><text class="tx lbl" x="700" y="42" text-anchor="middle">r3</text>
+    <path class="ed" style="marker-end:url(#arr2)" d="M824,74 L868,74"/><text class="tx lbl" x="846" y="42" text-anchor="middle">r4</text>
+    <g><title>v8_sql, round 5 from the champion</title><rect class="nd new" x="720" y="160" width="104" height="48" rx="8"/><text class="tx" x="772" y="182" text-anchor="middle">v8_sql</text><text class="tx s" x="772" y="199" text-anchor="middle">round 5</text></g>
+    <path class="ed acc" style="marker-end:url(#arr2)" d="M772,98 L772,156"/><text class="tx lbl" x="764" y="134" text-anchor="end">v6's run</text>
+    <path class="ed dash acc" style="marker-end:url(#arr2)" d="M926,98 C926,150 880,184 828,184"/><text class="tx lbl" x="990" y="206" text-anchor="end">reads round 4</text><text class="tx lbl" x="990" y="222" text-anchor="end">and its outcome</text>
+  </svg>
+  <ul class="qa" style="margin-top:var(--s4)">
+    <li><b><code>dab optimise --into v8_sql</code></b> with no run uses the champion's latest full run (<code>champion_run_id</code> in <code>promotions.jsonl</code>: v6's run 20260925T015204Z). A run whose agent is not the champion is refused, with the champion named. <code>dab crossfit</code> passes its own run and is unaffected.</li>
+    <li><b>Failed attempts accumulate.</b> The "last attempt" block covers every version whose <code>challenger_of</code> is the champion and that lost to it: v7 now. If v8 also loses, v9 reads both v7 and v8. A new champion starts a new list, while the per-question history keeps every version.</li>
+  </ul>
+</section>
+
+<section class="blk" id="guards">
+  <div class="hd"><p class="label">06 · guards on the history · the existing guard and G1–G4 still check every write</p>
+  <h2>The history is input only; it never shows an answer and never enters an agent's prompt</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>id</th><th>rule</th><th>why</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">H1</td><td>A past answer is shown only as pass or fail, never as text</td><td>for a question with no golden (agnews/4, crmarenapro/7), an answer that passed <i>is</i> the gold answer</td></tr>
+      <tr><td class="sub">H2</td><td>The statement that last passed is shown: the agent's own SQL, not a golden</td><td>it is the most direct evidence of what worked; anything written from it still passes the literal guard, G1 and the G2 audit</td></tr>
+      <tr><td class="sub">H3</td><td>A flip with no change to the question's dataset notes or its break-step section is labelled "no prompt change: model or run noise"</td><td>one trial per version; agnews/4, crmarenapro/3 and stockmarket/4 flipped on model switches alone</td></tr>
+      <tr><td class="sub">H4</td><td>Size caps: 1,500 characters of history per question, 600 per diff, 2,000 per session for the last-attempt block</td><td>a session that reads five questions gets at most ≈ 20,000 extra characters</td></tr>
+      <tr><td class="sub">H5</td><td>The history goes to the optimiser only, never to the agent, the curator, or G1 (the reviewer judges the text as it stands)</td><td>the same boundary goldens and ledgers already keep</td></tr>
+    </tbody></table></div>
+</section>
+
+<section class="blk" id="v8">
+  <div class="hd"><p class="label">07 · the v8 recipe · one change from v7</p>
+  <h2>v8 differs from v7 only in what the optimiser knows about the past, so v7 against v8 measures the history</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>part of the recipe</th><th>v6_sql · round 3</th><th>v7_sql · round 4 (lost)</th><th>v8_sql · round 5</th></tr></thead>
+    <tbody>
+      <tr class="dim"><td class="sub">parent</td><td>v5_sql's run</td><td>v6_sql's run (champion)</td><td>v6_sql's run (champion, now enforced)</td></tr>
+      <tr class="dim"><td class="sub">agent · reader · optimiser</td><td>Opus 5.5, medium</td><td>same</td><td>same</td></tr>
+      <tr class="dim"><td class="sub">what it reads from the parent</td><td>9 failed training statements</td><td>every error of the 54: 16 statements, 8 answers</td><td>same as v7</td></tr>
+      <tr class="dim"><td class="sub">guards</td><td>literal</td><td>literal + G1–G4</td><td>same as v7</td></tr>
+      <tr class="pro"><td class="sub">what it reads from before the parent</td><td>nothing</td><td>nothing</td><td><b>the history of v1–v7 for each failed question, and v7's round with its outcome</b></td></tr>
+      <tr class="dim"><td class="sub">score · promote</td><td>54 × 1 · D36</td><td>54 × 1 · D36</td><td>54 × 1, Opus reader · D36 against v6</td></tr>
+    </tbody></table></div>
+</section>
+
+<section class="blk" id="build">
+  <div class="hd"><p class="label">08 · the build · in order · ≈ $12 of model calls, all in B7–B8</p>
+  <h2>Six build steps with no model calls, then one round, one run and one promotion</h2></div>
+  <form class="q" data-lavish-question="build-s13" onsubmit="event.preventDefault(); const selected=[...event.currentTarget.querySelectorAll('input[name=items]:checked')].map(i=>({id:i.value,label:i.dataset.label,disposition:'build'})); if(!selected.length){return;} window.lavish.queuePrompt('Build exactly the ticked items from s13 (v8 = v7 recipe + per-question history and v7 outcome, read from MLflow), in B order, and return an item-by-item receipt. Account for every submitted ID before reporting completion. Items: '+selected.map(s=>s.id+' '+s.label).join('; '), {tag:'tracked-batch', text:'Build '+selected.length+' items from s13', element:event.currentTarget, data:{items:selected}}); event.currentTarget.querySelector('.queued').textContent='queued: '+selected.map(s=>s.id).join(', ');">
+    <h3>Build · no model calls</h3>
+    <label><input type="checkbox" name="items" value="B1" data-label="champion lock in dab optimise" checked><span><b>B1 · The champion lock.</b> RUN becomes optional in <code>dab optimise</code>. Left out, it is the champion's latest full run. A run of any other agent is refused.</span></label>
+    <label><input type="checkbox" name="items" value="B2" data-label="round outcome on MLflow: promote writes it; backfill rounds 1-4" checked><span><b>B2 · Each round's outcome in MLflow.</b> <code>dab promote</code> tags the challenger's optimise run <code>outcome=won|lost</code> and logs <code>outcome.json</code>: answers and SQL against the champion, and every question gained and lost. Rounds 1–4 are backfilled from <code>promotions.jsonl</code>.</span></label>
+    <label><input type="checkbox" name="items" value="B3" data-label="optimiser session traces on MLflow; backfill rounds 1-4" checked><span><b>B3 · Session traces.</b> Each optimiser session becomes an MLflow trace (<code>kind=optimise_session</code>) with its turns, queries, writes, refusals and G1 verdicts, tagged with its version, scope and whether its text was accepted. Rounds 1–4 are backfilled from their saved session files.</span></label>
+    <label><input type="checkbox" name="items" value="B4" data-label="dab history from MLflow -> history.json" checked><span><b>B4 · <code>dab history</code>.</b> Builds each question's timeline from MLflow: scorecards, traces, optimise runs with outcomes, and prompt versions (for the diffs). It writes <code>runs/&lt;champion run&gt;/history.json</code>, applies H1–H4, and labels each flip as a prompt change, a model switch or noise.</span></label>
+    <label><input type="checkbox" name="items" value="B5" data-label="briefings read history + last attempt; optimiser prompt paragraph" checked><span><b>B5 · The briefings.</b> Dataset and component sessions get the history block for each question they read, plus the last-attempt block. <code>agents/optimiser/system.md</code> and <code>component.md</code> gain one paragraph on how to read them. <code>optimise.json</code> records the history file it read.</span></label>
+    <label><input type="checkbox" name="items" value="B6" data-label="tests + docs" checked><span><b>B6 · Tests and docs, no model calls.</b> Tests: history from a fake MLflow matches the run folders; no answer text in any briefing (H1); the noise label; the champion lock; the backfilled outcomes match <code>promotions.jsonl</code>. Docs: CLAUDE.md (the MLflow exception, the lock) and AGENTS.md §7.</span></label>
+    <h3 style="margin-top:var(--s3)">Run · Opus 5.5 · one trial</h3>
+    <label><input type="checkbox" name="items" value="B7" data-label="optimise v6's run -> v8_sql (opus, --train all --strict, history)" checked><span><b>B7 · Round 5:</b> <code>dab optimise --into v8_sql --model opus --train all --strict</code> on v6's run. About $5: round 4 cost $4.39, and the history adds input.</span></label>
+    <label><input type="checkbox" name="items" value="B8" data-label="eval v8_sql on the 54 x 1 + Opus reader" checked><span><b>B8 · v8_sql on the 54, once</b>, then the Opus reader. About $6.40: v7's run was $5.15 and its reader $1.24.</span></label>
+    <label><input type="checkbox" name="items" value="B9" data-label="promote v8 vs v6 (D36)" checked><span><b>B9 · Promote v8 against v6</b> by D36. The outcome goes on v8's optimise run (B2), so v9 reads it either way.</span></label>
+    <label><input type="checkbox" name="items" value="B10" data-label="s14 receipt" checked><span><b>B10 · The s14 receipt.</b> v6, v7 and v8 compared paired, question by question, including whether v8 fixed any of the 7 regressions.</span></label>
+    <h3 style="margin-top:var(--s3)">Optional</h3>
+    <label><input type="checkbox" name="items" value="M1" data-label="Optimise tab: question history matrix"><span><b>M1 · Question history on the Optimise tab.</b> Section 01's matrix, built live from <code>history.json</code>, with each cell linking to its trial.</span></label>
+    <div class="row"><button type="submit" class="btn">Queue the build list</button><span class="queued"></span></div>
+  </form>
+</section>
+
+<section class="blk" id="decide">
+  <div class="hd"><p class="label">09 · decisions · D42–D45 · all settled 2026-09-25</p>
+  <h2>All four settled on the recommendation; the build list above is what ran</h2></div>
+  <div class="panel card" style="margin-top:var(--s4)"><h3>D42 · Where the history is read from <span class="tag ok">decided · A</span></h3><p>MLflow, as you asked. <code>dab history</code> reads the eval runs, the round runs with their outcomes, and the session traces. CLAUDE.md's "never read back" gains this one exception. <code>dab history --parity</code> holds MLflow's history equal to the folders'.</p></div>
+  <div class="panel card" style="margin-top:var(--s4)"><h3>D43 · Who reads the history <span class="tag ok">decided · A</span></h3><p>Only the optimiser's dataset and component sessions. The reader's ledger is unchanged.</p></div>
+  <div class="panel card" style="margin-top:var(--s4)"><h3>D44 · The statement that last passed <span class="tag ok">decided · A</span></h3><p>Shown: the agent's own SQL. A past answer is never shown (H1).</p></div>
+  <div class="panel card" style="margin-top:var(--s4)"><h3>D45 · v8's recipe <span class="tag ok">decided · A</span></h3><p>v7's recipe (every error of v6's run, G1–G4, Opus everywhere, one trial) plus the history and v7's round with its outcome.</p></div>
+</section>
+
+<section class="blk" id="sources">
+  <div class="hd"><p class="label">10 · sources and caveats</p>
+  <h2>What this rests on</h2></div>
+  <ul class="qa">
+    <li><b>Per-question results</b>: trial 1 of the full run of each version (v1: 20260924T050324Z, v2: 053026Z, v3: 235835Z, v4: 235837Z, v5: 20260925T004607Z, v6: 015204Z, v7: 040220Z), from each run's <code>scorecard.json</code>. The same file is logged to each MLflow eval run.</li>
+    <li><b>What changed between versions</b>: <code>agents/&lt;v&gt;/datasets/*.md</code> and the playbook sections of <code>system.md</code>, compared text for text. <b>Who read what</b>: <code>sessions[].questions</code> in each <code>optimise.json</code>.</li>
+    <li><b>"Changed together" is not "caused"</b>: with one trial per version, a statement that broke after a section changed may have broken anyway. H3 labels the flips that had no prompt change at all. Whether the history helps is what v7 against v8 measures.</li>
+    <li><b>Cost</b>: the subscription's notional dollars for Opus 5.5 at medium, from round 4 ($4.39 optimiser, $5.15 run, $1.24 reader).</li>
+  </ul>
+</section>
+</div>
+</body>
+</html>

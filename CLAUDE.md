@@ -10,9 +10,10 @@
 - `make dev` + `cd frontend && npm run dev` (explorer on :5173, API on :8091)
 - agent build: `make platform-up` · `make db-roles` · `make data` · `make context` ·
   `make curate` · `make sandbox` · `make eval SPLIT=smoke|all TRIALS=n`
-- the loop (s06, s08, s11): `dab eval --agent <version> --split all` ·
+- the loop (s06, s08, s11, s13): `dab eval --agent <version> --split all` ·
   `dab diagnose <run> --ledger [--model opus]` ·
-  `dab optimise <run> --into <version> [--model opus] [--train all --strict]` ·
+  `dab optimise --into <version> [--model opus] [--train all --strict]` (the champion's
+  run; it builds and reads the history) · `dab history [--parity]` · `dab mlflow-backfill` ·
   `dab crossfit <run> --prefix <version>` · `dab promote` · `dab export-submission <run>`
 - `uv run pytest -q` · `make lint` · `make fmt` (`DAB_TEST_PG=1` adds the live role test)
 
@@ -48,7 +49,10 @@
   or change the curator's prompt (`agents/curator/system.md`).
 - **The run folder is the record; MLflow is the index.** `runs/<id>/` is what
   the explorer, the profile and a compare read. MLflow (central,
-  `dataagentbench/evals`) is linked, never read back. Never start a local
+  `dataagentbench/evals`) is linked, never read back, with one exception (s13, D42 A):
+  `dab history` builds the optimiser's history from MLflow's copies (eval runs, round
+  runs with their `outcome`, session traces), and `dab history --parity` holds it equal to
+  the one built from the folders. MLflow down stops a round; it never falls back. Never start a local
   MLflow; the platform's rule zero applies. The benchmark lives in database
   `dab` on the central Postgres (:5432) since 2026-09-22; `make db-reset` only
   ever drops this project's schema, never the database (platform D16).
@@ -100,7 +104,15 @@
   handing over a decisive value or interpretation (the leaderboard rubric's §2.2; it sees
   gold answers, never writes a prompt), an audit of every gold value in the finished
   text, two or more errors behind every playbook section, and no text naming a question.
-  `tests/test_s11.py` holds every version's prompt to the audit. The scorecard (`dab diagnose`) reads goldens after a
+  `tests/test_s11.py` holds every version's prompt to the audit. From s14 (D46) `dab promote`
+  lets a challenger take the title only through that gate (its round ran G1–G4, and G2 finds
+  no gold value in its prompt), then ranks by Pass@1; the incumbent always stands. From s13 a round starts
+  only from the champion's run (`dab optimise` refuses another) and its sessions read the
+  history (`eval/history.py`): each failed question's answer and SQL under every version,
+  what each round changed, the statement that last passed a regressed question (the
+  agent's own; a past answer is never read, as for a question with no golden it is the
+  gold answer), and every round from the champion that lost to it. The history is input
+  to the optimiser only, and what it writes passes the same guards. The scorecard (`dab diagnose`) reads goldens after a
   run; nothing it computes reaches a trial. The reader (s08, `eval/ledger.py`)
   describes goldens and failed statements in words, seven steps each: its lines
   are stored beside the golden (`dataagentbench_meta.golden_ledger`, refused to

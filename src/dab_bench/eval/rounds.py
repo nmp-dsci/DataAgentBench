@@ -18,7 +18,9 @@ folders and the agent folders; nothing calls a model or writes.
 from __future__ import annotations
 
 import json
+import re
 from collections import Counter
+from pathlib import Path
 from typing import Any
 
 from dab_bench.config import AGENTS_DIR, RUNS_DIR
@@ -39,6 +41,52 @@ def round_records() -> list[dict[str, Any]]:
         rec.setdefault("version", p.parent.name)
         recs.append(rec)
     return sorted(recs, key=lambda r: str(r.get("started_at") or ""))
+
+
+def header_note(agent_yaml: Path) -> str:
+    """The version's own line from the comment block atop its `agent.yaml` (each version
+    prepends its line to its source's block, so the first block is its own)."""
+    if not agent_yaml.exists():
+        return ""
+    lines: list[str] = []
+    for raw in agent_yaml.read_text().splitlines():
+        if not raw.startswith("#"):
+            break
+        text = raw.lstrip("#").strip()
+        if lines and re.match(r"v\w+\s*[:—]", text):
+            break
+        lines.append(text)
+    return " ".join(lines)
+
+
+def version_change(
+    config: Any, source: Any | None, rec: dict[str, Any] | None, round_no: int | None
+) -> dict[str, Any]:
+    """How a version was made from the one before it: an optimisation round (`challenger_of`),
+    a model change (the same prompt files on another model), a build change (anything else
+    hand-built: the tools, the answer contract, the hints), or the base. `config` and `source`
+    are `AgentConfig`s; `rec` is the version's round record."""
+    if rec is not None:
+        g = rec.get("guards") or {}
+        strict = all(g.get(k) for k in ("g1_review", "g2_audit", "g3_breadth", "g4_routing"))
+        detail = f"round {round_no}" + (" · G1–G4" if strict else "")
+        return {"kind": "round", "detail": detail}
+    if source is None:
+        return {"kind": "base", "detail": "the first build"}
+    if source.model != config.model:
+        return {"kind": "model", "detail": f"{source.model} → {config.model}"}
+    sql = "mcp__dab__submit_answer"
+    if (sql in source.tools) != (sql in config.tools):
+        detail = "SQL answer" if sql in config.tools else "free answer"
+    elif len(source.tools) != len(config.tools):
+        detail = f"{len(source.tools)} → {len(config.tools)} tools"
+    elif source.hints != config.hints:
+        detail = "hints on" if config.hints else "hints off"
+    elif source.pack != config.pack:
+        detail = "pack on" if config.pack else "pack off"
+    else:
+        detail = "hand-built"
+    return {"kind": "build", "detail": detail}
 
 
 def _results(run_id: str) -> dict[str, dict[str, Any]]:

@@ -27,7 +27,16 @@ text, a hit reverting that unit to the parent's (`guards.audit`); G3, a playbook
 for a step where two or more errors break, its rationale citing two of them by id; G4, no
 text naming a question. `dab crossfit` runs the same round per fold with that fold's
 questions excluded (`exclude`) to score each question with a prompt that never read it.
-Round 1's own description follows.
+
+From s13 (D42–D45) a round starts from the **champion's run** (`from_champion`; `dab optimise`
+with no run picks it, and a run of any other version is refused), and with `history` each
+session also reads what came before that run (`eval/history.py`, built from MLflow and written
+to `runs/<run>/history.json`): every failed question's answer and SQL under each version, what
+each round changed and which flips had no prompt change behind them, the statement that last
+passed a regressed question, and every round from the champion that lost to it — what it
+wrote, what was refused, and what it gained and lost. The history is input only: what a
+session writes passes the same guards. Each session is also logged as an MLflow trace
+(`kind=optimise_session`). Round 1's own description follows.
 
 The optimiser is an agent (`agents/optimiser/`, Sonnet 5 at medium effort) that turns a
 scored run's failures into **dataset notes**, the per-dataset block the eval agent's
@@ -106,6 +115,12 @@ SYSTEM_PASS_TURNS = 6
 DIFF_LINES = 40
 TOOLS = ["mcp__dab__query_db", "mcp__dab__write_notes"]
 PLAYBOOK_HEAD = "## From the question to the statement"
+
+
+class NotChampionError(ValueError):
+    """A round was asked to start from a run that is not the champion's (s13)."""
+
+
 _SECTION = re.compile(r"^### (\d) · (\w+) — .*$", re.M)
 
 
@@ -160,9 +175,14 @@ def briefing(
     goldens: dict[str, dict[str, Any]],
     train: set[str],
     no_golden: bool = False,
+    history: dict[str, Any] | None = None,
 ) -> tuple[str, list[str]]:
     """The user message of one dataset's session, and the failed questions it covers.
-    `no_golden` (s11, every error read): wrong answers without a golden are included."""
+    `no_golden` (s11, every error read): wrong answers without a golden are included.
+    `history` (s13): each failed question's history, and the rounds from the champion that
+    lost (`eval/history.py`)."""
+    from dab_bench.eval import history as hist
+
     ctx = load_context(dataset)
     rows = [q for q in card["questions"] if q["query_id"].split("/")[0] == dataset]
     rows = [
@@ -180,6 +200,14 @@ def briefing(
         "## The prompt the agent saw for this dataset\n\n````\n"
         + version.prompt_for(ctx)
         + "\n````",
+        *(
+            [
+                "## Earlier rounds from this champion that lost to it\n\n"
+                + hist.attempt_block(history, dataset)
+            ]
+            if history and history.get("attempts")
+            else []
+        ),
         f"## Failed {which}questions ({len(failed)})",
     ]
     for q in failed:
@@ -199,6 +227,7 @@ def briefing(
                         + (r.get("agent_sql") or "(none submitted)")
                         + "\n```",
                         "Agent answer (wrong):\n```\n" + str(r.get("answer") or "")[:600] + "\n```",
+                        *([hist.question_block(history, qid)] if history else []),
                     ]
                 )
             )
@@ -237,6 +266,7 @@ def briefing(
                         if diff
                         else []
                     ),
+                    *([hist.question_block(history, qid)] if history else []),
                 ]
             )
         )
@@ -280,10 +310,12 @@ def component_briefing(
     current: str,
     budget: int,
     cite: bool = False,
+    history: dict[str, Any] | None = None,
 ) -> str:
     """The user message of one component session: every failed train question, across
     datasets, whose statement first breaks at `component`. `cite` (s11 G3): the rationale must
     name two or more of them by id."""
+    from dab_bench.eval import history as hist
     from dab_bench.eval.ledger import WHAT
 
     parts = [
@@ -302,6 +334,14 @@ def component_briefing(
         "## The shared instructions the agent reads (system.md), for context\n\n````\n"
         + system_md
         + "\n````",
+        *(
+            [
+                "## Earlier rounds from this champion that lost to it\n\n"
+                + hist.attempt_block(history, f"playbook:{component}")
+            ]
+            if history and history.get("attempts")
+            else []
+        ),
         f"## Failed training questions whose statement first breaks at {component} ({len(rows)})",
     ]
     for q in rows:
@@ -326,6 +366,7 @@ def component_briefing(
                         if diff
                         else []
                     ),
+                    *([hist.question_block(history, qid)] if history else []),
                 ]
             )
         )
@@ -655,12 +696,16 @@ async def optimise(
     exclude: set[str] | None = None,
     strict: bool = False,
     crossfit: dict[str, Any] | None = None,
+    from_champion: bool = True,
+    history: bool = False,
 ) -> dict[str, Any]:
     """One round. `components` (s08, D32 B): component sessions write the playbook and
     dataset sessions the notes; without it, round 1's per-dataset sessions and system pass.
     `model` overrides the optimiser's agent.yaml for this round (recorded in optimise.json).
     s11: `train_all` reads every error of the 54; `exclude` holds questions out (a cross-fit
-    fold); `strict` adds guards G1–G4; `crossfit` marks the version a fold (never listed)."""
+    fold); `strict` adds guards G1–G4; `crossfit` marks the version a fold (never listed).
+    s13: `from_champion` refuses a run of any version but the champion; `history` builds the
+    history from MLflow and gives it to every session."""
     from dab_bench.eval import golden
     from dab_bench.eval.scorecard import load_optimise_split, load_scorecard, score_run
 
@@ -671,6 +716,15 @@ async def optimise(
     if split is None and not train_all:
         raise FileNotFoundError("no train/held-out split: run `dab split-optimise` first")
     meta, results, traces = _read_run(run_id)
+    if from_champion:
+        from dab_bench.agent.versions import champion_name
+
+        champ = champion_name()
+        if meta["agent"] != champ:
+            raise NotChampionError(
+                f"{run_id} is a run of {meta['agent']}; a round starts from the champion's run "
+                f"({champ}): `dab optimise --into {into}` picks it (s13)"
+            )
     source = load_version(meta["agent"])
     if not source.submits_sql:
         raise ValueError(f"{source.name} has no submit_answer: nothing for the optimiser to read")
@@ -689,6 +743,27 @@ async def optimise(
             f"`dab diagnose {run_id} --ledger` first"
         )
     goldens = golden.current()
+    past: dict[str, Any] | None = None
+    history_rec: dict[str, Any] | None = None
+    if history:  # s13 (D42 A): read from MLflow; a round without it does not start
+        from dab_bench.eval import history as hist
+
+        past = hist.build(hist.MlflowSource(), champion=meta["agent"])
+        if past["champion_run"] != run_id:
+            raise ValueError(
+                f"MLflow's newest complete run of {meta['agent']} is {past['champion_run']}, "
+                f"not {run_id}: optimise that run, or log this one (`dab runs log {run_id}`)"
+            )
+        hpath = hist.write(past)
+        history_rec = {
+            "file": str(hpath.relative_to(RUNS_DIR.parent)),
+            "source": past["source"],
+            "versions": [v["version"] for v in past["versions"]],
+            "attempts": [a["version"] for a in past["attempts"]],
+            "regressed": sorted(
+                q for q, x in past["questions"].items() if x["status"] == "regressed"
+            ),
+        }
     optimiser = load_version(OPTIMISER_DIR.name)
     if model:
         optimiser = replace(optimiser, config=replace(optimiser.config, model=model))
@@ -715,7 +790,9 @@ async def optimise(
     component_prompt = (OPTIMISER_DIR / "component.md").read_text()
 
     async def one(ds: str) -> Session:
-        message, qs = briefing(ds, source, card, results, traces, goldens, train, train_all)
+        message, qs = briefing(
+            ds, source, card, results, traces, goldens, train, train_all, history=past
+        )
         async with sem:
             s = await run_session(
                 ds,
@@ -731,7 +808,15 @@ async def optimise(
 
     async def section(comp: str, rows: list[dict[str, Any]]) -> Session:
         message = component_briefing(
-            comp, rows, results, goldens, system_md, current.get(comp, ""), budget, cite=strict
+            comp,
+            rows,
+            results,
+            goldens,
+            system_md,
+            current.get(comp, ""),
+            budget,
+            cite=strict,
+            history=past,
         )
         g = replace(guard, max_chars=budget)
         async with sem:
@@ -821,6 +906,8 @@ async def optimise(
         method += "; every error of the 54 read (s11, D38)"
     if strict:
         method += "; guards G1–G4 (s11, D40 B)"
+    if history_rec:
+        method += "; the history of every earlier round read (s13, D45 A)"
     (target / "agent.yaml").write_text(
         "\n".join(
             [f"# {into}: {source.name} after one optimisation round of run {run_id} ({method})"]
@@ -872,6 +959,8 @@ async def optimise(
         **({"playbook_skipped_g3": skipped} if skipped else {}),
         **({"audit_g2": {"units_with_gold": audit_hits}} if strict else {}),
         **({"crossfit": crossfit} if crossfit else {}),
+        "from_champion": from_champion,
+        **({"history": history_rec} if history_rec else {}),
         "reviews_cost_usd": sum(r.get("cost_usd") or 0.0 for x in sessions for r in x.reviews),
         "cost_usd": sum(s.cost_usd or 0.0 for s in sessions)
         + sum(r.get("cost_usd") or 0.0 for x in sessions for r in x.reviews),
@@ -891,6 +980,9 @@ async def optimise(
         from dab_bench.tracking.prompts import register
 
         record["prompt_version"] = register(new)
+        from dab_bench.tracking.tracing import log_round_sessions
+
+        record["session_traces"] = log_round_sessions(record, tdir, force=True)  # s13 (B3)
         (target / "optimise.json").write_text(
             json.dumps(record, ensure_ascii=False, indent=1) + "\n"
         )
@@ -954,6 +1046,12 @@ async def rerun_system_pass(into: str) -> dict[str, Any]:
     except Exception as e:  # noqa: BLE001 - the folder is the record
         record["mlflow_error"] = f"{type(e).__name__}: {e}"
     (target / "optimise.json").write_text(json.dumps(record, ensure_ascii=False, indent=1) + "\n")
+    try:  # s13: the round's MLflow copy follows the record the history reads
+        from dab_bench.eval.outcome import relog_record
+
+        relog_record(record)
+    except Exception as e:  # noqa: BLE001
+        record["mlflow_error"] = f"{type(e).__name__}: {e}"
     return record
 
 

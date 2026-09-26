@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Round 5 receipt</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Design source (2): the project's own system — DESIGN.md ("Field Guide"), tokens verbatim,
+   the same block s00–s03 and frontend/src/tokens.css carry. */
+:root{
+  --bg:#F7F6F2; --panel:#FFFFFF; --band:#EFEEE8;
+  --ink:#1A1D1B; --ink-2:#3B403D; --muted:#4A514D; --faint:#5C635E;
+  --line:#DCDAD2; --line-2:#C7C5BC; --line-3:#8A8880;
+  --accent:#0A6552; --accent-ink:#FFFFFF; --accent-soft:#DFEFE8;
+  --amber:#8A5006; --amber-soft:#F6E6CF;
+  --red:#A2342B; --red-soft:#F6DEDB;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --serif:'IBM Plex Serif',Georgia,'Times New Roman',serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --t-2:0.8rem; --t-1:0.875rem; --t0:1rem; --t1:1.125rem; --t2:1.406rem; --t3:1.758rem; --t4:2.197rem;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
+  --r:10px; --r-sm:6px;
+  --shadow:0 1px 2px rgb(20 25 22 / .05), 0 12px 28px -18px rgb(20 25 22 / .22);
+  --dur:300ms; --ease:cubic-bezier(.2,.7,.2,1); --focus:var(--accent);
+  --w:1140px; --measure:68ch; --track-label:.08em;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121614; --panel:#191E1B; --band:#161A18;
+    --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+    --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+    --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+    --amber:#D99A4E; --amber-soft:#3A2A14;
+    --red:#E8776B; --red-soft:#3D1D1A;
+    --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121614; --panel:#191E1B; --band:#161A18;
+  --ink:#E8EBE7; --ink-2:#C9CFC9; --muted:#AEB6B0; --faint:#98A09A;
+  --line:#28302B; --line-2:#3A443E; --line-3:#727E77;
+  --accent:#43C29A; --accent-ink:#0E1512; --accent-soft:#17382C;
+  --amber:#D99A4E; --amber-soft:#3A2A14;
+  --red:#E8776B; --red-soft:#3D1D1A;
+  --shadow:0 1px 2px rgb(0 0 0 / .4), 0 12px 28px -18px rgb(0 0 0 / .65);
+}
+@media (prefers-reduced-motion: reduce){ :root{ --dur:0.01ms; } }
+*,*::before,*::after{box-sizing:border-box}
+:where(.grid,.flex,.kpi,.cards,.mock-body,.mock-cols,.mock-top,.ladder)>*{min-width:0}
+:where(p,h1,h2,h3,h4,li,dd,figcaption,td,th,.chip,.label){overflow-wrap:anywhere}
+:where(img,svg,video,iframe){max-width:100%;height:auto}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink-2);font-family:var(--sans);font-size:var(--t0);line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{color:var(--ink);margin:0;line-height:1.15;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+h1{font-size:var(--t4);font-family:var(--serif);font-weight:400} h1 em{font-style:italic;font-weight:400;color:var(--accent)}
+h2{font-size:var(--t3)} h3{font-size:var(--t1)} h4{font-size:var(--t0)}
+p{margin:0 0 var(--s4);text-wrap:pretty}
+a{color:var(--accent);text-decoration:underline;text-underline-offset:.2em} a:hover{text-decoration-thickness:2px}
+strong,b{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:max(var(--t-2),.86em);background:var(--band);padding:.08em .32em;border-radius:var(--r-sm);color:var(--ink-2)}
+pre{margin:0;font-family:var(--mono);font-size:var(--t-2);line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.wrap{max-width:var(--w);margin-inline:auto;padding-inline:var(--s5)}
+.label{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0}
+.lead{font-family:var(--serif);font-size:var(--t1);line-height:1.5;color:var(--ink-2);max-width:72ch}
+.small{font-size:var(--t-1);color:var(--muted)}
+.top{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:var(--w);margin-inline:auto;padding:var(--s3) var(--s5);display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.top b{font-family:var(--mono);font-size:var(--t-1);color:var(--ink);white-space:nowrap}
+.top nav{display:flex;gap:var(--s4);margin-left:auto;flex-wrap:wrap;font-size:var(--t-1);font-weight:500}
+.top nav a{color:var(--ink-2);text-decoration:none;padding:var(--s1) 0} .top nav a:hover{color:var(--accent)}
+header.hero{padding:var(--s7) 0 var(--s5)}
+.chips{display:flex;gap:var(--s2);flex-wrap:wrap;margin:var(--s4) 0 0}
+.chip{font-family:var(--mono);font-size:var(--t-2);padding:.3em .6em;border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--ink-2);background:var(--panel)}
+.chip.ok{border-color:var(--accent);color:var(--accent)} .chip.warn{border-color:var(--amber);color:var(--amber)}
+section.blk{padding-top:var(--s8)} section.blk:last-of-type{padding-bottom:var(--s9)}
+section.band-sec{background:var(--band);margin-top:var(--s8);padding:var(--s7) 0}
+section.band-sec + section.blk{padding-top:var(--s7)}
+.hd{margin-bottom:var(--s5);max-width:80ch} .hd .label{margin-bottom:var(--s2)} .hd h2{margin-bottom:var(--s3)}
+.panel{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5)}
+.grid{display:grid;gap:var(--s4)} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.g3,.g2{grid-template-columns:minmax(0,1fr)}}
+.card h3{margin-bottom:var(--s2)} .card p{margin-bottom:var(--s2);font-size:var(--t-1)} .card p:last-child{margin:0}
+.card.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r);box-shadow:var(--shadow);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:var(--t-1)}
+caption{text-align:left;padding:var(--s4) var(--s5) var(--s2);color:var(--muted);font-size:var(--t-1);caption-side:top}
+th,td{text-align:left;padding:var(--s3) var(--s4);border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}
+thead th{font-family:var(--mono);font-size:var(--t-2);font-weight:500;color:var(--faint);letter-spacing:var(--track-label);text-transform:uppercase;border-bottom:1px solid var(--line-2);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.sub{font-weight:600;color:var(--ink);white-space:nowrap}
+td.num{font-family:var(--mono);font-size:var(--t-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+td .path{display:block;font-family:var(--mono);font-size:var(--t-2);color:var(--faint);font-weight:400;margin-top:2px}
+td.mono,td code.u{font-family:var(--mono);font-size:var(--t-2)}
+code.u{background:none;padding:0;color:var(--ink)} code.u s{color:var(--faint);text-decoration:line-through}
+tr.pro td{background:color-mix(in srgb,var(--accent-soft) 55%,transparent)}
+tr.dim td{color:var(--muted)}
+.v-ok{color:var(--accent);font-weight:600} .v-no{color:var(--muted)} .v-warn{color:var(--amber);font-weight:600}
+blockquote{margin:0;padding:var(--s3) var(--s4);border-left:2px solid var(--accent);background:var(--band);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:var(--t-1)}
+blockquote.warn{border-left-color:var(--amber)}
+.fig{margin:var(--s5) 0 0}
+.fig-title{font-family:var(--mono);font-size:var(--t-2);font-weight:500;letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint);margin:0 0 var(--s3);text-wrap:balance}
+.fig figcaption{font-family:var(--sans);font-size:var(--t-1);color:var(--muted);line-height:1.5;margin-top:var(--s3)}
+.fig figcaption b{color:var(--ink);font-weight:600}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:var(--s3)}
+.steps li{position:relative;padding-left:2.75rem;font-size:var(--t-1)}
+.steps li::before{counter-increment:s;content:counter(s,decimal-leading-zero);position:absolute;left:0;top:2px;font-family:var(--mono);color:var(--accent);font-weight:500}
+form.q{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s5);display:grid;gap:var(--s3);margin-top:var(--s4)}
+form.q h3{margin:0} form.q .why{font-size:var(--t-1);color:var(--muted);margin:0}
+form.q label{display:grid;grid-template-columns:1.2rem minmax(0,1fr);gap:var(--s2);align-items:start;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);cursor:pointer;min-height:24px}
+form.q label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+form.q input[type=radio],form.q input[type=checkbox]{margin:3px 0 0;accent-color:var(--accent);width:16px;height:16px}
+form.q textarea{width:100%;font:inherit;font-size:var(--t-1);padding:var(--s2) var(--s3);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);color:var(--ink-2);min-height:3.2rem;resize:vertical}
+form.q .row{display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap}
+.btn{font:500 var(--t-1) var(--sans);background:var(--accent);color:var(--accent-ink);border:0;border-radius:var(--r-sm);padding:.55em 1em;cursor:pointer;min-height:24px;transition:filter var(--dur) var(--ease)}
+.btn:hover{filter:brightness(1.08)} .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.queued{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);min-height:1.2em}
+.rec{font-family:var(--mono);font-size:var(--t-2);color:var(--accent);margin-left:.4em}
+.tag{font-family:var(--mono);font-size:var(--t-2);padding:.15em .45em;border-radius:var(--r-sm);border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.tag.ok{border-color:var(--accent);color:var(--accent)} .tag.warn{border-color:var(--amber);color:var(--amber)} .tag.no{border-color:var(--line-3);color:var(--muted)}
+ul.tight{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.tight li{margin-bottom:var(--s1)}
+ul.qa{margin:0;padding-left:1.1em;font-size:var(--t-1)} ul.qa li{margin-bottom:var(--s2)}
+.code{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);margin-top:var(--s3);overflow-x:auto}
+.code .label{margin-bottom:var(--s2)}
+.code.band{background:var(--band)}
+.kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s4);margin-top:var(--s5)}
+@media (max-width:900px){.kpi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi .n{font-family:var(--serif);font-size:var(--t3);color:var(--ink);line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:var(--t-1);color:var(--muted);margin-top:var(--s1)}
+
+/* the hackable-address ladder */
+.ladder{display:grid;gap:var(--s2);margin-top:var(--s3)}
+.ladder .rung{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--s3);align-items:baseline;padding:var(--s2) var(--s3);border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel);font-family:var(--mono);font-size:var(--t-2)}
+.ladder .rung .u{color:var(--ink)} .ladder .rung .u b{color:var(--accent);font-weight:500}
+.ladder .rung .w{font-family:var(--sans);color:var(--muted);font-size:var(--t-2);text-align:right;white-space:nowrap}
+@media (max-width:640px){.ladder .rung{grid-template-columns:minmax(0,1fr)} .ladder .rung .w{text-align:left;white-space:normal}}
+
+/* the mock of the explorer page, in the explorer's own styles */
+.addr{font-family:var(--mono);font-size:var(--t-2);color:var(--ink);background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:var(--s2) var(--s3);margin-top:var(--s4);display:flex;gap:var(--s2);align-items:center}
+.addr .lock{color:var(--faint)} .addr b{color:var(--accent);font-weight:500}
+.mock{background:var(--bg);border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);margin-top:var(--s2)}
+.mock-top{display:flex;gap:var(--s4);align-items:center;padding:var(--s2) var(--s4);border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 88%,transparent);font-size:var(--t-2);flex-wrap:wrap}
+.mock-top .brand{font-family:var(--mono);color:var(--ink);font-weight:500}
+.mock-top nav{display:flex;gap:var(--s3);flex-wrap:wrap} .mock-top nav span{color:var(--ink-2)} .mock-top nav span.on{color:var(--accent);border-bottom:2px solid var(--accent)}
+.mock-body{padding:var(--s4)}
+.mock h1{font-size:var(--t2)} .mock .label{font-size:.7rem}
+.mock .ed{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent);padding:var(--s4);margin:var(--s3) 0 var(--s4);display:grid;gap:var(--s2)}
+.mock .ed .hdr{display:flex;gap:var(--s3);align-items:baseline;flex-wrap:wrap;font-size:var(--t-1)}
+.mock .ed .hdr b{font-family:var(--mono);font-weight:500;color:var(--ink)} .mock .ed .hdr .nav{margin-left:auto;display:flex;gap:var(--s3);font-size:var(--t-2)}
+.mock .ed .hdr .nav a{text-decoration:underline}
+.mock .ed .qtext{font-size:var(--t-1);color:var(--ink-2);margin:0}
+.mock .ed .ta{font-family:var(--mono);font-size:var(--t-2);border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--bg);padding:var(--s2) var(--s3);min-height:4.4rem;color:var(--ink-2);white-space:pre-wrap}
+.mock .ed .row{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap}
+.mock .ed .btn{font-size:var(--t-2);padding:.4em .8em} .mock .ed .btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.mock table{min-width:0;font-size:var(--t-2)} .mock th,.mock td{padding:var(--s2) var(--s3)}
+.mock tr.cur td{background:var(--accent-soft)} .mock tr.cur td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.mock .tw{box-shadow:none;border:1px solid var(--line)}
+.cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.cmp{grid-template-columns:minmax(0,1fr)}}
+.cmp .side{background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow);padding:var(--s4)}
+.cmp .side h4{margin-bottom:var(--s2)} .cmp .side .label{margin-bottom:var(--s2)}
+.cmp .side pre{background:var(--band);border-radius:var(--r-sm);padding:var(--s3)}
+.cmp .side.pro{box-shadow:var(--shadow),inset 0 0 0 1.5px var(--accent)}
+.src{font-size:var(--t-1);color:var(--muted)} .src li{margin-bottom:var(--s1)}
+
+.bar{display:flex;height:34px;border-radius:var(--r-sm);overflow:hidden;margin-top:var(--s3);box-shadow:var(--shadow)}
+.bar span{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:var(--t-2);color:var(--ink);min-width:0;white-space:nowrap;overflow:hidden}
+.bar .a{background:var(--accent-soft)} .bar .b{background:color-mix(in srgb,var(--accent-soft) 45%,var(--panel))} .bar .c{background:var(--amber-soft)}
+.legend{display:flex;gap:var(--s4);flex-wrap:wrap;font-size:var(--t-1);color:var(--muted);margin-top:var(--s2)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+pre.sql{background:var(--band);border-radius:var(--r-sm);padding:var(--s4);font-size:var(--t-2);white-space:pre;overflow-x:auto}
+.copyrow{display:flex;gap:var(--s3);align-items:center;margin-top:var(--s2);flex-wrap:wrap}
+
+/* impact chart: the .dia contract, green / amber / red composition (DESIGN.md §2 Colour) */
+.dia{width:100%;height:auto;display:block;background:var(--panel);border-radius:var(--r);box-shadow:var(--shadow)}
+.dia .ax{stroke:var(--line-2);stroke-width:1}
+.dia .tx{font:500 13px var(--sans);fill:var(--ink)} .dia .tx.all{font-weight:600}
+.dia .tx.k{font:500 13px var(--mono);fill:var(--faint)} .dia .tx.k.strong{fill:var(--ink)}
+.dia .tx.in{font:600 12.8px var(--mono);fill:var(--accent-ink)}
+.dia .trk{fill:var(--line-2)} .dia .agt{fill:var(--ink-2)}
+.dia .seg.ok{fill:var(--accent)} .dia .seg.mid{fill:var(--amber)} .dia .seg.bad{fill:var(--red)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+.sw.b{background:var(--ink-2)} .sw.ok{background:var(--accent)} .sw.mid{background:var(--amber)} .sw.bad{background:var(--red)}
+.lg{white-space:nowrap;margin-right:var(--s3)}
+
+/* the challenger flow figure (.dia contract; nodes follow the page tokens) */
+.dia.flow .nd{fill:var(--panel);stroke:var(--line-3);stroke-width:1}
+.dia.flow .nd.in{fill:var(--band)}
+.dia.flow .nd.hi{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.dia.flow .nd.gold{fill:var(--amber-soft);stroke:var(--amber)}
+.dia.flow .ed{stroke:var(--ink-2);stroke-width:1.25;fill:none;marker-end:url(#arr)}
+.dia.flow .ed.both{marker-start:url(#arr)}
+.dia.flow .ed.dash{stroke-dasharray:5 4}
+.dia.flow .tx.s{font:400 12.8px var(--sans);fill:var(--muted)}
+td.nw{white-space:nowrap}
+.dia.flow .cap{font:500 12.8px var(--mono);fill:var(--faint);letter-spacing:.08em;text-transform:uppercase}
+</style>
+<style>
+.shot{margin:var(--s5) 0 0}
+.shot img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+.shot figcaption{font-size:var(--t-1);color:var(--muted);margin-top:var(--s2);max-width:var(--measure)}
+.shot .src{font-family:var(--mono);font-size:var(--t-2);color:var(--faint)}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4)}
+@media (max-width:760px){.pair{grid-template-columns:minmax(0,1fr)}}
+td.up{color:var(--accent);font-weight:600}
+td.down{color:var(--amber);font-weight:600}
+.top b{min-width:0;overflow-wrap:anywhere}
+.verdict{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:760px){.verdict{grid-template-columns:minmax(0,1fr)}}
+.verdict .panel h3{display:flex;gap:var(--s2);align-items:baseline;flex-wrap:wrap}
+.big{font-family:var(--serif);font-size:var(--t3);line-height:1}
+.big.go{color:var(--accent)} .big.no{color:var(--amber)}
+.opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.opts{grid-template-columns:minmax(0,1fr)}}
+.opts .panel p{font-size:var(--t-1);margin-bottom:var(--s2)} .opts .panel dl{margin:0;font-size:var(--t-1)}
+.opts dt{font-family:var(--mono);font-size:var(--t-2);color:var(--faint);text-transform:uppercase;letter-spacing:var(--track-label);margin-top:var(--s2)}
+.opts dd{margin:0}
+.ideas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s4);margin-top:var(--s4)}
+@media (max-width:900px){.ideas{grid-template-columns:minmax(0,1fr)}}
+.ideas .panel p{font-size:var(--t-1);margin-bottom:var(--s2)}
+.ideas .who{font-family:var(--mono);font-size:var(--t-2);color:var(--faint)}
+.ideas .hits{display:flex;gap:var(--s2);flex-wrap:wrap;margin-top:var(--s2)}
+td .tag{margin-right:4px}
+.gapbar{display:inline-block;height:10px;background:var(--amber);border-radius:2px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in">
+  <b>s14 · round 5 receipt</b>
+  <nav aria-label="Sections"><a href="#receipt">Receipt</a><a href="#score">Score</a><a href="#moves">Moves</a><a href="#regressions">Regressions</a><a href="#rounds">Round 4 vs 5</a><a href="#mlflow">MLflow</a><a href="#next">Next</a></nav>
+</div></div>
+<div class="wrap">
+<header class="hero">
+  <p class="label">DataAgentBench · receipt s14 · 2026-09-25 · plan s13 · runs v6 20260925T015204Z, v7 040220Z, v8 061041Z · one trial each · branch challenger_v8 · updated: v8 promoted under D46</p>
+  <h1>v8 answers 48 of 54, the most of any version, and wins back four of the seven regressions; <em>promoted under D46 on Pass@1, 0.904 to 0.891</em></h1>
+  <p class="lead">Round 5 was v7's recipe with one change. Every session also read each failed question's history across v1–v7, plus v7's lost round: what it wrote, what was refused, and what it gained and lost. The history was read from MLflow, as asked. v8 improves on v6 in answers and in the leaderboard's Pass@1, and loses two SQL passes. Two of the four statements it lost had passed under v6 because of v6 notes that the reviewer (G1) refuses as handing over the answer; v8 left those notes out.</p>
+  <div class="kpi">
+    <div><div class="n">46 → 48 /54</div><div class="d">answers, v6 → v8; v7 had 46</div></div>
+    <div><div class="n">33 → 31 /49</div><div class="d">SQL of the questions with a golden; v7 had 30. D36 decided on this line; D46 leads with Pass@1</div></div>
+    <div><div class="n">0.891 → 0.904</div><div class="d">Pass@1, the leaderboard's number, one trial; Scout (#2) 0.906 over five</div></div>
+    <div><div class="n">4 of 7</div><div class="d">regressions won back (a question v6 failed after an earlier version passed it); 0 of the 13 that never passed</div></div>
+  </div>
+</header>
+
+<section class="blk" id="receipt">
+  <div class="hd"><p class="label">01 · the receipt · every item queued from s13</p>
+  <h2>All eleven items are done; round 5 and v8's run cost $11.48</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>id</th><th>item</th><th>outcome</th><th>evidence</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">B1</td><td>champion lock</td><td><span class="tag ok">done</span></td><td><code>dab optimise --into v8_sql</code> picked v6's run itself; a run of another version raises <code>NotChampionError</code> (test). <code>dab crossfit</code> passes its own run and reads no history.</td></tr>
+      <tr><td class="sub">B2</td><td>round outcomes on MLflow</td><td><span class="tag ok">done</span></td><td>Backfilled v2 won, v3 lost, v6 won, v7 lost. <code>dab promote</code> then wrote v8 lost under D36, and won under D46. Each round's MLflow run carries <code>outcome</code> and <code>outcome.json</code>.</td></tr>
+      <tr><td class="sub">B3</td><td>session traces</td><td><span class="tag ok">done</span></td><td>52 backfilled (rounds 1–4: 11, 16, 12, 13) and 13 logged by round 5; <code>kind=optimise_session</code>, a span per turn and tool call.</td></tr>
+      <tr><td class="sub">B4</td><td><code>dab history</code></td><td><span class="tag ok">done</span></td><td>Built from MLflow in about 7 s. <code>--parity</code>: MLflow = folders. Fixed on the way: MLflow artifact downloads hung (worked around in the client, §06), and MLflow held v2's pre-re-run <code>optimise.json</code> (re-logged).</td></tr>
+      <tr><td class="sub">B5</td><td>briefings</td><td><span class="tag ok">done</span></td><td>Each failed question's history block and v7's block for the same dataset or step. The optimiser's two prompts each gained one paragraph. <code>optimise.json</code> records <code>history</code>.</td></tr>
+      <tr><td class="sub">B6</td><td>tests and docs</td><td><span class="tag ok">done</span></td><td><code>tests/test_s13.py</code> (9) and one API test. pytest, ruff, mypy, tsc, vitest (51) and the design lint all pass. CLAUDE.md (the MLflow exception, the lock) and AGENTS.md §7.</td></tr>
+      <tr><td class="sub">B7</td><td>round 5 → v8_sql</td><td><span class="tag ok">done</span></td><td>$4.83, of which the reviewer took $1.29. Accepted: 3 of 3 sections and 6 of 10 dataset notes.</td></tr>
+      <tr><td class="sub">B8</td><td>v8 on the 54, once</td><td><span class="tag ok">done</span></td><td>$5.36; the Opus reader $1.29. No errors, timeouts or rate limits.</td></tr>
+      <tr><td class="sub">B9</td><td>promote v8 against v6</td><td><span class="tag ok">done · v8 promoted</span></td><td>D36 kept v6 on SQL, 33/49 against 31/49. You then set D46: a challenger passes the leak gate (its round ran G1–G4, and G2 finds no gold value in its prompt), then the highest Pass@1 wins. v8 passes the gate and wins, 0.904 to 0.891. Prompt version 11 holds the <code>champion</code> alias. v2–v5 are barred by the gate. v8 still carries 7 of the 10 v6 units the s12 G1 audit judged decisive; none of them is a gold value.</td></tr>
+      <tr><td class="sub">B10</td><td>this receipt</td><td><span class="tag ok">done</span></td><td>—</td></tr>
+      <tr><td class="sub">M1</td><td>question history on the Optimise tab</td><td><span class="tag ok">done</span></td><td><code>/api/optimise/history</code> and the matrix below; each cell links to its trial, and a row opens the text a session reads.</td></tr>
+    </tbody></table></div>
+</section>
+
+<section class="blk" id="score">
+  <div class="hd"><p class="label">02 · the three versions from v6's run · one trial each</p>
+  <h2>v8 leads on answers and Pass@1, v6 on SQL; neither gap is beyond one-trial noise</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>version</th><th>answers</th><th>SQL</th><th>decision</th><th>Pass@1</th><th>held-out answers</th><th>made by</th></tr></thead>
+    <tbody>
+      <tr class="pro"><td class="sub">v6_sql ★</td><td class="num">46/54</td><td class="num">33/49</td><td class="num">49/49</td><td class="num">0.891</td><td class="num">14/16</td><td>round 3, training split, literal guard, $1.90</td></tr>
+      <tr><td class="sub">v7_sql ✗</td><td class="num">46/54</td><td class="num">30/49</td><td class="num">49/49</td><td class="num">0.884</td><td class="num">13/16</td><td>round 4, every error + G1–G4, $4.39</td></tr>
+      <tr><td class="sub">v8_sql ✗</td><td class="num up">48/54</td><td class="num">31/49</td><td class="num">48/49</td><td class="num up">0.904</td><td class="num">14/16</td><td>round 5 = round 4 + the history, $4.83</td></tr>
+    </tbody></table></div>
+  <p class="small" style="margin-top:var(--s3)">Paired exact McNemar tests, v6 against v8: answers +3 −1 (p = 0.63), SQL +2 −4 (p = 0.69). Held-out = the 16 questions of the old s06 split, kept only for comparison: rounds 4 and 5 read every error.</p>
+</section>
+
+<section class="blk" id="moves">
+  <div class="hd"><p class="label">03 · every question that moved, v6 → v8</p>
+  <h2>v8 gained three answers and two statements, and lost one answer and four statements</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>question</th><th>move</th><th>under v8</th><th>what the record shows</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">crmarenapro/13</td><td class="up">answer + SQL gained</td><td>passes</td><td>Passed v1–v5, failed under v6 and v7 at sources. Round 5 read its history and v5's statement. Its crmarenapro notes were dropped (G1); v8 changed the sources, parse and shape sections.</td></tr>
+      <tr><td class="sub">crmarenapro/7</td><td class="up">answer gained</td><td>passes</td><td>No golden. Passed only under v5 before, a model switch with no prompt change: with one trial, this may be noise.</td></tr>
+      <tr><td class="sub">agnews/4</td><td class="up">answer gained</td><td>passes</td><td>No golden. Passed under v4 and v7. v8's agnews notes changed.</td></tr>
+      <tr><td class="sub">stockmarket/4</td><td class="up">SQL gained</td><td>passes</td><td>Last passed under v4. v8's stockmarket notes changed.</td></tr>
+      <tr class="dim"><td class="sub">googlelocal/2</td><td class="down">answer lost</td><td>SQL passes</td><td>The statement returns the right result; the validator rejects the answer's format.</td></tr>
+      <tr><td class="sub">deps_dev_v1/2</td><td class="down">SQL lost</td><td>breaks at metric</td><td>v6's deps_dev_v1 notes say to return a Version column for such rankings, and that returning only project names "counts as wrong". G1 refused that rule as decisive in rounds 4 and 5; v8 left it out. v7 lost this too.</td></tr>
+      <tr><td class="sub">stockmarket/2</td><td class="down">SQL lost</td><td>breaks at shape</td><td>v6's stockmarket notes give the list-plus-total format with a final "Total" row. G1 refused it in round 4, and v8's rationale says it removed "refused … list+total rules".</td></tr>
+      <tr><td class="sub">crmarenapro/4</td><td class="down">SQL lost</td><td>breaks at shape</td><td>Labels a month with its year. Round 5 rewrote the shape section, as round 4 did, and v7 broke this at shape too.</td></tr>
+      <tr><td class="sub">stockindex/1</td><td class="down">SQL lost</td><td>breaks at rank</td><td>No round touched the rank section or stockindex's notes, and v7 lost it too: noise or a side effect of shared text.</td></tr>
+    </tbody></table></div>
+  <blockquote class="warn" style="margin-top:var(--s4)">Two of v6's 33 SQL passes (deps_dev_v1/2, stockmarket/2) rest on notes the reviewer judges to hand over the answer (the rubric's §2.2). Set those two aside and v6 and v8 stand level at 31 of 49. Only a run of v6 without that text (N3 below) would make the comparison like for like.</blockquote>
+</section>
+
+<section class="blk" id="regressions">
+  <div class="hd"><p class="label">04 · the seven regressions the history pointed at</p>
+  <h2>Four of the seven pass again under v8; three still fail</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>question</th><th>tracks</th><th>last passed</th><th>v6</th><th>v7</th><th>v8</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">crmarenapro/13</td><td>answer</td><td class="num">v5</td><td class="v-no">fail</td><td class="v-no">fail</td><td class="v-ok">pass</td></tr>
+      <tr><td class="sub">crmarenapro/7</td><td>answer</td><td class="num">v5</td><td class="v-no">fail</td><td class="v-no">fail</td><td class="v-ok">pass</td></tr>
+      <tr><td class="sub">agnews/4</td><td>answer</td><td class="num">v4</td><td class="v-no">fail</td><td class="v-ok">pass</td><td class="v-ok">pass</td></tr>
+      <tr><td class="sub">stockmarket/4</td><td>SQL</td><td class="num">v4</td><td class="v-no">fail</td><td class="v-no">fail</td><td class="v-ok">pass</td></tr>
+      <tr><td class="sub">crmarenapro/3</td><td>answer</td><td class="num">v3</td><td class="v-no">fail</td><td class="v-no">fail</td><td class="v-no">fail</td></tr>
+      <tr><td class="sub">stockmarket/3</td><td>SQL</td><td class="num">v5</td><td class="v-no">fail</td><td class="v-no">fail</td><td class="v-no">fail</td></tr>
+      <tr><td class="sub">stockmarket/5</td><td>SQL</td><td class="num">v5</td><td class="v-no">fail</td><td class="v-no">fail</td><td class="v-no">fail</td></tr>
+    </tbody></table></div>
+  <figure class="shot">
+    <img src="s14_matrix.png" alt="The Optimise tab's question-history matrix: v6's 20 failing questions by version v1 to v8, the seven regressions first, with v6 and v8's columns shown">
+    <figcaption>The Optimise tab (M1) after round 5: v8's column sits beside v7's as a second round from v6 that lost. <span class="src">localhost:8091/optimise</span></figcaption>
+  </figure>
+</section>
+
+<section class="blk" id="rounds">
+  <div class="hd"><p class="label">05 · round 4 against round 5 · the same recipe, one reading the history</p>
+  <h2>With the history, the reviewer refused less and more notes got through, but the same three statements still broke</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th></th><th>round 4 → v7</th><th>round 5 → v8</th></tr></thead>
+    <tbody>
+      <tr><td class="sub">read</td><td>every error of v6's run</td><td>the same, plus the history and v7's round</td></tr>
+      <tr><td class="sub">sections accepted</td><td class="num">3 of 3 (sources, parse, shape)</td><td class="num">3 of 3 (sources, parse, shape)</td></tr>
+      <tr class="pro"><td class="sub">dataset notes accepted</td><td class="num">2 of 10</td><td class="num">6 of 10</td></tr>
+      <tr><td class="sub">G1 reviews decisive</td><td class="num">15 of 20</td><td class="num">13 of 22</td></tr>
+      <tr><td class="sub">cost (of which G1)</td><td class="num">$4.39 ($1.16)</td><td class="num">$4.83 ($1.29)</td></tr>
+      <tr><td class="sub">SQL lost against v6</td><td>crmarenapro/4, deps_dev_v1/2, stockindex/1</td><td>the same three, and stockmarket/2</td></tr>
+    </tbody></table></div>
+  <p class="small" style="margin-top:var(--s3)">Four of round 5's 13 rationales name the earlier rounds: the sources and shape sections, agnews and yelp. The stockmarket session dropped the rules round 4's reviewer had refused, the list-plus-total rule among them. Both rounds added the same shape rule (output numbers as computed, no rounding). The four questions it came from (bookreview/1, googlelocal/3, music_brainz_20k/3, yelp/6) still fail SQL under v8, and crmarenapro/4 broke at shape under both rounds.</p>
+</section>
+
+<section class="blk" id="mlflow">
+  <div class="hd"><p class="label">06 · what MLflow holds now · experiment dataagentbench/evals</p>
+  <h2>Five rounds carry an outcome, 65 sessions are traces, and the history reads back equal to the folders</h2></div>
+  <ul class="qa">
+    <li><b>Outcomes</b>, from tag <code>outcome</code>: v2 won, v3 lost, v6 won, v7 lost, v8 lost. A round 6 from v6 reads both v7 and v8 as rounds that lost.</li>
+    <li><b>Session traces</b>: 65 in total (rounds 1–5), each tagged with its version, scope, whether its text was accepted, its refusals and G1's decisive count.</li>
+    <li><b>A platform issue, worked around in the client only.</b> The central server offers multipart artifact downloads, but their presigned URLs name MinIO by its compose hostname, which the host cannot resolve. Each download retried for minutes. <code>MlflowSource</code> sets <code>MLFLOW_ENABLE_PROXY_MULTIPART_DOWNLOAD=false</code> for its own process. The real fix belongs in nmp-central-ai; I did not change it.</li>
+  </ul>
+</section>
+
+<section class="blk" id="next">
+  <div class="hd"><p class="label">07 · next · your call, nothing queued</p>
+  <h2>v8 is the champion; round 6 starts from its run</h2></div>
+  <form class="q" data-lavish-question="next-s14" onsubmit="event.preventDefault(); const selected=[...event.currentTarget.querySelectorAll('input[name=items]:checked')].map(i=>({id:i.value,label:i.dataset.label,disposition:'build'})); if(!selected.length){return;} window.lavish.queuePrompt('From s14, do exactly the ticked next steps and return an item-by-item receipt. Items: '+selected.map(s=>s.id+' '+s.label).join('; '), {tag:'tracked-batch', text:'Queue '+selected.length+' next steps from s14', element:event.currentTarget, data:{items:selected}}); event.currentTarget.querySelector('.queued').textContent='queued: '+selected.map(s=>s.id).join(', ');">
+    <h3>Next steps</h3>
+    <label><input type="checkbox" name="items" value="N3" data-label="v6-clean: v6 with its G1-decisive units removed, run on the 54 once"><span><b>N3 · v6-clean</b> <span class="rec">recommended first</span>: v6 without the text G1 finds decisive: the 10 units the s12 audit flagged, and the deps_dev_v1 output-shape rule refused in rounds 4 and 5. Run on the 54 once (≈ $6.40). It shows how much of the score rests on that text; v8 carries 7 of those 10 units.</span></label>
+    <label><input type="checkbox" name="items" value="N1" data-label="round 6 from the champion, reading v7 and v8"><span><b>N1 · Round 6 from the champion, v8.</b> Its history lists no lost round: v7 lost to v6, not to v8 (≈ $11.50 with its run).</span></label>
+    <label><input type="checkbox" name="items" value="N2" disabled><span><b>N2 · D46, the rule.</b> <span class="tag ok">done</span> Promotion now leads with Pass@1, behind the leak gate. v8 won, 0.904 to 0.891.</span></label>
+    <label><input type="checkbox" name="items" value="N4" data-label="3 more trials of v6 and v8 on the 20 questions that differ or fail"><span><b>N4 · More trials where it matters.</b> Three more trials of v6 and v8 on the 20 questions that fail or differ (≈ 120 trials, ≈ $12), to separate signal from one-trial noise.</span></label>
+    <div class="row"><button type="submit" class="btn">Queue next steps</button><span class="queued"></span></div>
+  </form>
+  <p class="small" style="margin-top:var(--s3)">Correction to s13: its KPI said 8 of 12 of v7's dataset sessions ended with nothing accepted. v7's round had 10 dataset sessions, so it is 8 of 10. The s13 page is fixed.</p>
+</section>
+</div>
+</body>
+</html>

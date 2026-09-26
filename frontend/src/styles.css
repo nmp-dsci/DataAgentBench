@@ -385,3 +385,14 @@ table.lines{min-width:0} table.lines td.sub{width:6rem}
 ol.attempts{list-style:none;margin:0;padding:0;display:grid;gap:var(--s1);font-size:var(--t-1)}
 .session .chips{margin:0}
 .session a.chip{text-decoration:none}
+
+/* s13: the question history on the Optimise tab */
+table.hist td.hc{text-align:center;white-space:nowrap;font-family:var(--mono)}
+table.hist td.hc a{text-decoration:none}
+table.hist .hm{display:inline-block;width:1.1em;text-align:center}
+table.hist .hm.ok{color:var(--accent)} table.hist .hm.fail{color:var(--red)} table.hist .hm.none{color:var(--line-3)}
+table.hist .hm.dim{opacity:.45}
+table.hist td.hc.flip{box-shadow:inset 0 -2px 0 var(--amber)}
+table.hist th.champ,table.hist td.champ{background:color-mix(in srgb,var(--accent-soft) 60%,transparent)}
+table.hist tr.hgrp td{background:var(--band);font:500 var(--t-2)/1.4 var(--mono);letter-spacing:var(--track-label);text-transform:uppercase;color:var(--faint)}
+table.hist pre.hblock{margin:0;background:var(--band);border-radius:var(--r-sm);padding:var(--s3) var(--s4);font:400 var(--t-2)/1.5 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%}

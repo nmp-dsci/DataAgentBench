@@ -1,0 +1,15 @@
+## Duplicates in `music_brainz_20k_tracks`
+- One song is up to 5 records, one per `source_id`, each wrapping the title differently:
+  - 1: "Title (Album)"
+  - 2: "Artist - Title", `artist` NULL
+  - 3: "Title - Album", `album` NULL
+  - 4: "NNN-Title". The 3-digit prefix is sometimes corrupted ("F004-", "0B2-") or has no dash.
+  - 5: plain title
+- Records also carry random one-character typos and dropped or added spaces ("StreetH ype").
+- Source 4 has no non-ASCII characters, so accents are stripped there ("Lugen" vs "Lügen"). The other sources keep accents.
+- To compare text, unwrap each record by its source. Then make a key: fold accents, lower-case, keep only letters and digits. Skipping the accent folding splits songs.
+- Typos mean exact (title key, artist key) groups can split one song, which matters most in catalogue-wide rankings. Link two records when one key is equal and the other differs by about one character.
+- Placeholder artists do not identify a performer, so never group on them: "[unknown]", "unknown", "[unknownn]", "[[unknown]", "[gunknown]". A real band name can also contain "Unknown".
+- Every sales `track_id` exists in tracks. Sum sales over ALL of a song's records.
+- For a named song or artist, use the letters-only key of `title` plus `artist` together, because source 2 keeps the artist inside `title`. Substring matching finds every record.
+- For "which X earned the most", return the identifying column. Add the amount only if the question asks for it.
