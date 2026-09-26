@@ -718,12 +718,19 @@ async def optimise(
     meta, results, traces = _read_run(run_id)
     if from_champion:
         from dab_bench.agent.versions import champion_name
+        from dab_bench.eval.promote import champion_run
 
         champ = champion_name()
         if meta["agent"] != champ:
             raise NotChampionError(
                 f"{run_id} is a run of {meta['agent']}; a round starts from the champion's run "
                 f"({champ}): `dab optimise --into {into}` picks it (s13)"
+            )
+        champ_run_id = champion_run()
+        if champ_run_id is not None and run_id != champ_run_id:
+            raise NotChampionError(
+                f"{run_id} is not {champ}'s newest complete run ({champ_run_id}): "
+                f"`dab optimise --into {into}` picks it (s13)"
             )
     source = load_version(meta["agent"])
     if not source.submits_sql:

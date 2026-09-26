@@ -209,11 +209,10 @@ class MlflowSource:
     @contextmanager
     def _files(self, run_id: str, paths: list[str]) -> Iterator[Path]:
         with tempfile.TemporaryDirectory() as tmp:
+            present = {f.path for f in self.client.list_artifacts(run_id)}
             for p in paths:
-                try:
+                if p in present:
                     self.client.download_artifacts(run_id, p, tmp)
-                except Exception:  # noqa: BLE001, S112 - a missing artifact leaves the run out
-                    continue
             yield Path(tmp)
 
     def versions(self) -> list[VersionRun]:

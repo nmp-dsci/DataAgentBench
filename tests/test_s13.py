@@ -360,6 +360,12 @@ class _FakeMlflow:
     ) -> list[Any]:
         return self.eval if "'eval'" in filter_string else self.opt
 
+    def list_artifacts(self, run_id: str, path: str = "") -> list[Any]:
+        return [
+            SimpleNamespace(path=p.name, is_dir=p.is_dir())
+            for p in sorted(self.files[run_id].iterdir())
+        ]
+
     def download_artifacts(self, run_id: str, path: str, dst: str) -> str:
         src = self.files[run_id] / path
         if src.is_dir():
@@ -379,6 +385,19 @@ def test_mlflow_and_the_folders_give_the_same_history(lineage: tuple[Path, Path]
     assert hist.parity(from_mlflow, _history(lineage)) == []
 
 
+def test_an_mlflow_outage_stops_the_round_instead_of_dropping_it(
+    lineage: tuple[Path, Path],
+) -> None:
+    """D42 A: MLflow down stops a round, it never silently drops the run from history."""
+
+    class _FlakyMlflow(_FakeMlflow):
+        def download_artifacts(self, run_id: str, path: str, dst: str) -> str:
+            raise ConnectionError("artifact store unreachable")
+
+    with pytest.raises(ConnectionError):
+        hist.build(hist.MlflowSource(client=_FlakyMlflow(*lineage), experiment_id="1"), "c_sql")
+
+
 # ── the champion lock (B1) and the briefings (B5) ────────────────────────────
 
 
@@ -392,6 +411,49 @@ def test_a_round_from_a_run_that_is_not_the_champions_is_refused(
     monkeypatch.setattr(versions, "CHAMPION_FILE", champion)
     with pytest.raises(op.NotChampionError, match="c_sql"):
         asyncio.run(op.optimise("run_d_sql", "e_sql"))
+
+
+def test_a_stale_run_of_the_champion_is_refused_even_without_history(
+    lineage: tuple[Path, Path], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """F2: the champion-recency check must hold with history=False too, not only inside the
+    `if history:` branch (the CLI always sets history=True, but the guarantee should not
+    depend on that)."""
+    runs, agents = lineage
+    required = {
+        "fingerprint": "f",
+        "context_sha": "c",
+        "model": "opus",
+        "effort": "high",
+        "n_queries": 5,
+        "trials": 1,
+        "workers": 1,
+        "hints": False,
+        "max_turns": 20,
+    }
+    for d in runs.iterdir():
+        rj = d / "run.json"
+        live = json.loads(rj.read_text())
+        live["summary"] = {**live["summary"], "passed": live["summary"]["scored"]}
+        rj.write_text(json.dumps(live | required))
+
+    stale_id = "run_d_sql_stale"
+    stale = runs / stale_id
+    shutil.copytree(runs / "run_d_sql", stale)
+    meta = json.loads((stale / "run.json").read_text())
+    meta["run_id"] = stale_id
+    meta["started_at"] = "2000-01-01T00:00:00"
+    (stale / "run.json").write_text(json.dumps(meta))
+
+    from dab_bench.eval import runner
+
+    monkeypatch.setattr(op, "RUNS_DIR", runs)
+    monkeypatch.setattr(runner, "RUNS_DIR", runs)
+    champion = tmp_path / "champion"
+    champion.write_text("d_sql\n")
+    monkeypatch.setattr(versions, "CHAMPION_FILE", champion)
+    with pytest.raises(op.NotChampionError, match="run_d_sql"):
+        asyncio.run(op.optimise(stale_id, "e_sql", history=False))
 
 
 def test_a_component_briefing_carries_the_history_only_when_given(
