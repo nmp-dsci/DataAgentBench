@@ -471,7 +471,9 @@ def diagnose(
 
 @app.command()
 def optimise(
-    run_id: str,
+    run_id: str | None = typer.Argument(
+        None, help="the run to learn from; default the champion's newest full run (s13)"
+    ),
     into: str = typer.Option(..., help="the new version's name, e.g. v2_sql"),
     workers: int = 4,
     system_pass_only: bool = typer.Option(
@@ -494,14 +496,20 @@ def optimise(
     strict: bool = typer.Option(
         False, help="s11 (D40 B): guards G1 review, G2 audit, G3 breadth, G4 no routing"
     ),
+    history: bool = typer.Option(
+        True,
+        help="s13 (D42 A): every session reads each failed question's history and the rounds "
+        "from the champion that lost, built from MLflow",
+    ),
 ) -> None:
     """One optimisation round: the optimiser (Sonnet 5, medium) reads RUN's failed train
     questions and writes agents/INTO/ = the run's version + a playbook section per step at
     which statements break (across datasets, from the ledger: run `dab diagnose RUN --ledger`
     first) + dataset notes. Every edit is checked for question text, gold values and golden
-    SQL; the held-out questions are never shown."""
+    SQL; the held-out questions are never shown. From s13 the run must be the champion's."""
     import asyncio
 
+    from dab_bench.agent.optimise import NotChampionError
     from dab_bench.agent.optimise import optimise as _optimise
     from dab_bench.tracking.mlflow_log import TrackingDownError, preflight
 
@@ -518,17 +526,30 @@ def optimise(
         if train not in ("split", "all"):
             console.print("[red]--train is split or all[/]")
             raise typer.Exit(1)
-        rec = asyncio.run(
-            _optimise(
-                run_id,
-                into,
-                workers=workers,
-                components=components,
-                model=model,
-                train_all=train == "all",
-                strict=strict,
+        if run_id is None:
+            from dab_bench.eval.promote import champion_run
+
+            run_id = champion_run()
+            if run_id is None:
+                console.print("[red]the champion has no complete full-split run[/]")
+                raise typer.Exit(1)
+            console.print(f"the champion's run: {run_id}")
+        try:
+            rec = asyncio.run(
+                _optimise(
+                    run_id,
+                    into,
+                    workers=workers,
+                    components=components,
+                    model=model,
+                    train_all=train == "all",
+                    strict=strict,
+                    history=history,
+                )
             )
-        )
+        except NotChampionError as e:
+            console.print(f"[red]{e}[/]")
+            raise typer.Exit(1) from None
     for s in rec["sessions"]:
         state = (
             "[red]error[/] " + s["error"]
@@ -560,8 +581,9 @@ def optimise(
 
 @app.command()
 def promote(candidates: str | None = None, dry_run: bool = False) -> None:
-    """Crown the version whose statements are right most often (D36): the most SQL passed
-    of the questions with a golden; answers passed of the 54 break a tie; then the incumbent;
+    """Crown the version that answers best (D46): a challenger passes the leak gate (its round
+    ran guards G1–G4, no gold value in its prompt); the highest Pass@1 wins; answers passed of
+    the 54 break a tie, then SQL passed of the questions with a golden; then the incumbent;
     then the older run. Each candidate is its newest complete full-split run. Moves
     agents/champion, sets the MLflow prompt alias `champion` and appends the verdict to
     agents/promotions.jsonl."""
@@ -584,10 +606,105 @@ def promote(candidates: str | None = None, dry_run: bool = False) -> None:
             else "—",
             f"{c['pass_at_1']:.3f}" if c.get("pass_at_1") is not None else "—",
             f"{ho['passed']}/{ho['n']}" if ho else "—",
-            c["why_not"],
+            c["why_not"]
+            or (
+                ("gate: " + c["gate"]) if c.get("gate") and c["version"] != rec["incumbent"] else ""
+            ),
         )
     console.print(t)
     console.print(("[dim]dry run[/] " if dry_run else "") + rec["reason"])
+
+
+@app.command("history")
+def history_cmd(
+    champion: str | None = typer.Option(None, help="default: agents/champion"),
+    source: str = typer.Option("mlflow", help="mlflow (D42 A) | folders"),
+    parity: bool = typer.Option(False, help="also build from the folders and compare"),
+) -> None:
+    """Every question's record across the versions (s13): the champion's lineage and the rounds
+    from it that lost, each question's answer and SQL per version, what changed, and the last
+    pass of a regressed question. Built from MLflow; written to runs/<champion run>/history.json,
+    which `dab optimise` rebuilds and reads itself."""
+    from dab_bench.agent.versions import champion_name
+    from dab_bench.eval import history as hist
+    from dab_bench.tracking.mlflow_log import TrackingDownError, preflight
+
+    name = champion or champion_name()
+    if source == "mlflow":
+        try:
+            preflight()
+        except TrackingDownError as e:
+            console.print(f"[red]{e}[/]")
+            raise typer.Exit(1) from None
+    src: hist.Source = hist.MlflowSource() if source == "mlflow" else hist.FolderSource()
+    h = hist.build(src, name)
+    path = hist.write(h)
+    status: dict[str, int] = {}
+    for x in h["questions"].values():
+        status[x["status"]] = status.get(x["status"], 0) + 1
+    console.print(
+        f"{name} · run {h['champion_run']} · versions "
+        + " → ".join(
+            v["version"] + {"champion": " ★", "attempt": " ✗"}.get(v["role"], "")
+            for v in h["versions"]
+        )
+    )
+    console.print(
+        "questions: "
+        + " · ".join(f"{k} {v}" for k, v in sorted(status.items()))
+        + f" · attempts {', '.join(a['version'] for a in h['attempts']) or 'none'} · {path}"
+    )
+    if parity:
+        other = hist.build(hist.FolderSource() if source == "mlflow" else hist.MlflowSource(), name)
+        diffs = hist.parity(h, other)
+        console.print(
+            "parity: "
+            + ("[green]MLflow = folders[/]" if not diffs else "[red]" + "; ".join(diffs) + "[/]")
+        )
+        if diffs:
+            raise typer.Exit(1)
+
+
+@app.command("mlflow-backfill")
+def mlflow_backfill(
+    force: bool = typer.Option(False, help="re-log session traces already logged"),
+) -> None:
+    """Put the records of rounds already run on MLflow (s13, B2 + B3; no model call): each
+    round's outcome (from promotions.jsonl and the scorecards) and each optimiser session as a
+    trace (from runs/<run>/optimise/<version>/), and each lineage run's current scorecard."""
+    from dab_bench.config import RUNS_DIR
+    from dab_bench.eval import outcome
+    from dab_bench.eval.runner import list_runs
+    from dab_bench.tracking.mlflow_log import TrackingDownError, log_scorecard, preflight
+    from dab_bench.tracking.tracing import log_round_sessions
+
+    try:
+        preflight()
+    except TrackingDownError as e:
+        console.print(f"[red]{e}[/]")
+        raise typer.Exit(1) from None
+    for m in list_runs():
+        if (
+            m.split == "all"
+            and not m.dry_run
+            and m.mlflow_run_id
+            and (RUNS_DIR / m.run_id / "scorecard.json").exists()
+        ):
+            log_scorecard(m.mlflow_run_id, RUNS_DIR / m.run_id)
+    for rec, out in outcome.all_outcomes():
+        outcome.relog_record(rec)
+        logged = outcome.log_outcome(rec, out)
+        tdir = RUNS_DIR / rec["source_run"] / "optimise" / rec["version"]
+        n = (
+            log_round_sessions(rec, tdir, force=force)
+            if rec.get("mlflow_run_id") and tdir.is_dir()
+            else 0
+        )
+        console.print(
+            f"  {rec['version']:<8} outcome {out['outcome']:<8}"
+            + ("" if logged else " [yellow](no MLflow run)[/]")
+            + f" · session traces logged {n}"
+        )
 
 
 @app.command("crossfit")

@@ -12,6 +12,10 @@ Your job: write **dataset notes**, a short block of general knowledge about this
 - Checked: every note rests on at least one `query_db` you ran in this session (count the phrasings of a text column over the whole table, check a key's overlap, look at a date's format). A claim you did not check is left out. Keep queries small.
 - Short: at most 2,000 characters, plain markdown bullets. Fewer, sharper notes beat many.
 
+## When you are given history
+
+Some messages add, under each failed question, its **history**: its answer and SQL under every earlier version, how each version was made (a round that rewrote notes and playbook sections, or a model switch that left the prompt as it was), which session read it, and why a result flipped. One trial per version, so a flip with no change to the question's notes or break-step section may be run noise. For a question that passed under an earlier version you also see what its dataset's notes and its break-step section said then ("was:") and say now ("now:"), and the statement the agent wrote when it passed (never its answer). A section **Earlier rounds from this champion that lost to it** shows what such a round wrote for this dataset, what the checks refused, and which questions it gained and lost. Read both as evidence of what text does to the agent's statements: what an earlier version said that a passing question relied on, and what a lost round tried that did not help or broke questions that passed. Everything below still holds for what you write.
+
 ## What notes must never contain
 
 The notes are checked mechanically and refused if they contain any of these; the refusal names the problem:

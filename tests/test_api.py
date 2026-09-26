@@ -87,3 +87,32 @@ def test_a_trial_is_addressed_by_its_id_and_the_old_file_route_agrees(client: Te
     assert client.get(f"/api/runs/{run}/{row['query_id']}/x{row['trial']}").status_code == 404
     assert client.get(f"/api/runs/{run}/{row['query_id']}/t999").status_code == 404
     assert client.get(f"/api/runs/no_such_run/{row['query_id']}/t1").status_code == 404
+
+
+def test_the_question_history_is_its_own_route_not_a_round_named_history(
+    client: TestClient,
+) -> None:
+    """s13 (M1): `/api/optimise/history` is declared before `/api/optimise/{version}`, so it
+    answers with the history (or none) instead of a 404 for a round named "history"."""
+    r = client.get("/api/optimise/history")
+    assert r.status_code == 200
+    body = r.json()
+    assert set(body) == {"run_id", "history", "blocks"}
+    if body["history"]:
+        qs = body["history"]["questions"]
+        assert set(body["blocks"]) == {
+            q for q, x in qs.items() if x["status"] in ("regressed", "never")
+        }
+
+
+def test_every_version_says_how_it_was_made(client: TestClient) -> None:
+    """The versions figure (Runs and Optimise): each version carries its change, and a round's
+    source is the version it was optimised from."""
+    body = client.get("/api/optimise").json()
+    kinds = {"round", "model", "build", "base"}
+    for n in body["versions"]:
+        ch = n["change"]
+        assert ch["kind"] in kinds and ch["detail"]
+        assert (ch["kind"] == "round") == (n["parent"] is not None)
+        if n["parent"]:
+            assert ch["source"] == n["parent"]

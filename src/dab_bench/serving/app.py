@@ -378,24 +378,40 @@ def create_app(index: Index | None = None) -> FastAPI:
         version with its parent and the top line of its newest complete full-split run."""
         from dab_bench.agent.versions import champion_name, list_versions, load_version
         from dab_bench.eval.promote import candidate
-        from dab_bench.eval.rounds import round_records, round_summary
+        from dab_bench.eval.rounds import (
+            header_note,
+            round_records,
+            round_summary,
+            version_change,
+        )
         from dab_bench.eval.runner import list_runs
 
-        rounds = [round_summary(r) for r in round_records()]
+        recs = round_records()
+        rounds = [round_summary(r) for r in recs]
+        rec_of = {r["version"]: (i + 1, r) for i, r in enumerate(recs)}
         agent_of = {m.run_id: m.agent for m in list_runs()}
+        names = list_versions()
+        versions = {name: load_version(name) for name in names}
         nodes = []
-        for name in list_versions():
-            v = load_version(name)
+        for name in names:
+            v = versions[name]
             c = candidate(name)
             meta = next((m for m in list_runs() if m.run_id == c.run_id), None)
+            # a hand-built challenger names no parent: its agent.yaml (a model switch, s08)
+            # or its run says what it was measured against
+            against = v.config.measured_against or (
+                agent_of.get(meta.challenger_of or "") if meta else None
+            )
+            source = v.config.challenger_of or against
+            no, rec = rec_of.get(name, (None, None))
+            src = versions.get(source or "")
             nodes.append(
                 {
                     "version": name,
                     "parent": v.config.challenger_of,
-                    # a hand-built challenger names no parent: its agent.yaml (a model switch, s08)
-                    # or its run says what it was measured against
-                    "measured_against": v.config.measured_against
-                    or (agent_of.get(meta.challenger_of or "") if meta else None),
+                    "measured_against": against,
+                    "change": version_change(v.config, src.config if src else None, rec, no)
+                    | {"source": source, "note": header_note(v.path / "agent.yaml")},
                     "model": v.config.model,
                     "sql": (c.scorecard or {}).get("sql") if not c.why_not else None,
                     "heldout": c.heldout if not c.why_not else None,
@@ -407,6 +423,34 @@ def create_app(index: Index | None = None) -> FastAPI:
                 }
             )
         return {"champion": champion_name(), "rounds": rounds, "versions": nodes}
+
+    @app.get("/api/optimise/history")
+    def optimise_history() -> dict[str, Any]:
+        """Each question's record across the versions (s13): the history the last round read,
+        `runs/<champion run>/history.json`; when that file is not written yet, the same history
+        built from the folders (never from MLflow here). With the text a session reads for
+        each failing question."""
+        from dab_bench.agent.versions import champion_name
+        from dab_bench.eval import history as hist
+        from dab_bench.eval.promote import champion_run
+
+        run = champion_run()
+        h = hist.load(run) if run else None
+        if h is None and run:
+            try:
+                h = hist.build(hist.FolderSource(), champion_name())
+            except ValueError:
+                h = None
+        blocks = (
+            {
+                q: hist.question_block(h, q)
+                for q, x in h["questions"].items()
+                if x["status"] in ("regressed", "never")
+            }
+            if h
+            else {}
+        )
+        return {"run_id": run, "history": h, "blocks": blocks}
 
     @app.get("/api/optimise/{version}")
     def optimise_round(version: str) -> dict[str, Any]:

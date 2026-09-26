@@ -1,0 +1,7 @@
+- Repo metrics (stars, forks, open issues) exist ONLY as free text in `deps_dev_v1_project_info."Project_Information"`. Slug = first `owner/repo` token (regex like `[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]*[A-Za-z0-9_-]`), lowercased, joined to lowercased `project_packageversion."ProjectName"`. Don't LIKE-match the whole text.
+- Numbers may have thousands commas: strip, then cast to bigint.
+- Forks, 3 non-overlapping phrasings: "forks count of N", "forked N times", "N forks" (coalesce all, case-insensitive).
+- Stars: "stars count of N", "N stars", "starred by N users". Open issues: "open issues count of N" or "N open issues".
+- `Licenses` (project and package) and `VersionInfo` are JSON text: parse as jsonb (key-exists test for 'MIT'; IsRelease and Ordinal read as text then cast). "Project license" = `project_info."Licenses"`.
+- Join path: packageinfo(System,Name,Version) = project_packageversion(System,Name,Version), then ProjectName = slug.
+- Grain: one repo backs many NPM package names (e.g. babel/babel ~845 names, lodash/lodash 95), and each name has many versions. So one project maps to many package-version rows, and per-package rankings by repo stars/forks have large ties. A package can also map to several projects: take its max metric. The version order lives in VersionInfo's integer Ordinal. UpstreamPublishedAt (ms epoch) is a second time signal that can be null.

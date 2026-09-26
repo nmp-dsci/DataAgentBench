@@ -113,6 +113,10 @@ async def crossfit(
             exclude=set(fold),
             strict=strict,
             crossfit={"of": prefix, "fold": i, "k": k, "seed": seed, "holds_out": fold},
+            # a fold measures the round on RUN as given; the history (s13) would carry the
+            # held-out fold's outcomes in, so a fold never reads it
+            from_champion=False,
+            history=False,
         )
         rounds.append({"version": name, "cost_usd": rec.get("cost_usd")})
         meta, _ = await run_eval(

@@ -146,7 +146,10 @@ Plan `.lavish/s06_golden-from-gold-and-hints.html`, decisions D26–D31:
 - **The explorer**: the Optimise tab (`/optimise`, a round at `/optimise/<version>`,
   `eval/rounds.py`) shows every round as diagnostic → proposal → outcome, with the
   version lineage and each question before and after; the Runs tab opens with the
-  champion over time (the reigns in `agents/promotions.jsonl` and every full-split run).
+  champion over time (the reigns in `agents/promotions.jsonl`). Both tabs draw the versions
+  with one figure (`frontend/src/lib/versions.tsx`): every version in build order, and under
+  each how it was made (`eval/rounds.version_change`): an optimise round, a build change or
+  a model change, and the version it came from.
 
 ### Round 2: the statement is the goal (s08, 2026-09-25)
 
@@ -174,7 +177,7 @@ its diagnosis named a `sqlglot` category rather than the part of the statement t
   `measured_against: v3_sql`, so the prompt's lift (v2 → v3, both Haiku) and the model's
   (v3 → v4) are measured apart.
 - **Promotion** (D36 B): the most SQL passed of the questions with a golden wins; answers
-  of the 54 break a tie; then the incumbent; then the older run.
+  of the 54 break a tie; then the incumbent; then the older run. Replaced by D46 (s14).
 - **The Optimise tab** (D37 A): the loop as seven clickable stages with the round's own
   counts, the rounds over versions with SQL first, and a round opened as a component
   matrix, one card per session and held-out SQL first.
@@ -206,6 +209,45 @@ studying them). Three rounds had lifted training SQL +10 of 33 and held-out SQL 
 - **The leaderboard's number** beside the rule: Pass@1 (the mean over datasets of each
   one's pass rate) in `dab promote`, the rounds table and the Optimise headline;
   `dab export-submission <run>` writes the answers in the leaderboard's format.
+
+v7 tied v6 on answers (46/54) and lost SQL (30/49 against 33/49); v6 kept the title.
+
+### Round 5: the optimiser reads the history (s13, 2026-09-25)
+
+Plan `.lavish/s13_v8-history-from-mlflow.html`, decisions D42–D45 (all A). 7 of v6's 20
+failing questions had passed under an earlier version; 4 of them first failed in v6, and
+the round that made v6 read none of them (they were passing). v7 read them with no sign of
+that. So:
+
+- **The champion lock**: `dab optimise` with no run takes the champion's newest full run
+  (`promote.champion_run()`); a run of another version is refused (`NotChampionError`).
+  `dab crossfit` passes its own run and reads no history.
+- **Round outcomes and session traces in MLflow** (`eval/outcome.py`): `dab promote` tags
+  each round version's MLflow run `outcome=won|lost|pending` with `outcome.json` (answers and
+  SQL against its parent, every question gained and lost, where each lost statement
+  breaks); each optimiser session is a trace (`kind=optimise_session`).
+  `dab mlflow-backfill` put rounds 1–4 there, with no model call.
+- **The history** (`eval/history.py`, D42 A: read from MLflow, parity-checked against the
+  folders): the champion's lineage and the rounds from it that lost; per question the
+  timeline, each flip labelled (a prompt change for it, a model switch, or no change to its
+  notes or break-step section: noise), and for a regressed question the diffs since its last
+  pass and the statement that passed (D44 A). Written to `runs/<run>/history.json`.
+- **What the sessions read** (D43 A, optimiser only): each failed question's history block
+  and each lost round's block for the same dataset or step; the optimiser's prompts gained
+  one paragraph on reading them. v8 = v7's recipe plus the history (D45 A).
+
+v8 against v6: answers 48 of 54 against 46, Pass@1 0.904 against 0.891, SQL 31 of 49 against 33
+(McNemar on answers +3/−1, p = 0.63; on SQL +2/−4, p = 0.69). D36 kept v6; D46 promoted v8.
+
+- **Promotion by the leaderboard's number, behind a leak gate** (D46, 2026-09-25, the
+  owner's call): a challenger takes the title only when the round that made it ran guards
+  G1–G4 (`--strict`; a model switch is judged by the version it copied, a base version saw
+  no gold) and G2 finds no gold value in its `system.md` or any notes (`promote.leak_gate`).
+  Of those standing (the incumbent always stands), the highest Pass@1 wins; answers of the
+  54, then SQL of 49, break a tie; then the incumbent; then the older run. v2–v5 are barred
+  (rounds 1–3 ran the literal guard only), and v6, no longer champion, is barred with them.
+  v8 carries 7 of the 10 units of v6's text that the s12 G1 audit judged decisive, unchanged
+  (none is a gold value); it rewrote the other three under G1.
 
 ## 8 · The agent build — decisions, layout, contract
 

@@ -325,8 +325,8 @@ export type CompareResp = {
   broken: string[];
 };
 export type RunRole = 'champion' | 'challenger' | 'superseded' | 'smoke' | 'dry';
-export type PromotionCandidate = { version: string; run_id: string | null; passed: number | null; scored: number | null; n: number | null; heldout: ScoreTotals | null; scorecard: ScoreTotals | null; why_not: string };
-/** `dab promote`'s latest verdict (agents/promotions.jsonl): D36, the most SQL passed wins, answers break a tie (D30 before 2026-09-25). */
+export type PromotionCandidate = { version: string; run_id: string | null; passed: number | null; scored: number | null; n: number | null; heldout: ScoreTotals | null; scorecard: ScoreTotals | null; why_not: string; gate?: string };
+/** `dab promote`'s latest verdict (agents/promotions.jsonl): D46, a challenger passes the leak gate, then the highest Pass@1 wins, answers then SQL break a tie (D36 SQL-first, D30 answers-only before). */
 export type Promotion = { at: string; rule: string; incumbent: string; winner: string; changed: boolean; reason: string; candidates: PromotionCandidate[]; champion_run_id: string | null; prompt_version?: number };
 /** The champion over time (`eval/rounds.champion_history`): the reigns and every full-split run. */
 export type Reign = { version: string; run_id: string; from: string; until: string | null; passed: number; scored: number; reason: string; lift: number | null };
@@ -365,7 +365,9 @@ export type RoundSummary = {
   changes: Tally;
   promoted_at: string | null;
 };
-export type VersionNode = { version: string; parent: string | null; measured_against: string | null; run_id: string | null; passed: number | null; scored: number | null; fingerprint: string; started_at: string | null; model?: string; sql?: Rate | null; heldout?: ScoreTotals | null };
+/** How a version was made from `source` (`eval/rounds.version_change`): an optimisation round, a model change, a build change, or the base; `note` is its own line atop `agent.yaml`. */
+export type VersionChange = { kind: 'round' | 'model' | 'build' | 'base'; detail: string; source: string | null; note: string };
+export type VersionNode = { version: string; parent: string | null; measured_against: string | null; change?: VersionChange; run_id: string | null; passed: number | null; scored: number | null; fingerprint: string; started_at: string | null; model?: string; sql?: Rate | null; heldout?: ScoreTotals | null };
 /** The round as the loop figure draws it (eval/rounds.stages): the counts on each stage. */
 export type Stages = {
   run: { agent: string | null; run_id: string; trials: number; totals: ScoreTotals | null; cost_usd: number | null };
@@ -377,6 +379,25 @@ export type Stages = {
   outcome: { run_id: string | null; totals: ScoreTotals | null; heldout_sql: Rate | null; promoted_at: string | null };
 };
 export type Rounds = { champion: string; rounds: RoundSummary[]; versions: VersionNode[] };
+/** s13: each question's record across the versions, as a round reads it (eval/history.py). */
+export type HistoryEntry = { version: string; answer: boolean | null; sql: boolean | null; breaks_at: Component | null; flip?: string; read_by?: string[] };
+export type HistoryQuestion = {
+  tracked: 'answer' | 'sql';
+  status: 'passing' | 'regressed' | 'never' | 'unscored';
+  timeline: HistoryEntry[];
+  last_passed?: { version: string; run_id: string; sql: string; notes_diff: string; section: Component | null; section_diff: string };
+};
+export type HistoryVersion = { version: string; run_id: string; started_at: string; model: string; role: 'lineage' | 'champion' | 'attempt'; change: { kind: 'base' | 'round' | 'model'; parent?: string } };
+export type QuestionHistory = {
+  champion: string;
+  champion_run: string;
+  source: string;
+  built_at: string;
+  versions: HistoryVersion[];
+  questions: Record<string, HistoryQuestion>;
+  attempts: { version: string; outcome: { outcome: string } | null }[];
+};
+export type HistoryResp = { run_id: string | null; history: QuestionHistory | null; blocks: Record<string, string> };
 export type Side = {
   answer: boolean | null;
   sql: boolean | null;

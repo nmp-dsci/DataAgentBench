@@ -1,10 +1,11 @@
-import type { KeyboardEvent } from 'react';
+import { Fragment, type KeyboardEvent, useState } from 'react';
 import { Link, Outlet, useNavigate, useParams } from 'react-router-dom';
-import { type Attempt, type Change, COMPONENTS, type Component, type OptimiseSessionRec, type QuestionChange, type Rate as RateT, type RoundDetail, type RoundSummary, type Rounds, type Side, type Stages, type Tally, type TallyCore, type VersionNode, fmtUsd, useGet } from '../lib/api';
+import { type Attempt, type Change, COMPONENTS, type HistoryResp, type Component, type OptimiseSessionRec, type QuestionChange, type Rate as RateT, type RoundDetail, type RoundSummary, type Rounds, type Side, type Stages, type Tally, type TallyCore, type VersionNode, fmtUsd, useGet } from '../lib/api';
 import { GoldDiff } from '../lib/golddiff';
 import { Mark, rate } from '../lib/scorecard';
 import { Loading } from '../lib/ui';
-import { agentPath, goldenPath, optimisePath, questionPath, runPath, trialPath, useLens } from '../lib/url';
+import { VersionsFig } from '../lib/versions';
+import { agentPath, goldenPath, optimisePath, questionPath, runPath, trialId, trialPath, useLens } from '../lib/url';
 
 /**
  * Optimisation rounds, explored like runs (plan s06, redesigned in s08). A round read a scored
@@ -87,6 +88,108 @@ export function Optimise() {
       ) : (
         <RoundsTable rounds={rounds} open={version ?? null} />
       )}
+      <HistoryMatrix />
+    </>
+  );
+}
+
+// ── the history the next round reads (s13) ─────────────────────────────────
+
+const ROLE_MARK: Record<string, string> = { champion: ' ★', attempt: ' ✗', lineage: '' };
+
+function HMark({ v, tracked }: { v: boolean | null; tracked: boolean }) {
+  const cls = v == null ? 'none' : v ? 'ok' : 'fail';
+  return <span className={`hm ${cls}${tracked ? '' : ' dim'}`}>{v == null ? '–' : v ? '●' : '○'}</span>;
+}
+
+function HistoryMatrix() {
+  const { data } = useGet<HistoryResp>('/api/optimise/history');
+  const [open, setOpen] = useState<string | null>(null);
+  const h = data?.history;
+  if (!h) return null;
+  const failing = Object.entries(h.questions).filter(([, x]) => x.status === 'regressed' || x.status === 'never');
+  const groups: [string, typeof failing][] = [
+    ['passed under an earlier version', failing.filter(([, x]) => x.status === 'regressed')],
+    ['never passed', failing.filter(([, x]) => x.status === 'never')],
+  ];
+  const regressed = groups[0][1].length;
+  return (
+    <>
+      <h2>
+        {regressed} of the {failing.length} questions {h.champion} fails passed under an earlier version
+      </h2>
+      <p className="lead">
+        The history the next round reads (<code>dab history</code>, from {h.source === 'mlflow' ? 'MLflow' : 'the run folders'}): each question {h.champion} fails, its answer and SQL under every version since {h.versions[0]?.version}, and the rounds from {h.champion} that lost to it ({h.attempts.map((a) => a.version).join(', ') || 'none yet'}). Click a row for the text a session reads.
+      </p>
+      <div className="tw">
+        <table className="hist">
+          <caption>
+            One trial per version. In each cell the first mark is the answer and the second the SQL; the one the row tracks (the one that fails under {h.champion}) is solid, and an amber underline marks a flip from the version's parent, with the reason on hover. Source: {h.source}, {day(h.built_at)}.
+          </caption>
+          <thead>
+            <tr>
+              <th>Question</th>
+              {h.versions.map((v) => (
+                <th key={v.version} className={`num${v.role === 'champion' ? ' champ' : ''}`} title={v.change.kind === 'model' ? `model switch from ${v.change.parent}` : v.change.kind === 'round' ? `round from ${v.change.parent}` : 'base'}>
+                  {v.version.replace('_sql', '')}
+                  {ROLE_MARK[v.role]}
+                  <span className="path">{v.change.kind === 'model' ? `→ ${v.model}` : v.change.kind === 'round' ? 'round' : v.model}</span>
+                </th>
+              ))}
+              <th>Breaks at</th>
+              <th>Last passed</th>
+            </tr>
+          </thead>
+          <tbody>
+            {groups.map(([label, rows]) => (
+              <Fragment key={label}>
+                <tr className="hgrp">
+                  <td colSpan={h.versions.length + 3}>
+                    {label} · {rows.length}
+                  </td>
+                </tr>
+                {rows.map(([q, x]) => {
+                  const champ = x.timeline.find((e) => e.version === h.champion);
+                  return (
+                    <Fragment key={q}>
+                      <tr className={`pickrow ${open === q ? 'cur' : ''}`} onClick={() => setOpen(open === q ? null : q)}>
+                        <td className="sub">
+                          <Link to={questionPath(q)} onClick={(e) => e.stopPropagation()}>
+                            {q}
+                          </Link>
+                          <span className="path">fails {x.tracked === 'sql' ? 'SQL' : 'answer'}</span>
+                        </td>
+                        {x.timeline.map((e) => {
+                          const v = h.versions.find((y) => y.version === e.version);
+                          return (
+                            <td key={e.version} className={`hc${v?.role === 'champion' ? ' champ' : ''}${e.flip ? ' flip' : ''}`} title={e.flip ? `flipped: ${e.flip}` : undefined}>
+                              {v ? (
+                                <Link to={trialPath(v.run_id, trialId({ query_id: q, trial: 1 }))} onClick={(ev) => ev.stopPropagation()} aria-label={`${q} under ${e.version}`}>
+                                  <HMark v={e.answer} tracked={x.tracked === 'answer'} />
+                                  <HMark v={e.sql} tracked={x.tracked === 'sql'} />
+                                </Link>
+                              ) : null}
+                            </td>
+                          );
+                        })}
+                        <td className="small mono">{champ?.breaks_at ?? '—'}</td>
+                        <td className="small">{x.last_passed ? x.last_passed.version : 'never'}</td>
+                      </tr>
+                      {open === q && data.blocks[q] && (
+                        <tr className="hdetail">
+                          <td colSpan={h.versions.length + 3}>
+                            <pre className="hblock">{data.blocks[q]}</pre>
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  );
+                })}
+              </Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }
@@ -187,7 +290,7 @@ const STAGES: StageDef[] = [
     edge: () => '',
     tone: '',
     body: (s) => ({
-      lead: 'The new version answers the same 54, diagnosed the same way. dab promote then picks the champion among every version\'s newest complete run: the most SQL passed, answers breaking a tie (D36). This run is the next round\'s source.',
+      lead: 'The new version answers the same 54, diagnosed the same way. dab promote then picks the champion among every version\'s newest complete run: a challenger passes the leak gate, then the highest Pass@1 wins, answers then SQL breaking a tie (D46). This run is the next round\'s source.',
       facts: s.outcome.totals ? [`answers ${r(s.outcome.totals.answer)}`, `SQL ${r(s.outcome.totals.sql)}`, `held-out SQL ${r(s.outcome.heldout_sql)}`, s.outcome.promoted_at ? `promoted ${day(s.outcome.promoted_at)}` : 'not promoted'] : ['not run yet'],
       next: s.outcome.totals ? undefined : `dab eval --agent ${s.version.name} --split all`,
       files: 'eval/promote.py · agents/promotions.jsonl · eval/rounds.py',
@@ -291,104 +394,13 @@ function LoopFig({ round }: { round: RoundSummary }) {
 
 function RoundsChart({ nodes, rounds, champion, open }: { nodes: VersionNode[]; rounds: RoundSummary[]; champion: string; open: string | null }) {
   const nav = useNavigate();
-  const order = [...nodes].sort((a, b) => (a.started_at ?? '9').localeCompare(b.started_at ?? '9'));
-  const byVersion = new Map(rounds.map((x) => [x.version, x]));
-  const W = 1000;
-  const H = 300;
-  const lx = 64;
-  const rx = W - 30;
-  const top = 36;
-  const bot = 220;
-  const gap = order.length > 1 ? (rx - lx - 80) / (order.length - 1) : 0;
-  const X = (i: number) => lx + 40 + i * gap;
-  const Y = (share: number) => bot - (bot - top) * share;
-  const idx = new Map(order.map((n, i) => [n.version, i]));
-  const share = (x: RateT | null | undefined) => (x && x.n ? x.passed / x.n : null);
-  const ans = order.map((n) => (n.passed != null && n.scored ? n.passed / n.scored : null));
-  const sql = order.map((n) => share(n.sql));
-  const edges = order.flatMap((n) => {
-    const from = n.parent ?? n.measured_against;
-    if (!from || !idx.has(from)) return [];
-    const f = order[idx.get(from) as number];
-    const kind = n.parent ? 'round' : f.model && n.model && f.model !== n.model ? 'model' : 'hand';
-    return [{ from: idx.get(from) as number, to: idx.get(n.version) as number, kind, label: kind === 'round' ? 'round' : kind === 'model' ? `${f.model} → ${n.model}` : 'hand-built' }];
-  });
+  const hasRound = new Set(rounds.map((x) => x.version));
   return (
     <figure>
-      <p className="label">Fig · every version in order: SQL passed (filled) and answers passed (open), each on its own denominator</p>
-      <svg className="dia" viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Every agent version in order, with the share of SQL passed and of answers passed on its newest complete run; a round is a solid edge, a model switch or hand-built version a dashed one">
-        <title>SQL and answers per version</title>
-        {[0, 0.25, 0.5, 0.75, 1].map((g) => (
-          <g key={g}>
-            <line className="ax" x1={lx} x2={rx} y1={Y(g)} y2={Y(g)} style={{ strokeDasharray: g ? '2 4' : undefined }} />
-            <text className="tx k" x={lx - 8} y={Y(g) + 4} textAnchor="end">
-              {g * 100}%
-            </text>
-          </g>
-        ))}
-        {edges.map((e) => {
-          const x1 = X(e.from);
-          const x2 = X(e.to);
-          const mid = (x1 + x2) / 2;
-          return (
-            <g key={`${e.from}-${e.to}`}>
-              <title>
-                {order[e.from].version} → {order[e.to].version}: {e.label}
-              </title>
-              <line x1={x1} x2={x2} y1={bot + 22} y2={bot + 22} stroke="currentColor" style={{ stroke: e.kind === 'round' ? 'var(--accent)' : 'var(--line-3)', strokeDasharray: e.kind === 'round' ? undefined : '4 3', strokeWidth: 2 }} />
-              <text className="tx k" x={mid} y={bot + 38} textAnchor="middle">
-                {e.label}
-              </text>
-            </g>
-          );
-        })}
-        <polyline fill="none" style={{ stroke: 'var(--ink-2)', strokeDasharray: '5 4', strokeWidth: 1.5 }} points={ans.map((v, i) => (v == null ? '' : `${X(i)},${Y(v)}`)).filter(Boolean).join(' ')} />
-        <polyline fill="none" style={{ stroke: 'var(--accent)', strokeWidth: 2.5 }} points={sql.map((v, i) => (v == null ? '' : `${X(i)},${Y(v)}`)).filter(Boolean).join(' ')} />
-        {order.map((n, i) => {
-          const rd = byVersion.get(n.version);
-          const go = () => (rd ? nav(optimisePath(n.version)) : nav(agentPath(n.version)));
-          const ho = n.heldout?.sql;
-          return (
-            <g key={n.version} className="pick" role="button" tabIndex={0} aria-label={`${n.version}: SQL ${r(n.sql)}, answers ${n.passed ?? '—'} of ${n.scored ?? '—'}`} onClick={go} onKeyDown={onKey(go)}>
-              <title>
-                {n.version} ({n.model ?? '—'}): SQL {r(n.sql)} · held-out SQL {r(ho)} · answers {n.passed ?? '—'}/{n.scored ?? '—'}
-                {rd ? ' · open its round' : ' · open the agent'}
-              </title>
-              {ans[i] != null && (
-                <>
-                  <circle cx={X(i)} cy={Y(ans[i] as number)} r={6} style={{ fill: 'var(--panel)', stroke: 'var(--ink-2)', strokeWidth: 2 }} />
-                  <text className="tx k" x={X(i)} y={Y(ans[i] as number) - 13} textAnchor="middle">
-                    {n.passed}/{n.scored}
-                  </text>
-                </>
-              )}
-              {sql[i] != null && (
-                <>
-                  <circle cx={X(i)} cy={Y(sql[i] as number)} r={7} style={{ fill: 'var(--accent)' }} />
-                  {/* centred under the point on two lines, so neighbours a question apart never collide */}
-                  <text className="tx k" x={X(i)} y={Y(sql[i] as number) + 24} textAnchor="middle" style={{ fill: 'var(--ink)' }}>
-                    SQL {r(n.sql)}
-                  </text>
-                  {ho && (
-                    <text className="tx k" x={X(i)} y={Y(sql[i] as number) + 40} textAnchor="middle">
-                      ho {r(ho)}
-                    </text>
-                  )}
-                </>
-              )}
-              <text className="tx" x={X(i)} y={bot + 60} textAnchor="middle" style={open === n.version ? { fontWeight: 700 } : undefined}>
-                {n.version}
-                {n.version === champion ? ' · champion' : ''}
-              </text>
-              <text className="tx s" x={X(i)} y={bot + 76} textAnchor="middle">
-                {n.model ?? ''}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
+      <p className="label">Fig · every version in order: SQL passed (filled) and answers passed (open), each on its own denominator, and how each version was made</p>
+      <VersionsFig nodes={nodes} champion={champion} mode="rounds" open={open} onPick={(n) => nav(hasRound.has(n.version) ? optimisePath(n.version) : agentPath(n.version))} />
       <figcaption>
-        <b>The filled line is the target</b>: SQL passed of the questions with a golden; the open dots are answers passed of the 54, the leaderboard's number; <code>ho</code> is held-out SQL. A solid accent edge is an optimisation round, a dashed one a hand-built version or a model switch. Click a version to open its round (or its agent page). Source: each version's newest complete full-split run.
+        The filled line is SQL passed of the questions with a golden, what a round aims at; the open dots are answers passed of the 54, the leaderboard's number, on which promotion leads (Pass@1, D46); <code>ho</code> is held-out SQL. Under each version, how it was made: <b>optimise</b> (a round, solid accent), a <b>build change</b> or a <b>model change</b> (dashed), and the version it came from. Click a version to open its round (or its agent page). Source: each version's newest complete full-split run and its <code>agent.yaml</code>.
       </figcaption>
     </figure>
   );

@@ -240,7 +240,7 @@ def test_a_session_sees_only_its_datasets_train_questions() -> None:
     assert "bookreview" not in msg.split("## Failed")[1]  # another dataset
 
 
-# ── promotion (D30) ──────────────────────────────────────────────────────────
+# ── promotion (D30; with no Pass@1 recorded, D46 falls to answers) ──────────────────────────────────────────────────────────
 
 
 def test_the_most_answers_passed_wins_and_a_tie_keeps_the_incumbent() -> None:

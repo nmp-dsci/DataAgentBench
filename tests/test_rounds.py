@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from dab_bench.eval.rounds import change, summarise_changes
@@ -76,3 +77,45 @@ def test_a_round_one_record_reads_as_refusals_then_one_accepted_write() -> None:
         "attempts": [{"ok": True, "chars": 9, "problems": []}],
     }
     assert attempts(new) == new["attempts"] and session_kind(new) == "component"
+
+
+# ── how each version was made, under the versions figure ──────────────────────
+
+
+def test_a_version_is_a_round_a_model_change_a_build_change_or_the_base(tmp_path: Path) -> None:
+    from dab_bench.agent.versions import AgentConfig
+    from dab_bench.eval.rounds import version_change
+
+    haiku = AgentConfig(model="haiku", tools=["mcp__dab__query_db", "mcp__dab__list_db"])
+    sql = AgentConfig(model="haiku", tools=["mcp__dab__query_db", "mcp__dab__submit_answer"])
+    sonnet = AgentConfig(model="sonnet", tools=sql.tools)
+    strict = {"guards": dict.fromkeys(("g1_review", "g2_audit", "g3_breadth", "g4_routing"), True)}
+    assert version_change(haiku, None, None, None) == {"kind": "base", "detail": "the first build"}
+    assert version_change(sql, haiku, None, None) == {"kind": "build", "detail": "SQL answer"}
+    assert version_change(sonnet, sql, None, None) == {"kind": "model", "detail": "haiku → sonnet"}
+    assert version_change(sonnet, sql, {"guards": {}}, 2) == {"kind": "round", "detail": "round 2"}
+    got = version_change(sonnet, sonnet, strict, 5)
+    assert got == {"kind": "round", "detail": "round 5 · G1–G4"}
+
+
+def test_the_note_is_the_versions_own_line_atop_its_agent_yaml(tmp_path: Path) -> None:
+    from dab_bench.eval.rounds import header_note
+
+    p = tmp_path / "agent.yaml"
+    p.write_text(
+        "# v5_sql: v4_sql's prompt files on opus (was sonnet); a model switch, not a round\n"
+        "# v4_sql: v3_sql's prompt files on sonnet (was haiku); a model switch, not a round\n"
+        "model: opus\n"
+    )
+    assert (
+        header_note(p)
+        == "v5_sql: v4_sql's prompt files on opus (was sonnet); a model switch, not a round"
+    )
+    p.write_text(
+        "# v1_sql — the SQL-answer challenger. Frozen across a comparison: only\n# system.md moves.\nmodel: haiku\n"
+    )
+    assert (
+        header_note(p)
+        == "v1_sql — the SQL-answer challenger. Frozen across a comparison: only system.md moves."
+    )
+    assert header_note(tmp_path / "missing.yaml") == ""
