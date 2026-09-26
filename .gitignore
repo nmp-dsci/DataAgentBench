@@ -22,8 +22,15 @@ data/upstream/
 # committed context pack: text only (schema, profile, samples, joins, curated
 # summary and pitfalls).
 
-# Eval runs and the sandbox workspace: one folder per run, never committed.
-runs/
+# Eval runs: one folder per run. The four record files are committed — they are
+# what the case study, the Runs tab and every quoted number read — and the rest
+# of a run folder (traces, the agent and context copies, optimiser sessions, the
+# history, the submission) stays local, as does the sandbox workspace.
+runs/*/*
+!runs/*/run.json
+!runs/*/results.jsonl
+!runs/*/scorecard.json
+!runs/*/ledger.json
 workspace/
 
 # Per-row rescore verdicts are large; the per-query summary in

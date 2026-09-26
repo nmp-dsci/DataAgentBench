@@ -278,8 +278,10 @@ data/context/<ds>/    committed pack: tables.json · schema.md · profile.json �
                       description.txt · hints.txt · summary.md · pitfalls.md · curation.json
 data/splits/          smoke.json (12 ids); `all` is the index
 infra/                roles.sql (applied to database `dab` on the central Postgres) · sandbox.Dockerfile
-runs/<id>/            gitignored: run.json · results.jsonl · traces/<ds>_<n>_t<k>.json · agent/ (incl.
-                      system.<dataset>.md, the composed prompts) · context/<ds>/ copies
+data/golden/          coverage.json: a status per question, no SQL text (`dab golden-coverage`)
+runs/<id>/            committed: run.json · results.jsonl · scorecard.json · ledger.json (the record the
+                      case study cites) · gitignored: traces/<ds>_<n>_t<k>.json · agent/ (incl.
+                      system.<dataset>.md, the composed prompts) · context/<ds>/ copies · optimise/
 workspace/<run>/      gitignored: the sandbox's /work, one folder per trial
 src/dab_bench/
   data/stores.py · download.py · load.py · pg.py      the store map, HF download, the three load paths, roles
