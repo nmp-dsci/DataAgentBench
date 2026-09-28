@@ -1,0 +1,62 @@
+{
+  "run_id": "20260921T040706Z_v0_smoke_haiku",
+  "agent": "v0",
+  "fingerprint": "6851359040b1",
+  "context_sha": "f1937c76ed93",
+  "model": "claude-haiku-4-5",
+  "effort": "medium",
+  "split": "smoke",
+  "n_queries": 1,
+  "trials": 1,
+  "workers": 1,
+  "hints": false,
+  "dry_run": false,
+  "started_at": "2026-09-21T04:07:06.913891+00:00",
+  "max_turns": 60,
+  "finished_at": "2026-09-21T04:22:19.307668+00:00",
+  "code_sha": "unknown",
+  "upstream_commit": "0290945c2b38ccbe1ccec6f4765d078350291129",
+  "summary": {
+    "n": 1,
+    "scored": 1,
+    "passed": 0,
+    "pass_rate_micro": 0.0,
+    "pass_rate_macro": 0.0,
+    "per_dataset": {
+      "bookreview": {
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0,
+        "queries": 1
+      }
+    },
+    "per_query": {
+      "bookreview/2": {
+        "dataset": "bookreview",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      }
+    },
+    "errors": 1,
+    "timeouts": 1,
+    "cost_usd": 0.7493775999999998,
+    "duration_ms": 910567,
+    "turns_total": 0,
+    "input_tokens": 843164,
+    "cache_read_tokens": 0,
+    "cache_creation_tokens": 0,
+    "output_tokens": 90324,
+    "failed_queries": [
+      "bookreview/2"
+    ]
+  },
+  "mlflow_run_id": "6ce789fcdaa542e5be1f9ed96cdb6a3f",
+  "note": "first live trial",
+  "query_ids": [
+    "bookreview/2"
+  ],
+  "kind": "eval",
+  "challenger_of": null,
+  "sandbox": "dab-sbx-20260921T040706Z_v0_smoke_haiku"
+}

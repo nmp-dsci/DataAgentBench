@@ -1,0 +1,522 @@
+{
+  "run_id": "20260924T235835Z_v3_sql_all_haiku_hints",
+  "agent": "v3_sql",
+  "fingerprint": "01e2d0ad9fde",
+  "context_sha": "7128b746056a",
+  "model": "claude-haiku-4-5",
+  "effort": "medium",
+  "split": "all",
+  "n_queries": 54,
+  "trials": 1,
+  "workers": 4,
+  "hints": true,
+  "dry_run": false,
+  "started_at": "2026-09-24T23:58:35.751177+00:00",
+  "max_turns": 30,
+  "finished_at": "2026-09-25T00:20:36.162284+00:00",
+  "code_sha": "unknown",
+  "upstream_commit": "0290945c2b38ccbe1ccec6f4765d078350291129",
+  "summary": {
+    "n": 54,
+    "scored": 54,
+    "passed": 32,
+    "pass_rate_micro": 0.5925925925925926,
+    "pass_rate_macro": 0.57251221001221,
+    "per_dataset": {
+      "deps_dev_v1": {
+        "passed": 0,
+        "n": 2,
+        "rate": 0.0,
+        "queries": 2
+      },
+      "github_repos": {
+        "passed": 3,
+        "n": 4,
+        "rate": 0.75,
+        "queries": 4
+      },
+      "pancancer_atlas": {
+        "passed": 2,
+        "n": 3,
+        "rate": 0.6666666666666666,
+        "queries": 3
+      },
+      "patents": {
+        "passed": 1,
+        "n": 3,
+        "rate": 0.3333333333333333,
+        "queries": 3
+      },
+      "agnews": {
+        "passed": 0,
+        "n": 4,
+        "rate": 0.0,
+        "queries": 4
+      },
+      "bookreview": {
+        "passed": 3,
+        "n": 3,
+        "rate": 1.0,
+        "queries": 3
+      },
+      "crmarenapro": {
+        "passed": 8,
+        "n": 13,
+        "rate": 0.6153846153846154,
+        "queries": 13
+      },
+      "googlelocal": {
+        "passed": 4,
+        "n": 4,
+        "rate": 1.0,
+        "queries": 4
+      },
+      "music_brainz_20k": {
+        "passed": 1,
+        "n": 3,
+        "rate": 0.3333333333333333,
+        "queries": 3
+      },
+      "stockindex": {
+        "passed": 3,
+        "n": 3,
+        "rate": 1.0,
+        "queries": 3
+      },
+      "stockmarket": {
+        "passed": 3,
+        "n": 5,
+        "rate": 0.6,
+        "queries": 5
+      },
+      "yelp": {
+        "passed": 4,
+        "n": 7,
+        "rate": 0.5714285714285714,
+        "queries": 7
+      }
+    },
+    "per_query": {
+      "deps_dev_v1/1": {
+        "dataset": "deps_dev_v1",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "deps_dev_v1/2": {
+        "dataset": "deps_dev_v1",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "github_repos/1": {
+        "dataset": "github_repos",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "github_repos/2": {
+        "dataset": "github_repos",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "github_repos/3": {
+        "dataset": "github_repos",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "github_repos/4": {
+        "dataset": "github_repos",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "pancancer_atlas/1": {
+        "dataset": "pancancer_atlas",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "pancancer_atlas/2": {
+        "dataset": "pancancer_atlas",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "pancancer_atlas/3": {
+        "dataset": "pancancer_atlas",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "patents/1": {
+        "dataset": "patents",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "patents/2": {
+        "dataset": "patents",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "patents/3": {
+        "dataset": "patents",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "agnews/1": {
+        "dataset": "agnews",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "agnews/2": {
+        "dataset": "agnews",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "agnews/3": {
+        "dataset": "agnews",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "agnews/4": {
+        "dataset": "agnews",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "bookreview/1": {
+        "dataset": "bookreview",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "bookreview/2": {
+        "dataset": "bookreview",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "bookreview/3": {
+        "dataset": "bookreview",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "crmarenapro/1": {
+        "dataset": "crmarenapro",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "crmarenapro/2": {
+        "dataset": "crmarenapro",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "crmarenapro/3": {
+        "dataset": "crmarenapro",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "crmarenapro/4": {
+        "dataset": "crmarenapro",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "crmarenapro/5": {
+        "dataset": "crmarenapro",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "crmarenapro/6": {
+        "dataset": "crmarenapro",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "crmarenapro/7": {
+        "dataset": "crmarenapro",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "crmarenapro/8": {
+        "dataset": "crmarenapro",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "crmarenapro/9": {
+        "dataset": "crmarenapro",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "crmarenapro/10": {
+        "dataset": "crmarenapro",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "crmarenapro/11": {
+        "dataset": "crmarenapro",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "crmarenapro/12": {
+        "dataset": "crmarenapro",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "crmarenapro/13": {
+        "dataset": "crmarenapro",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "googlelocal/1": {
+        "dataset": "googlelocal",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "googlelocal/2": {
+        "dataset": "googlelocal",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "googlelocal/3": {
+        "dataset": "googlelocal",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "googlelocal/4": {
+        "dataset": "googlelocal",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "music_brainz_20k/1": {
+        "dataset": "music_brainz_20k",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "music_brainz_20k/2": {
+        "dataset": "music_brainz_20k",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "music_brainz_20k/3": {
+        "dataset": "music_brainz_20k",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "stockindex/1": {
+        "dataset": "stockindex",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "stockindex/2": {
+        "dataset": "stockindex",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "stockindex/3": {
+        "dataset": "stockindex",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "stockmarket/1": {
+        "dataset": "stockmarket",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "stockmarket/2": {
+        "dataset": "stockmarket",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "stockmarket/3": {
+        "dataset": "stockmarket",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "stockmarket/4": {
+        "dataset": "stockmarket",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "stockmarket/5": {
+        "dataset": "stockmarket",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "yelp/1": {
+        "dataset": "yelp",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "yelp/2": {
+        "dataset": "yelp",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "yelp/3": {
+        "dataset": "yelp",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "yelp/4": {
+        "dataset": "yelp",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "yelp/5": {
+        "dataset": "yelp",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "yelp/6": {
+        "dataset": "yelp",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "yelp/7": {
+        "dataset": "yelp",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      }
+    },
+    "errors": 4,
+    "timeouts": 0,
+    "rate_limited": 0,
+    "cost_usd": 5.2022442,
+    "duration_ms": 4935327,
+    "turns_total": 974,
+    "input_tokens": 7036,
+    "cache_read_tokens": 10582972,
+    "cache_creation_tokens": 863830,
+    "output_tokens": 470686,
+    "failed_queries": [
+      "agnews/1",
+      "agnews/2",
+      "agnews/3",
+      "agnews/4",
+      "crmarenapro/12",
+      "crmarenapro/2",
+      "crmarenapro/6",
+      "crmarenapro/7",
+      "crmarenapro/8",
+      "deps_dev_v1/1",
+      "deps_dev_v1/2",
+      "github_repos/1",
+      "music_brainz_20k/1",
+      "music_brainz_20k/3",
+      "pancancer_atlas/1",
+      "patents/1",
+      "patents/2",
+      "stockmarket/2",
+      "stockmarket/3",
+      "yelp/3",
+      "yelp/4",
+      "yelp/7"
+    ]
+  },
+  "mlflow_run_id": "c36edbab3f2d4f77ab65cfb69a896c2d",
+  "note": "",
+  "query_ids": [
+    "deps_dev_v1/1",
+    "deps_dev_v1/2",
+    "github_repos/1",
+    "github_repos/2",
+    "github_repos/3",
+    "github_repos/4",
+    "pancancer_atlas/1",
+    "pancancer_atlas/2",
+    "pancancer_atlas/3",
+    "patents/1",
+    "patents/2",
+    "patents/3",
+    "agnews/1",
+    "agnews/2",
+    "agnews/3",
+    "agnews/4",
+    "bookreview/1",
+    "bookreview/2",
+    "bookreview/3",
+    "crmarenapro/1",
+    "crmarenapro/2",
+    "crmarenapro/3",
+    "crmarenapro/4",
+    "crmarenapro/5",
+    "crmarenapro/6",
+    "crmarenapro/7",
+    "crmarenapro/8",
+    "crmarenapro/9",
+    "crmarenapro/10",
+    "crmarenapro/11",
+    "crmarenapro/12",
+    "crmarenapro/13",
+    "googlelocal/1",
+    "googlelocal/2",
+    "googlelocal/3",
+    "googlelocal/4",
+    "music_brainz_20k/1",
+    "music_brainz_20k/2",
+    "music_brainz_20k/3",
+    "stockindex/1",
+    "stockindex/2",
+    "stockindex/3",
+    "stockmarket/1",
+    "stockmarket/2",
+    "stockmarket/3",
+    "stockmarket/4",
+    "stockmarket/5",
+    "yelp/1",
+    "yelp/2",
+    "yelp/3",
+    "yelp/4",
+    "yelp/5",
+    "yelp/6",
+    "yelp/7"
+  ],
+  "kind": "eval",
+  "challenger_of": null,
+  "sandbox": null,
+  "prompt_version": 6
+}

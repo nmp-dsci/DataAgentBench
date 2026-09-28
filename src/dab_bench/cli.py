@@ -856,3 +856,23 @@ def serve(port: int = 8091, host: str = "127.0.0.1", reload: bool = False) -> No
 
 if __name__ == "__main__":
     app()
+
+
+@app.command("golden-coverage")
+def golden_coverage_cmd() -> None:
+    """Write data/golden/coverage.json: every question's golden status (exact · differs ·
+    evidence · fails · none) with no SQL text. The committed view of coverage, which the case
+    study cites; re-run it after saving goldens."""
+    import json
+
+    from dab_bench.data.index import load
+    from dab_bench.eval import golden
+
+    cov = golden.coverage(load().queries)
+    golden.COVERAGE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    golden.COVERAGE_PATH.write_text(json.dumps(cov, indent=1) + "\n")
+    c = cov["counts"]
+    console.print(
+        f"{cov['written']}/{cov['n']} written · {c['exact']} exact · {c['differs']} differ · "
+        f"{c['evidence']} evidence · {c['none']} none → data/golden/coverage.json"
+    )

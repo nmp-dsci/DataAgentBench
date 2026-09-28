@@ -1,0 +1,210 @@
+{
+  "run_id": "20260921T042451Z_v0_smoke_haiku",
+  "agent": "v0",
+  "fingerprint": "6851359040b1",
+  "context_sha": "7128b746056a",
+  "model": "claude-haiku-4-5",
+  "effort": "medium",
+  "split": "smoke",
+  "n_queries": 12,
+  "trials": 1,
+  "workers": 4,
+  "hints": false,
+  "dry_run": false,
+  "started_at": "2026-09-21T04:24:51.019835+00:00",
+  "max_turns": 60,
+  "finished_at": "2026-09-21T06:45:05.774436+00:00",
+  "code_sha": "unknown",
+  "upstream_commit": "0290945c2b38ccbe1ccec6f4765d078350291129",
+  "summary": {
+    "n": 12,
+    "scored": 12,
+    "passed": 7,
+    "pass_rate_micro": 0.5833333333333334,
+    "pass_rate_macro": 0.5833333333333334,
+    "per_dataset": {
+      "stockindex": {
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0,
+        "queries": 1
+      },
+      "bookreview": {
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0,
+        "queries": 1
+      },
+      "crmarenapro": {
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0,
+        "queries": 1
+      },
+      "pancancer_atlas": {
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0,
+        "queries": 1
+      },
+      "github_repos": {
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0,
+        "queries": 1
+      },
+      "stockmarket": {
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0,
+        "queries": 1
+      },
+      "googlelocal": {
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0,
+        "queries": 1
+      },
+      "music_brainz_20k": {
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0,
+        "queries": 1
+      },
+      "agnews": {
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0,
+        "queries": 1
+      },
+      "yelp": {
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0,
+        "queries": 1
+      },
+      "deps_dev_v1": {
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0,
+        "queries": 1
+      },
+      "patents": {
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0,
+        "queries": 1
+      }
+    },
+    "per_query": {
+      "stockindex/1": {
+        "dataset": "stockindex",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "bookreview/2": {
+        "dataset": "bookreview",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "crmarenapro/6": {
+        "dataset": "crmarenapro",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "pancancer_atlas/3": {
+        "dataset": "pancancer_atlas",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "github_repos/4": {
+        "dataset": "github_repos",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "stockmarket/3": {
+        "dataset": "stockmarket",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "googlelocal/4": {
+        "dataset": "googlelocal",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "music_brainz_20k/1": {
+        "dataset": "music_brainz_20k",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "agnews/1": {
+        "dataset": "agnews",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "yelp/2": {
+        "dataset": "yelp",
+        "passed": 1,
+        "n": 1,
+        "rate": 1.0
+      },
+      "deps_dev_v1/1": {
+        "dataset": "deps_dev_v1",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      },
+      "patents/2": {
+        "dataset": "patents",
+        "passed": 0,
+        "n": 1,
+        "rate": 0.0
+      }
+    },
+    "errors": 0,
+    "timeouts": 0,
+    "rate_limited": 0,
+    "cost_usd": 2.1728214000000006,
+    "duration_ms": 1532994,
+    "turns_total": 177,
+    "input_tokens": 1781767,
+    "cache_read_tokens": 2458789,
+    "cache_creation_tokens": 224005,
+    "output_tokens": 131387,
+    "failed_queries": [
+      "agnews/1",
+      "deps_dev_v1/1",
+      "googlelocal/4",
+      "patents/2",
+      "stockmarket/3"
+    ]
+  },
+  "mlflow_run_id": "0b171a800c784280ae546be17cca6954",
+  "note": "M3 smoke: one median-difficulty query per dataset",
+  "query_ids": [
+    "stockindex/1",
+    "bookreview/2",
+    "crmarenapro/6",
+    "pancancer_atlas/3",
+    "github_repos/4",
+    "stockmarket/3",
+    "googlelocal/4",
+    "music_brainz_20k/1",
+    "agnews/1",
+    "yelp/2",
+    "deps_dev_v1/1",
+    "patents/2"
+  ],
+  "kind": "eval",
+  "challenger_of": null,
+  "sandbox": "dab-sbx-20260921T042451Z_v0_smoke_haiku"
+}

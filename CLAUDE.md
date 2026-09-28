@@ -149,8 +149,12 @@
 - **Visuals follow DESIGN.md**: tokens verbatim, assertion headings, one `<em>`
   per page, every number with its baseline. Never the Tailwind/DaisyUI fallback.
 - Never add `.lavish/` to `.gitignore`.
-- Never commit `data/upstream/`, `runs/`, `workspace/` or any database file.
-  `data/context/` (the pack, text only) **is** committed.
+- Never commit `data/upstream/`, `workspace/`, a run's `traces/` or any database file.
+  `data/context/` (the pack, text only) **is** committed, and so are a run's four record
+  files (`run.json`, `results.jsonl`, `scorecard.json`, `ledger.json`): they are what the
+  case study and every quoted number cite. `data/golden/coverage.json` is the committed
+  view of golden coverage — a status per question, no SQL text — written by
+  `dab golden-coverage`; re-run it after saving goldens.
 
 ## Delegating
 
